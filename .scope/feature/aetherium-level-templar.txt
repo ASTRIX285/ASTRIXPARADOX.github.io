@@ -1,0 +1,8 @@
+# feature/aetherium-level-templar: Templar level guidance for the level planner (tank and DPS): research record, skill values and synergies, ascent weights and trends, stacks re-checked, tests.
+astrix-app/games/aion2/data/advisor/builds/templar.json
+astrix-app/games/aion2/data/advisor/skills.json
+astrix-app/games/aion2/docs/level-guidance/templar.md
+astrix-app/tools/test-aetherium-level-templar.mjs
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aion2-advisor.mjs
+astrix-app/tools/test-aetherium-ascent.mjs

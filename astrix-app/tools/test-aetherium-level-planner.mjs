@@ -298,7 +298,7 @@ check('no class-specific code: the planner reads only data, and the other seven 
     if(slots&&!slots.pending)assert.deepEqual(p.stigmas.slots.map(slot=>slot.name),slots.slots.map(slot=>slot.name),`${name}: slot order`);
   }
   // planLevelSetup with no ascent record says it has no plan of its own.
-  const templar=builds.Templar.records.find(build=>build.main);
+  const templar={...builds.Templar.records.find(build=>build.main),ascent:undefined};
   const setup=planLevelSetup({build:templar,team:null,catalogue:new Map(),icons:new Map(),level:30,model:null,facts:{},cap:45});
   assert.equal(setup.planned,false);
   assert.equal(setup.confirmed,false);

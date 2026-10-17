@@ -1088,9 +1088,14 @@ check('every DPS class matches section 6 of the research record: rows, main atta
     assert.equal(plan.macro.verified,false,'Not checked against a published top-player build: tagged on the page');
   }
 });
-check('Templar: stack A has Doom Shield in row 0, stack B Debilitating Smash in row 0, Vicious Strike between them',()=>{
+// Templar level guidance (17 Oct 2026): Doom Shield is a 20 m dash, so it has its own key and Judgment leads stack A
+// (docs/level-guidance/templar.md, section 4). Stack B and the main attack are unchanged.
+check('Templar: stack A has Judgment in row 0 and Doom Shield on a dash key of its own, stack B Debilitating Smash in row 0, Vicious Strike between them',()=>{
   const plan=buildAscentPlan({className:'Templar',level:45,data:data('Templar')});
-  assert.equal(plan.skillBar.stacks.A.skills[0].name,'Doom Shield');
+  assert.equal(plan.skillBar.stacks.A.skills[0].name,'Judgment');
+  assert.ok(!Object.values(plan.skillBar.stacks).some(stack=>['A','B'].includes(stack.key)&&stack.skills.some(skill=>skill.name==='Doom Shield')),'Doom Shield is in neither macro stack');
+  const doom=plan.skillBar.left.map(key=>plan.skillBar.stacks[key]).find(stack=>stack.skills.some(skill=>skill.name==='Doom Shield'));
+  assert.ok(doom&&doom.skills.length===1&&doom.skills[0].reason==='dash','Doom Shield on a dash key of its own');
   assert.equal(plan.skillBar.stacks.B.skills[0].name,'Debilitating Smash');
   assert.equal(plan.skillBar.stacks.LMB.skills[0].name,'Vicious Strike');
   assert.equal(builds.Templar.records.find(build=>build.main).macro.layoutProvenance.capturedBy,'Miguel','The layout is Miguel\'s in-game Templar setup');

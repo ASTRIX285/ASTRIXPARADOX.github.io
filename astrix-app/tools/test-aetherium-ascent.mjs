@@ -864,9 +864,11 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   assert.deepEqual(await page.$$eval('#aeNotOnBar li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim()).slice(-1)),["Aerial Snare Not in this build's bar. Swap it in if you like it."]);
   assert.deepEqual(errors,[]);
   await context.close();
+  // Templar level guidance (17 Oct 2026): every Templar cooldown on the bar is now captured from the tooltip data, so
+  // none is marked pending (the Gladiator bar above still checks the pending marker).
   const templar=await open(ascent('class=templar&level=45','skill-bar'));
-  assert.ok(await templar.page.locator('.ae-bar-cell.is-cd-pending').count()>0,'Pending cooldowns are marked');
-  assert.match(await plain(templar.page,'.ae-bar-pending'),/Cooldown not captured yet for .*Doom Shield/);
+  assert.equal(await templar.page.locator('.ae-bar-cell.is-cd-pending').count(),0,'No Templar cooldown left pending');
+  assert.equal(await templar.page.locator('.ae-bar-pending').count(),0,'No pending cooldown line for the Templar');
   assert.deepEqual(await templar.page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['A','LMB','B'],'Two stacks either side of the main attack');
   await templar.context.close();
   // The four classes not checked against a published top-player build carry the tag on the Skill Bar and Macro screens.

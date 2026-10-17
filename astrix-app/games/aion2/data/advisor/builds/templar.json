@@ -9,59 +9,60 @@
       "main": true,
       "label": "Shield tank",
       "beginner": "very high",
-      "summary": "The main tank. Hold threat with Taunt, use Judgment in shield windows and keep Warding Strike for damage tolerance.",
+      "summary": "The main tank. Hold the boss with Enmity, keep Warding up, block big hits for Fury's party buff, and fire Judgment after every shield skill.",
       "coreSkills": [
         {
-          "name": "Vicious Strike",
-          "priority": 1,
-          "target": "Keep levelled for MP",
-          "why": "Your MP filler. Its Lv 12 perk lowers the Warding Strike cooldown.",
-          "refs": [
-            "ec-templar"
-          ]
-        },
-        {
           "name": "Judgment",
-          "priority": 2,
-          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more (its skill level 16 perks matter most): Mastery stops at 11 and the build names no other source",
-          "why": "Main damage hit. Top players put Daevanion points into it on Nezekan.",
+          "priority": 1,
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
+          "why": "Main damage hit: every shield skill makes it ready. First in 102 of 172 published priority lists.",
           "refs": [
-            "ec-templar",
-            "mb-templar"
+            "ql-builds-templar",
+            "mb-templar-top"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
             "capturedBy": "Miguel",
             "capturedOn": "2026-10-10",
             "where": "Skill > Mastery window",
-            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20 (Lv 16 perks matter most)\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
+          }
+        },
+        {
+          "name": "Vicious Strike",
+          "priority": 2,
+          "target": "Keep levelled for MP",
+          "why": "Your MP filler, held on left click: MP back on every hit. Its skill Lv 12 option cuts Warding Strike.",
+          "refs": [
+            "ql-builds-templar",
+            "mb-templar-top"
+          ]
+        },
+        {
+          "name": "Punishment",
+          "priority": 3,
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
+          "why": "Charged hit that grants Executor: PvE damage +20% for 20 s.",
+          "refs": [
+            "ql-builds-templar",
+            "mb-templar-top"
+          ],
+          "targetProvenance": {
+            "kind": "in-game-capture",
+            "capturedBy": "Miguel",
+            "capturedOn": "2026-10-10",
+            "where": "Skill > Mastery window",
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
           }
         },
         {
           "name": "Pummel",
-          "priority": 3,
-          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "Core shield attack.",
-          "refs": [
-            "ec-templar",
-            "mb-templar"
-          ],
-          "targetProvenance": {
-            "kind": "in-game-capture",
-            "capturedBy": "Miguel",
-            "capturedOn": "2026-10-10",
-            "where": "Skill > Mastery window",
-            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
-          }
-        },
-        {
-          "name": "Punishment",
           "priority": 4,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "Unlocks at Lv 14. 20 m charged hit that grants Executor: more accuracy and PvE damage.",
+          "why": "Core shield attack. No cooldown, so it fills every gap in the smash stack; its skill Lv 12 option cuts Punishment.",
           "refs": [
-            "ec-templar",
-            "mb-templar"
+            "ql-builds-templar",
+            "mb-templar-top"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
@@ -75,9 +76,10 @@
           "name": "Warding Strike",
           "priority": 5,
           "target": "Keep levelled",
-          "why": "Self heal and damage tolerance buff. At skill Lv 16 it helps the whole party.",
+          "why": "Self heal and damage tolerance buff. It also makes Judgment ready.",
           "refs": [
-            "mb-templar"
+            "ql-builds-templar",
+            "mb-templar-top"
           ]
         }
       ],
@@ -86,17 +88,127 @@
           "skill": "Judgment",
           "picks": [
             {
-              "skillLevel": 12,
-              "pick": "Always lands as a critical hit",
+              "skillLevel": 8,
+              "pick": "Extra damage on hit",
+              "perk": "Extra damage on hit",
               "refs": [
-                "ec-templar"
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Critical Hit on hit",
+              "perk": "Critical Hit on hit",
+              "refs": [
+                "ql-builds-templar"
               ]
             },
             {
               "skillLevel": 16,
               "pick": "Remove cooldown",
+              "perk": "Remove cooldown",
               "refs": [
-                "ec-templar"
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Vicious Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+50% Multi-Hit on hit",
+              "perk": "+50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "-2s Warding Strike cooldown on hit",
+              "perk": "-2s Warding Strike cooldown on hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Punishment",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+30% Skill Speed",
+              "perk": "+30% Skill Speed",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Changes to mobile skill",
+              "perk": "Changes to mobile skill",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion and lands as a Critical Hit",
+              "perk": "Ignores Block and Evasion and lands as a Critical Hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Pummel",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Up to 12% more damage when fewer targets are hit",
+              "perk": "Up to 12% more damage when fewer targets are hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "-1s Punishment cooldown on hit",
+              "perk": "-1s Punishment cooldown on hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Warding Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "-5s cooldown",
+              "perk": "-5s cooldown",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Warding scales with targets hit",
+              "perk": "Warding scales with targets hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Party gains PvE Damage Tolerance on use",
+              "perk": "Party gains PvE Damage Tolerance on use",
+              "refs": [
+                "ql-builds-templar"
               ]
             }
           ]
@@ -106,35 +218,42 @@
         "slots": [
           {
             "slotLevel": 22,
-            "name": "Taunt"
+            "name": "Shield of Protection"
           },
           {
             "slotLevel": 27,
-            "name": "Empyrean Lord's Punishment"
+            "name": "Taunt"
           },
           {
             "slotLevel": 32,
-            "name": "Battlefield Banner"
+            "name": "Doom Shield"
           },
           {
             "slotLevel": 37,
-            "name": "Doom Shield"
+            "name": "Noble Armor"
           }
         ],
         "alternatives": [
           {
-            "name": "Nezekan's Shield",
-            "why": "Pure survival tank pick.",
+            "name": "Empyrean Lord's Punishment",
+            "why": "More damage: a heavy AoE hit that stuns. 67% of top players run it.",
             "refs": [
-              "ec-templar",
-              "mb-stigma"
+              "mb-templar-top"
             ]
           },
           {
-            "name": "Shield of Protection",
-            "why": "Pure survival tank pick.",
+            "name": "Battlefield Banner",
+            "why": "More damage: Attack from Defense for 10 s. 65% of top players run it.",
             "refs": [
-              "ec-templar"
+              "mb-templar-top"
+            ]
+          },
+          {
+            "name": "Nezekan's Shield",
+            "why": "A party shield for a boss that needs one.",
+            "refs": [
+              "ec-templar",
+              "mb-stigma"
             ]
           },
           {
@@ -147,24 +266,28 @@
         ],
         "confidence": "top-player data",
         "refs": [
-          "mb-templar",
+          "ql-builds-templar",
+          "mb-templar-top",
           "ec-templar"
         ],
-        "note": "Taunt is in every PvE tank set. For pure survival, run Shield of Protection, Taunt, Nezekan's Shield and Second Skin."
+        "note": "Taunt, Shield of Protection, Doom Shield and Noble Armor: the tank set most published tank builds share. Swap Doom Shield for Empyrean Lord's Punishment where stagger matters."
       },
       "daevanion": {
         "priorities": [
-          "Punishment +1 on Zikel",
-          "Judgment +1 on Nezekan",
-          "Vicious Strike +1 on Zikel"
+          "Judgment +1 on every board you open",
+          "Vicious Strike, Warding Strike, Punishment and Pummel +1",
+          "Fury and Insulting Roar +1 on Zikel"
         ],
         "skillNodes": [
-          "Punishment",
           "Judgment",
-          "Vicious Strike"
+          "Vicious Strike",
+          "Warding Strike",
+          "Punishment",
+          "Pummel"
         ],
         "refs": [
-          "mb-templar"
+          "mb-templar-top",
+          "ql-daev-templar"
         ]
       },
       "stats": {
@@ -223,16 +346,6 @@
         },
         {
           "kind": "community-guide",
-          "ref": "mb-templar",
-          "title": "Templar build (top player data)",
-          "publisher": "MetaBot",
-          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
-          "retrievedOn": "2026-10-06",
-          "region": "global",
-          "reliability": "high"
-        },
-        {
-          "kind": "community-guide",
           "ref": "av-macros",
           "title": "Most common macros by class",
           "publisher": "AION2 Vault",
@@ -240,31 +353,69 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-templar",
+          "title": "Public Templar skill builds (287 distinct PvE of 951 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-templar",
+          "title": "Public Templar Daevanion plans (267 distinct of 445 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-templar-top",
+          "title": "Templar build planner and top-player meta (153 top players)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
         "status": "reported",
         "refs": [
-          "av-macros"
+          "av-macros",
+          "ql-builds-templar"
         ],
         "stackA": {
           "label": "Shield",
+          "name": "Shield stack",
           "rows": [
             {
-              "name": "Doom Shield",
-              "why": "Fires first when ready. Most players start this stack with it."
-            },
-            {
               "name": "Judgment",
-              "why": "Strong hit on a 5 s cooldown."
+              "why": "Fires whenever a shield skill has made it ready: Shield Smite, Warding Strike, Doom Shield or Shield Rush."
             },
             {
               "name": "Shield Smite",
-              "why": "Next in the most common line."
+              "why": "Stuns NPCs, so Annihilate can fire, and makes Judgment ready."
             },
             {
               "name": "Warding Strike",
-              "why": "Heals you and grants damage tolerance. Your main attack cuts its cooldown."
+              "why": "Heals you, grants Warding and makes Judgment ready. Your main attack cuts its cooldown."
             }
           ]
         },
@@ -274,6 +425,7 @@
         },
         "stackB": {
           "label": "Smash",
+          "name": "Smash stack",
           "rows": [
             {
               "name": "Debilitating Smash",
@@ -281,28 +433,45 @@
             },
             {
               "name": "Annihilate",
-              "why": "Next in the most common line."
+              "why": "Fires on a stunned or knocked-down target: Shield Smite in the shield stack opens it."
+            },
+            {
+              "name": "Flash Rampage",
+              "why": "Fires only on a staggered target, so it never blocks the stack: it waits above Pummel."
             },
             {
               "name": "Pummel",
-              "why": "Last in the most common line."
+              "why": "No cooldown, so it sits last: it fills every gap and raises your Enmity.",
+              "noCooldown": true
             }
           ]
         },
         "opener": [],
         "ownKeys": [
           {
+            "name": "Noble Armor",
+            "reason": "buff",
+            "why": "Max HP up for 120 s: press it before the pull and keep it up."
+          },
+          {
             "name": "Punishment",
-            "reason": "charged"
+            "reason": "charged",
+            "why": "Charged: hold it to full charge for Executor. A macro only fires stage 1."
           },
           {
             "name": "Taunt",
             "reason": "other",
-            "why": "Pulls enemies to you, so you choose when."
+            "why": "Raises your Enmity and shrinks the boss: use it on the pull and after a res."
           },
           {
             "name": "Poach",
-            "reason": "other"
+            "reason": "other",
+            "why": "Pulls one target to you from 20 m: you choose which."
+          },
+          {
+            "name": "Shield of Protection",
+            "reason": "defensive",
+            "why": "Hold it for a big boss hit: a sure Block, MP back, and Fury's party buff."
           },
           {
             "name": "Defiance",
@@ -310,8 +479,14 @@
             "why": "Clears crowd control: you need it at a chosen moment."
           },
           {
+            "name": "Doom Shield",
+            "reason": "dash",
+            "why": "A 20 m dash: it knocks the target down and makes Judgment ready. Use it when you mean to move."
+          },
+          {
             "name": "Shield Rush",
-            "reason": "dash"
+            "reason": "dash",
+            "why": "Fires after a Dodge or in flight, and makes Judgment ready."
           }
         ],
         "levelNotes": [],
@@ -323,6 +498,168 @@
           "where": "Skill bar and Macro window, Templar",
           "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
         }
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Hold the boss with Enmity, stay alive, and keep Fury's party buff up with your blocks.",
+        "weights": {
+          "damage": 2,
+          "enmity": 3,
+          "survival": 2,
+          "partyBuff": 3,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-templar",
+          "ql-db-templar",
+          "mb-templar-top"
+        ],
+        "preferences": [
+          {
+            "id": "line-doom-shield",
+            "kind": "line",
+            "skill": "Doom Shield",
+            "count": "49 of 287 builds put Doom Shield on top of the Judgment stack; 62 give it a key of its own",
+            "why": "Some builds put Doom Shield at the top of the shield stack.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-taunt",
+            "kind": "line",
+            "skill": "Taunt",
+            "count": "Taunt is in a stack in 99 of 287 builds and in 24 published macros",
+            "why": "Some builds put Taunt in a stack or the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "mastery-judgment-first",
+            "kind": "mastery",
+            "skill": "Judgment",
+            "count": "Judgment comes first in 102 of 172 published priority lists",
+            "why": "Judgment levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "from": 4
+          },
+          {
+            "id": "mastery-pummel-levelling",
+            "kind": "mastery",
+            "skill": "Pummel",
+            "count": "A levelling build copied 66 times: spam Pummel and the macro until Vicious Strike and Judgment are Lv 12",
+            "why": "Pummel levelled first while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "to": 21
+          },
+          {
+            "id": "stigma-taunt",
+            "kind": "stigma",
+            "skill": "Taunt",
+            "count": "21 of 23 tank builds with four stigmas; 76% of 153 top players",
+            "why": "Enmity, and Shrink for the whole party.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-noble-armor",
+            "kind": "stigma",
+            "skill": "Noble Armor",
+            "count": "17 of 23 tank builds with four stigmas; 37% of top players",
+            "why": "Max HP up for 120 s; later Insulting Roar and Fury count 1.5 times.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-shield-of-protection",
+            "kind": "stigma",
+            "skill": "Shield of Protection",
+            "count": "11 of 23 tank builds with four stigmas; 61% of top players",
+            "why": "A sure Block that sets off Fury.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-doom-shield",
+            "kind": "stigma",
+            "skill": "Doom Shield",
+            "count": "11 of 23 tank builds with four stigmas; 61% of top players",
+            "why": "Makes Judgment ready and knocks NPCs down.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-battlefield-banner",
+            "kind": "stigma",
+            "skill": "Battlefield Banner",
+            "count": "10 of 23 tank builds with four stigmas; 65% of top players",
+            "why": "Attack from Defense for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-elp",
+            "kind": "stigma",
+            "skill": "Empyrean Lord's Punishment",
+            "count": "7 of 23 tank builds with four stigmas; 67% of top players",
+            "why": "A heavy AoE hit that stuns.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-taunt-first",
+            "kind": "stigma",
+            "skill": "Taunt",
+            "count": "The editorial levelling build on one stats site slots Taunt at Lv 22",
+            "why": "Taunt in the first slot.",
+            "status": "reported",
+            "refs": [
+              "mb-templar-top"
+            ],
+            "slot": 1
+          },
+          {
+            "id": "mastery-warding-tank",
+            "kind": "mastery",
+            "skill": "Warding Strike",
+            "count": "6 of 35 tank priority lists start with Warding Strike",
+            "why": "Warding Strike levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "from": 8
+          }
+        ]
       }
     },
     {
@@ -332,15 +669,16 @@
       "main": false,
       "label": "Offensive tank (solo and AoE)",
       "beginner": "very high",
-      "summary": "For solo levelling and AoE farming: the same core skills with damage stigmas.",
+      "summary": "For solo levelling and AoE farming: the same shield and smash stacks with damage stigmas.",
       "coreSkills": [
         {
           "name": "Judgment",
           "priority": 1,
           "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "Main damage hit.",
+          "why": "Main damage hit: every shield skill makes it ready. First in 102 of 172 published priority lists.",
           "refs": [
-            "ec-templar"
+            "ql-builds-templar",
+            "mb-templar-top"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
@@ -351,12 +689,23 @@
           }
         },
         {
-          "name": "Punishment",
+          "name": "Vicious Strike",
           "priority": 2,
-          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "Big charged hit with the Executor buff.",
+          "target": "Keep levelled for MP",
+          "why": "Your MP filler, held on left click: MP back on every hit. Its skill Lv 12 option cuts Warding Strike.",
           "refs": [
-            "ec-templar"
+            "ql-builds-templar",
+            "mb-templar-top"
+          ]
+        },
+        {
+          "name": "Punishment",
+          "priority": 3,
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
+          "why": "Charged hit that grants Executor: PvE damage +20% for 20 s.",
+          "refs": [
+            "ql-builds-templar",
+            "mb-templar-top"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
@@ -368,19 +717,30 @@
         },
         {
           "name": "Pummel",
-          "priority": 3,
-          "target": "Mastery 11. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
-          "why": "Core shield attack.",
+          "priority": 4,
+          "target": "Mastery 11, then +4 from Daevanion nodes. The guide's skill level 20 needs more: Mastery stops at 11 and the build names no other source",
+          "why": "Core shield attack. No cooldown, so it fills every gap in the smash stack; its skill Lv 12 option cuts Punishment.",
           "refs": [
-            "ec-templar"
+            "ql-builds-templar",
+            "mb-templar-top"
           ],
           "targetProvenance": {
             "kind": "in-game-capture",
             "capturedBy": "Miguel",
             "capturedOn": "2026-10-10",
             "where": "Skill > Mastery window",
-            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names no Daevanion node for this skill. Gear and Arcana are not named as a source for this skill."
+            "note": "Mastery stops at skill Lv 11 (mechanics.json, mastery-cap). The guide target \"Lv 20\" is reworded against the cap: the build names this skill's Daevanion nodes, one +1 on each of the first four boards (progression.json, daevanion-boards). Gear and Arcana are not named as a source for this skill."
           }
+        },
+        {
+          "name": "Warding Strike",
+          "priority": 5,
+          "target": "Keep levelled",
+          "why": "Self heal and damage tolerance buff. It also makes Judgment ready.",
+          "refs": [
+            "ql-builds-templar",
+            "mb-templar-top"
+          ]
         }
       ],
       "specialties": [
@@ -388,17 +748,127 @@
           "skill": "Judgment",
           "picks": [
             {
-              "skillLevel": 12,
-              "pick": "Always lands as a critical hit",
+              "skillLevel": 8,
+              "pick": "Extra damage on hit",
+              "perk": "Extra damage on hit",
               "refs": [
-                "ec-templar"
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Critical Hit on hit",
+              "perk": "Critical Hit on hit",
+              "refs": [
+                "ql-builds-templar"
               ]
             },
             {
               "skillLevel": 16,
               "pick": "Remove cooldown",
+              "perk": "Remove cooldown",
               "refs": [
-                "ec-templar"
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Vicious Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+50% Multi-Hit on hit",
+              "perk": "+50% Multi-Hit on hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "-2s Warding Strike cooldown on hit",
+              "perk": "-2s Warding Strike cooldown on hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Punishment",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "+30% Skill Speed",
+              "perk": "+30% Skill Speed",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Changes to mobile skill",
+              "perk": "Changes to mobile skill",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Ignores Block and Evasion and lands as a Critical Hit",
+              "perk": "Ignores Block and Evasion and lands as a Critical Hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Pummel",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "Up to 12% more damage when fewer targets are hit",
+              "perk": "Up to 12% more damage when fewer targets are hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "-1s Punishment cooldown on hit",
+              "perk": "-1s Punishment cooldown on hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            }
+          ]
+        },
+        {
+          "skill": "Warding Strike",
+          "picks": [
+            {
+              "skillLevel": 8,
+              "pick": "-5s cooldown",
+              "perk": "-5s cooldown",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 12,
+              "pick": "Warding scales with targets hit",
+              "perk": "Warding scales with targets hit",
+              "refs": [
+                "ql-builds-templar"
+              ]
+            },
+            {
+              "skillLevel": 16,
+              "pick": "Party gains PvE Damage Tolerance on use",
+              "perk": "Party gains PvE Damage Tolerance on use",
+              "refs": [
+                "ql-builds-templar"
               ]
             }
           ]
@@ -412,23 +882,23 @@
           },
           {
             "slotLevel": 27,
-            "name": "Battlefield Banner"
-          },
-          {
-            "slotLevel": 32,
             "name": "Empyrean Lord's Punishment"
           },
           {
+            "slotLevel": 32,
+            "name": "Battlefield Banner"
+          },
+          {
             "slotLevel": 37,
-            "name": "Taunt"
+            "name": "Noble Armor"
           }
         ],
         "alternatives": [
           {
-            "name": "Noble Armor",
-            "why": "Set for solo play and big pulls.",
+            "name": "Shield of Protection",
+            "why": "A sure Block when a hit is too big to take.",
             "refs": [
-              "ec-templar"
+              "ql-builds-templar"
             ]
           },
           {
@@ -437,25 +907,39 @@
             "refs": [
               "ec-templar"
             ]
+          },
+          {
+            "name": "Taunt",
+            "why": "Only when you hold the boss for a party.",
+            "refs": [
+              "mb-templar-top"
+            ]
           }
         ],
-        "confidence": "single-source",
+        "confidence": "top-player data",
         "refs": [
+          "ql-builds-templar",
+          "mb-templar-top",
           "ec-templar"
         ],
-        "note": "The slot order is a suggestion."
+        "note": "Doom Shield, Battlefield Banner and Noble Armor are in 12 or more of 14 published DPS sets; the fourth is Empyrean Lord's Punishment in most of them."
       },
       "daevanion": {
         "priorities": [
-          "Punishment +1 on Zikel",
-          "Judgment +1 on Nezekan"
+          "Judgment +1 on every board you open",
+          "Punishment, Vicious Strike and Pummel +1",
+          "Warding Strike +1"
         ],
         "skillNodes": [
+          "Judgment",
           "Punishment",
-          "Judgment"
+          "Vicious Strike",
+          "Pummel",
+          "Warding Strike"
         ],
         "refs": [
-          "mb-templar"
+          "mb-templar-top",
+          "ql-daev-templar"
         ]
       },
       "stats": {
@@ -469,8 +953,24 @@
         ]
       },
       "rotation": {
-        "pending": true,
-        "reason": "No source gives a solo Templar rotation. Use the tank priorities."
+        "steps": [
+          "Noble Armor and Battlefield Banner before the pull",
+          "Poach to close in",
+          "Punishment at full charge",
+          "Hold the macro and Vicious Strike",
+          "Doom Shield and Shield Rush by hand for more Judgment"
+        ],
+        "filler": "Vicious Strike for MP, Pummel in the smash stack",
+        "manual": [
+          "Punishment",
+          "Doom Shield",
+          "Shield Rush",
+          "Defiance"
+        ],
+        "refs": [
+          "ql-builds-templar"
+        ],
+        "note": "These are priorities from published builds, not a fixed order."
       },
       "levelNotes": [],
       "status": "sourced",
@@ -488,16 +988,6 @@
         },
         {
           "kind": "community-guide",
-          "ref": "mb-templar",
-          "title": "Templar build (top player data)",
-          "publisher": "MetaBot",
-          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
-          "retrievedOn": "2026-10-06",
-          "region": "global",
-          "reliability": "high"
-        },
-        {
-          "kind": "community-guide",
           "ref": "av-macros",
           "title": "Most common macros by class",
           "publisher": "AION2 Vault",
@@ -505,31 +995,69 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-templar",
+          "title": "Templar skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-templar",
+          "title": "Public Templar skill builds (287 distinct PvE of 951 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-daev-templar",
+          "title": "Public Templar Daevanion plans (267 distinct of 445 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/daevanion-planner",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-templar-top",
+          "title": "Templar build planner and top-player meta (153 top players)",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes/templar/build",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
         "status": "reported",
         "refs": [
-          "av-macros"
+          "av-macros",
+          "ql-builds-templar"
         ],
         "stackA": {
           "label": "Shield",
+          "name": "Shield stack",
           "rows": [
             {
-              "name": "Doom Shield",
-              "why": "Fires first when ready. Most players start this stack with it."
-            },
-            {
               "name": "Judgment",
-              "why": "Strong hit on a 5 s cooldown."
+              "why": "Fires whenever a shield skill has made it ready: Shield Smite, Warding Strike, Doom Shield or Shield Rush."
             },
             {
               "name": "Shield Smite",
-              "why": "Next in the most common line."
+              "why": "Stuns NPCs, so Annihilate can fire, and makes Judgment ready."
             },
             {
               "name": "Warding Strike",
-              "why": "Heals you and grants damage tolerance. Your main attack cuts its cooldown."
+              "why": "Heals you, grants Warding and makes Judgment ready. Your main attack cuts its cooldown."
             }
           ]
         },
@@ -539,6 +1067,7 @@
         },
         "stackB": {
           "label": "Smash",
+          "name": "Smash stack",
           "rows": [
             {
               "name": "Debilitating Smash",
@@ -546,28 +1075,45 @@
             },
             {
               "name": "Annihilate",
-              "why": "Next in the most common line."
+              "why": "Fires on a stunned or knocked-down target: Shield Smite in the shield stack opens it."
+            },
+            {
+              "name": "Flash Rampage",
+              "why": "Fires only on a staggered target, so it never blocks the stack: it waits above Pummel."
             },
             {
               "name": "Pummel",
-              "why": "Last in the most common line."
+              "why": "No cooldown, so it sits last: it fills every gap and raises your Enmity.",
+              "noCooldown": true
             }
           ]
         },
         "opener": [],
         "ownKeys": [
           {
-            "name": "Punishment",
-            "reason": "charged"
+            "name": "Battlefield Banner",
+            "reason": "buff",
+            "why": "Attack from your Defense for 10 s: press it before the pull, with Noble Armor."
           },
           {
-            "name": "Taunt",
+            "name": "Noble Armor",
+            "reason": "buff",
+            "why": "Max HP up for 120 s: press it before the pull and keep it up."
+          },
+          {
+            "name": "Punishment",
+            "reason": "charged",
+            "why": "Charged: hold it to full charge for Executor. A macro only fires stage 1."
+          },
+          {
+            "name": "Empyrean Lord's Punishment",
             "reason": "other",
-            "why": "Pulls enemies to you, so you choose when."
+            "why": "A heavy hit that stuns the pack, so Annihilate can fire. Most players keep it off the macro."
           },
           {
             "name": "Poach",
-            "reason": "other"
+            "reason": "other",
+            "why": "Pulls one target to you from 20 m: you choose which."
           },
           {
             "name": "Defiance",
@@ -575,8 +1121,14 @@
             "why": "Clears crowd control: you need it at a chosen moment."
           },
           {
+            "name": "Doom Shield",
+            "reason": "dash",
+            "why": "A 20 m dash: it knocks the target down and makes Judgment ready. Use it when you mean to move."
+          },
+          {
             "name": "Shield Rush",
-            "reason": "dash"
+            "reason": "dash",
+            "why": "Fires after a Dodge or in flight, and makes Judgment ready."
           }
         ],
         "levelNotes": [],
@@ -588,6 +1140,144 @@
           "where": "Skill bar and Macro window, Templar",
           "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
         }
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Solo and AoE farming: damage first, enough survival to hold your own pulls, no party to buff.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 0,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-templar",
+          "ql-db-templar",
+          "mb-templar-top"
+        ],
+        "preferences": [
+          {
+            "id": "line-doom-shield",
+            "kind": "line",
+            "skill": "Doom Shield",
+            "count": "49 of 287 builds put Doom Shield on top of the Judgment stack; 62 give it a key of its own",
+            "why": "Some builds put Doom Shield at the top of the shield stack.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "stack": "stackA"
+          },
+          {
+            "id": "line-taunt",
+            "kind": "line",
+            "skill": "Taunt",
+            "count": "Taunt is in a stack in 99 of 287 builds and in 24 published macros",
+            "why": "Some builds put Taunt in a stack or the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "stack": "stackB"
+          },
+          {
+            "id": "mastery-judgment-first",
+            "kind": "mastery",
+            "skill": "Judgment",
+            "count": "Judgment comes first in 102 of 172 published priority lists",
+            "why": "Judgment levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "from": 4
+          },
+          {
+            "id": "mastery-pummel-levelling",
+            "kind": "mastery",
+            "skill": "Pummel",
+            "count": "A levelling build copied 66 times: spam Pummel and the macro until Vicious Strike and Judgment are Lv 12",
+            "why": "Pummel levelled first while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar"
+            ],
+            "to": 21
+          },
+          {
+            "id": "stigma-doom-shield",
+            "kind": "stigma",
+            "skill": "Doom Shield",
+            "count": "13 of 14 DPS builds with four stigmas; 61% of top players",
+            "why": "Makes Judgment ready and knocks NPCs down.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-battlefield-banner",
+            "kind": "stigma",
+            "skill": "Battlefield Banner",
+            "count": "12 of 14 DPS builds with four stigmas; 65% of top players",
+            "why": "Attack from Defense for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-noble-armor",
+            "kind": "stigma",
+            "skill": "Noble Armor",
+            "count": "12 of 14 DPS builds with four stigmas; 37% of top players",
+            "why": "Max HP up for 120 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-elp",
+            "kind": "stigma",
+            "skill": "Empyrean Lord's Punishment",
+            "count": "7 of 14 DPS builds with four stigmas; 67% of top players",
+            "why": "A heavy AoE hit that stuns.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-taunt",
+            "kind": "stigma",
+            "skill": "Taunt",
+            "count": "3 of 14 DPS builds with four stigmas; 76% of top players",
+            "why": "Enmity and Shrink.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          },
+          {
+            "id": "stigma-shield-of-protection",
+            "kind": "stigma",
+            "skill": "Shield of Protection",
+            "count": "5 of 14 DPS builds with four stigmas; 61% of top players",
+            "why": "A sure Block.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-templar",
+              "mb-templar-top"
+            ]
+          }
+        ]
       }
     }
   ]
