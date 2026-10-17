@@ -383,7 +383,9 @@ await check('live Gear page: one call for first paint, item detail on demand',as
   assert.match(await page.textContent('#aeInfo .ae-card-head p'),/Main Hand · Greatsword · Rare/);
   assert.equal(await page.locator('#aeInfo .ae-pips i').count(),5,'Enchant pips up to the max');
   assert.equal(await page.locator('#aeInfo .ae-pips i.is-on').count(),2);
-  assert.match(await page.textContent('#aeInfo .ae-card-status'),/Enchant it: 3 more levels to \+5/);
+  // Compact card (Miguel, 17 Oct 2026): the move is What to do's head, with no status strip saying it again.
+  assert.equal(await page.textContent('#aeInfo .ae-advice-head'),'Enchant it to +5');
+  assert.equal(await page.locator('#aeInfo .ae-card-status').count(),0);
   assert.match(await page.textContent('#aeInfo .ae-item-rows'),/Attack48 \+2/);
   assert.equal(await page.locator('#aeInfo .ae-sockets i').count(),2,'Manastone slots drawn as sockets');
   assert.match(await page.textContent('[data-slot="0"] .ae-slot-meta'),/\+2 of 5/,'Tile picks up max enchant from the detail');
