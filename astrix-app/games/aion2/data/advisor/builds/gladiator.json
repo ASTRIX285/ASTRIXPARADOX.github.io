@@ -84,7 +84,8 @@
               "pick": "Upward Strike chain",
               "refs": [
                 "ec-gladiator"
-              ]
+              ],
+              "perk": "Adds Upward Strike chain skill"
             },
             {
               "skillLevel": 12,
@@ -111,7 +112,8 @@
               "pick": "Usable while moving",
               "refs": [
                 "ec-gladiator"
-              ]
+              ],
+              "perk": "Becomes a mobile skill"
             },
             {
               "skillLevel": 12,
@@ -137,7 +139,8 @@
               "pick": "Faster skill speed",
               "refs": [
                 "ec-gladiator"
-              ]
+              ],
+              "perk": "20% faster skill speed"
             },
             {
               "skillLevel": 12,
@@ -315,6 +318,26 @@
           "retrievedOn": "2026-10-17",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-gladiator",
+          "title": "Public Gladiator skill builds (141 distinct of 555 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macro": {
@@ -408,6 +431,147 @@
             "fromSkillLevel": 16
           }
         ]
+      },
+      "ascent": {
+        "status": "reported",
+        "why": "Damage first; survival, party buffs and MP count for a little.",
+        "weights": {
+          "damage": 3,
+          "enmity": 0,
+          "survival": 1,
+          "partyBuff": 1,
+          "mp": 1
+        },
+        "refs": [
+          "ql-builds-gladiator",
+          "ql-db-gladiator"
+        ],
+        "preferences": [
+          {
+            "id": "line-ruinous",
+            "kind": "line",
+            "skill": "Ruinous Blow",
+            "count": "7 of 141 builds run Rage Burst then Ruinous Blow as their macro",
+            "why": "Some builds put Ruinous Blow in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "line-lunge",
+            "kind": "line",
+            "skill": "Lunge Stance",
+            "count": "5 of 141 builds (102 with copies) put Lunge Stance in the macro",
+            "why": "Some builds put Lunge Stance in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "line-zikel",
+            "kind": "line",
+            "skill": "Zikel's Blessing",
+            "count": "6 of 141 builds make Zikel's Blessing a macro line",
+            "why": "Some builds put Zikel's Blessing in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "line-sword-aura",
+            "kind": "line",
+            "skill": "Sword Aura Rampage",
+            "count": "7 of 141 builds make Sword Aura Rampage a macro line",
+            "why": "Some builds put Sword Aura Rampage in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-rage-burst",
+            "kind": "stigma",
+            "skill": "Rage Burst",
+            "count": "129 of 141 builds; 18 of 18 levelling builds",
+            "why": "Opens Overhead Slam for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-lunge",
+            "kind": "stigma",
+            "skill": "Lunge Stance",
+            "count": "125 of 141 builds",
+            "why": "Combat Speed +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-zikel",
+            "kind": "stigma",
+            "skill": "Zikel's Blessing",
+            "count": "124 of 141 builds",
+            "why": "Attack +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-focused-block",
+            "kind": "stigma",
+            "skill": "Focused Block",
+            "count": "82 of 141 builds",
+            "why": "Parry for MP and the party buff.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-zikel-first",
+            "kind": "stigma",
+            "skill": "Zikel's Blessing",
+            "count": "One editorial levelling plan slots it first at Lv 22",
+            "why": "Zikel's Blessing in the first slot.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ],
+            "slot": 1
+          },
+          {
+            "id": "mastery-overhead-first",
+            "kind": "mastery",
+            "skill": "Overhead Slam",
+            "count": "58 of 100 builds with a priority list put it first",
+            "why": "Overhead Slam levelled first.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ],
+            "from": 22
+          },
+          {
+            "id": "mastery-keen-rending-early",
+            "kind": "mastery",
+            "skill": "Rending Blow",
+            "count": "Levelling guides level Keen Strike and Rending Blow first",
+            "why": "Keen Strike and Rending Blow first while you level.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ],
+            "to": 21
+          }
+        ]
       }
     },
     {
@@ -483,7 +647,8 @@
               "pick": "Upward Strike chain",
               "refs": [
                 "ql-gladiator"
-              ]
+              ],
+              "perk": "Adds Upward Strike chain skill"
             },
             {
               "skillLevel": 12,
@@ -509,7 +674,8 @@
               "pick": "50% Multi-Hit",
               "refs": [
                 "ql-gladiator"
-              ]
+              ],
+              "perk": "50% Multi-Hit on hit"
             },
             {
               "skillLevel": 12,
@@ -528,7 +694,8 @@
               "pick": "+200 Block while using it",
               "refs": [
                 "ql-gladiator"
-              ]
+              ],
+              "perk": "+200 Block while using the skill"
             },
             {
               "skillLevel": 16,
@@ -907,8 +1074,197 @@
           "retrievedOn": "2026-10-17",
           "region": "global",
           "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-gladiator",
+          "title": "Public Gladiator skill builds (141 distinct of 555 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
-      ]
+      ],
+      "ascent": {
+        "status": "reported",
+        "why": "Hold the boss with Enmity and survive, and keep the party buff up from your blocks.",
+        "weights": {
+          "damage": 2,
+          "enmity": 3,
+          "survival": 2,
+          "partyBuff": 3,
+          "mp": 1
+        },
+        "teamWeights": {
+          "main-tank": {
+            "weights": {
+              "damage": 2,
+              "enmity": 3,
+              "survival": 2,
+              "partyBuff": 3,
+              "mp": 1
+            },
+            "why": "You hold the boss, and your block buff counts: no Templar Fury to clash with it.",
+            "refs": [
+              "ql-db-gladiator"
+            ]
+          },
+          "off-tank-templar": {
+            "weights": {
+              "damage": 2,
+              "enmity": 2,
+              "survival": 2,
+              "partyBuff": 0,
+              "mp": 1
+            },
+            "why": "The Templar holds the boss, and your block buff does not stack with the Templar's Fury.",
+            "refs": [
+              "ql-db-gladiator"
+            ]
+          },
+          "solo": {
+            "weights": {
+              "damage": 3,
+              "enmity": 0,
+              "survival": 2,
+              "partyBuff": 0,
+              "mp": 1
+            },
+            "why": "No party to buff and nobody to take the boss from: damage and staying alive.",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          }
+        },
+        "refs": [
+          "ql-builds-gladiator",
+          "ql-db-gladiator"
+        ],
+        "preferences": [
+          {
+            "id": "line-ruinous",
+            "kind": "line",
+            "skill": "Ruinous Blow",
+            "count": "7 of 141 builds run Rage Burst then Ruinous Blow as their macro",
+            "why": "Some builds put Ruinous Blow in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "line-lunge",
+            "kind": "line",
+            "skill": "Lunge Stance",
+            "count": "5 of 141 builds (102 with copies) put Lunge Stance in the macro",
+            "why": "Some builds put Lunge Stance in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "line-zikel",
+            "kind": "line",
+            "skill": "Zikel's Blessing",
+            "count": "6 of 141 builds make Zikel's Blessing a macro line",
+            "why": "Some builds put Zikel's Blessing in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "line-sword-aura",
+            "kind": "line",
+            "skill": "Sword Aura Rampage",
+            "count": "7 of 141 builds make Sword Aura Rampage a macro line",
+            "why": "Some builds put Sword Aura Rampage in the macro.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-rage-burst",
+            "kind": "stigma",
+            "skill": "Rage Burst",
+            "count": "9 of 9 tank builds",
+            "why": "Opens Overhead Slam for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-focused-block",
+            "kind": "stigma",
+            "skill": "Focused Block",
+            "count": "8 of 9 tank builds",
+            "why": "Parry for MP; a block gives the party a damage buff.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-zikel",
+            "kind": "stigma",
+            "skill": "Zikel's Blessing",
+            "count": "6 of 9 tank builds",
+            "why": "Attack +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-lunge",
+            "kind": "stigma",
+            "skill": "Lunge Stance",
+            "count": "6 of 9 tank builds",
+            "why": "Combat Speed +20% for 10 s.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "stigma-wave-armor",
+            "kind": "stigma",
+            "skill": "Wave Armor",
+            "count": "2 of 9 tank builds",
+            "why": "At stigma Lv 10 it makes your block buff 1.5 times stronger.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ]
+          },
+          {
+            "id": "mastery-counter-second",
+            "kind": "mastery",
+            "skill": "Experienced Counterstrike",
+            "count": "The top early-45 build levels it second",
+            "why": "Experienced Counterstrike near the top.",
+            "status": "reported",
+            "refs": [
+              "ql-builds-gladiator"
+            ],
+            "from": 21
+          }
+        ]
+      }
     }
   ]
 }

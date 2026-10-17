@@ -19,15 +19,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% more MP restored"
+          "text": "20% more MP restored",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "120 MP a hit in place of 100.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you a little on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "50% Multi-Hit on hit"
+          "text": "50% Multi-Hit on hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "Half its hits land twice.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -68,6 +101,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -88,7 +131,64 @@
           "skillLevel": 12,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "Restores 100 MP on every hit, with no cooldown.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 nearby enemies.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 100,
+          "text": "Restores 100 MP.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Ruinous Blow",
+          "seconds": 1,
+          "text": "Each hit cuts Ruinous Blow by 1 s.",
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-rending-blow",
@@ -108,15 +208,58 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% less MP consumed"
+          "text": "20% less MP consumed",
+          "values": [
+            {
+              "key": "mp",
+              "weight": 1,
+              "text": "Costs 96 MP in place of 120.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+200 Block while using the skill"
+          "text": "+200 Block while using the skill",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "+200 Block while it runs.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            },
+            {
+              "key": "partyBuff",
+              "weight": 1,
+              "text": "More blocks set off Experienced Counterstrike for the party.",
+              "status": "reported",
+              "refs": [
+                "ql-builds-gladiator"
+              ],
+              "needs": "Experienced Counterstrike"
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes a mobile skill"
+          "text": "Becomes a mobile skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "You can move while it runs, so the macro never roots you.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -157,12 +300,69 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-gladiator",
+          "title": "Public Gladiator skill builds (141 distinct of 555 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "line",
         "status": "confirmed"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Always ready: hits up to 4 nearby enemies and fills every gap.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "mp",
+          "amount": 50,
+          "text": "Restores 50 MP on a critical hit.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 120
     },
     {
       "id": "gladiator-overhead-slam",
@@ -179,15 +379,48 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "Absorbs HP on hit"
+          "text": "Absorbs HP on hit",
+          "values": [
+            {
+              "key": "survival",
+              "weight": 1,
+              "text": "Heals you a little on every hit.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Becomes an AoE skill"
+          "text": "Becomes an AoE skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Hits a group, weaker on one target.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "Adds Upward Strike chain skill"
+          "text": "Adds Upward Strike chain skill",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "A follow-up hit after each Overhead Slam.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -228,6 +461,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -247,7 +490,65 @@
           "skillLevel": 16,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Fires on a knocked-down target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 1.5,
+          "text": "Inside Rage Burst's 10 s window it fires on every pass: your hardest regular hit.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ],
+          "needs": "Rage Burst"
+        },
+        {
+          "key": "enmity",
+          "weight": 1,
+          "text": "Raises your Enmity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "knockdown",
+          "text": "Fires only on a knocked-down target, or inside the Rage Burst window.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Overhead Slam",
+          "seconds": 5,
+          "text": "No cooldown once you pick Remove cooldown.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 22,
+        "10": 28
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-ruinous-blow",
@@ -259,15 +560,38 @@
       "specialties": [
         {
           "skillLevel": 8,
-          "text": "20% faster skill speed"
+          "text": "20% faster skill speed",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 0.5,
+              "text": "Faster to land.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 8,
-          "text": "+12.5m range"
+          "text": "+12.5m range",
+          "values": []
         },
         {
           "skillLevel": 8,
-          "text": "+30% skill Critical Hit"
+          "text": "+30% skill Critical Hit",
+          "values": [
+            {
+              "key": "damage",
+              "weight": 1,
+              "text": "+30% critical hit chance on the dash.",
+              "status": "confirmed",
+              "refs": [
+                "ql-db-gladiator"
+              ]
+            }
+          ]
         },
         {
           "skillLevel": 12,
@@ -308,6 +632,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -322,7 +656,24 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Prepare for Battle: +20% PvE damage and +100 Critical Hit for 20 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 32,
+        "10": 38
+      },
+      "mpCost": 250
     },
     {
       "id": "gladiator-rush-strike",
@@ -388,13 +739,52 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "dash",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "A gap closer.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Overhead Slam",
+          "via": "knockdown",
+          "text": "It always knocks down NPC targets, so Overhead Slam can fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 28,
+        "10": 34
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-crushing-wave",
@@ -460,6 +850,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "triggers": [
@@ -469,7 +869,45 @@
           "skillLevel": 12,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Hits up to 4 enemies around you.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "reset",
+          "target": null,
+          "text": "A critical hit resets its cooldown.",
+          "skillLevel": 12,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "type": "mp",
+          "amount": 50,
+          "text": "Restores 50 MP on a critical hit.",
+          "skillLevel": 8,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 26,
+        "10": 32
+      },
+      "mpCost": 250
     },
     {
       "id": "gladiator-defiance",
@@ -535,13 +973,40 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "defensive",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Clears stun, knockdown and fear and gives 5 s of status immunity.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [],
+      "training": {
+        "8": 34,
+        "10": 40
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-mocking-blade",
@@ -607,6 +1072,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "triggers": [
@@ -616,7 +1091,40 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "A single-target hit that knocks the target down for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Overhead Slam",
+          "via": "knockdown",
+          "text": "Its 3 s knockdown lets Overhead Slam fire.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 21,
+        "10": 27
+      },
+      "mpCost": 200,
+      "macroUse": {
+        "value": "line",
+        "status": "reported"
+      }
     },
     {
       "id": "templar-judgment",
@@ -3879,6 +4387,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "triggers": [
@@ -3888,7 +4406,36 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Hits up to 4 enemies and roots NPC targets.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Overhead Slam",
+          "via": "knockdown",
+          "text": "With its first Lv 8 option it can knock the target down for 3 s.",
+          "skillLevel": 8,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 25,
+        "10": 31
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-blade-toss",
@@ -3925,6 +4472,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "triggers": [
@@ -3934,7 +4491,20 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Target Defence 30% lower for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "gladiator-focused-block",
@@ -3968,6 +4538,26 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-builds-gladiator",
+          "title": "Public Gladiator skill builds (141 distinct of 555 read)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/skill-builder",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -3988,7 +4578,61 @@
           "text": "Some boss attacks go through it.",
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "Held: guarantees a parry and doubles block damage reduction.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "mp",
+          "weight": 1,
+          "text": "A parry gives 110 MP and stamina.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 2,
+          "text": "A block sets off Experienced Counterstrike: party PvE damage up for 20 s.",
+          "status": "reported",
+          "refs": [
+            "ql-builds-gladiator"
+          ],
+          "needs": "Experienced Counterstrike"
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Experienced Counterstrike",
+          "via": "block",
+          "text": "A successful block sets off Experienced Counterstrike.",
+          "skillLevel": null,
+          "status": "reported",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "type": "mp",
+          "amount": 110,
+          "text": "Restores 110 MP and stamina once on a parry.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "mpCost": 0
     },
     {
       "id": "gladiator-leaping-slam",
@@ -4028,13 +4672,51 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "dash",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "Leaps to a target up to 20 m away.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "reset",
+          "target": null,
+          "text": "Defeating an enemy resets its cooldown.",
+          "skillLevel": 8,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 19,
+        "10": 25
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-lunge-stance",
@@ -4074,13 +4756,48 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Combat Speed +20% for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "text": "A critical hit has a 50% chance to cut all cooldowns by 1 s while it lasts.",
+          "skillLevel": 20,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "mpCost": 0
     },
     {
       "id": "gladiator-rage-burst",
@@ -4114,6 +4831,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -4133,7 +4860,43 @@
           "skillLevel": 5,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "+10% PvE damage for 10 s, and the target hits 10% softer.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "opens",
+          "target": "Overhead Slam",
+          "via": "window",
+          "text": "Makes Overhead Slam ready on the target for 10 s.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "Rage Burst",
+          "seconds": 15,
+          "text": "Cooldown 30 s in place of 45 s.",
+          "skillLevel": 5,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "mpCost": 100
     },
     {
       "id": "gladiator-sword-aura-rampage",
@@ -4170,6 +4933,16 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
@@ -4190,7 +4963,46 @@
           "skillLevel": null,
           "status": "reported"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Fires on a staggered target only.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "stagger",
+          "text": "Fires only on a staggered target.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "type": "cdCut",
+          "target": "all",
+          "seconds": 1,
+          "text": "Each hit cuts all your cooldowns by 1 s.",
+          "skillLevel": 16,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "training": {
+        "8": 23,
+        "10": 29
+      },
+      "mpCost": 0
     },
     {
       "id": "gladiator-zikel-s-blessing",
@@ -4224,13 +5036,36 @@
           "retrievedOn": "2026-10-14",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
       ],
       "macroUse": {
         "value": "own-key",
         "reason": "buff",
         "status": "reported"
-      }
+      },
+      "values": [
+        {
+          "key": "damage",
+          "weight": 2,
+          "text": "Attack +20% and Accuracy +100 for 10 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     },
     {
       "id": "assassin-ambush",
@@ -6990,6 +7825,48 @@
           "retrievedOn": "2026-10-17",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ],
+      "values": [
+        {
+          "key": "partyBuff",
+          "weight": 2,
+          "text": "A block gives you and the party +5.4% PvE damage for 20 s. It does not stack with a Templar's Fury.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "damage",
+          "weight": 0.5,
+          "text": "More front attack damage.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [
+        {
+          "type": "condition",
+          "needs": "block",
+          "text": "Fires on a block.",
+          "skillLevel": null,
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
         }
       ]
     },
@@ -7026,8 +7903,42 @@
           "retrievedOn": "2026-10-17",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "damage",
+          "weight": 1,
+          "text": "Damage over time on up to 4 enemies around you.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        },
+        {
+          "key": "partyBuff",
+          "weight": 1,
+          "text": "At stigma Lv 10 your Experienced Counterstrike counts 1.5 times while it lasts.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ],
+          "needs": "Experienced Counterstrike",
+          "skillLevel": 10
+        }
+      ],
+      "synergies": [],
+      "mpCost": 200
     },
     {
       "id": "gladiator-tenaciousness",
@@ -7056,8 +7967,31 @@
           "retrievedOn": "2026-10-17",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-db-gladiator",
+          "title": "Gladiator skill tooltips (game database)",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2/en/database",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
         }
-      ]
+      ],
+      "values": [
+        {
+          "key": "survival",
+          "weight": 2,
+          "text": "3 s of immunity, then 50% PvE damage tolerance for 3 s.",
+          "status": "confirmed",
+          "refs": [
+            "ql-db-gladiator"
+          ]
+        }
+      ],
+      "synergies": [],
+      "mpCost": 0
     }
   ]
 }

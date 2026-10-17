@@ -322,9 +322,9 @@ const skillOfEffect = effect => /^(.+?)\s*\+\d+$/.exec(String(effect ?? ''))?.[1
  * boards: [{ id, name, open, unlockLevel, nodes|null }] in route order. priorities: routePriorities. budget: { points, boardCost }.
  * Rules (Miguel, 17 Oct 2026): one board at a time in route order; a board is done for the role once the nodes its core
  * tiers ask for are taken, and the route moves on; spare (non-core) nodes come only after every board is done for the
- * role; nothing past the budget. An open board not read yet stops the route there, so it never guesses.
+ * role; nothing past the budget, nor past the points the player has (have). An open board not read yet stops the route there, so it never guesses.
  */
-export function planRoleRoute({ boards = [], priorities = [], budget = null, cap = null, skills: summarySkills = null }) {
+export function planRoleRoute({ boards = [], priorities = [], budget = null, cap = null, skills: summarySkills = null, have = null }) {
   const points = Number.isFinite(budget?.points) ? budget.points : null;
   const open = boards.filter(board => board.open);
   const read = open.filter(board => Array.isArray(board.nodes));
@@ -332,6 +332,8 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
   const spent = read.reduce((total, board) => total + plans.get(board.id).pointsSpent, 0);
   const known = read.length === open.length;
   let left = points === null ? Infinity : points - spent;
+  // The points the player has to spend now (typed on the Daevanion screen): the route never plans past them.
+  if (Number.isFinite(have)) left = Math.min(left, Math.max(0, have));
   const steps = [];
   let stopped = null;
   const plan = (board, list, kind) => {
@@ -394,7 +396,7 @@ export function planRoleRoute({ boards = [], priorities = [], budget = null, cap
   }
   const plannedCost = steps.reduce((total, step) => total + step.cost, 0);
   return {
-    budget: points, spent, known, plannedCost, left: points === null ? null : points - spent - plannedCost,
+    budget: points, spent, known, plannedCost, have: Number.isFinite(have) ? have : null, left: points === null ? null : points - spent - plannedCost,
     current: current ? { id: current.id, name: current.name, read: plans.has(current.id) } : null,
     boards: rows, steps, stopped,
     summary: { skills, stats: [...stats.values()].map(item => ({ ...item, text: `${item.name} ${item.total < 0 ? '-' : '+'}${Math.abs(item.total)}${item.unit}` })) }

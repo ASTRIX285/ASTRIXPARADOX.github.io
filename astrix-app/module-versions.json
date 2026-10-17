@@ -82,9 +82,11 @@
 
   "/astrix-app/games/aion2/engine/armory-adapter.mjs": "4af43094a0",
 
-  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "2bccfce7ed",
+  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "6ade1b2268",
 
-  "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "3f93a0c800",
+  "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "afa4c97d0d",
+
+  "/astrix-app/games/aion2/engine/level-planner.mjs": "3b012c469d",
 
   "/astrix-app/games/aion2/engine/stat-advisor.mjs": "17b4c6fdfa",
 
@@ -114,7 +116,7 @@
 
   "/astrix-app/pages/aetherium/aetherium-ui.mjs": "aed77c45f5",
 
-  "/astrix-app/pages/aetherium/ascent-plan.mjs": "e329767eaf",
+  "/astrix-app/pages/aetherium/ascent-plan.mjs": "ad4e246ad3",
 
   "/astrix-app/pages/aetherium/character-menu.mjs": "d75de1947b",
 
@@ -122,7 +124,7 @@
 
   "/astrix-app/pages/aetherium/compare-page.mjs": "81f972f4d0",
 
-  "/astrix-app/pages/aetherium/daeva-card.mjs": "b6e34e3e0f",
+  "/astrix-app/pages/aetherium/daeva-card.mjs": "4c93c68209",
 
   "/astrix-app/pages/aetherium/daevanion-board.mjs": "589e8f42ad",
 

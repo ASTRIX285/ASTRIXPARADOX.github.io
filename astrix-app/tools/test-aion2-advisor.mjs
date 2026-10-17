@@ -121,11 +121,14 @@ check('ASTRIX285: armory fixes first, then the build',()=>{
     'Spend points on the Nezekan Daevanion board',
     // Grade rule (11 Oct 2026): at Lv 12 the Common and Rare pieces go to their +5 cap, one move for all eight.
     'Enchant 8 Rare and Common pieces to +5',
-    // One level order (walkthrough fix, 11 Oct 2026): the level move is the Mastery list's first step, Keen Strike, not the lowest skill.
-    'Level Keen Strike (now Lv 3)'
+    // Level planner (17 Oct 2026): the level move is still the Mastery list's first step; the logic now puts Rending Blow
+    // first at Lv 12 (it was Keen Strike, the build's priority 1): its Lv 8 pick, Usable while moving, is worth more to a DPS.
+    'Level Rending Blow (now Lv 3)',
+    // and the main line this Lv 12 bar can fire: Mocking Blade opens Overhead Slam until Rage Burst comes at Lv 22.
+    'Set your main line: Mocking Blade, Overhead Slam, Rending Blow'
   ]);
-  assert.deepEqual(plan.now.map(item=>item.kind),['armory','armory','build']);
-  assert.deepEqual(plan.now.map(item=>item.step),[1,2,3]);
+  assert.deepEqual(plan.now.map(item=>item.kind),['armory','armory','build','build']);
+  assert.deepEqual(plan.now.map(item=>item.step),[1,2,3,4]);
 });
 
 check('Mastery: real skill levels, key skills first, points go to the next Specialty slot',()=>{
@@ -136,8 +139,11 @@ check('Mastery: real skill levels, key skills first, points go to the next Speci
   assert.ok(m.passive.length>0,'Passive skills listed');
   assert.ok(m.passive.every(skill=>skill.category==='Passive'));
   assert.deepEqual(m.slotLevels,[8,12,20]);
-  assert.deepEqual(m.spend.map(step=>[step.name,step.from,step.to,step.reason]),[
-    ['Keen Strike',3,8,'opens Specialty slot 1'],['Rending Blow',3,8,'opens Specialty slot 1'],['Overhead Slam',2,8,'opens Specialty slot 1']]);
+  // Level planner (17 Oct 2026): the order is the logic's (role weights over values and the next Specialty pick), not the
+  // build's priority list, and each step says from which character level the trainer sells skill Lv 8.
+  assert.deepEqual(m.spend.map(step=>[step.name,step.from,step.to,step.reason,step.waits]),[
+    ['Rending Blow',3,8,'opens Specialty slot 1',19],['Overhead Slam',2,8,'opens Specialty slot 1',22],['Keen Strike',3,8,'opens Specialty slot 1',19]]);
+  assert.ok(m.spend.every(step=>typeof step.why==='string'&&step.why.length>0),'Every step carries its reason');
   const keen=m.active[0];
   assert.match(keen.icon??'',/^https:\/\//,'Game skill icon from the armory');
   assert.equal(keen.slots.length,3);
@@ -166,19 +172,24 @@ check('Skill bar: basic skill fixed on left click for every class, nothing place
     assert.equal(new Set(names).size,names.length,`${name}: no skill on two keys`);
     assert.ok(Object.values(bar.bars[0]).every(cell=>!cell||cell.icon),`${name}: icons on bar 0`);
   }
-  // Macro builder (16 Oct 2026): Ruinous Blow is a dash, so it leaves the stack for its own key (it was row 0 of key 1). Still locked at Lv 12.
-  // Role aware (17 Oct 2026): the Gladiator's one main line sits on the stack right of left click (B); Rage Burst is its row 0.
+  // Macro builder (16 Oct 2026): Ruinous Blow is a dash, so it leaves the stack for its own key (it was row 0 of key 1).
+  // Level planner (17 Oct 2026): at Lv 12 it cannot be placed yet, so its key is kept free for it (no skill moves key as
+  // the Daeva levels) and it waits in Comes later; at Lv 14 it is on that same key.
   const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).skillBar;
-  const key=glad.left.find(item=>glad.stacks[item].skills[0]?.name==='Ruinous Blow');
-  assert.ok(key,'Ruinous Blow has a key of its own');
-  assert.equal(glad.stacks[key].skills.length,1);
-  assert.equal(glad.stacks[key].skills[0].reason,'dash');
-  assert.equal(glad.stacks[key].skills[0].locked,true,'Ruinous Blow locked at Lv 12 (unlocks at 14)');
-  assert.equal(glad.bars[0].B.name,'Rage Burst','Row 0 of the main line fires first');
+  const key=glad.left.find(item=>glad.stacks[item].reserved?.includes('Ruinous Blow'));
+  assert.ok(key,'Ruinous Blow has a key of its own, kept free at Lv 12');
+  assert.equal(glad.stacks[key].skills.length,0);
+  assert.deepEqual(glad.later.find(item=>item.name==='Ruinous Blow'),{name:'Ruinous Blow',where:'own key',unlockLevel:14,reason:'Unlocks at Lv 14.',icon:glad.later.find(item=>item.name==='Ruinous Blow').icon});
+  const at14=buildAscentPlan({className:'Gladiator',role:'dps',level:14,data:data('Gladiator')}).skillBar;
+  assert.equal(at14.stacks[key].skills[0].name,'Ruinous Blow','Same key once it unlocks');
+  assert.equal(at14.stacks[key].skills[0].reason,'dash');
+  // Rage Burst (a stigma, slot 1 at Lv 22) is not placeable at Lv 12: Mocking Blade, which knocks the target down, opens Overhead Slam in its row.
+  assert.equal(glad.bars[0].B.name,'Mocking Blade','Row 0 of the main line fires first');
+  assert.ok(Object.values(glad.stacks).every(stack=>stack.skills.every(skill=>!skill.locked)),'No locked skill on the bar');
 });
 check('Each next move names the screen that shows it; stigmas carry the game icon',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
-  assert.deepEqual(plan.now.map(item=>item.view),['daevanion','gear','mastery']);
+  assert.deepEqual(plan.now.map(item=>item.view),['daevanion','gear','mastery','skill-bar']);
   assert.match(plan.stigmas.slots[0].icon??'',/^https:\/\//,'Lunge Stance icon from the armory');
   assert.match(plan.stigmas.alternatives[0].icon??'',/^https:\/\//);
   assert.match(plan.skillIcons['Keen Strike']??'',/^https:\/\//);
@@ -598,7 +609,9 @@ check('no Mastery step above the cap for any class, with or without a Daeva',()=
 check('Keen Strike at 10 still gets a Mastery step to 11',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':10})});
   const step=plan.mastery.spend.find(item=>item.name==='Keen Strike');
-  assert.deepEqual(step,{name:'Keen Strike',from:10,to:11,reason:'reaches the Mastery cap',priority:1});
+  // Level planner (17 Oct 2026): the step also carries its rank, score, reason and training level, so the shape is checked field by field.
+  assert.deepEqual([step.name,step.from,step.to,step.reason,step.priority,step.waits],['Keen Strike',10,11,'reaches the Mastery cap',1,null]);
+  assert.equal(typeof step.why,'string');
   assert.equal(plan.mastery.atCap.length,0);
   assert.ok(plan.now.some(item=>item.title.startsWith('Level ')),'A level move still comes');
 });
@@ -706,9 +719,12 @@ check('Gladiator tank build: sourced, Tank with damage, team variants swap Wave 
   assert.deepEqual(teamsFor(tank).map(item=>item.id),['main-tank','off-tank-templar','solo']);
   assert.deepEqual(Object.keys(TEAMS),['main-tank','off-tank-templar','solo']);
   const at=team=>buildAscentPlan({className:'Gladiator',role:'tank',team,level:45,data:data('Gladiator')});
-  assert.deepEqual(at('main-tank').stigmas.slots.map(slot=>slot.name),['Rage Burst','Focused Block','Wave Armor',"Zikel's Blessing"]);
+  // Level planner (17 Oct 2026): the team's four are the same set; the logic orders them by what each is worth to the team,
+  // so the slot that opens first (Lv 22) gets the best one: Focused Block for a main tank (its block buff counts).
+  assert.deepEqual(at('main-tank').stigmas.slots.map(slot=>slot.name),['Focused Block','Rage Burst',"Zikel's Blessing",'Wave Armor']);
   assert.deepEqual(at('off-tank-templar').stigmas.slots.map(slot=>slot.name),['Rage Burst','Focused Block',"Zikel's Blessing",'Lunge Stance']);
   assert.deepEqual(at('solo').stigmas.slots.map(slot=>slot.name),['Rage Burst',"Zikel's Blessing",'Lunge Stance','Focused Block']);
+  for(const team of ['main-tank','off-tank-templar','solo'])assert.deepEqual(at(team).stigmas.slots.map(slot=>slot.name).sort(),[...tank.teamVariants[team].stigmas].sort(),`${team}: the team's own four`);
   assert.deepEqual(tank.teamVariants['off-tank-templar'].swap,{out:'Wave Armor',in:'Lunge Stance',why:"Your parry buff does not stack with the Templar's Fury."},'The rule is data on the build');
   assert.equal(at('off-tank-templar').team.swap.why,"Your parry buff does not stack with the Templar's Fury.");
   assert.equal(at(null).team.id,'solo','No team picked: Solo or levelling');
@@ -790,8 +806,9 @@ check('Macro 1 is the macro block: one entry per stack the build uses, 10 ms eac
   assert.deepEqual(plan.macro.entries.map(entry=>[entry.entry,entry.key,entry.name,entry.delayMs]),[[1,'B','Main line',10]]);
   assert.deepEqual(plan.macro.entries[0].skills.map(skill=>[skill.name,skill.row,skill.inMacro]),[['Rage Burst',0,true],['Overhead Slam',1,true],['Rending Blow',3,true]]);
   assert.deepEqual(plan.macro.entries[0].empty.map(item=>item.row),[2],'Row 2 stays empty');
+  // Level planner (17 Oct 2026): at Lv 5 Rage Burst is not placeable, so Mocking Blade (its knockdown) opens Overhead Slam.
   const low=buildAscentPlan({className:'Gladiator',role:'dps',level:5,data:data('Gladiator')}).macro.entries;
-  assert.deepEqual(low.map(entry=>entry.firesNow),[['Overhead Slam','Rending Blow']]);
+  assert.deepEqual(low.map(entry=>entry.firesNow),[['Mocking Blade','Overhead Slam','Rending Blow']]);
   const templar=buildAscentPlan({className:'Templar',level:45,data:data('Templar')}).macro;
   assert.deepEqual(templar.keys,['A','B'],'A class with two stacks keeps two entries');
   const cleric=buildAscentPlan({className:'Cleric',role:'healer',level:45,data:data('Cleric')}).macro;
@@ -825,7 +842,8 @@ check('a next move says the key and the row from the stacks: Put Overhead Slam a
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
   const move=plan.now.find(item=>/^Put Overhead Slam/.test(item.title));
   // Role aware (17 Oct 2026): the main line is named, so the move names it (it said "on stack A").
-  assert.equal(move.title,'Put Overhead Slam above Rage Burst on the main line');
+  // Level planner (17 Oct 2026): at Lv 12 row 0 is Mocking Blade, the stand-in that opens Overhead Slam until Rage Burst.
+  assert.equal(move.title,'Put Overhead Slam above Mocking Blade on the main line');
   assert.equal(move.view,'skill-bar');assert.equal(move.key,'B');assert.equal(move.row,1);
 });
 /* Walkthrough fix (fix/aetherium-walkthrough-logic, 11 Oct 2026): a Lv 12 and a Lv 41 Gladiator walk found screens that
@@ -881,14 +899,17 @@ check('stigmas sit where the macro block puts them: in stack A or B, or on a key
   const bad={stigmas:['A','B','C','D'],stacks:{'1':{key:'1',skills:[{name:'X'},{name:'A',stigma:true}]},'5':{key:'5',skills:[{name:'Y'}]}}};
   assert.equal(stigmaKeyProblems(bad).length,2,'A stack on a left key, and a stigma in it, both fail');
 });
-check('Gladiator Lv 12 and Lv 41: the main line is Rage Burst, Overhead Slam, Rending Blow; Lv 12 says what it fires now',()=>{
+// Level planner (17 Oct 2026): the bar holds only what the Daeva can place now. At Lv 12 Rage Burst is not placeable (its
+// slot opens at 22), so Mocking Blade takes row 0 to open Overhead Slam; at Lv 41 the line is the build's own.
+check('Gladiator Lv 12 and Lv 41: the main line at Lv 41 is Rage Burst, Overhead Slam, Rending Blow; at Lv 12 Mocking Blade opens Overhead Slam',()=>{
   for(const level of [12,41]){
     const bar=buildAscentPlan({className:'Gladiator',role:'dps',level,data:data('Gladiator')}).skillBar;
-    assert.deepEqual(bar.stacks.B.skills.map(skill=>[skill.name,skill.locked]),[['Rage Burst',level<32],['Overhead Slam',false],['Rending Blow',false]]);
-    assert.deepEqual(bar.stacks.B.firesNow,level<32?['Overhead Slam','Rending Blow']:['Rage Burst','Overhead Slam','Rending Blow']);
-    assert.equal(bar.stacks.B.nextUnlock,level<32?32:null,'Until Lv 32 the main line fires Overhead Slam first');
-    const ruinous=bar.left.map(key=>bar.stacks[key]).find(stack=>stack.skills[0]?.name==='Ruinous Blow');
-    assert.equal(ruinous.nextUnlock,level<14?14:null);
+    assert.deepEqual(bar.stacks.B.skills.map(skill=>[skill.name,skill.locked]),[[level<22?'Mocking Blade':'Rage Burst',false],['Overhead Slam',false],['Rending Blow',false]]);
+    assert.deepEqual(bar.stacks.B.firesNow,[level<22?'Mocking Blade':'Rage Burst','Overhead Slam','Rending Blow']);
+    assert.equal(bar.stacks.B.nextUnlock,null,'Nothing locked on the bar');
+    assert.deepEqual(bar.later.filter(item=>item.where!=='own key').map(item=>[item.name,item.unlockLevel]),level<22?[['Rage Burst',22]]:[]);
+    const ruinous=bar.left.map(key=>bar.stacks[key]).find(stack=>stack.skills[0]?.name==='Ruinous Blow'||stack.reserved?.includes('Ruinous Blow'));
+    assert.equal(ruinous.skills.length,level<14?0:1);
   }
 });
 check('stigma screen data: an equipped build swap is a swap once, never "swap it out", and is not offered again',()=>{
@@ -898,7 +919,8 @@ check('stigma screen data: an equipped build swap is a swap once, never "swap it
   for(const skill of live.skills.filter(item=>item.category==='Dp'))Object.assign(skill,{acquired:true,equipped:equip.has(skill.name)});
   const s=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live}).stigmas;
   const wrath=s.equippedNow.find(item=>item.name==='Wrath Wave');
-  assert.deepEqual([wrath.verdict,wrath.slot,wrath.for],['swap',3,'Rage Burst'],'Slot 3: Wrath Wave is a popular swap for Rage Burst');
+  // Level planner (17 Oct 2026): Rage Burst is now slot 1 (the logic fills the first slot with it), so the swap names slot 1.
+  assert.deepEqual([wrath.verdict,wrath.slot,wrath.for],['swap',1,'Rage Burst'],'Slot 1: Wrath Wave is a popular swap for Rage Burst');
   assert.ok(s.equippedNow.filter(item=>item.name!=='Wrath Wave').every(item=>item.verdict==='keep'));
   assert.deepEqual(s.alternatives.map(alt=>alt.name),['Blade Toss'],'Wrath Wave is not offered again');
   // A stigma in neither list is the only "swap it out", and it names the slot and the stigma to put in.
@@ -907,7 +929,7 @@ check('stigma screen data: an equipped build swap is a swap once, never "swap it
   other.equipped=true;
   const t=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live}).stigmas;
   const out=t.equippedNow.find(item=>item.name===other.name);
-  assert.deepEqual([out.verdict,out.slot,out.for],['out',3,'Rage Burst']);
+  assert.deepEqual([out.verdict,out.slot,out.for],['out',1,'Rage Burst']);
   assert.ok(!t.alternatives.some(alt=>alt.name===other.name),'Never offered after being told to remove it');
 });
 
@@ -915,14 +937,17 @@ check('one level order: the level move, Mastery "Level these next" and the manua
   for(const {name,role,level,plan} of everyPlan()){
     const order=levelOrder(plan);
     assert.equal(order,plan.mastery.spend,'levelOrder is the Mastery list');
-    const priorities=order.map(step=>step.priority);
-    assert.deepEqual(priorities,[...priorities].sort((a,b)=>a-b),`${name} ${role} Lv ${level}: build priority order`);
+    // Level planner (17 Oct 2026): a build with an ascent record is ordered by the logic's score (highest first); a build
+    // without one keeps the build's priority order, as before.
+    const planned=builds[name].records.find(build=>build.role===role)?.ascent;
+    const key=planned?order.map(step=>-step.score):order.map(step=>step.priority);
+    assert.deepEqual(key,[...key].sort((a,b)=>a-b),`${name} ${role} Lv ${level}: ${planned?'score':'build priority'} order`);
     const move=plan.now.find(item=>/^Level /.test(item.title));
     if(!order.length){assert.equal(move,undefined);continue;}
     assert.equal(move.title,`Level your skills in this order: ${order.map(step=>step.name).join(', ')}`,`${name} ${role} Lv ${level}`);
   }
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:astrix});
-  assert.deepEqual(levelOrder(plan).map(step=>step.name),['Keen Strike','Rending Blow','Overhead Slam']);
+  assert.deepEqual(levelOrder(plan).map(step=>step.name),['Rending Blow','Overhead Slam','Keen Strike']);
   assert.equal(plan.now.find(item=>/^Level /.test(item.title)).title,`Level ${levelOrder(plan)[0].name} (now Lv ${levelOrder(plan)[0].from})`,'The move names the first skill of the list');
   assert.equal(plan.now.filter(item=>/^Level /.test(item.title)).length,1,'One level move');
 });
@@ -974,9 +999,13 @@ check('no Specialty pick, slot or follow-up above 11 reads as reachable without 
 
 check('Macro 1: what joins later comes with its level; the opener is in order; no skill twice (all 8 classes)',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')});
-  assert.deepEqual(plan.macro.later.map(item=>[item.name,item.key,item.unlockLevel]),[['Rage Burst','B',32]]);
-  assert.deepEqual(plan.macro.opener.map(item=>[item.name,item.locked,item.unlockLevel]),[["Zikel's Blessing",true,27],['Lunge Stance',true,22],['Ruinous Blow',true,14]]);
-  assert.deepEqual(plan.macro.ownKeys.map(group=>group.reason),['buff','stagger','defensive','dash','movement']);
+  // Level planner (17 Oct 2026): Rage Burst joins at Lv 22 (stigma slot 1, the logic's first pick); the opener and own keys
+  // hold only what a Lv 12 Daeva can place (Zikel's Blessing, Lunge Stance and Ruinous Blow come later).
+  assert.deepEqual(plan.macro.later.map(item=>[item.name,item.unlockLevel]),[['Rage Burst',22]]);
+  assert.deepEqual(plan.macro.opener.map(item=>item.name),[]);
+  assert.deepEqual(plan.macro.ownKeys.map(group=>group.reason),['stagger','movement']);
+  const top=buildAscentPlan({className:'Gladiator',role:'dps',level:45,data:data('Gladiator')});
+  assert.deepEqual(top.macro.opener.map(item=>[item.name,item.locked]),[["Zikel's Blessing",false],['Lunge Stance',false],['Ruinous Blow',false]]);
   for(const {name,role,level,plan:p} of everyPlan()){
     if(p.macro.pending)continue;
     const keys=p.macro.entries.map(entry=>entry.key);
@@ -985,7 +1014,8 @@ check('Macro 1: what joins later comes with its level; the opener is in order; n
     assert.equal(new Set(named).size,named.length,`${name} ${role} Lv ${level}: no skill twice in the macro`);
     const own=p.macro.ownKeys.flatMap(group=>group.skills.map(skill=>skill.name));
     for(const skill of named)assert.ok(!own.includes(skill),`${name}: ${skill} is in the macro and on its own key`);
-    for(const item of p.macro.later)assert.ok(item.unlockLevel>level,`${name}: ${item.name} joins later`);
+    // Level planner (17 Oct 2026): a stigma outside the slots joins once it is slotted, so it has no level, only the reason.
+    for(const item of p.macro.later)assert.ok(item.unlockLevel>level||(item.unlockLevel===null&&item.reason==='Needs a stigma slot.'),`${name}: ${item.name} joins later`);
   }
 });
 /* Macro eight (fix/aetherium-macro-eight, 12 Oct 2026): a macro holds up to 8 entries (Miguel, in game, 11 Oct 2026). Macro 1
@@ -1035,13 +1065,18 @@ check('every DPS class matches section 6 of the research record: rows, main atta
   for(const [name,want] of Object.entries(SECTION_6)){
     const plan=buildAscentPlan({className:name,role:'dps',level:45,data:data(name)});
     const bar=plan.skillBar;
-    assert.deepEqual(bar.stacks.A.skills.map(skill=>skill.name),want.A,`${name} stack A`);
-    assert.deepEqual(bar.stacks.B.skills.map(skill=>skill.name),want.B,`${name} stack B`);
+    // Level planner (17 Oct 2026): a row whose stigma is not in the four slots leaves the bar for Comes later, with the reason.
+    const waiting=new Set(bar.later.filter(item=>item.reason==='Needs a stigma slot.').map(item=>item.name));
+    assert.deepEqual(bar.stacks.A.skills.map(skill=>skill.name),want.A.filter(item=>!waiting.has(item)),`${name} stack A`);
+    assert.deepEqual(bar.stacks.B.skills.map(skill=>skill.name),want.B.filter(item=>!waiting.has(item)),`${name} stack B`);
+    for(const item of [...want.A,...want.B].filter(item=>waiting.has(item)))assert.ok(!plan.stigmas.slots.some(slot=>slot.name===item),`${name}: ${item} is out only because it is not slotted`);
     assert.equal(bar.stacks.LMB.skills[0].name,want.main,`${name} main attack`);
     assert.deepEqual(bar.opener,want.opener,`${name} opener`);
     assert.deepEqual(plan.macro.opener.map(item=>item.name),want.opener);
-    const own=bar.left.map(key=>bar.stacks[key].skills[0]?.name).filter(Boolean);
+    // Level planner (17 Oct 2026): a stigma outside the four slots keeps its key free (reserved) and waits in Comes later.
+    const own=bar.left.map(key=>bar.stacks[key].skills[0]?.name??bar.stacks[key].reserved?.[0]).filter(Boolean);
     assert.deepEqual([...own].sort(),[...want.own].sort(),`${name} own keys`);
+    for(const key of bar.left.filter(item=>bar.stacks[item].reserved))assert.ok(bar.later.some(item=>bar.stacks[key].reserved.includes(item.name)),`${name}: a free key's skill is in Comes later`);
     assert.equal(plan.macro.blockStatus,'reported','Section 6 is REPORTED');
     assert.equal(plan.macro.verified,false,'Not checked against a published top-player build: tagged on the page');
   }
@@ -1086,8 +1121,9 @@ check('a skill the Daeva has not learned, or has at level 0, stays out of the ma
   const slam=live.skills.find(skill=>skill.name==='Overhead Slam');
   Object.assign(slam,{acquired:true,skillLevel:0});
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:live});
-  const row=plan.macro.entries[0].skills.find(skill=>skill.name==='Overhead Slam');
-  assert.equal(row.inMacro,false);assert.equal(row.out,'Not learned yet');
+  // Level planner (17 Oct 2026): it leaves the bar for Comes later (it was a greyed row), with the reason.
+  assert.equal(plan.macro.entries[0].skills.find(skill=>skill.name==='Overhead Slam'),undefined);
+  assert.deepEqual(plan.skillBar.later.filter(item=>item.name==='Overhead Slam').map(item=>item.reason),['Learn it first.']);
   assert.ok(!plan.macro.entries[0].firesNow.includes('Overhead Slam'));
 });
 check('a Lv 16 trigger is dimmed for a Daeva below skill Lv 16, and lights up at 16',()=>{
