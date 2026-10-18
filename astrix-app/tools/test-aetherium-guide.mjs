@@ -141,6 +141,7 @@ await check('shell contract: the Guide window, breadcrumb and section nav, the c
 
 await check('the Guide link sits in the ribbon and the menu drawer of every Aetherium page, lit only on Guide pages',async()=>{
   assert.ok(allPages.length>=31,`${allPages.length} Aetherium pages`);
+  const cssKeys=new Set();
   for(const path of allPages){
     const html=await readFile(resolve(root,`.${path}index.html`),'utf8');
     const ribbon=html.match(/<nav class="apx-destination-ribbon"[\s\S]*?<\/nav>/)[0];
@@ -151,8 +152,12 @@ await check('the Guide link sits in the ribbon and the menu drawer of every Aeth
       assert.equal(links[3].href,'/hub/aetherium/guide/',`${path} ${where}: Guide link`);
       assert.equal(links[3].current,path.startsWith('/hub/aetherium/guide/'),`${path} ${where}: Guide lit only on Guide pages`);
     }
-    assert.match(html,/aetherium\.css\?v=20261018-guide-1/,`${path}: aetherium.css key bumped`);
+    // One aetherium.css key on every page, newer than the key before the Guide (20261017-8), so a later bump keeps passing.
+    const key=html.match(/aetherium\.css\?v=([^"&]+)/)?.[1];
+    assert.ok(key&&key>'20261017-8',`${path}: aetherium.css key bumped (${key})`);
+    cssKeys.add(key);
   }
+  assert.equal(cssKeys.size,1,`one aetherium.css key on every page (${[...cssKeys].join(', ')})`);
   const {page,context}=await open('/hub/aetherium/guide/classes/',{viewport:{width:390,height:844}});
   await page.click('#aeMenu');
   await page.waitForSelector('#aeDrawer.is-open');

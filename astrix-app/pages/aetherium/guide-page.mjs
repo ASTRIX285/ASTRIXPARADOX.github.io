@@ -20,7 +20,7 @@ const ICONS = {
 const icon = id => `<svg class="ae-gd-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[id] ?? ''}</svg>`;
 
 /* Built pages inside a section, by topic: a topic with a page is a link, the rest wait for their phase. */
-const TOPIC_PAGES = { character: { Classes: `${GUIDE_ROOT}classes/` } };
+const TOPIC_PAGES = { character: { Classes: `${GUIDE_ROOT}classes/` }, guides: { 'Your path by level': `${GUIDE_ROOT}path/` } };
 
 const soonTag = '<span class="ae-gd-soon-tag">Coming soon</span>';
 
@@ -38,7 +38,7 @@ function startRowHtml(linked) {
     { n: 1, title: 'Pick a class', text: 'See what each of the eight classes does and which role it plays.', href: `${GUIDE_ROOT}classes/` },
     { n: 2, title: 'Find your Daeva', text: 'Type your character name to read your gear, skills and boards.', href: linked ? cardUrl(linked.ref) : '/hub/aetherium/#aeSearch' },
     { n: 3, title: 'Plan your build', text: 'The Ascent Plan says what to level, slot and spend next.', href: '/hub/aetherium/ascent/' },
-    { n: 4, title: 'Your path by level', text: 'What to do at each level, from Lv 1 to the Lv 45 weekly loop.', href: guideHref('guides'), soon: true }
+    { n: 4, title: 'Your path by level', text: 'What to do at each level, from Lv 1 to the Lv 45 weekly loop.', href: `${GUIDE_ROOT}path/` }
   ];
   return `<section class="ae-gd-start" aria-labelledby="aeStartTitle">
       <h2 id="aeStartTitle">New player? Start here</h2>

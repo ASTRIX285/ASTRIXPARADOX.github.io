@@ -1,0 +1,1233 @@
+{
+  "description": "AION 2 step-by-step guide for The Aetherium (Miguel, 18 Oct 2026): what opens and what to do at each level, which content each item level enters, and the weekly loop at the level cap. Facts from the AION2 Wiki (Fandom, an open wiki) are in our own words with the page as the source; nothing is copied. A step whose level is already in progression.json names that fact (fact, and pick for one entry of a list) and takes its level and source from it. Status: confirmed (two sources agree, or seen in game), reported (one source) or unknown.",
+  "records": [
+    {
+      "id": "path",
+      "label": "Your path by level",
+      "text": "Each step opens at a level. Steps below your level are done, the ones at your level are now, and the next few are coming up.",
+      "status": "reported",
+      "steps": [
+        {
+          "id": "crafting-start",
+          "level": 1,
+          "kind": "do",
+          "title": "Gather and level your crafting",
+          "text": "Gather materials as you go and level your crafting. By the time Unique gear starts you can farm and craft enough to succeed.",
+          "status": "confirmed",
+          "provenance": [
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel (ASTRIX285)",
+              "capturedOn": "2026-10-18",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Gear and Enhancement",
+              "note": "Miguel, in game: before Unique gear, gather materials and level crafting."
+            },
+            {
+              "kind": "community-guide",
+              "ref": "tgw-crafting",
+              "title": "Crafting",
+              "publisher": "The Games Wiki",
+              "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+              "retrievedOn": "2026-10-07",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ],
+          "until": {
+            "fact": "unique-gear-level"
+          }
+        },
+        {
+          "id": "save-stones",
+          "level": 1,
+          "kind": "do",
+          "title": "Save your Enhance Stones",
+          "text": "Do not enhance gear below Unique: everything you wear before Unique gear starts is replaced. Belt and amulet are the exception, with their own scrolls.",
+          "status": "confirmed",
+          "provenance": [
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel (ASTRIX285)",
+              "capturedOn": "2026-10-18",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Gear and Enhancement",
+              "note": "Miguel, in game: never enhance Epic or lower; Unique gear starts at Lv 35."
+            }
+          ],
+          "until": {
+            "fact": "unique-gear-level"
+          }
+        },
+        {
+          "id": "board-nezekan",
+          "fact": "daevanion-boards",
+          "pick": "Nezekan",
+          "kind": "unlock",
+          "title": "Nezekan, your first Daevanion board",
+          "text": "Spend Daevanion points on the skill nodes for your rotation first."
+        },
+        {
+          "id": "board-zikel",
+          "fact": "daevanion-boards",
+          "pick": "Zikel",
+          "kind": "unlock",
+          "title": "Zikel board opens",
+          "text": "Carry on board by board: move on once a board's nodes for your role are taken."
+        },
+        {
+          "id": "krao-exploration",
+          "fact": "dungeons",
+          "pick": "Krao Cave",
+          "kind": "unlock",
+          "title": "Krao Cave, Exploration",
+          "text": "Your first Expedition, up to 5 players. Exploration is the learning difficulty, with toned-down boss patterns.",
+          "gate": "krao-exploration"
+        },
+        {
+          "id": "stigmas",
+          "fact": "stigma-unlock",
+          "kind": "unlock",
+          "title": "Stigmas open",
+          "text": "Finish the stigma quest and equip your first stigma."
+        },
+        {
+          "id": "stigma-2",
+          "fact": "stigma-slots",
+          "pick": 1,
+          "kind": "unlock",
+          "title": "Second stigma slot",
+          "text": "Equip your second stigma."
+        },
+        {
+          "id": "urugugu-exploration",
+          "fact": "dungeons",
+          "pick": "Urugugu Canyon",
+          "kind": "unlock",
+          "title": "Urugugu Canyon, Exploration",
+          "text": "Your second Expedition. Expect gliding and windstreams on the way.",
+          "gate": "urugugu-exploration"
+        },
+        {
+          "id": "board-vaizel",
+          "fact": "daevanion-boards",
+          "pick": "Vaizel",
+          "kind": "unlock",
+          "title": "Vaizel board opens",
+          "text": "The third Daevanion board."
+        },
+        {
+          "id": "stigma-3",
+          "fact": "stigma-slots",
+          "pick": 2,
+          "kind": "unlock",
+          "title": "Third stigma slot",
+          "text": "Equip your third stigma."
+        },
+        {
+          "id": "unique-gear",
+          "fact": "unique-gear-level",
+          "kind": "unlock",
+          "title": "Unique gear starts",
+          "text": "Build your Unique pieces one at a time: Growth to +10 first, the weapon, then the guard. The Enhance tab on the Gear page walks you through it.",
+          "link": "enhance"
+        },
+        {
+          "id": "fire-exploration",
+          "fact": "dungeons",
+          "pick": "Fire Temple",
+          "kind": "unlock",
+          "title": "Fire Temple, Exploration",
+          "text": "Your third Expedition, noticeably harder. Bring healing or cleansing potions for the Burn.",
+          "gate": "fire-exploration"
+        },
+        {
+          "id": "stigma-4",
+          "fact": "stigma-slots",
+          "pick": 3,
+          "kind": "unlock",
+          "title": "Fourth stigma slot",
+          "text": "Every stigma slot is open."
+        },
+        {
+          "id": "board-triniel",
+          "fact": "daevanion-boards",
+          "pick": "Triniel",
+          "kind": "unlock",
+          "title": "Triniel board opens",
+          "text": "The fourth Daevanion board."
+        },
+        {
+          "id": "level-cap",
+          "fact": "level-cap",
+          "kind": "unlock",
+          "title": "Level cap",
+          "text": "The highest level on the global servers. The weekly loop below starts here."
+        },
+        {
+          "id": "board-azphel",
+          "fact": "daevanion-boards",
+          "pick": "Azphel",
+          "kind": "unlock",
+          "title": "Azphel board opens",
+          "text": "The fifth board: PvP damage and status effects, no skill nodes."
+        },
+        {
+          "id": "draupnir",
+          "level": 45,
+          "kind": "do",
+          "title": "Draupnir, Exploration, once",
+          "text": "Clear it once during the main quest for a Unique weapon for your class. The way in is inside the Abyss, a PvP zone, and needs gliding, flying and Kisk travel.",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-draupnir",
+              "title": "Draupnir",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Draupnir",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ],
+          "gate": "draupnir-exploration"
+        },
+        {
+          "id": "sealed",
+          "level": 45,
+          "kind": "do",
+          "title": "Sealed Dungeons and Strongholds",
+          "text": "Solo, about 10 minutes each, shown as question marks on the map. They give Daevanion Crystals, Wisdom Stones, Enhance Stones and Noble Belt Enhance Scrolls, and fill your Daeva Gauge. Do them at max level: their item drops scale with your level.",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-sealed-dungeon-and-stronghold",
+              "title": "Sealed Dungeon and Stronghold",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-dungeons",
+              "title": "Dungeons",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Dungeons",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "final-quest",
+          "level": 45,
+          "kind": "do",
+          "title": "The final main quest",
+          "text": "It opens when your Daeva Gauge reaches 100% and gives a Unique title and Unique wings.",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-sealed-dungeon-and-stronghold",
+              "title": "Sealed Dungeon and Stronghold",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "conquest",
+          "level": 45,
+          "kind": "unlock",
+          "title": "Expeditions on Conquest",
+          "text": "The full version of each Expedition. Enough Conquest runs fill Condensed Cube Energy, which lets you pick a Unique item. The item level each one needs is under \"What your item level enters\".",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-dungeons",
+              "title": "Dungeons",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Dungeons",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-expedition",
+              "title": "Expedition",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Expedition",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-krao-cave",
+              "title": "Krao Cave",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-draupnir",
+              "title": "Draupnir",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Draupnir",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-vakron-sky-island",
+              "title": "Vakron Sky Island",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Vakron_Sky_Island",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-urugugu-canyon",
+              "title": "Urugugu Canyon",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-fire-temple",
+              "title": "Fire Temple",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-ferocious-horn-den",
+              "title": "Ferocious Horn Den",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Ferocious_Horn_Den",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: before Unique gear, gather materials and level crafting."
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: never enhance Epic or lower; Unique gear starts at Lv 35."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-draupnir",
+          "title": "Draupnir",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Draupnir",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-and-stronghold",
+          "title": "Sealed Dungeon and Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "gates",
+      "label": "What your item level enters",
+      "text": "Each Expedition difficulty and the item-level content at the cap, with the level and item level the game asks for. Many parties ask for more than the entry item level.",
+      "status": "reported",
+      "gates": [
+        {
+          "id": "krao-exploration",
+          "name": "Krao Cave, Exploration",
+          "mode": "exploration",
+          "level": 20,
+          "itemLevel": 200,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-krao-cave",
+              "title": "Krao Cave",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "urugugu-exploration",
+          "name": "Urugugu Canyon, Exploration",
+          "mode": "exploration",
+          "level": 28,
+          "itemLevel": 300,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-urugugu-canyon",
+              "title": "Urugugu Canyon",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "fire-exploration",
+          "name": "Fire Temple, Exploration",
+          "mode": "exploration",
+          "level": 35,
+          "itemLevel": 500,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-fire-temple",
+              "title": "Fire Temple",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "draupnir-exploration",
+          "name": "Draupnir, Exploration",
+          "mode": "exploration",
+          "level": 45,
+          "itemLevel": 700,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-draupnir",
+              "title": "Draupnir",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Draupnir",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "krao-conquest",
+          "name": "Krao Cave, Conquest",
+          "mode": "conquest",
+          "level": 45,
+          "itemLevel": 700,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-krao-cave",
+              "title": "Krao Cave",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-expedition",
+              "title": "Expedition",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Expedition",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ],
+          "note": "The wiki's Expedition list says 800. Check in game."
+        },
+        {
+          "id": "draupnir-conquest",
+          "name": "Draupnir, Conquest",
+          "mode": "conquest",
+          "level": 45,
+          "itemLevel": 700,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-draupnir",
+              "title": "Draupnir",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Draupnir",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "ascension-trial",
+          "name": "Ascension Trial, Easy",
+          "mode": "weekly",
+          "level": 45,
+          "itemLevel": 1000,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-ascension-trial",
+              "title": "Ascension Trial",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "vakron",
+          "name": "Vakron Sky Island, both difficulties",
+          "mode": "conquest",
+          "level": 45,
+          "itemLevel": 1400,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-vakron-sky-island",
+              "title": "Vakron Sky Island",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Vakron_Sky_Island",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ],
+          "note": "2 players at least."
+        },
+        {
+          "id": "urugugu-conquest",
+          "name": "Urugugu Canyon, Conquest",
+          "mode": "conquest",
+          "level": 45,
+          "itemLevel": 1600,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-urugugu-canyon",
+              "title": "Urugugu Canyon",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "transcendence",
+          "name": "Transcendence, Stage 1",
+          "mode": "weekly",
+          "level": 45,
+          "itemLevel": 1600,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-transcendence",
+              "title": "Transcendence",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Transcendence",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ],
+          "note": "Stages go up to item level 2,500."
+        },
+        {
+          "id": "fire-conquest",
+          "name": "Fire Temple, Conquest",
+          "mode": "conquest",
+          "level": 45,
+          "itemLevel": 2100,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-fire-temple",
+              "title": "Fire Temple",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "horn-den",
+          "name": "Ferocious Horn Den, both difficulties",
+          "mode": "conquest",
+          "level": 45,
+          "itemLevel": 2100,
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-ferocious-horn-den",
+              "title": "Ferocious Horn Den",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Ferocious_Horn_Den",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-krao-cave",
+          "title": "Krao Cave",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-urugugu-canyon",
+          "title": "Urugugu Canyon",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-draupnir",
+          "title": "Draupnir",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Draupnir",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-vakron-sky-island",
+          "title": "Vakron Sky Island",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Vakron_Sky_Island",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ferocious-horn-den",
+          "title": "Ferocious Horn Den",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ferocious_Horn_Den",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "weekly",
+      "label": "The weekly loop at the level cap",
+      "text": "Weekly limits reset every Wednesday at 07:00 UTC, daily ones every day at 07:00 UTC.",
+      "status": "reported",
+      "reset": {
+        "daily": {
+          "hourUtc": 7
+        },
+        "weekly": {
+          "weekdayUtc": 3,
+          "hourUtc": 7
+        }
+      },
+      "items": [
+        {
+          "id": "nightmare",
+          "title": "Nightmare",
+          "cycle": "daily",
+          "when": "2 tries a day, up to 14 saved",
+          "text": "Solo boss fights, 10 challenge levels each. A try is used only when you clear. Phantasmal Fragments buy Daevanion Crystals and more in its shop.",
+          "unlock": {
+            "fact": "level-cap"
+          },
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-nightmare",
+              "title": "Nightmare",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Nightmare",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "ascension-trial",
+          "title": "Ascension Trial",
+          "cycle": "weekly",
+          "when": "3 a week",
+          "text": "Solo, timed and scored: Enhance Stones, Growth Pet Chests and chests of manastones and soulstones. A try is used on entry, so pick a difficulty you can finish.",
+          "unlock": {
+            "fact": "level-cap"
+          },
+          "gate": "ascension-trial",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-ascension-trial",
+              "title": "Ascension Trial",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-dungeons",
+              "title": "Dungeons",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Dungeons",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "daily-dungeon",
+          "title": "Daily Dungeon",
+          "cycle": "weekly",
+          "when": "14 a week",
+          "text": "Waves of enemies against the clock, for Enhance Stones. Despite the name it refills weekly.",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-dungeons",
+              "title": "Dungeons",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Dungeons",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "expedition",
+          "title": "Expeditions",
+          "cycle": "energy",
+          "when": "Odyle Energy on claim",
+          "text": "Party dungeons for gear. You spend Odyle Energy when you claim the rewards, not on entry. Enough Conquest runs let you pick a Unique item from the cube.",
+          "refill": {
+            "pending": true,
+            "reason": "No source yet says when Odyle Energy refills. Check in game."
+          },
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-dungeons",
+              "title": "Dungeons",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Dungeons",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-expedition",
+              "title": "Expedition",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Expedition",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "transcendence",
+          "title": "Transcendence",
+          "cycle": "weekly",
+          "when": "weekly reward count",
+          "text": "Five-player seasonal dungeons. The only source of Arcana, which raise item level and skill levels (key for skill Lv 16 and 20).",
+          "gate": "transcendence",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-transcendence",
+              "title": "Transcendence",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Transcendence",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-arcana",
+              "title": "Arcana",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Arcana",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-dungeons",
+              "title": "Dungeons",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Dungeons",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "shugo",
+          "title": "Shugo Festival",
+          "cycle": "daily",
+          "when": "3 keys a day, up to 12",
+          "text": "Mini-games with reward cards, Enhance Stones among them. A key is used only when you open a card, and below the minimum score there is no reward.",
+          "status": "reported",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-shugo-festival",
+              "title": "Shugo Festival",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Shugo_Festival",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shugo-festival",
+          "title": "Shugo Festival",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Shugo_Festival",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "power",
+      "label": "How to raise your combat power",
+      "text": "The order to grow a Daeva, by stage. Combat power is the number the official site shows; it rises with every step below.",
+      "status": "reported",
+      "steps": [
+        {
+          "id": "daevanion",
+          "title": "Daevanion points",
+          "text": "Take the nodes for your rotation on each board. Sealed Dungeons and Nightmare's shop give Daevanion Crystals.",
+          "from": 1,
+          "link": "daevanion",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-sealed-dungeon-and-stronghold",
+              "title": "Sealed Dungeon and Stronghold",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-nightmare",
+              "title": "Nightmare",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Nightmare",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "save",
+          "title": "Save, gather, craft",
+          "text": "Keep Enhance Stones, Kina and manastones for Unique gear, and level your crafting.",
+          "from": 1,
+          "until": {
+            "fact": "unique-gear-level"
+          },
+          "provenance": [
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel (ASTRIX285)",
+              "capturedOn": "2026-10-18",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Gear and Enhancement",
+              "note": "Miguel, in game: never enhance Epic or lower; Unique gear starts at Lv 35."
+            },
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel (ASTRIX285)",
+              "capturedOn": "2026-10-18",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Gear and Enhancement",
+              "note": "Miguel, in game: before Unique gear, gather materials and level crafting."
+            }
+          ]
+        },
+        {
+          "id": "unique-growth",
+          "title": "Unique gear, Growth to +10",
+          "text": "Every step to +10 succeeds. The weapon first, then the guard, then the armour.",
+          "from": {
+            "fact": "unique-gear-level"
+          },
+          "link": "enhance",
+          "provenance": [
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel (ASTRIX285)",
+              "capturedOn": "2026-10-18",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Gear and Enhancement",
+              "note": "Miguel, in game: never enhance Epic or lower; Unique gear starts at Lv 35."
+            }
+          ]
+        },
+        {
+          "id": "manastones",
+          "title": "Manastones on keepers",
+          "text": "Top manastones for your role on gear you will keep. The Ascension Trial gives manastone chests.",
+          "from": {
+            "fact": "unique-gear-level"
+          },
+          "link": "enhance",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-ascension-trial",
+              "title": "Ascension Trial",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        },
+        {
+          "id": "soul-binding",
+          "title": "Soul Binding",
+          "text": "Reroll weak lines first, then Bind towards 100%.",
+          "from": {
+            "fact": "unique-gear-level"
+          },
+          "link": "enhance",
+          "provenance": [
+            {
+              "kind": "in-game-capture",
+              "capturedBy": "Miguel (ASTRIX285)",
+              "capturedOn": "2026-10-18",
+              "gameVersion": "global launch (Oct 2026)",
+              "where": "Gear and Enhancement",
+              "note": "Miguel, in game: never enhance Epic or lower; Unique gear starts at Lv 35."
+            }
+          ]
+        },
+        {
+          "id": "arcana",
+          "title": "Arcana from Transcendence",
+          "text": "Each Arcana raises item level (20 Common, 40 Rare, 60 Epic, 80 Unique) and skill levels. Transcendence opens at item level 1,600.",
+          "from": {
+            "fact": "level-cap"
+          },
+          "gate": "transcendence",
+          "provenance": [
+            {
+              "kind": "community-guide",
+              "ref": "fandom-arcana",
+              "title": "Arcana",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Arcana",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            },
+            {
+              "kind": "community-guide",
+              "ref": "fandom-transcendence",
+              "title": "Transcendence",
+              "publisher": "AION2 Wiki (Fandom)",
+              "url": "https://aion2.fandom.com/wiki/Transcendence",
+              "retrievedOn": "2026-10-18",
+              "region": "not-stated",
+              "reliability": "medium"
+            }
+          ]
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-and-stronghold",
+          "title": "Sealed Dungeon and Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-arcana",
+          "title": "Arcana",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Arcana",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: never enhance Epic or lower; Unique gear starts at Lv 35."
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: before Unique gear, gather materials and level crafting."
+        }
+      ]
+    }
+  ]
+}
