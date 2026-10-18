@@ -184,7 +184,7 @@ await check('home: intro, "New player? Start here", a tile per section, every li
   await context.close();
 });
 
-await check('class roles table: 8 rows in game order, class names gold, ratings bold, each cell from the data, every rating cited',async()=>{
+await check('class roles table: 8 rows in game order, class names gold, ratings bold, each cell from the data, no status tags or footnotes on screen',async()=>{
   const {page,context,errors,calls}=await open('/hub/aetherium/guide/classes/');
   assert.deepEqual(errors,[]);
   assert.deepEqual(calls,[],'The Classes page never calls the official site');
@@ -204,10 +204,7 @@ await check('class roles table: 8 rows in game order, class names gold, ratings 
       if(rated&&!rated.pending){
         assert.equal(cell.kind,'reported',`${name} ${role}: a cited rating`);
         assert.ok(cell.text.startsWith(rated.rating),`${name} ${role}: ${cell.text}`);
-        assert.match(cell.text,/Reported/);
-        assert.ok(cell.ref,`${name} ${role}: footnote`);
-        const source=await page.$eval(cell.ref,li=>li.querySelector('a').href);
-        assert.match(source,/^https:\/\//,`${name} ${role}: cited source is https`);
+        assert.doesNotMatch(cell.text,/Reported|\[\d\]/);
         assert.ok(cell.bold>=700,`${name} ${role}: bold`);
       } else {
         assert.equal(cell.kind,ours==='-'?'none':'data',`${name} ${role}: our data`);

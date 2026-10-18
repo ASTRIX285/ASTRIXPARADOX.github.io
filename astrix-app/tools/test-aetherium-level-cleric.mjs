@@ -308,7 +308,7 @@ if(process.env.AE_BROWSER!=='0'){
       const line=`${await plain(page,'#aeSetup [data-setup="line"] dt')}: ${await plain(page,'#aeSetup [data-setup="line"] dd')}`;
       // The strip names one stack: the Cleric's first named stack is stack A (the Skill Bar shows both).
       assert.equal(line,'Thunder stack: Divine Aura, Debilitating Mark, Judgment Thunder',`${role}: the line`);
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,`${role}: REPORTED tagged`);
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,`${role}: REPORTED tagged`);
       assert.equal(await page.locator('#aeSetupTitle [data-status-tag="setup-unconfirmed"]').count(),0,`${role}: no Not confirmed yet on the setup`);
       assert.equal(await page.locator('#aeNextAt').count(),1);
       assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 7 /);

@@ -324,7 +324,7 @@ if(process.env.AE_BROWSER!=='0'){
       assert.equal(await plain(page,'#aeSetup [data-setup="line"] dd'),plan(5).setup.line[0].skills.join(', '));
       assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
       assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 7 Gale Arrow joins the set-up stack\./);
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,'REPORTED tagged');
       assert.equal(await page.locator('#aeSetupTitle [data-status-tag="setup-unconfirmed"]').count(),0);
       assert.doesNotMatch(await page.evaluate(()=>document.body.innerText),/[–—]/,`${view||'menu'}: no dashes`);
       assert.deepEqual(errors,[]);

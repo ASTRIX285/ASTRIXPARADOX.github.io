@@ -103,11 +103,11 @@ startCharacterPage({
   prefetch: className => { loadGrades().catch(() => {}); loadStats().catch(() => {}); loadMechanics().catch(() => {}); if (className) loadBuilds(className).catch(() => {}); },
   async render({ model, ref }) {
     const [grades, stats, builds, mechanics] = await Promise.all([loadGrades().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null), loadMechanics().catch(() => null)]);
-    // The two kinds of title effect, from the title-effects rule (mechanics.json). Unconfirmed parts would carry the tag.
+    // The two kinds of title effect, from the title-effects rule (mechanics.json).
     const rule = mechanics ? indexMechanics(mechanics, null)['title-effects'] : null;
     const partOf = id => rule?.parts?.find(part => part.id === id) ?? null;
     const ruleStatus = id => partOf(id)?.status ?? 'unconfirmed';
-    const ruleTag = id => (ruleStatus(id) === 'confirmed' ? '' : ' <span class="ae-tag is-unconfirmed">Not confirmed yet</span>');
+    const ruleTag = () => '';
     const build = builds ? buildFor(builds, rolePick(ref)) : null;
     const index = stats ? indexStats(stats) : null;
     const rank = index && build ? rankPointStats(build, index) : null;

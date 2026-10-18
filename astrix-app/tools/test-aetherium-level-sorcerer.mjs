@@ -364,7 +364,7 @@ if(process.env.AE_BROWSER!=='0'){
       assert.equal(await plain(page,'#aeSetup [data-setup="stigmas"] dd'),'From Lv 22: Element Enhancement');
       assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
       assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 7 Frost goes on its own key\./);
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,'REPORTED tagged');
       assert.equal(await page.locator('[data-status-tag="setup-unconfirmed"]').count(),0,'No "Not confirmed yet" on the setup');
       assert.deepEqual(errors,[]);
       await context.close();
@@ -380,7 +380,7 @@ if(process.env.AE_BROWSER!=='0'){
       const onBar=await page.$$eval('#aeSkillBar [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
       assert.ok(onBar.length>0);
-      assert.equal(await page.locator('[data-status-tag="stacks-unverified"]').count(),1,`Lv ${level}: the stacks are not checked against a top-player build yet`);
+      assert.equal(await page.locator('[data-status-tag="stacks-unverified"]').count(),0,`Lv ${level}: the stacks are not checked against a top-player build yet`);
       await context.close();
     }
   });

@@ -992,7 +992,7 @@ await check('Gear page stats: tapping a tile opens its card in place with what i
   await page.waitForSelector('#aeInfo:not([hidden]) [data-stat-reason]');
   assert.equal(page.url(),before,'No navigation');
   const card=await page.$eval('#aeInfoBody',el=>el.innerText.replace(/\s+/g,' '));
-  for(const part of [/Constitution/,/Low for Gladiator/,/What it does/,/HP: Your health pool\./,/Constitution: low for Gladiator\. It only raises HP, which your build does not chase\. Templars want it\./,/Where points come from/,/Not confirmed yet/,/Sub stat lines on armour/,/Soul Binding rerolls/,/Look for Constitution lines on armour\./])assert.match(card,part);
+  for(const part of [/Constitution/,/Low for Gladiator/,/What it does/,/HP: Your health pool\./,/Constitution: low for Gladiator\. It only raises HP, which your build does not chase\. Templars want it\./,/Where points come from/,/Sub stat lines on armour/,/Soul Binding rerolls/,/Look for Constitution lines on armour\./])assert.match(card,part);
   await page.keyboard.press('Escape');
   assert.equal(await page.evaluate(()=>document.activeElement?.dataset.statOpen),'constitution','Focus returns to the tile');
   await page.click('[data-stat-open="time"]');
@@ -1226,7 +1226,7 @@ await check('Gear grid click: the item card is the game\'s tooltip (item only); 
   assert.equal(new URL(page.url()).searchParams.get('item'),'2');
   assert.equal(await page.getAttribute('#aeEnhanceList [data-slot-pos="2"] button','aria-pressed'),'true');
   const card=await page.$eval('#aeEnhanceDetail #aeAdvice',el=>el.innerText.replace(/\s+/g,' '));
-  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in the Growth tab\./,/Not confirmed yet/])assert.match(card,part);
+  for(const part of [/^What to do Enchant it to \+15/,/Grade Unique/,/Enchant cap \+15/,/Now \+11/,/Target \+15/,/\+12: 50% chance/,/A failure costs the attempt, never a level, and never breaks the item\./,/Check the cost in the Growth tab\./])assert.match(card,part);
   const whole=await page.$eval('#aeEnhanceDetail',el=>el.innerText.replace(/\s+/g,' '));
   for(const said of ['Check the cost','Chance of each step','A failure costs the attempt','Enchant it to +15'])assert.equal(whole.split(said).length-1,1,`"${said}" is said once`);
   assert.equal(await page.locator('#aeAdvice #aeEnhancePanel').count(),1,'The Enhancement window sits inside What to do');
@@ -1302,10 +1302,10 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
   assert.equal(rate.now,'94.3');
   near(Math.round(rate.fill*1000)/10,94.3,1.5,'The rate bar fills 94.3%');
   const lines=await page.$$eval('#aeEpanel-soul-binding .ae-elines li',items=>items.map(el=>[el.querySelector('.ae-eline-name').firstChild.textContent.trim(),el.classList.contains('is-weak'),el.querySelector('.ae-ebar').className,el.querySelector('.ae-eline-value').textContent]));
-  assert.deepEqual(lines,[['Block',false,'ae-ebar is-unknown','37, range not in the data'],['MP',true,'ae-ebar is-unknown','112, range not in the data'],['Back Attack',true,'ae-ebar is-unknown','59, range not in the data']]);
+  assert.deepEqual(lines,[['Block',false,'ae-ebar is-unknown','37'],['MP',true,'ae-ebar is-unknown','112'],['Back Attack',true,'ae-ebar is-unknown','59']]);
   text=await enhanceText(page);
   assert.match(text,/MP Weak for tank/);
-  assert.match(text,/Lines for a tank: Block, HP, Accuracy\. Reported/);
+  assert.match(text,/Lines for a tank: Block, HP, Accuracy\./);
   // Manastone: four filled slots, each judged for a tank.
   await page.keyboard.press('Home');
   await page.focus('#aeEnhancePanel [data-etab="soul-binding"]');
@@ -1325,8 +1325,9 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
   assert.match(text,/\+4 to \+10: every step succeeds/);
   await page.click('#aeEnhancePanel [data-etab="theostone"]');
   const theo=await page.$eval('#aeEpanel-theostone',el=>el.innerText.replace(/\s+/g,' '));
-  assert.match(theo,/Theostone slots 1 Engraved Not confirmed yet/);
-  assert.match(theo,/A Stun or Root stone\. Reported/);
+  assert.match(theo,/Theostone slots 1/);
+  assert.doesNotMatch(theo,/Not confirmed|Reported|in game/);
+  assert.match(theo,/A Stun or Root stone\./);
   await page.click('#aeEnhancePanel [data-etab="soul-binding"]');
   const full=await page.$$eval('#aeEpanel-soul-binding .ae-elines .ae-ebar',items=>items.map(el=>[el.getAttribute('aria-valuenow'),Math.round(el.querySelector('i').getBoundingClientRect().width)===Math.round(el.getBoundingClientRect().width-2)]));
   assert.ok(full.length===4&&full.every(([now,filled])=>now==='100'&&filled),'At 100% every line bar is full');
@@ -1338,7 +1339,7 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
   await openItem(dps.page,2);
   await dps.page.click('#aeEnhancePanel [data-etab="soul-binding"]');
   assert.equal(await dps.page.locator('#aeEpanel-soul-binding .ae-eline.is-weak').count(),0);
-  assert.match(await enhanceText(dps.page),/Which lines suit a DPS on this slot is not confirmed yet\. Not confirmed yet/);
+  assert.doesNotMatch(await enhanceText(dps.page),/Not confirmed|No line list/);
   await dps.page.click('#aeEnhancePanel [data-etab="manastone"]');
   assert.equal(await dps.page.locator('#aeEpanel-manastone .ae-stat-tag.is-low').count(),4,'No guard stone suits a DPS');
   await shot(dps.page,'enhance-guard-dps',1600);
@@ -1358,16 +1359,16 @@ await check('How enhancing works: one Do this next line, one line per tab openin
   await page.waitForSelector('#aeInfo:not([hidden])');
   const growth=await page.$eval('#aeInfo',el=>el.innerText.replace(/\s+/g,' '));
   for(const step of ['+11: 65% to start, at most 8 tries','+12: 50% to start, at most 11 tries','+13: 35% to start, at most 14 tries','+14: 25% to start, at most 16 tries','+15: 20% to start, at most 17 tries'])assert.ok(growth.includes(step),step);
-  assert.match(growth,/Confirmed/);
-  assert.match(growth,/Reported/);
+  assert.doesNotMatch(growth,/Confirmed/);
+  assert.doesNotMatch(growth,/Reported|Not confirmed/);
   assert.match(growth,/Check the cost in the Growth tab\./);
   assert.doesNotMatch(growth,/\d[\d,]*\s*(Kina|Enhance Stones)|up to \d|a run|a boss/i,'Stone sources by name only, no numbers');
   await page.keyboard.press('Escape');
   assert.equal(await page.evaluate(()=>document.activeElement?.dataset.ehow),'growth','Focus back on the line');
   await page.click('#aeEnhanceHow [data-ehow="manastone"]');
   const stones=await page.$eval('#aeInfo',el=>el.innerText.replace(/\s+/g,' '));
-  assert.match(stones,/Stones for a tank Reported HP, top 160 Defence, top 100 Block, top 20 Accuracy, top 15/);
-  assert.match(stones,/Whether one Engrave fills one slot or rerolls them all\. Not confirmed yet/);
+  assert.match(stones,/Stones for a tank HP, top 160 Defence, top 100 Block, top 20 Accuracy, top 15/);
+  assert.match(stones,/Whether one Engrave fills one slot or rerolls them all\./);
   await page.keyboard.press('Escape');
   // Do this next picks the weapon on the Enhance tab.
   await page.click('#aeEnhanceNext button');

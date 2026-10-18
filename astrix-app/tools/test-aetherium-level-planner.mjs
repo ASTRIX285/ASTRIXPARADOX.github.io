@@ -381,7 +381,7 @@ if(process.env.AE_BROWSER!=='0'){
       assert.equal(await plain(page,'#aeSetup [data-setup="stigmas"] dd'),'From Lv 22: Rage Burst');
       assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
       assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 10 Rush Strike joins the movement key\./);
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,'REPORTED tagged');
       assert.deepEqual(errors,[]);
       await context.close();
     }

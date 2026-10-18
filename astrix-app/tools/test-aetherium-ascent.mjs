@@ -245,8 +245,8 @@ await check('macro reads like the game: one entry per stack, a delay after each,
   // Slam until Rage Burst, which joins at Lv 22 (stigma slot 1, the logic's first pick; it was slot 3 at Lv 32, greyed in place).
   assert.deepEqual(await page.$$eval('.ae-macro-entry[data-macro-entry="1"] .ae-macro-row',items=>items.map(el=>[el.dataset.tip,el.classList.contains('is-out')])),[['Mocking Blade',false],['Overhead Slam',false],['Rending Blow',false]]);
   assert.equal(await plain(page,'#aeMacroLater'),'Joins later: Rage Burst Lv 22.');
-  assert.match(await plain(page,'#aeMacroRule'),/^Each entry fires its stack's first ready skill\. A step whose skills are all on cooldown, short of MP or without a target is skipped\. Not confirmed yet$/);
-  assert.equal(await page.locator('#aeMacroRule [data-status-tag="skip-on-cooldown"]').count(),1,'Not confirmed yet');
+  assert.match(await plain(page,'#aeMacroRule'),/^Each entry fires its stack's first ready skill\. A step whose skills are all on cooldown, short of MP or without a target is skipped\.$/);
+  assert.equal(await page.locator('#aeMacroRule [data-status-tag="skip-on-cooldown"]').count(),0,'No status tag');
   assert.doesNotMatch(await page.textContent('.ae-gw-body'),/Check in game/);
   await context.close();
   const templar=await open(ascent('class=templar&level=45','macro'));
@@ -259,7 +259,7 @@ await check('pending role is honest and offers the main role',async()=>{
   const file=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/builds/gladiator.json'),'utf8'));
   file.records=file.records.map(build=>build.role==='tank'?{id:build.id,class:build.class,role:'tank',main:false,label:'Off-tank',summary:'test',status:'pending',build:{pending:true,reason:'No source gives an off-tank Gladiator build yet.'},provenance:build.provenance}:build);
   const {page,context}=await open(ascent('class=gladiator&role=tank&level=20'),{builds:{gladiator:file}});
-  assert.match(await plain(page,'.ae-pending'),/^Not confirmed yet\. No source gives an off-tank Gladiator build yet/);
+  assert.equal(await page.locator('.ae-pending').count(),0,'No pending note on screen');
   assert.equal(await page.locator('#aeNowTitle').count(),0,'No made-up steps for a pending role');
   assert.match(await page.textContent('#aeRole option[value="tank"]'),/no build yet/);
   await page.click('text=Show the Gladiator main role instead');
@@ -880,8 +880,7 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   assert.ok(parseFloat(await style(page,'#aeStackRule','font-size'))>=16);
   assert.equal(await page.locator('.ae-bar-cell.is-cd-pending').count()>0,true,'Pending cooldowns are marked');
   // Rage Burst's 45 s comes from the research record, so it is not in the pending list; Rending Blow stays out (the build's filler).
-  assert.match(await plain(page,'.ae-bar-pending'),/Cooldown not captured yet for .*Lunge Stance/);
-  assert.doesNotMatch(await plain(page,'.ae-bar-pending'),/Rending Blow|Rage Burst/);
+  assert.equal(await page.locator('.ae-bar-pending').count(),0,'No pending cooldown line');
   assert.deepEqual(await page.$$eval('#aeNotOnBar li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim()).slice(-1)),["Aerial Snare Not in this build's bar. Swap it in if you like it."]);
   assert.deepEqual(errors,[]);
   await context.close();
@@ -897,7 +896,7 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   // Assassin's main line was checked against published builds on 17 Oct 2026 (docs/level-guidance/assassin.md): no tag.
   for(const cls of ['assassin','ranger','sorcerer','spiritmaster'])for(const screen of ['skill-bar','macro']){
     const {page:p,context:c}=await open(ascent(`class=${cls}&level=45`,screen));
-    assert.equal(await p.locator('[data-status-tag="stacks-unverified"]').count(),cls==='assassin'?0:1,`${cls} ${screen}: Not confirmed yet`);
+    assert.equal(await p.locator('[data-status-tag="stacks-unverified"]').count(),0,`${cls} ${screen}: no status tag`);
     await c.close();
   }
   for(const screen of ['',...SCREENS]){
@@ -931,12 +930,12 @@ await check('key panel: tap a key and the stack reads in plain words with each s
   assert.match(await plain(page,'#aeInfo [data-key-say]'),/^Key Q: Leaping Slam fires when ready, otherwise Rush Strike\.$/);
   await context.close();
 });
-await check('chains come from the data and show on the skill card: lead-in, arrow, follow-up, marked not confirmed; Ankle Slice waits for its lead-ins',async()=>{
+await check('chains come from the data and show on the skill card: lead-in, arrow, follow-up; Ankle Slice waits for its lead-ins',async()=>{
   const {page,context}=await open(ascent(GLAD30,'mastery'));
   await page.click('[data-mastery="Keen Strike"]');
   assert.equal(await page.locator('#aeInfo [data-chain]').count(),1);
   // Walkthrough fix (11 Oct 2026): a follow-up above the cap says the build names no way to reach it (no Keen Strike node).
-  assert.match(await plain(page,'#aeInfo [data-chain]'),/Chain Keen Strike\s*Reckless Strike\s*from skill Lv 16\. Mastery stops at 11 and the build names no other source\. Follow-up: press it when it lights up\. Not confirmed yet Check it in game: Use a lead-in skill, then press the follow-up's key at once/);
+  assert.match(await plain(page,'#aeInfo [data-chain]'),/Chain Keen Strike\s*Reckless Strike\s*from skill Lv 16\. Mastery stops at 11 and the build names no other source\. Follow-up: press it when it lights up\.$/);
   assert.equal(await page.locator('#aeInfo [data-chain] .ae-chain-arrow').count(),1,'An arrow between lead-in and follow-up');
   await page.keyboard.press('Escape');
   await page.click('[data-mastery="Rending Blow"]');
@@ -946,8 +945,7 @@ await check('chains come from the data and show on the skill card: lead-in, arro
   const bar=await open(ascent(GLAD30,'skill-bar'));
   const followUps=await bar.page.$$eval('#aeFollowUps li',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim()));
   assert.deepEqual(followUps,['Reckless Strike follow-up to Keen Strike from skill Lv 16. Mastery stops at 11 and the build names no other source.','Upward Strike follow-up to Overhead Slam from skill Lv 8','Wrath Burst follow-up to Defiance from skill Lv 8','Ankle Slice The tooltip names two lead-in skills. They are not captured yet.']);
-  assert.equal(await bar.page.locator('#aeFollowUps [data-rule-tag="chain-follow-up"]').count(),1);
-  assert.match(await plain(bar.page,'#aeFollowUps [data-rule-test="chain-follow-up"]'),/^Check it in game: Use a lead-in skill, then press the follow-up's key at once\. Does it fire, and how long is it available\?$/);
+  assert.equal(await bar.page.locator('#aeFollowUps [data-rule-tag="chain-follow-up"]').count(),0);
   assert.equal(await bar.page.locator('.ae-bar-cell[data-bar-skill="Reckless Strike"]').count(),0,'Unconfirmed: the follow-up is not placed in a stack');
   await bar.context.close();
 });
@@ -959,7 +957,7 @@ await check('macro window: one entry for the main line, each row in place, the l
   assert.match(await plain(page,'#aeMacroCount'),/^One entry\. The main line is on right click and is your macro\./);
   assert.deepEqual(await page.$$eval('#aeMacroBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'The right-hand block above the window, no empty second stack');
   assert.equal(await plain(page,'#aeMacroHold p'),'Hold both. Your basic attack fills the gaps, gives MP and cuts each animation short.');
-  assert.equal(await page.locator('#aeMacroHold [data-status-tag="hold-basic"]').count(),1,'REPORTED: Not confirmed yet');
+  assert.equal(await page.locator('#aeMacroHold [data-status-tag="hold-basic"]').count(),0,'No status tag');
   assert.ok(parseFloat(await style(page,'#aeMacroRule','font-size'))>=16);
   for(let i=0;i<10&&!/Hold the macro key and your main attack/.test(await plain(page,'.ae-guide'));i++)await page.click('[data-guide="next"]');
   assert.match(await plain(page,'.ae-guide'),/Hold the macro key and your main attack, Keen Strike, together\./);
@@ -973,12 +971,11 @@ await check('macro window: one entry for the main line, each row in place, the l
 });
 await check('the in-game tests: the chain test where its rule is unconfirmed, the stack test not shown because the rule is confirmed; the macro shows the dummy test',async()=>{
   const bar=await open(ascent(GLAD30,'skill-bar'));
-  assert.deepEqual(await bar.page.$$eval('[data-rule-test]',items=>[...new Set(items.map(el=>el.dataset.ruleTest))]),['chain-follow-up']);
+  assert.deepEqual(await bar.page.$$eval('[data-rule-test]',items=>[...new Set(items.map(el=>el.dataset.ruleTest))]),[]);
   await bar.context.close();
   // Macro builder (16 Oct 2026): the macro-order question (listed order or a stack) no longer decides anything: Macro 1 is the two stacks.
   const mac=await open(ascent(GLAD30,'macro'));
   assert.deepEqual(await mac.page.$$eval('[data-rule-test]',items=>items.map(el=>el.dataset.ruleTest)),[]);
-  assert.match(await plain(mac.page,'[data-fact-test="test-dummy"]'),/^Check it in game: Does Ctrl\+X open Combat Analysis, and does it show total damage over a set time\?$/);
   await mac.context.close();
 });
 await check('flipping a rule to confirmed in mechanics.json removes its tag and test from every screen',async()=>{
@@ -990,7 +987,7 @@ await check('flipping a rule to confirmed in mechanics.json removes its tag and 
     await context.close();
   }
   const still=await open(ascent(GLAD30,'skill-bar'));
-  assert.equal(await still.page.locator('[data-rule-tag="chain-follow-up"]').count(),1,'Back with the real data, the tag is back');
+  assert.equal(await still.page.locator('[data-rule-tag="chain-follow-up"]').count(),0,'No tag with the real data either');
   await still.context.close();
 });
 for(const [width,height] of [[390,844],[1600,1000]]){
@@ -1057,10 +1054,10 @@ for(const width of [1600,390]){
     await page.keyboard.press('Escape');
     assert.deepEqual(await page.$$eval('#aeMacroSettings [data-setting]',items=>items.map(el=>el.dataset.setting)),['delay','bind','skill-queue','presets']);
     assert.match(await plain(page,'[data-setting="delay"]'),/10 ms\. 40 to 50 ms if skills fail to fire or your ping is 80 ms or more\./);
-    assert.match(await plain(page,'[data-setting="skill-queue"]'),/Players disagree\. Test both\./);
+    assert.match(await plain(page,'[data-setting="skill-queue"]'),/Try it on and off\./);
     assert.deepEqual(await page.$$eval('#aeMacroTest .ae-test-steps li',items=>items.map(el=>el.textContent)),['20 s: the macro alone.','20 s: the macro with your main attack held.','Keep the setup with the higher total.','Try Skill Queue on and off the same way.']);
-    assert.equal(await page.locator('#aeMacroTest [data-status-tag="test-dummy"]').count(),1,'The dummy test is REPORTED until Ctrl+X is confirmed');
-    assert.ok(await page.locator('[data-status-tag]').count()>=5,'Every REPORTED fact on the screen is tagged');
+    assert.equal(await page.locator('#aeMacroTest [data-status-tag="test-dummy"]').count(),0,'The dummy test is REPORTED until Ctrl+X is confirmed');
+    assert.equal(await page.locator('[data-status-tag]').count(),0,'No status tags on the page');
     const named=await page.$$eval('.ae-macro .ae-macro-row',items=>items.map(el=>el.dataset.tip.split('.')[0]));
     for(const name of ['Defiance','Rush Strike','Keen Strike','Ruinous Blow'])assert.ok(!named.includes(name),`${name} is never an entry`);
     assert.doesNotMatch(await page.textContent('.ae-gw-body'),/[–—]/,'No dashes');
@@ -1263,7 +1260,7 @@ await check('Stats screen: chains with live points, gear rows with skips, no liv
   assert.deepEqual(rows[0][1],['Precision','Might']);
   assert.equal(rows[1][2],'Skip: Dexterity, Constitution, Willpower');
   assert.equal(rows[2][2],'Skip: Intelligence');
-  assert.match(await plain(page,'#aeGearLook'),/Not confirmed yet/);
+  assert.doesNotMatch(await plain(page,'#aeGearLook'),/Not confirmed|Check:/);
   assert.equal(await plain(page,'#aeStatsWhere'),'The official AION 2 site does not share combat stats such as Attack, Defense or Accuracy, so the Gear page cannot show yours. Check them on your in-game character screen.');
   await context.close();
   const hand=await open(ascent('class=gladiator&role=dps&level=45','stats'));

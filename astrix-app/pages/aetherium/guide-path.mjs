@@ -110,7 +110,7 @@ function gatesHtml() {
   const typed = typedItemLevel(state.memRef);
   const label = now?.from === 'official'
     ? `<p class="ae-gp-il"><span>Item level</span><b data-gp-il>${esc(number(now.value))}</b><small>From the official AION 2 site.</small></p>`
-    : now ? `<p class="ae-gp-il"><span>Item level</span><b data-gp-il>${esc(number(now.value))}</b><small data-gp-il-age>You typed this ${esc(ageWords(now.at) ?? '')}. Not live: check it in game.</small></p>` : '';
+    : now ? `<p class="ae-gp-il"><span>Item level</span><b data-gp-il>${esc(number(now.value))}</b><small data-gp-il-age>You typed this ${esc(ageWords(now.at) ?? '')}.</small></p>` : '';
   const form = now?.from === 'official' ? '' : `<form class="ae-gp-ilform" id="aeGpIlForm">
       <label class="ae-field"><span>${now ? 'Update your item level' : 'Type your item level once'}</span><input id="aeGpIl" name="itemLevel" type="number" inputmode="numeric" min="0" max="9999" step="1" value="${typed ? esc(typed.value) : ''}" placeholder="e.g. 640"></label>
       <button class="ae-btn" type="submit">Save</button>
@@ -135,7 +135,7 @@ function stepHtml(step, ticked) {
   const tick = `<button class="ae-btn ae-gp-tick" type="button" aria-pressed="${press}" data-tick-step="${esc(step.id)}" aria-label="${ticked ? 'Done: untick' : 'Mark done'}: ${esc(step.title)}">${tickIcon}<span>${ticked ? 'Done' : 'Mark done'}</span></button>`;
   return `<li class="ae-gp-step is-${esc(step.state)}" data-gp-step="${esc(step.id)}">
       <span class="ae-gp-lvchip">Lv ${esc(step.level)}</span>
-      <div class="ae-gp-copy"><strong>${esc(step.title)}</strong><p>${esc(step.text)}${link ? ` <a href="${esc(link.href)}">${esc(link.label)}</a>` : ''}</p>${step.status === 'reported' ? '<small>One source so far.</small>' : ''}</div>
+      <div class="ae-gp-copy"><strong>${esc(step.title)}</strong><p>${esc(step.text)}${link ? ` <a href="${esc(link.href)}">${esc(link.label)}</a>` : ''}</p></div>
       ${step.state === 'next' || step.why === 'passed' || step.why === 'behind' ? '' : tick}
     </li>`;
 }
@@ -178,7 +178,7 @@ function weeklyHtml() {
         <p data-gp-reset="weekly"><span>Weekly reset</span><b data-gp-count="weekly">${esc(countdownWords('weekly'))}</b><small>Every Wednesday, 07:00 UTC</small></p>
         <p data-gp-reset="daily"><span>Daily reset</span><b data-gp-count="daily">${esc(countdownWords('daily'))}</b><small>Every day, 07:00 UTC</small></p>
       </div>
-      <p class="ae-gp-note">Ticks clear at each item's reset. Expedition rewards cost Odyle Energy; when it refills is not confirmed yet.</p>
+      <p class="ae-gp-note">Ticks clear at each item's reset. Expedition rewards cost Odyle Energy.</p>
       <ul class="ae-gp-weeks">${items.map(row).join('')}</ul>
     </section>`;
 }

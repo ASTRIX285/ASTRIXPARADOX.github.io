@@ -1644,7 +1644,7 @@ await check('Gear page: five Arcana slots filled or empty with a card each, exce
   assert.equal(await page.isVisible('#aeArcanaNone'),true);
   await page.click('#aeArcana [data-arcana-empty="1"]');
   assert.equal(await plainText(page,'#aeInfoTitle'),'No Arcana yet');
-  assert.match(await plainText(page,'#aeInfo [data-arcana-line]'),/^Arcana are the main source of deity stats\. Not confirmed yet$/,'The one line, tagged unconfirmed as in stats.json');
+  assert.match(await plainText(page,'#aeInfo [data-arcana-line]'),/^Arcana are the main source of deity stats\.$/,'The one line, no status tag');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#aeGear .ae-gtile-ex').count(),0,'Exceed 0 everywhere: no exceed mark');
   assert.equal(await page.isVisible('#aeAppearance'),true,'Skins in the data: the Appearance panel shows');

@@ -70,7 +70,7 @@ export function roleLines(record, role, slot) {
   const entry = record?.roles?.[role];
   if (!entry || isPending(entry)) return { pending: true, reason: entry?.reason ?? `No Soul Binding lines for ${roleWords(role)} yet.` };
   const list = entry.slots?.[slotKey(slot)] ?? entry.slots?.any ?? null;
-  if (!list) return { pending: true, reason: `Which lines suit ${roleWords(role)} on this slot is not confirmed yet.` };
+  if (!list) return { pending: true, reason: `No line list for ${roleWords(role)} on this slot.` };
   return { status: entry.status, note: entry.note ?? null, lines: list };
 }
 
@@ -129,7 +129,7 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
     const names = isPending(stones) ? [] : [...new Set(sockets.filter(socket => !socket.filled && socket.best).map(socket => socket.best.name))];
     const what = accessory
       ? (enhancement.manastone?.accessories?.text ?? 'Accessories take Soulstones.')
-      : isPending(stones) ? `Which stones suit ${roleWords(role)} is not confirmed yet.` : `Engrave stones for ${roleWords(role)}: ${names.join(', ')}.`;
+      : isPending(stones) ? 'Engrave the stones your build uses.' : `Engrave stones for ${roleWords(role)}: ${names.join(', ')}.`;
     add('manastone', 'manastone', `Stones: fill ${empty} empty ${empty === 1 ? 'slot' : 'slots'}`, what, { empty, status: accessory ? 'unknown' : isPending(stones) ? 'unknown' : stones.status });
   }
   // 2. Keeper gear past +10: one step at a time, with its chance and the most tries the failure bonus allows.
@@ -137,8 +137,8 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
     const to = advice.from + 1;
     const rate = rules['enchant-rates']?.value?.rates?.[to] ?? null;
     const most = tries[to] ?? null;
-    const odds = Number.isFinite(rate) ? `${rate}% now${most ? `, at most ${most} tries with the failure bonus` : ''}.` : 'The chance of this step is not confirmed yet.';
-    add('growth-risky', 'growth', `Growth: +${advice.from} to +${to}`, `${odds} Check the cost in the Growth tab.`, { from: advice.from, to, rate, tries: most, cap: advice.cap });
+    const odds = Number.isFinite(rate) ? `${rate}% now${most ? `, at most ${most} tries with the failure bonus` : ''}.` : '';
+    add('growth-risky', 'growth', `Growth: +${advice.from} to +${to}`, `${odds ? `${odds} ` : ''}Check the cost in the Growth tab.`, { from: advice.from, to, rate, tries: most, cap: advice.cap });
   }
   // 3. Soul Binding on keepers below 100%: reroll the role's weak lines first, then Bind.
   const lines = roleLines(enhancement['soul-binding'], role, slot);
@@ -152,8 +152,8 @@ export function itemPlan(slot, { role, level, grades, rules, enhancement, tries 
   // 5. Theostone on the weapon you keep: last. The data never says which one is engraved, so the step says so.
   if (key === 'MAINHAND' && keeper && Number.isInteger(slot.theostoneSlots) && slot.theostoneSlots > 0) {
     const advise = enhancement.theostone?.roles?.[role];
-    const which = advise && !isPending(advise) ? advise.text : `Which Theostone suits ${roleWords(role)} is not confirmed yet.`;
-    add('theostone', 'theostone', 'Theostone: last, on this weapon', `${which} The official data does not say whether one is engraved: if the slot is empty, engrave one after everything else.`);
+    const which = advise && !isPending(advise) ? advise.text : '';
+    add('theostone', 'theostone', 'Theostone: last, on this weapon', `${which ? `${which} ` : ''}If the slot is empty, engrave one after everything else.`);
   }
   steps.sort((a, b) => a.rank - b.rank);
   const next = steps[0] ?? null;

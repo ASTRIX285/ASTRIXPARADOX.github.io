@@ -639,7 +639,7 @@ check('enchant rules in mechanics.json: rates, pity, carry and stones, each with
     // DPS: the record has no DPS lines for a guard, so nothing is called weak.
     const dps=by(planFor('dps'),2);
     assert.deepEqual(dps.steps[1].weak,null);
-    assert.match(dps.steps[1].why,/Which lines suit a DPS on this slot is not confirmed yet\./);
+    assert.match(dps.steps[1].why,/No line list for a DPS on this slot\./);
     // At 100% every line is maxed and there is no Bind step.
     assert.ok(by(planFor('tank'),1).lines.every(line=>line.maxed&&line.percent===100));
   });
@@ -660,7 +660,7 @@ check('enchant rules in mechanics.json: rates, pity, carry and stones, each with
     assert.ok(dpsFilled.every(socket=>socket.fits===false));
     // A healer has no stone order in the record: said, never guessed.
     const healer=by(planFor('healer',model),2);
-    assert.match(healer.steps.find(step=>step.kind==='manastone').why,/Which stones suit a healer is not confirmed yet\./);
+    assert.match(healer.steps.find(step=>step.kind==='manastone').why,/Engrave the stones your build uses\./);
     // Epic pieces (Miguel, 18 Oct 2026): nothing is spent on them, not even cheap stones. No step, no mark.
     const helm=by(planFor('tank'),3);
     assert.deepEqual([helm.label,helm.next,helm.steps.length],[null,null,0],'No stones on an Epic piece');
