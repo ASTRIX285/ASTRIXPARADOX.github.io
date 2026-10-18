@@ -1,0 +1,8 @@
+# perf/validator-speed: parallel PARADOX validator, changed-area runs, full run as a GitHub check.
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/validator-runner.mjs
+astrix-app/tools/validator-areas.json
+astrix-app/tools/test-paradox-validator-runner.mjs
+.github/workflows/validate-paradox.yml
+.github/workflows/twitch-status.yml
+CLAUDE.md

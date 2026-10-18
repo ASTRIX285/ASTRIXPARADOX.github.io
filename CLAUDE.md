@@ -86,10 +86,10 @@ Read this file at the start of every session. It survives chat compaction. The c
 - Run `node astrix-app/tools/build-module-versions.mjs` after changing any JS file. Import maps and `module-versions.json` list one module per line, sorted, with a blank line between entries, so PRs that bump different modules merge without conflicts. Never hand-edit or reflow them; `validate-single-module-urls.mjs` checks the layout.
 
 ## Validation (run after every change)
-- `node astrix-app/tools/validate-scope-guard.mjs`
-- `node astrix-app/tools/validate-journey-visual-pass.mjs`
-- `node astrix-app/tools/paradox-validator.mjs`
-- Plus every test the brief names and every test you touched.
+- Run `node astrix-app/tools/paradox-validator.mjs`. On a branch it runs the core set plus the areas your changed files touch (map: `astrix-app/tools/validator-areas.json`) and prints which areas and why. `--all` runs every suite, `--serial` runs one by one.
+- Also run any new test the brief adds, if it is not in the validator yet.
+- Do not run suites again on their own that the validator already ran.
+- The full run is the GitHub check "Validate PARADOX" (`validate-paradox.yml`, every suite on every PR to main). It must be green before merging.
 All must exit 0 before a PR, apart from failures that already fail on `main` (list them).
 - Design PRs: tests must check what the page looks like (computed styles, bounding boxes), not only that class names exist. Put before/after screenshots at 1600 and 390 in the PR description.
 

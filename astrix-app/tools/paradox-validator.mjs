@@ -1,41 +1,49 @@
-import {spawnSync} from 'node:child_process';
+// The PARADOX validator: every suite below, run by validator-runner.mjs (18 Oct 2026).
+//   node astrix-app/tools/paradox-validator.mjs            changed areas on a branch (every suite on main and in CI)
+//   node astrix-app/tools/paradox-validator.mjs --all      every suite (the GitHub check validate-paradox.yml runs this)
+//   --serial runs one by one and stops at the first failure, as before; --jobs=N sets the pool size.
+// Mark a suite browser(...) when it starts Chromium (at most 3 run at once), and {name,serial:true} when it cannot share
+// the machine: it times itself against a fixed limit, or writes files inside the repo while it runs.
+import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {main} from './validator-runner.mjs';
 
-const tools=fileURLToPath(new URL('./',import.meta.url));
-const validators=[
+const browser=name=>({name,browser:true});
+export const validators=[
   'validate-scope-guard.mjs',
   'test-scope-guard.mjs',
+  'test-paradox-validator-runner.mjs', // The validator runner: pool, --serial, --changed areas, result lines.
   'test-game-folders.mjs',
   'validate-game-folders.mjs',
   'test-division-validator.mjs',
   'validate-division.mjs',
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
-  'test-aetherium-pages.mjs', // The Aetherium Daeva Card and Gear page: demo, live, roster, faction, Worker down, layout.
-  'test-aetherium-character.mjs', // The Aetherium character menu, Gear, Skills and Daevanion pages: cards, tabs, hover card, board totals, layout.
+  browser('test-aetherium-pages.mjs'), // The Aetherium Daeva Card and Gear page: demo, live, roster, faction, Worker down, layout.
+  {name:'test-aetherium-character.mjs',browser:true,serial:true}, // The Aetherium character menu, Gear, Skills and Daevanion pages: cards, tabs, hover card, board totals, layout. Serial: its Gear tile look check failed under load (18 Oct 2026).
   'test-aetherium-worker.mjs', // AION 2 armory Worker: whitelist, cache, rate limit, CORS, 502.
-  'test-hub-cards.mjs', // The Hub: full-bleed card art, text backdrop, spare card map image.
+  browser('test-hub-cards.mjs'), // The Hub: full-bleed card art, text backdrop, spare card map image.
   'test-aion2-adapter.mjs', // AION 2 armory adapter: ASTRIX285 fixtures to the character model.
   'test-aion2-advisor.mjs', // AION 2 Ascent Plan advisor: data coverage, sources, level-aware plans.
-  'test-aetherium-ascent.mjs', // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout.
-  'test-aetherium-guide.mjs', // The Aetherium AION 2 Guide: shell, home grid, class roles table, class pages, setup flag, layout.
+  {name:'test-aetherium-ascent.mjs',browser:true,serial:true}, // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout. Serial: its title and data line layout check failed under load (18 Oct 2026).
+  browser('test-aetherium-guide.mjs'), // The Aetherium AION 2 Guide: shell, home grid, class roles table, class pages, setup flag, layout.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
   'test-game-footers.mjs',
   'validate-bungie-footer.mjs',
   'test-clips-design.mjs', // Clips: builder keeps the page design, no inline handlers or reveals.
-  'test-clips-cards.mjs', // Clips cards: visible at rest, clean picture, readable sizes, player, filters, thumbnail fallbacks.
-  'test-forge-tint.mjs', // The Forge: faint steel-blue background and edges, Ember actions, public pages neutral.
-  'test-capsule-buttons.mjs', // Buttons: reactor capsule with the dial on headline actions; locked stream buttons unchanged.
+  browser('test-clips-cards.mjs'), // Clips cards: visible at rest, clean picture, readable sizes, player, filters, thumbnail fallbacks.
+  browser('test-forge-tint.mjs'), // The Forge: faint steel-blue background and edges, Ember actions, public pages neutral.
+  browser('test-capsule-buttons.mjs'), // Buttons: reactor capsule with the dial on headline actions; locked stream buttons unchanged.
   'test-reports-data.mjs',
   'test-reports-drilldown.mjs',
   'test-reports-three-stage.mjs',
   'test-reports-boxes.mjs',
-  'test-background-prebuild.mjs', // feature/background-page-prebuild: tabs and Reports sections open from what was built.
+  {name:'test-background-prebuild.mjs',browser:true,serial:true}, // feature/background-page-prebuild: tabs and Reports sections open from what was built. Serial: fixed 100 ms open limits.
   'validate-reports-catalogue.mjs',
   'validate-no-dashes.mjs', // Forge final pass: no en or em dash in visible copy.
-  'test-recovery-states.mjs', // Forge final pass: one recovery panel, three states.
+  browser('test-recovery-states.mjs'), // Forge final pass: one recovery panel, three states.
   'validate-plain-language.mjs', // Prompt 19: copy-only language contract.
   'validate-forge-internal-rename.mjs',
   'validate-site-typography.mjs',
@@ -58,11 +66,11 @@ const validators=[
   'test-gloss-controls.mjs',
   'validate-portal-loader.mjs',
   'validate-single-loader.mjs',
-  'validate-single-module-urls.mjs',
-  'test-portal-single-skin.mjs',
-  'test-seamless-transitions.mjs', // feature/seamless-tool-transitions: no frame before readiness.
-  'test-home-browser.mjs',
-  'test-asset-weight.mjs', // perf/asset-weight: no first-load image over 300 KB, no full manifest.
+  browser('validate-single-module-urls.mjs'),
+  {name:'test-portal-single-skin.mjs',browser:true,serial:true}, // Serial: its 200 ms breach readiness window failed under load (18 Oct 2026).
+  browser('test-seamless-transitions.mjs'), // feature/seamless-tool-transitions: no frame before readiness.
+  browser('test-home-browser.mjs'),
+  browser('test-asset-weight.mjs'), // perf/asset-weight: no first-load image over 300 KB, no full manifest.
   'validate-tools-hub.mjs',
   'validate-sitemap.mjs', // sitemap.xml and robots.txt match the public pages.
   'validate-tool-intro.mjs',
@@ -83,7 +91,7 @@ const validators=[
   'test-artifact-recommender.mjs',
   'test-forge-artifact-selection.mjs',
   'test-forge-background.mjs',
-  'test-engine-budget.mjs',
+  {name:'test-engine-budget.mjs',serial:true}, // Serial: engine timing budgets, and it writes temporary engine copies inside the repo.
   'test-engine-stream-review.mjs',
   'test-forge-super-synergy.mjs',
   'test-forge-weapon-anchor.mjs',
@@ -111,7 +119,7 @@ const validators=[
   'validate-paradox-item-cards.mjs',
   'test-build-space-character-isolation.mjs',
   'test-build-forge-equipped-entry.mjs',
-  'test-build-forge-zoom.mjs',
+  browser('test-build-forge-zoom.mjs'),
   'test-build-review.mjs',
   'test-dim-fit-status.mjs',
   'test-forge-weapon-variety.mjs',
@@ -128,11 +136,6 @@ const validators=[
   'validate-weapon-rolls.mjs'
 ];
 
-for(const validator of validators){
-  const executable=validator.endsWith('.py')?'python3':process.execPath;
-  const result=spawnSync(executable,[`${tools}${validator}`],{cwd:fileURLToPath(new URL('../../',import.meta.url)),stdio:'inherit'});
-  if(result.error)throw result.error;
-  if(result.status!==0){console.error(`VALIDATOR_FAILED=${validator} exit=${result.status} signal=${result.signal}`);process.exit(result.status??1);}
-}
-
-console.log('PARADOX_VALIDATOR=PASS');
+// Run only when called as the command, so the runner test can import the list.
+const self=fileURLToPath(import.meta.url).toLowerCase();
+if(process.argv[1]&&resolve(process.argv[1]).toLowerCase()===self)process.exit(await main(process.argv.slice(2),validators));
