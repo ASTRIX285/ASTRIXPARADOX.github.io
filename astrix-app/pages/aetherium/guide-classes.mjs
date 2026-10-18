@@ -5,7 +5,7 @@
  * <body data-guide="classes"> or <body data-guide="class" data-guide-class="Templar">.
  *
  * Everything comes from the build data (data/advisor/builds/<class>.json) and the role ratings record
- * (data/advisor/class-roles.json, each rating tagged Reported and cited). No rating is guessed: a cell no source rates
+ * (data/advisor/class-roles.json, each rating cited in the data). No rating is guessed: a cell no source rates
  * shows what our build data says. The setup check reuses the engine (ascent-advisor.mjs, item-assessor.mjs) and only
  * advises: it never blocks a choice. Character data shows its age; saved notes show theirs (aetherium-memory.mjs).
  */
@@ -48,8 +48,7 @@ function cell(records, name, role, ratings) {
   const ours = !records ? 'Pending' : !build ? '-' : build.main ? 'Main role' : build.status === 'pending' ? 'Pending' : 'Can play';
   const rated = ratings.byClass[name]?.[role];
   if (rated && !isPending(rated) && rated.rating) {
-    const n = ratings.numbers.get(rated.ref);
-    return { kind: 'reported', html: `<b class="ae-gd-rating" data-rating="${esc(String(rated.rating).toLowerCase())}">${esc(rated.rating)}</b><span class="ae-tag is-reported">Reported</span>${n ? `<a class="ae-gd-ref" href="#aeRoleSrc${n}" aria-label="Source ${n}">[${n}]</a>` : ''}<small class="ae-gd-ours">Our build: ${esc(ours === '-' ? 'none' : ours)}</small>`, ours };
+    return { kind: 'reported', html: `<b class="ae-gd-rating" data-rating="${esc(String(rated.rating).toLowerCase())}">${esc(rated.rating)}</b>`, ours };
   }
   return { kind: ours === '-' ? 'none' : 'data', html: ours === '-' ? '<span aria-label="Not played">-</span>' : `<b class="ae-gd-rating" data-ours="${esc(ours.toLowerCase())}">${esc(ours)}</b>`, ours };
 }
@@ -67,10 +66,8 @@ function rolesTableHtml(all, ratings, only = null) {
 }
 
 function rolesKeyHtml(ratings) {
-  const used = [...ratings.sources.values()];
   return `<div class="ae-gd-key">
-      <p><b>Main role</b>: the role the class's main build plays. <b>Can play</b>: we have a build for it. <b>Pending</b>: a build is being sourced. <b>-</b>: no build for that role.${used.length ? ' A rating marked <span class="ae-tag is-reported">Reported</span> comes from the source named under it; it is that source\'s view, not ours.' : ''}</p>
-      ${used.length ? `<ol class="ae-gd-sources">${used.map(source => `<li id="aeRoleSrc${ratings.numbers.get(source.ref)}"><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title)}</a>, ${esc(source.publisher)} (read ${esc(source.retrievedOn)})</li>`).join('')}</ol>` : ''}
+      <p><b>Main role</b>: the role the class's main build plays. <b>Can play</b>: we have a build for it. <b>Pending</b>: a build is being sourced. <b>-</b>: no build for that role.</p>
     </div>`;
 }
 
@@ -148,7 +145,7 @@ function buildHtml(name, build, icons, linked) {
   return `<article class="ae-gd-build" id="build-${esc(build.role)}" data-build="${esc(build.id)}" data-role="${esc(build.role)}" aria-labelledby="aeBuild${esc(build.role)}">
       <header class="ae-gd-build-head">
         <h3 id="aeBuild${esc(build.role)}"><span class="ae-gd-build-role">${esc(ROLE_LABEL[build.role])}</span> ${esc(build.label)}</h3>
-        <p class="ae-gd-chips">${build.main ? '<span class="ae-tag is-main">Main role</span>' : ''}${build.beginner ? `<span class="ae-tag" data-beginner="${esc(build.beginner)}">New player friendly: ${esc(cap(build.beginner))}</span>` : ''}${build.status === 'partial' ? '<span class="ae-tag is-reported">Partly sourced</span>' : ''}${build.status === 'pending' ? '<span class="ae-tag">Pending</span>' : ''}</p>
+        <p class="ae-gd-chips">${build.main ? '<span class="ae-tag is-main">Main role</span>' : ''}${build.beginner ? `<span class="ae-tag" data-beginner="${esc(build.beginner)}">New player friendly: ${esc(cap(build.beginner))}</span>` : ''}${build.status === 'pending' ? '<span class="ae-tag">Pending</span>' : ''}</p>
       </header>
       <p>${esc(build.summary ?? '')}</p>
       <div class="ae-gd-build-grid">

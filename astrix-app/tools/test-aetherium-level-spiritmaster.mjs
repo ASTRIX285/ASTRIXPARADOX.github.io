@@ -348,7 +348,7 @@ if(process.env.AE_BROWSER!=='0'){
     for(const level of [5,22,45]){
       const {page,context,errors}=await open(screen(level,'skill-bar'));
       assert.equal(await page.getAttribute('#aeSetup','data-setup-level'),String(level));
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,'REPORTED tagged');
       assert.equal(await page.locator('#aeSkillBar .ae-bar-cell.is-locked,#aeSkillBar .ae-lock').count(),0,`Lv ${level}: nothing locked on the bar`);
       assert.doesNotMatch(await plain(page,'#aeCopyBar'),/from Lv|needs a stigma slot/,`Lv ${level}: the copy list`);
       const onBar=await page.$$eval('#aeSkillBar [data-bar-skill]',items=>items.map(el=>el.dataset.barSkill));

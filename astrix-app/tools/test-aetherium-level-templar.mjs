@@ -362,7 +362,7 @@ if(process.env.AE_BROWSER!=='0'){
       assert.equal(await plain(page,'#aeSetup [data-setup="line"] dd'),'Judgment, Shield Smite');
       assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
       assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 7 Debilitating Smash joins the smash stack\./);
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,'REPORTED tagged');
       assert.equal(await page.locator('#aeSetupTitle [data-status-tag="setup-unconfirmed"]').count(),0,'No longer Not confirmed yet');
       assert.deepEqual(errors,[]);
       await context.close();

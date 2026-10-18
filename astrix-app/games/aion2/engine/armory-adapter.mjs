@@ -87,7 +87,7 @@ export function enhanceFields(detail) {
       grade: stone.grade ?? null
     })),
     theostoneSlots: Number.isInteger(detail.godStoneSlotCount) ? detail.godStoneSlotCount : notSent('Theostone slot count'),
-    theostone: pending('The official item data has no field for an engraved Theostone. Check the Theostone tab in game.'),
+    theostone: pending('The official item data has no field for an engraved Theostone.'),
     soulBindRate: number(detail.soulBindRate) ?? notSent('Soul Binding rate'),
     bindLines: (Array.isArray(detail.subStats) ? detail.subStats : []).filter(row => row && typeof row.name === 'string').map(row => ({
       id: row.id ?? null,

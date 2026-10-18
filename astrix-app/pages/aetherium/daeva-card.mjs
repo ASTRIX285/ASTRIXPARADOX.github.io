@@ -247,7 +247,7 @@ async function loadFirstMove() {
 }
 
 /* The setup for now and the next change, from the level planner: the main line, the stigmas, the next skill to level and
-   one "Next at Lv N" line with its reason. A build with no ascent record says it is not confirmed yet. */
+   one "Next at Lv N" line with its reason. */
 function renderCardSetup(plan) {
   const box = $('#aeCardSetup');
   if (!box) return;
@@ -256,11 +256,10 @@ function renderCardSetup(plan) {
   const line = s.line.find(item => item.name) ?? s.line[0] ?? null;
   const stigmas = s.stigmas.filter(slot => slot.open && slot.name).map(slot => slot.name);
   const next = plan.nextAt;
-  const tag = s.planned ? (s.status === 'reported' ? ' <span class="ae-tag is-reported">Reported</span>' : '') : ' <span class="ae-tag is-unconfirmed">Not confirmed yet</span>';
   box.hidden = false;
-  box.innerHTML = `<p class="ae-setup-title">Your setup at Lv ${esc(s.level)}${tag}</p>
+  box.innerHTML = `<p class="ae-setup-title">Your setup at Lv ${esc(s.level)}</p>
     <dl class="ae-setup-list">
-      <div data-setup="line"><dt>${esc(line?.name ?? 'Macro')}</dt><dd>${esc(line ? line.skills.join(', ') : 'Nothing sourced yet')}</dd></div>
+      <div data-setup="line"><dt>${esc(line?.name ?? 'Macro')}</dt><dd>${esc(line ? line.skills.join(', ') : '-')}</dd></div>
       <div data-setup="stigmas"><dt>Stigmas</dt><dd>${esc(stigmas.length ? stigmas.join(', ') : (s.stigmas[0] ? `From Lv ${s.stigmas[0].slotLevel}` : 'None'))}</dd></div>
       <div data-setup="mastery"><dt>Level next</dt><dd>${esc(s.mastery ? `${s.mastery.name} to Lv ${s.mastery.to}` : 'Nothing to level now')}</dd></div>
     </dl>

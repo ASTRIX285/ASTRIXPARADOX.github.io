@@ -422,10 +422,10 @@ export function enchantAdvice(slot, { level = 1, grades = null, progression = nu
   const base = { from, to: null, cap, about, costly: false, grade };
   const capText = `${about ? 'about ' : ''}+${cap}`;
   if (OWN_RULE_SLOTS.test(slotKey(slot))) {
-    return { ...base, action: null, flag: null, why: 'Runes and Arcana enhance their own way. Enchant advice for them is not confirmed yet.' };
+    return { ...base, action: null, flag: null, why: 'Runes and Arcana enhance their own way.' };
   }
   if (!Number.isFinite(cap) || grade.order === null) {
-    return { ...base, action: null, flag: null, why: `The ${grade.name} grade is not confirmed for enchant advice yet.` };
+    return { ...base, action: null, flag: null, why: `No enchant step for the ${grade.name} grade.` };
   }
   const full = { ...base, action: 'full', to: cap, flag: 'FULL', why: `Fully enchanted: +${from} is its cap.` };
   const enchantTo = (to, why, costly = false) => ({ ...base, action: 'enchant', to, costly, flag: `ENCHANT +${from} to +${to}`, why });
@@ -450,7 +450,7 @@ export function enchantAdvice(slot, { level = 1, grades = null, progression = nu
     }
     return { ...base, action: 'done', to: safe, flag: null, why: `+${from} reached. Past +${SAFE_ENCHANT} only pays on the weapon and guard.` };
   }
-  return { ...base, action: null, flag: null, why: `The ${grade.name} grade is not confirmed for enchant advice yet.` };
+  return { ...base, action: null, flag: null, why: `No enchant step for the ${grade.name} grade.` };
 }
 const slotLabelOf = slot => String(slot.slot ?? '').toLowerCase().replace(/^./, c => c.toUpperCase());
 

@@ -150,7 +150,7 @@ const isArcana = slot => /^arcana\d$/i.test(String(slot?.slot ?? ''));
 function arcanaNote(slot) {
   if (!isArcana(slot)) return '';
   const source = arcanaSource();
-  return `<p class="ae-card-line" data-arcana-line>Arcana are the main source of deity stats.${source.confirmed ? '' : ` ${NOT_CONFIRMED(null)}`}</p>`;
+  return `<p class="ae-card-line" data-arcana-line>Arcana are the main source of deity stats.</p>`;
 }
 /** An empty Arcana slot: "No Arcana yet" when none is worn, else this slot is empty. Nothing else is claimed. */
 function openArcanaEmpty(n, from) {
@@ -160,7 +160,6 @@ function openArcanaEmpty(n, from) {
   openInfo(infoCardHtml({ icon: null, title: none ? 'No Arcana yet' : 'Empty Arcana slot', sub: slotLabel(slot.slot), body: arcanaNote(slot) }), from);
 }
 
-const NOT_CONFIRMED = test => `<span class="ae-tag is-unconfirmed">Not confirmed yet</span>${test ? ` <span class="ae-tag-test">Check: ${esc(test)}</span>` : ''}`;
 
 
 /** Bonus stat lines, each tagged High, Useful or Low for this Daeva's class (stats.json and the class's stat order). */
@@ -177,7 +176,7 @@ function subRows(list) {
 /* Enhancement (docs/ENHANCEMENT.md): the game's Enhancement window, item by item. The plan comes from the engine
    (enhancement-advisor.mjs) with the role the player picked; each tile gets a small mark for its next tab, the item card an
    Enhance panel drawn like the window's five tabs, and the page a How enhancing works strip with one Do this next line.
-   Facts carry their status: Confirmed, Reported (guides agree) or Not confirmed yet. No cost numbers: check them in game. */
+   No cost numbers. */
 
 /* Our own icons for the five tabs, 16 by 16, stroke only. */
 const ENHANCE_ICONS = {
@@ -189,12 +188,7 @@ const ENHANCE_ICONS = {
   done: '<path d="M3 8.5l3.2 3.2L13 4.8"/>'
 };
 const enhanceIcon = id => `<svg class="ae-eicon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ENHANCE_ICONS[id] ?? ''}</svg>`;
-const STATUS_TAG = {
-  confirmed: '<span class="ae-tag is-confirmed">Confirmed</span>',
-  reported: '<span class="ae-tag is-reported">Reported</span>',
-  unknown: '<span class="ae-tag is-unconfirmed">Not confirmed yet</span>'
-};
-const statusTag = status => STATUS_TAG[status] ?? STATUS_TAG.unknown;
+const statusTag = () => '';
 const enhanceRecords = () => (state.enhancement ? indexEnhancement(state.enhancement) : null);
 
 /** The plan for this Daeva, worked out once and again whenever an item detail lands. null until the record has loaded. */
@@ -247,12 +241,12 @@ function growthPanel(slot, item, rules) {
   if (safe.length) lines.push(`<li>+${safe[0].to}${safe.length > 1 ? ` to +${safe.at(-1).to}` : ''}: every step succeeds</li>`);
   for (const step of risky) lines.push(`<li>+${step.to}: ${step.rate === null ? 'chance not known yet' : `${step.rate}% chance`}${next?.tries && next.to === step.to ? `, at most ${esc(next.tries)} tries` : ''}</li>`);
   const fromList = !ownScroll && Array.isArray(stones?.value?.from)
-    ? `<p class="ae-card-line ae-efrom">${esc(stones.value.name)}s from ${esc(stones.value.from.join(', '))}. ${stones.confirmed ? '' : NOT_CONFIRMED(stones.test)}</p>`
+    ? `<p class="ae-card-line ae-efrom">${esc(stones.value.name)}s from ${esc(stones.value.from.join(', '))}.</p>`
     : '';
-  return `<p class="ae-item-sec ae-odds-title">Chance of each step${rates?.confirmed ? '' : ` ${NOT_CONFIRMED(rates?.test)}`}</p>
+  return `<p class="ae-item-sec ae-odds-title">Chance of each step</p>
     <ul class="ae-odds-list">${lines.join('')}</ul>
     ${rates?.value?.keepsLevel ? '<p class="ae-card-line">A failure costs the attempt, never a level, and never breaks the item.</p>' : ''}
-    ${risky.length && pity ? `<p class="ae-card-line">${pity.confirmed ? 'Each failed try past +10 adds 5 points to the next try at that step.' : `Each failed try past +10 may add 5 points to the next try at that step. ${NOT_CONFIRMED(pity.test)}`}</p>` : ''}
+    ${risky.length && pity ? `<p class="ae-card-line">Each failed try past +10 adds 5 points to the next try at that step.</p>` : ''}
     <p class="ae-card-line">${ownScroll ? 'It uses its own enhance scroll, not Enhance Stones. ' : ''}Check the cost in the Growth tab.${advice.costly ? ' Past +10 it is a big Kina and stone cost.' : ''}</p>
     ${fromList}`;
 }
@@ -283,10 +277,9 @@ function theostonePanel(slot) {
   if (!slot.theostoneSlots) return '<p class="ae-card-line">No Theostone slot on this item.</p>';
   const weapon = /^main\s*hand$/i.test(String(slot.slot));
   const advice = enhanceRecords()?.theostone?.roles?.[state.build?.role ?? ''];
-  const role = advice && !isPending(advice) ? `<p class="ae-card-line">${esc(advice.text)} ${statusTag(advice.status)}</p>` : `<p class="ae-card-line">Which Theostone suits ${esc(roleWords(state.build?.role ?? null))}: ${statusTag('unknown')}</p>`;
-  return `<ul class="ae-advice-facts ae-erows"><li><span>Theostone slots</span><b>${esc(slot.theostoneSlots)}</b></li><li><span>Engraved</span><b>${statusTag('unknown')}</b></li></ul>
-    <p class="ae-card-line">The official data does not say which Theostone is engraved. Check the Theostone tab in game.</p>
-    ${weapon ? `${role}<p class="ae-card-line">Do it last, on the weapon you will keep. ${statusTag('reported')}</p>` : `<p class="ae-card-line">Guides speak of the weapon only. ${statusTag('reported')}</p>`}`;
+  const role = advice && !isPending(advice) ? `<p class="ae-card-line">${esc(advice.text)} ${statusTag(advice.status)}</p>` : '';
+  return `<ul class="ae-advice-facts ae-erows"><li><span>Theostone slots</span><b>${esc(slot.theostoneSlots)}</b></li></ul>
+    ${weapon ? `${role}<p class="ae-card-line">Do it last, on the weapon you will keep.</p>` : `<p class="ae-card-line">Theostones go on the weapon.</p>`}`;
 }
 
 /** The Soul Binding tab: the rate as a bar, each line as a bar within its range, weak lines for the role marked. */
@@ -295,11 +288,11 @@ function bindPanel(slot, item) {
   const rate = slot.soulBindRate;
   const who = roleWords(state.build?.role ?? null);
   const lines = item.lines.map(line => {
-    const range = line.maxed ? `${esc(line.text)}, maxed` : Number.isFinite(line.max) ? `${esc(line.text)} of ${esc(line.max)}` : `${esc(line.text)}, range not in the data`;
+    const range = line.maxed ? `${esc(line.text)}, maxed` : Number.isFinite(line.max) ? `${esc(line.text)} of ${esc(line.max)}` : esc(line.text);
     return `<li class="ae-eline${line.weak ? ' is-weak' : ''}"><span class="ae-eline-name">${esc(line.name)}${line.weak ? ` <i class="ae-stat-tag is-low">Weak for ${esc(who.replace(/^a /, ''))}</i>` : ''}</span><span class="ae-eline-value">${range}</span>${barHtml(line.percent, `${line.name} within its range`)}</li>`;
   }).join('');
   const skills = Array.isArray(slot.skillLines) && slot.skillLines.length ? `<ul class="ae-efacts">${slot.skillLines.map(perk => `<li><span>${esc(perk.name)}</span> <b>+${esc(perk.level ?? '')}</b></li>`).join('')}</ul>` : '';
-  const linesNote = isPending(item.linesFor) ? `<p class="ae-card-line">${esc(item.linesFor.reason)} ${statusTag('unknown')}</p>` : `<p class="ae-card-line">Lines for ${esc(who)}: ${esc(item.linesFor.lines.map(entry => entry.name).join(', '))}. ${statusTag(item.linesFor.status)}</p>`;
+  const linesNote = isPending(item.linesFor) ? '' : `<p class="ae-card-line">Lines for ${esc(who)}: ${esc(item.linesFor.lines.map(entry => entry.name).join(', '))}. ${statusTag(item.linesFor.status)}</p>`;
   return `<div class="ae-eline is-rate"><span class="ae-eline-name">Soul Binding rate</span><span class="ae-eline-value">${esc(rate)}%</span>${barHtml(rate, 'Soul Binding rate')}</div>
     ${lines ? `<ul class="ae-elines">${lines}</ul>` : '<p class="ae-card-line">No Soul Binding lines on this item.</p>'}
     ${skills}${linesNote}
@@ -308,7 +301,7 @@ function bindPanel(slot, item) {
 
 /** The Transfer tab: what moves and what is lost, with the status of each. */
 function transferPanel() {
-  return factsHtml(enhanceRecords()?.transfer?.facts?.filter(fact => fact.status !== 'unknown')) || '<p class="ae-card-line">Not confirmed yet.</p>';
+  return factsHtml(enhanceRecords()?.transfer?.facts?.filter(fact => fact.status !== 'unknown')) || '';
 }
 
 /**
@@ -422,8 +415,7 @@ function renderEnhanceLogic() {
     ${prepare}
     <p class="ae-item-sec">Each Unique piece, in this order</p>
     <ol class="ae-elogic-steps">${logic.steps.map(step => `<li data-step-tab="${esc(step.tab)}">${enhanceIcon(step.tab)}<span><b>${esc(step.title)}</b> ${esc(step.text)}</span></li>`).join('')}</ol>
-    ${logic.exceptions.map(item => `<p class="ae-card-line ae-elogic-except">${esc(item.text)}</p>`).join('')}
-    <p class="ae-card-line">${statusTag(logic.status)}</p>`;
+    ${logic.exceptions.map(item => `<p class="ae-card-line ae-elogic-except">${esc(item.text)}</p>`).join('')}`;
 }
 
 /** How enhancing works: one Do this next line for the whole Daeva, then one line per tab that opens the full explanation. */
@@ -455,19 +447,19 @@ function openHow(id, from) {
   const list = items => `<ul class="ae-odds-list">${items.map(text => `<li>${esc(text)}</li>`).join('')}</ul>`;
   let body = '';
   if (id === 'order') {
-    body = `<ol class="ae-efacts is-order">${records.order.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol><p class="ae-card-line">${statusTag(records.order.status)}</p>`;
+    body = `<ol class="ae-efacts is-order">${records.order.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol>`;
   } else if (id === 'growth') {
     const rates = indexMechanics(state.mechanics, null)['enchant-rates']?.value?.rates ?? {};
     const tries = Object.entries(plan.tries).map(([to, most]) => `+${to}: ${rates[to]}% to start, at most ${most} tries`);
     const sources = records['enhance-stone-sources'];
     body = `${factsHtml(records.growth.facts)}
-      <div class="ae-item-block"><p class="ae-item-sec">Most tries per step past +10</p>${list(tries)}<p class="ae-card-line">Worked out from the chance of each step and the failure bonus. ${statusTag('confirmed')}</p></div>
+      <div class="ae-item-block"><p class="ae-item-sec">Most tries per step past +10</p>${list(tries)}<p class="ae-card-line">Worked out from the chance of each step and the failure bonus.</p></div>
       <div class="ae-item-block"><p class="ae-item-sec">Where Enhance Stones come from ${statusTag(sources.status)}</p>${list(sources.sources.map(source => source.name))}</div>`;
   } else if (id === 'manastone') {
     const stones = records.manastone.roles?.[state.build?.role ?? ''];
     const role = stones && !isPending(stones)
       ? `<div class="ae-item-block"><p class="ae-item-sec">Stones for ${esc(roleWords(state.build.role))} ${statusTag(stones.status)}</p>${list(stones.stones.map(stone => `${stone.name}, top ${stone.top}`))}${stones.note ? `<p class="ae-card-line">${esc(stones.note)}</p>` : ''}</div>`
-      : `<p class="ae-card-line">Which stones suit ${esc(roleWords(state.build?.role ?? null))}: ${statusTag('unknown')}</p>`;
+      : '';
     body = `${factsHtml(records.manastone.facts)}${role}<p class="ae-card-line">${esc(records.manastone.accessories.text)} ${statusTag(records.manastone.accessories.status)}</p>`;
   } else if (id === 'theostone') {
     body = factsHtml(records.theostone.facts);

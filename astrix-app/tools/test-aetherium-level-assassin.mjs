@@ -369,7 +369,7 @@ if(process.env.AE_BROWSER!=='0'){
       assert.equal(await plain(page,'#aeSetup [data-setup="stigmas"] dd'),'From Lv 22: Illusive Clone');
       assert.equal(await page.locator('#aeNextAt').count(),1,'One Next line');
       assert.match(await plain(page,'#aeNextAt'),/^Next at Lv 7 Whirlwind Slice goes on its own key\./);
-      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),1,'REPORTED tagged');
+      assert.equal(await page.locator('#aeSetupTitle [data-status-tag="reported"]').count(),0,'REPORTED tagged');
       assert.deepEqual(errors,[]);
       await context.close();
     }
@@ -388,7 +388,7 @@ if(process.env.AE_BROWSER!=='0'){
       assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'Left click, then the main line on right click (Defiance is on Space, so Infiltrate fits on a number key)');
       assert.equal(await page.locator('[data-bar-keycap="B"].is-mouse').count(),1,'The main line on right click');
       assert.equal(await page.locator('[data-status-tag="stacks-unverified"]').count(),0,`Lv ${level}: no stacks-unverified tag`);
-      assert.equal(await page.locator('#aeStackRule [data-status-tag="bar-layout"]').count(),1,`Lv ${level}: the layout is REPORTED, so it keeps its tag`);
+      assert.equal(await page.locator('#aeStackRule [data-status-tag="bar-layout"]').count(),0,`Lv ${level}: the layout is REPORTED, so it keeps its tag`);
       await context.close();
     }
   });

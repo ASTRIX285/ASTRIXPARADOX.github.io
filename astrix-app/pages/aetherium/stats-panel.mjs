@@ -14,7 +14,6 @@ const TAG_WORD = { high: 'High', useful: 'Useful', low: 'Low' };
 const SOURCE_WORDS = { weapon: 'weapons', armour: 'armour', accessory: 'accessories' };
 const panel = { stats: null, rank: null, build: null, className: null, live: [], boards: [], mainBuilds: null };
 
-const notConfirmed = test => `<span class="ae-tag is-unconfirmed">Not confirmed yet</span>${test ? ` <span class="ae-tag-test">Check: ${esc(test)}</span>` : ''}`;
 const listWords = items => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`);
 const liveOf = stat => panel.live.find(row => row.type === stat.type) ?? { value: 0, effects: [] };
 /** The effect line on a tile: the game's own words when the data sends them, else what one point gives, from our record. */
@@ -57,7 +56,7 @@ async function openStat(id, from) {
   const others = rank ? classesWanting(id, panel.mainBuilds, panel.stats, panel.className) : [];
   const does = stat.effects.value.map(name => {
     const combat = panel.stats.combatByName.get(name);
-    const cap = combat?.cap ? ` It tops out at ${combat.cap.value}%. ${combat.cap.status === 'confirmed' ? '' : notConfirmed('Check the cap in the stat window tooltip.')}` : '';
+    const cap = combat?.cap ? ` It tops out at ${combat.cap.value}%.` : '';
     return `<li><b>${esc(name)}</b>: ${esc(combat?.meaning.value ?? '')}${cap}</li>`;
   }).join('');
   const sources = stat.from.value.map(source => panel.stats.byId.get(source)).filter(Boolean);
@@ -79,7 +78,7 @@ async function openStat(id, from) {
       ${lines.length ? `<div class="ae-item-block"><p class="ae-item-sec">Your points give</p><ul class="ae-odds-list">${lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul></div>` : ''}
       <div class="ae-item-block"><p class="ae-item-sec">What it does</p><p class="ae-card-line">Each point gives ${esc(stat.perPoint.value)}% to each of these.</p><ul class="ae-odds-list">${does}</ul></div>
       <div class="ae-item-block"><p class="ae-item-sec">For ${esc(panel.className)}</p><p class="ae-card-line" data-stat-reason>${esc(rank ? statReason(stat, rank, panel.className, others) : `No stat order for ${panel.className} yet, so this shows what the stat does only.`)}</p></div>
-      <div class="ae-item-block"><p class="ae-item-sec">Where points come from ${stat.from.status === 'confirmed' ? '' : notConfirmed('Check the sub stat lines on your gear and your Arcana in game.')}</p><ul class="ae-odds-list">${where}${boardLine}</ul></div>
+      <div class="ae-item-block"><p class="ae-item-sec">Where points come from</p><ul class="ae-odds-list">${where}${boardLine}</ul></div>
       <div class="ae-item-block"><p class="ae-item-sec">On your gear</p><p class="ae-card-line">${esc(look)}</p></div>`
   }), from);
 }

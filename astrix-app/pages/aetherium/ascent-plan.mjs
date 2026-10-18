@@ -29,7 +29,7 @@ const CONFIDENCE = {
   'single-source': 'An early pick, less tested.'
 };
 
-const pendingNote = value => `<p class="ae-pending"><span>Not confirmed yet.</span> ${esc(value.reason)}</p>`;
+const pendingNote = () => '';
 
 function fillClassSelect() {
   $('#aeClass').innerHTML = AION2_CLASSES.map(name => `<option value="${esc(name)}">${esc(name)}</option>`).join('');
@@ -172,14 +172,14 @@ function viewArt(view, plan) {
 }
 
 function viewStatus(view, plan) {
-  if (plan.pending) return 'Not confirmed yet';
+  if (plan.pending) return '';
   if (view === 'mastery') {
     const m = plan.mastery;
     return m.spend.length ? `${m.spend.length} key ${m.spend.length === 1 ? 'skill' : 'skills'} to level` : `${m.active.filter(entry => entry.priority).length} key skills`;
   }
   if (view === 'stigma') {
     const s = plan.stigmas;
-    if (s.pending) return 'Not confirmed yet';
+    if (s.pending) return '';
     const change = (s.equippedNow ?? []).find(item => item.verdict === 'out' && item.slot);
     if (change) return `Slot ${change.slot} to change`;
     return plan.level < s.unlockLevel ? `Opens at Lv ${s.unlockLevel}` : `${s.open} of 4 slots open`;
@@ -195,11 +195,11 @@ function viewStatus(view, plan) {
     return `Stack A, ${bar.mainAttack}, stack B`;
   }
   if (view === 'macro') {
-    if (!plan.macro || plan.macro.pending) return 'Not confirmed yet';
+    if (!plan.macro || plan.macro.pending) return '';
     const names = plan.macro.entries.map(entry => entry.name ?? (entry.key === 'A' ? 'Stack A' : 'Stack B'));
     return plan.macro.used ? `${names.map((name, index) => (index ? name.charAt(0).toLowerCase() + name.slice(1) : name)).join(' and ')} in Macro 1` : 'Nothing to add yet';
   }
-  if (view === 'stats') return isPending(plan.stats) ? 'Not confirmed yet' : `First: ${plan.stats.order[0]}`;
+  if (view === 'stats') return isPending(plan.stats) ? '' : `First: ${plan.stats.order[0]}`;
   return '';
 }
 
@@ -261,12 +261,11 @@ function renderMenu(plan) {
 
 /* The setup for now and the next change (level planner, games/aion2/engine/level-planner.mjs). Every screen and the menu
    show it: what this Daeva runs at this level, and one "Next at Lv N" line with its reason. A build with no ascent
-   record runs on today's data and says so; a reported choice says Reported. */
-const reportedTag = status => (status === 'reported' ? '<span class="ae-tag is-reported" data-status-tag="reported">Reported</span>' : '');
+   record runs on today's data. */
 function nextAtLine(plan) {
   const next = plan.nextAt;
   if (!next) return `<p class="ae-next-at" id="aeNextAt"><b>Next</b> Nothing changes in your setup before Lv ${esc(plan.levelCap)}.</p>`;
-  return `<p class="ae-next-at" id="aeNextAt" data-next-level="${esc(next.level)}"><b>Next at Lv ${esc(next.level)}</b> ${esc(next.text)}${next.why ? ` <span class="ae-next-why">${esc(next.why)}</span>` : ''} ${reportedTag(next.status)}</p>`;
+  return `<p class="ae-next-at" id="aeNextAt" data-next-level="${esc(next.level)}"><b>Next at Lv ${esc(next.level)}</b> ${esc(next.text)}${next.why ? ` <span class="ae-next-why">${esc(next.why)}</span>` : ''}</p>`;
 }
 function setupStrip(plan) {
   const s = plan.setup;
@@ -276,14 +275,14 @@ function setupStrip(plan) {
   const firstStigma = s.stigmas.find(slot => !slot.open);
   const board = s.daevanion.board;
   const items = [
-    ['line', line?.name ?? 'Macro', line ? line.skills.join(', ') : 'Nothing sourced yet'],
+    ['line', line?.name ?? 'Macro', line ? line.skills.join(', ') : '-'],
     ['stigmas', 'Stigmas', stigmas.length ? stigmas.map(slot => slot.name).join(', ') : firstStigma ? `From Lv ${firstStigma.slotLevel}: ${firstStigma.name}` : 'None'],
     ['mastery', 'Level next', s.mastery ? `${s.mastery.name} to Lv ${s.mastery.to}` : 'Nothing to level now'],
     ['daevanion', 'Daevanion', board ? `${board.name}${s.daevanion.now.length ? `: +1 on ${s.daevanion.now.join(', ')}` : ''}` : s.daevanion.firstLevel ? `From Lv ${s.daevanion.firstLevel}` : 'None'],
-    ['stats', 'Stat focus', s.stats?.first ?? 'Not confirmed yet']
+    ['stats', 'Stat focus', s.stats?.first ?? '-']
   ];
   return `<section class="ae-setup" id="aeSetup" aria-labelledby="aeSetupTitle" data-setup-level="${esc(s.level)}">
-    <h2 class="ae-setup-title" id="aeSetupTitle">Your setup at Lv ${esc(s.level)} ${s.planned ? reportedTag(s.status) : '<span class="ae-tag is-unconfirmed" data-status-tag="setup-unconfirmed">Not confirmed yet</span>'}</h2>
+    <h2 class="ae-setup-title" id="aeSetupTitle">Your setup at Lv ${esc(s.level)}</h2>
     <dl class="ae-setup-list">${items.map(([id, label, value]) => `<div data-setup="${id}"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>
     ${nextAtLine(plan)}
   </section>`;
@@ -352,12 +351,6 @@ function selectStigma(el) {
   openInfo(stigmaCard(state.plan, Number(el.dataset.stigma)), el);
 }
 
-/* Rule tags. Anything that rests on a game rule that is not confirmed says so, with the one-line in-game test.
-   Flip the rule's status in mechanics.json and the tag goes from every screen. */
-function ruleTag(rule, id, { test = true } = {}) {
-  if (!rule || rule.confirmed) return '';
-  return `<span class="ae-tag is-unconfirmed" data-rule-tag="${esc(id)}">Not confirmed yet</span>${test && rule.test ? ` <span class="ae-tag-test" data-rule-test="${esc(id)}">Check it in game: ${esc(rule.test)}</span>` : ''}`;
-}
 const CHAIN_ARROW = '<svg class="ae-chain-arrow" viewBox="0 0 24 12" aria-hidden="true"><path d="M1 6h19M15 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 /** A skill's chains on its card: the lead-in skills, an arrow, the follow-up. Only from the data; pressing it is the chain rule. */
 function chainHtml(plan, chains) {
@@ -366,7 +359,7 @@ function chainHtml(plan, chains) {
   return `<div class="ae-chain-block" data-chain>
     <p class="ae-item-sec">Chain</p>
     ${chains.map(chain => `<p class="ae-chain">${chain.pending ? `<em class="ae-chain-pending">${esc(chain.pending.reason)}</em>` : chain.leadIns.map(skill).join('<span class="ae-chain-or">or</span>')}${CHAIN_ARROW}${skill(chain.followUp)}${chain.opensAt ? `<small>from skill Lv ${esc(chain.opensAt)}${chain.reach ? `. ${esc(chain.reach.note)}.` : ''}</small>` : ''}</p>`).join('')}
-    <p class="ae-chain-note">Follow-up: press it when it lights up. ${ruleTag(plan.chains, 'chain-follow-up')}</p>
+    <p class="ae-chain-note">Follow-up: press it when it lights up.</p>
   </div>`;
 }
 
@@ -378,15 +371,10 @@ function iconTile(name, icon, { badge = null, tone = '', attr = '', tip = null, 
 }
 
 
-/* The macro facts and rules (progression.json: macro-order facts, macro-rules) as the page shows them. A fact or rule that is
-   not confirmed carries the "Not confirmed yet" tag; one players disagree on says so. Sources stay in the data. */
+/* The macro facts and rules (progression.json: macro-order facts, macro-rules) as the page shows them. Sources stay in the data. */
 const factOf = (plan, id) => plan.macro?.facts?.facts?.find(item => item.id === id) ?? plan.macroOrder?.facts?.find(item => item.id === id) ?? null;
 const macroRule = (plan, id) => plan.macro?.rules?.rules?.find(item => item.id === id) ?? null;
-function statusTag(item, id) {
-  if (!item || item.status === 'confirmed') return '';
-  if (item.status === 'disputed') return `<span class="ae-tag is-unconfirmed" data-status-tag="${esc(id)}">Players disagree</span>`;
-  return `<span class="ae-tag is-unconfirmed" data-status-tag="${esc(id)}">Not confirmed yet</span>`;
-}
+const statusTag = () => '';
 
 /* Skill Bar, as the game draws it: every key a column of four rows, row 0 at the bottom nearest the key label. The
    keys run 1 to 8, Q, E, then left click (the main attack, row 0 only), right click (the main line) and the second stack in
@@ -491,8 +479,6 @@ function macroWhere(bar) {
   if (ownRight) return second ? `${cap(name(main))} and ${name(second)} sit after right click and go into your macro.` : `${cap(name(main))} sits after right click and is your macro.`;
   return second ? `${cap(name(main))} is on right click and ${name(second)} sits next to it. Both go into your macro.` : `${cap(name(main))} is on right click and is your macro.`;
 }
-/** The tag for stacks not checked against a published top-player build yet (the build's macro block says verified: false). */
-const unverifiedTag = bar => (bar?.verified === false ? '<span class="ae-tag is-unconfirmed" data-status-tag="stacks-unverified">Not confirmed yet</span>' : '');
 /** The "What fires now" panel: what stack A and stack B fire at this level, and what joins them later. */
 function firesNowPanel(plan) {
   const bar = plan.skillBar;
@@ -544,7 +530,6 @@ function renderSkillBarScreen(plan) {
   const chains = plan.chains?.chains ?? [];
   const chip = (name, icon, note) => `<li>${art(icon)}<span>${esc(name)}${note ? ` <small>${esc(note)}</small>` : ''}</span></li>`;
   const groupStart = new Set(['5', 'Q']);
-  const pendingCooldowns = Object.values(bar.stacks).flatMap(stack => stack.skills).filter(skill => skill.cooldownPending && !skill.fixed);
   return `<div class="ae-skillbar">
     <div class="ae-bar-top">
       <div class="ae-bar-main">
@@ -560,14 +545,13 @@ function renderSkillBarScreen(plan) {
       </div>
       ${firesNowPanel(plan)}
     </div>
-    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. ${esc(macroWhere(bar))} Everything else gets a key of its own. Tap a skill to see why it sits there. ${ruleTag(bar.rule, 'skill-stack')}${bar.status && bar.status !== 'confirmed' ? ` ${statusTag({ status: bar.status }, 'bar-layout')}` : ''} ${unverifiedTag(bar)}</p>
+    <p class="ae-bar-rule" id="aeStackRule">Each key is a stack: press it and the lowest ready skill fires, row 0 first. ${esc(macroWhere(bar))} Everything else gets a key of its own. Tap a skill to see why it sits there.</p>
     ${copyList(bar)}
     ${comesLater(bar)}
-    ${chains.length ? `<div class="ae-icon-group" id="aeFollowUps"><p class="ae-mskills-title">Follow-up skills ${ruleTag(plan.chains, 'chain-follow-up', { test: false })}</p>
+    ${chains.length ? `<div class="ae-icon-group" id="aeFollowUps"><p class="ae-mskills-title">Follow-up skills</p>
       <ul class="ae-chiplist ae-followups">${chains.map(chain => chip(chain.followUp, plan.skillIcons[chain.followUp], chain.pending ? chain.pending.reason : `follow-up to ${chain.leadIns.join(' or ')}${chain.opensAt ? ` from skill Lv ${chain.opensAt}` : ''}${chain.reach ? `. ${chain.reach.note}.` : ''}`)).join('')}</ul>
-      <p class="ae-muted">Press a follow-up when it lights up.${plan.chains.confirmed ? '' : ` It goes above its lead-in in the stack once the chain rule is confirmed.${plan.chains.test ? ` <span class="ae-tag-test" data-rule-test="chain-follow-up">Check it in game: ${esc(plan.chains.test)}</span>` : ''}`}</p></div>` : ''}
+      <p class="ae-muted">Press a follow-up when it lights up.</p></div>` : ''}
     ${bar.notOnBar.length ? `<div class="ae-icon-group" id="aeNotOnBar"><p class="ae-mskills-title">Not on your bar</p><ul class="ae-chiplist">${bar.notOnBar.map(skill => chip(skill.name, skill.icon, skill.reason)).join('')}</ul></div>` : ''}
-    ${pendingCooldowns.length ? `<p class="ae-muted ae-bar-pending">Cooldown not captured yet for ${esc(pendingCooldowns.map(skill => skill.name).join(', '))}. Check each tooltip in game.</p>` : ''}
     <p class="ae-muted ae-bar-note">This is where the build puts each skill, not what is on your bars now. The official AION 2 site only says whether a skill is equipped, never which key or row it is on.</p>
   </div>`;
 }
@@ -576,8 +560,7 @@ function triggersHtml(item) {
   const list = item.triggers ?? [];
   if (!list.length) return '';
   const LABEL = { condition: 'Needs', opens: 'Gives', cdCut: 'Cooldown' };
-  return `<ul class="ae-triggers" data-triggers>${list.map(trigger => `<li class="${trigger.dim ? 'is-dim' : ''}" data-trigger-level="${esc(trigger.skillLevel ?? '')}"><b>${esc(LABEL[trigger.type] ?? 'Note')}</b> ${esc(trigger.text)}${trigger.from ? ` <small>${esc(trigger.from)}</small>` : ''}</li>`).join('')}</ul>
-    ${list.some(trigger => trigger.status !== 'confirmed') ? '<p class="ae-card-line"><span class="ae-tag is-unconfirmed">Not confirmed yet</span></p>' : ''}`;
+  return `<ul class="ae-triggers" data-triggers>${list.map(trigger => `<li class="${trigger.dim ? 'is-dim' : ''}" data-trigger-level="${esc(trigger.skillLevel ?? '')}"><b>${esc(LABEL[trigger.type] ?? 'Note')}</b> ${esc(trigger.text)}${trigger.from ? ` <small>${esc(trigger.from)}</small>` : ''}</li>`).join('')}</ul>`;
 }
 /** A cell's card: the skill's own card, then where it goes and why, its condition and triggers. */
 function barSkillCard(name, role, key = null) {
@@ -641,7 +624,7 @@ function renderMacroScreen(plan) {
       <div class="ae-macro-window" id="aeMacroWindow">
         <div class="ae-macro-tabs" aria-hidden="true"><span class="is-on">1</span><span>2</span><span>3</span></div>
         <ol class="ae-macro">${entries}</ol>
-        <p class="ae-macro-count" id="aeMacroCount">${m.entries.length === 2 ? 'Two entries, one for each stack.' : 'One entry.'} ${esc(macroWhere(bar))} ${unverifiedTag(bar)}</p>
+        <p class="ae-macro-count" id="aeMacroCount">${m.entries.length === 2 ? 'Two entries, one for each stack.' : 'One entry.'} ${esc(macroWhere(bar))}</p>
       </div>
       <p class="ae-macro-skip" id="aeMacroRule">Each entry fires its stack's first ready skill. ${skip ? `${esc(skip.text.split('. ')[0])}. ${statusTag(skip, 'skip-on-cooldown')}` : ''}</p>
       ${later}
@@ -659,14 +642,14 @@ function renderMacroScreen(plan) {
         <dl class="ae-settings">
           <div data-setting="delay"><dt>Delay</dt><dd>${esc(delay)} ms. ${delayRule?.value?.slowMs ? `${esc(delayRule.value.slowMs.join(' to '))} ms if skills fail to fire or your ping is ${esc(delayRule.value.pingMs)} ms or more.` : ''} ${statusTag(delayRule, 'delay')}</dd></div>
           ${order?.bind ? `<div data-setting="bind" id="aeMacroBind"><dt>Key</dt><dd><ol class="ae-crumbs">${order.bind.path.map(step => `<li>${esc(step)}</li>`).join('')}</ol>${order.bind.defaultKey ? '' : 'No key is set at the start, so bind one.'}${mouse ? ` ${esc(mouse.text)} ${statusTag(mouse, 'mouse-bind-aion1')}` : ''}</dd></div>` : ''}
-          ${queue ? `<div data-setting="skill-queue"><dt>Skill Queue</dt><dd>Players disagree. Test both. ${statusTag(queue, 'skill-queue')}</dd></div>` : ''}
+          ${queue ? `<div data-setting="skill-queue"><dt>Skill Queue</dt><dd>Try it on and off.</dd></div>` : ''}
           ${order?.bind?.presets ? `<div data-setting="presets" id="aeMacroPresets"><dt>Presets</dt><dd>${esc(order.bind.presetNote)}</dd></div>` : ''}
         </dl>
       </section>
       ${test ? `<section class="ae-macro-test" id="aeMacroTest" aria-labelledby="aeTestTitle">
-        <h2 class="ae-mskills-title" id="aeTestTitle">Test it on the training dummy ${statusTag(test, 'test-dummy')}</h2>
+        <h2 class="ae-mskills-title" id="aeTestTitle">Test it on the training dummy</h2>
         <ol class="ae-test-steps">${(test.steps ?? []).map(step => `<li>${esc(step)}</li>`).join('')}</ol>
-        <p class="ae-muted">Open Combat Analysis with Ctrl+X.${test.check ? ` <span class="ae-tag-test" data-fact-test="test-dummy">Check it in game: ${esc(test.check)}</span>` : ''}</p>
+        <p class="ae-muted">Open Combat Analysis with Ctrl+X.</p>
       </section>` : ''}
       ${m.extras.length ? `<div class="ae-icon-group" id="aeMacroExtras"><p class="ae-mskills-title">Some players add</p><ul class="ae-chiplist">${m.extras.map(item => `<li>${art(item.icon)}<span>${esc(item.name)} <small>${esc(item.reason)}</small></span></li>`).join('')}</ul></div>` : ''}
       ${m.levelNotes.length ? `<ul class="ae-macro-notes" id="aeMacroNotes">${m.levelNotes.map(note => `<li>${esc(note.text)}</li>`).join('')}</ul>` : ''}
@@ -687,7 +670,7 @@ function statChainHtml(entry, live, rank) {
 /* What to look for on each kind of gear: the lines this build wants in its order, the rest greyed as skip. */
 function gearRowsHtml(rows) {
   return `<section class="ae-gear-look" id="aeGearLook" aria-labelledby="aeGearLookTitle">
-      <h3 class="ae-stats-group" id="aeGearLookTitle">What to look for on your gear <span class="ae-tag is-unconfirmed">Not confirmed yet</span> <span class="ae-tag-test">Check: the sub stat lines your gear rolls in game.</span></h3>
+      <h3 class="ae-stats-group" id="aeGearLookTitle">What to look for on your gear</h3>
       <ul class="ae-look-rows">${rows.map(row => `<li data-gear-row="${esc(row.id)}"><strong>${esc(row.label)}</strong>
         <span>${row.want.length ? row.want.map(stat => `<span class="ae-look-want${stat.tag ? ` is-${esc(stat.tag)}` : ''}">${esc(stat.name)}</span>`).join(' ') : '<span class="ae-look-none">Nothing your build chases</span>'}${row.skip.length ? `<span class="ae-look-skip">Skip: ${esc(row.skip.map(stat => stat.name).join(', '))}</span>` : ''}</span></li>`).join('')}</ul>
     </section>`;
@@ -715,7 +698,7 @@ function renderBoardsByHand(plan) {
       <span><strong>${esc(board.name)}</strong><small>${esc(board.focus)}</small></span>
       <b>${board.open ? 'Open' : `Lv ${esc(board.unlockLevel)}`}</b>
     </li>`).join('')}</ul>
-    ${isPending(d.priorities) ? pendingNote(d.priorities) : `<div class="ae-board-first" id="aeBoardFirst"><p class="ae-mskills-title">Take these first ${d.status === 'reported' ? statusTag({ status: 'reported' }, 'node-priorities') : ''}</p><ol class="ae-list">${d.priorities.map(item => `<li>${esc(item)}</li>`).join('')}</ol></div>`}
+    ${isPending(d.priorities) ? pendingNote(d.priorities) : `<div class="ae-board-first" id="aeBoardFirst"><p class="ae-mskills-title">Take these first</p><ol class="ae-list">${d.priorities.map(item => `<li>${esc(item)}</li>`).join('')}</ol></div>`}
     <p class="ae-callout">Find your Daeva and this screen draws your own boards with the route on them. <a class="ae-linkish" href="/hub/aetherium/">Find your Daeva</a></p>`;
 }
 
