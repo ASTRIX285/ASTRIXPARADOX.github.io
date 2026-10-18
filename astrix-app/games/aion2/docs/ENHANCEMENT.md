@@ -41,13 +41,15 @@ So the Gear page can give each item its exact next step.
 - CONFIRMED in game: Gear Transfer moves from a Source Gear to the target and needs Gear Transfer Material.
 - REPORTED: moves the enhance level and Soul Binding lines; loses manastones, Theostone and the extra line. Material made in Substance Morph. Use it to move a built-up piece onto a better item of the same slot. Check the preview first.
 
-## 6. The order to advise
-1. Levelling: enhance to +10 only (always succeeds, stones refundable). Belt and amulet to +10. Cheap manastones in empty slots. No Theostone.
-2. Keeper gear (Unique you will hold): weapon first, then guard, then armour, past +10 one step at a time; the pity bonus means each step ends within a known number of tries.
-3. Soul Binding on keepers: reroll bad lines first, then Bind.
-4. Top manastones for your role on keepers only.
-5. Theostone on the final weapon.
-6. New better item for the same slot: Transfer, then rebuild manastones and Theostone.
+## 6. The order to advise (superseded in part by section 9, Miguel, 18 Oct 2026)
+1. Before Lv 35 (no Unique gear yet): enhance nothing but the belt and amulet (own scrolls). Save Enhance Stones, Kina and manastones; gather and level crafting instead (section 9).
+2. Epic, Rare and Common gear: never enhanced. A Unique piece replaces it.
+3. Each Unique piece: Growth to +10 first (always succeeds, stones refundable). Weapon first, then guard, then armour.
+4. Past +10: weapon, then guard, one step at a time; the pity bonus means each step ends within a known number of tries.
+5. Soul Binding on keepers: reroll bad lines first, then Bind.
+6. Top manastones for your role on keepers only.
+7. Theostone on the final weapon.
+8. New better Unique for the same slot: Transfer, then rebuild manastones and Theostone.
 
 ## 7. Miguel's own gear today (screenshots, 17 Oct)
 Greatsword +9 (Unique), guard +11 (Soul Binding 94.3%, Block 37/37, Ankle Slice +1), gloves +11 (45%), breastplate +9 (80.9%, Survival Willpower +1), legs +3, belt +6, one piece +1. Manastone slots empty on the gloves; no Theostone on the weapon.
@@ -60,6 +62,37 @@ Advice from the order above: weapon +9 to +10 (always succeeds) before more guar
 4. Bind cost and Codex count at higher rates; is "Soul Codices" the same item as "Soul Binding Book"?
 5. Transfer preview: what is kept.
 6. Sealed Wings weekly limit.
+
+## 9. The decision logic: what to enhance, and when (Miguel, in game, 18 Oct 2026)
+
+Miguel's rulings: do not recommend enhancing even Epic gear; Unique gear does not drop before Lv 35; before then, players should gather materials and level their crafting (armour, weapons, food, jewellery) so that by the time they are proficient they can farm the resources to build enough material to succeed. Data: progression.json unique-gear-level (35); enhancement.json logic and order.
+
+### Gate 1: the level
+- Below Lv 35: no Unique gear exists for the Daeva yet, and everything worn (Common, Rare, Epic) will be replaced.
+  - Do not spend Enhance Stones, Kina or manastones on gear.
+  - Belt and amulet are the exception: their own scrolls, not Enhance Stones, +10 at every grade.
+  - Prepare instead: gather all the time (Orichalcum Ore, wood, gems, herbs, Odyle) and level the five crafting professions. Every craft gives proficiency, success or not. Crafted Dragon Lord gear needs proficiency 55, is Unique, and has one more Soul Binding line than dungeon drops (CRAFTING-RESEARCH.md sections 4 to 8).
+  - Blacksmithing: weapons and guards. Armorsmithing: armour. Handicrafting: jewellery, bows and staffs. Alchemy: potions, scrolls, Manastones and Soulstones. Cooking: buff food.
+- Lv 35 and up: build the Unique pieces, one at a time.
+
+### Gate 2: the grade
+- Unique or better: a keeper. Follow the steps below.
+- Epic, Rare, Common: do not enhance it, not even with cheap stones. Replace it with a Unique piece (from a drop or a craft).
+
+### Gate 3: which piece first
+- The weapon, then the guard, then the armour, then the accessories.
+
+### The steps for each Unique piece, in order
+1. Growth to +10: every step succeeds; extraction gives the stones back.
+2. Past +10: the weapon, then the guard only; one step at a time; the failure bonus caps the tries.
+3. Soul Binding: reroll weak lines for the role first, then Bind towards 100%.
+4. Manastones: top stones for the role in every slot (keepers only; Transfer loses them).
+5. Theostone: the weapon you keep, last.
+6. Transfer: when a better Unique drops for the slot, move the enhance level and Soul Binding across, then rebuild stones and Theostone.
+
+### What the tool does with it
+- Each piece's What to do follows the gates: below Lv 35 a non-Unique piece says "wear it, do not enhance it"; from Lv 35 it says "replace it with a Unique piece". No manastone step on non-Unique gear.
+- The Enhance tab shows the gates with the Daeva's own stage lit, the steps, and below Lv 35 the prepare path (gather and craft).
 
 ## Sources
 In-game screenshots (Miguel, 17 Oct 2026); official character data (lv45-items fixture). games.gg Enhance Stones and Soul Binding guides; playnews Soul Binding and Enhancement Stones guides; thegameswiki manastones and gear progression; gamewith enhancement simulator; mobalytics endgame gear and Gladiator build; expcarry Theostone guide; gameplay.tips enhancement guide; ezg gear upgrade guide; metabot enhancement page (rates cross-check only).

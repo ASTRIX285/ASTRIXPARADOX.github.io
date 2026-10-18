@@ -348,7 +348,8 @@ export function levelOrder(plan) {
    the item card and the plan's gear moves all read enchantAdvice, so a tile's flag and the move that names it agree. */
 
 /** The level from which Common and Rare gear is replaced, not enchanted: the progression fact when there is one, else Lv 20. */
-export const EARLY_GEAR_LEVEL = 20;
+/** The level Unique gear starts at (Miguel, in game, 18 Oct 2026; progression.json unique-gear-level). */
+export const UNIQUE_GEAR_LEVEL = 35;
 /** Every enchant step up to this level succeeds (mechanics.json enchant-rates). */
 export const SAFE_ENCHANT = 10;
 /** Slots that go past +10 only on these (the rest stop at +10: past it every step can fail and the cost climbs). */
@@ -398,9 +399,9 @@ export function enchantCap(slot, grades) {
   return { cap, about: true };
 }
 
-function earlyGearLevel(progression) {
-  const fact = indexProgression(progression)['gear-replace-level'];
-  return Number.isFinite(fact?.value) ? fact.value : EARLY_GEAR_LEVEL;
+export function uniqueGearLevel(progression) {
+  const fact = indexProgression(progression)['unique-gear-level'];
+  return Number.isFinite(fact?.value) ? fact.value : UNIQUE_GEAR_LEVEL;
 }
 
 /**
@@ -431,14 +432,14 @@ export function enchantAdvice(slot, { level = 1, grades = null, progression = nu
   if (OWN_CAP_SLOTS.has(slotKey(slot))) {
     return from >= cap ? full : enchantTo(cap, `${slotLabelOf(slot)}s go to ${capText} at every grade. They use their own enhance scroll.`);
   }
-  if (grade.id === 'epic') {
-    return { ...base, action: 'replace', flag: 'REPLACE', why: `Epic gear stops at ${capText}. Replace it with a Unique piece, and do not enchant it past +5: the stones stay with it when you swap.` };
-  }
-  if (grade.id === 'common' || grade.id === 'rare') {
-    if (level >= earlyGearLevel(progression)) {
-      return { ...base, action: 'replace', flag: 'REPLACE', why: `${grade.name} gear is for the early levels. Replace it with a Unique piece: enchanting it now spends stones on an item you will drop.` };
+  // Below Unique (Miguel, 18 Oct 2026): never enhanced. Before Unique gear starts, wear it and save; after, replace it.
+  const uniqueOrder = index.byCode.get('Unique')?.order?.value ?? Infinity;
+  if (grade.order < uniqueOrder) {
+    const from35 = uniqueGearLevel(progression);
+    if (level < from35) {
+      return { ...base, action: 'hold', flag: null, why: `Wear it, but do not enhance it: no Unique gear drops before Lv ${from35}, and this piece will be replaced. Save the stones, and gather and level your crafting instead.` };
     }
-    return from >= cap ? full : enchantTo(cap, `Cheap while you level: every step to ${capText} succeeds.`);
+    return { ...base, action: 'replace', flag: 'REPLACE', why: grade.id === 'epic' ? 'Do not enhance Epic gear. Replace it with a Unique piece, from a drop or a craft.' : `${grade.name} gear is for the early levels. Replace it with a Unique piece, from a drop or a craft.` };
   }
   if (grade.order >= (index.byCode.get('Unique')?.order?.value ?? Infinity)) {
     if (from >= cap) return full;
@@ -488,17 +489,20 @@ export function gearMoves(model, { level = 1, grades = null, progression = null 
   else if (otherSafe.length) add(30.5, 'enchant-unique', `Enchant ${otherSafe.length} ${otherSafe[0].advice.grade.name} pieces to +${SAFE_ENCHANT}`, `Every step succeeds. ${otherSafe.map(({ slot }) => slot.name).join(', ')}.`, otherSafe.map(({ slot }) => slot));
   // Amulets and belts to their own cap.
   plain.filter(({ slot }) => OWN_CAP_SLOTS.has(slotKey(slot))).forEach((entry, n) => one(entry, 31 + n / 10, `${entry.advice.to - entry.advice.from === 1 ? 'One step' : `${entry.advice.to - entry.advice.from} steps`} to its +${entry.advice.cap} cap. It uses its own enhance scroll.`));
-  // Common and Rare while levelling: one move.
-  const early = plain.filter(({ slot, advice }) => !OWN_CAP_SLOTS.has(slotKey(slot)) && (advice.grade.id === 'common' || advice.grade.id === 'rare'));
-  if (early.length === 1) one(early[0], 31.5, 'Cheap while you level. Every step succeeds.');
-  else if (early.length) add(31.5, 'enchant-early', `Enchant ${early.length} ${namesOf(early)} pieces to +${early[0].advice.cap}`, `Cheap while you level. Every step succeeds. ${early.map(({ slot }) => slot.name).join(', ')}.`, early.map(({ slot }) => slot));
+  // Before Unique gear starts (Miguel, 18 Oct 2026): nothing is enhanced but the belt and amulet. One move says so and
+  // points at what to do instead: gather and level the crafting professions.
+  const held = of(advice => advice.action === 'hold');
+  if (held.length) {
+    const from35 = uniqueGearLevel(progression);
+    add(31.5, 'save-stones', `Save your Enhance Stones until Lv ${from35}`, `No Unique gear drops before Lv ${from35}, and the ${held.length === 1 ? 'piece' : `${held.length} pieces`} you wear now will be replaced. Do not enhance ${held.length === 1 ? 'it' : 'them'}. Gather materials and level your crafting instead, so you are ready to build Unique gear.`, held.map(({ slot }) => slot));
+  }
   // Replace: Epic pieces, then Common and Rare.
   const replace = of(advice => advice.action === 'replace');
   const epic = replace.filter(({ advice }) => advice.grade.id === 'epic');
   const low = replace.filter(({ advice }) => advice.grade.id !== 'epic');
   const replaceMove = (rank, id, list) => add(rank, id,
     list.length === 1 ? `Replace ${list[0].slot.name} with a Unique piece` : `Replace ${list.length} ${namesOf(list)} pieces with Unique gear`,
-    `${list[0].advice.grade.id === 'epic' ? 'Epic gear stops at +10. Do not enchant it past +5.' : 'Do not enchant them: the stones stay with the old item.'} Replace with a Unique piece. ${list.map(({ slot }) => slot.name).join(', ')}.`,
+    `${list[0].advice.grade.id === 'epic' ? 'Do not enhance Epic gear.' : 'Do not enchant them: the stones stay with the old item.'} Replace with a Unique piece, from a drop or a craft. ${list.map(({ slot }) => slot.name).join(', ')}.`,
     list.map(({ slot }) => slot));
   if (epic.length) replaceMove(32, 'replace-epic', epic);
   if (low.length) replaceMove(33, 'replace-early', low);

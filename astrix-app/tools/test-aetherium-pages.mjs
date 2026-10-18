@@ -380,12 +380,13 @@ await check('live Gear page: one call for first paint, item detail on demand',as
   await page.click('[data-slot="0"]');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
   assert.equal(await page.textContent('#aeInfoTitle'),'Twilight Greatsword');
-  assert.match(await page.textContent('#aeInfo .ae-card-head p'),/Main Hand · Greatsword · Rare/);
+  // Item tooltip (Miguel, 17 Oct 2026): the card is the game's item tooltip, the item only; advice is on the Enhance tab.
+  assert.match((await page.textContent('#aeInfo .ae-tt-kind')).replace(/\s+/g,' ').trim(),/^Rare Greatsword$/);
+  assert.equal(await page.getAttribute('#aeInfo .ae-tt','data-grade'),'rare');
   assert.equal(await page.locator('#aeInfo .ae-pips i').count(),5,'Enchant pips up to the max');
   assert.equal(await page.locator('#aeInfo .ae-pips i.is-on').count(),2);
-  // Compact card (Miguel, 17 Oct 2026): the move is What to do's head, with no status strip saying it again.
-  assert.equal(await page.textContent('#aeInfo .ae-advice-head'),'Enchant it to +5');
-  assert.equal(await page.locator('#aeInfo .ae-card-status').count(),0);
+  assert.equal(await page.locator('#aeInfo #aeAdvice, #aeInfo .ae-card-status').count(),0,'No advice inside the item card');
+  assert.equal(await page.locator('#aeInfo [data-enhance-item]').count(),1,'One tap to the Enhance tab');
   assert.match(await page.textContent('#aeInfo .ae-item-rows'),/Attack48 \+2/);
   assert.equal(await page.locator('#aeInfo .ae-sockets i').count(),2,'Manastone slots drawn as sockets');
   assert.match(await page.textContent('[data-slot="0"] .ae-slot-meta'),/\+2 of 5/,'Tile picks up max enchant from the detail');
@@ -393,9 +394,10 @@ await check('live Gear page: one call for first paint, item detail on demand',as
   assert.equal(await page.isHidden('#aeInfo'),true);
   await page.click('[data-slot="1"]');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-perk-list'));
-  assert.deepEqual(await page.$$eval('#aeInfo .ae-perk',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Survival Willpower+1','Empty perk slot','Empty perk slot'],'Skill perks: rolled and empty');
+  assert.deepEqual(await page.$$eval('#aeInfo .ae-perk',items=>items.map(el=>el.textContent.replace(/\s+/g,' ').trim())),['Survival WillpowerLv. +1','Empty perk slot','Empty perk slot'],'Skill perks: rolled and empty');
   assert.match(await page.getAttribute('#aeInfo .ae-perk img','src'),/ICON_GL_SKILL_Passive_009\.png$/);
-  assert.match(await page.textContent('#aeInfo'),/Wear from Lv 22.*Look: Skybright Oath \(Helm\).*A helm for the brave\.Can be upgraded\./s);
+  // Item tooltip (17 Oct 2026): the look and the description in the body, the required level at the foot, as in game.
+  assert.match(await page.textContent('#aeInfo'),/LookSkybright Oath \(Helm\).*A helm for the brave\.Can be upgraded\..*Required Level 22/s);
   await page.click('#aeInfo .ae-info-close');
   assert.equal(await page.isHidden('#aeInfo'),true);
   // Gear grid (11 Oct 2026): was deepEqual(calls,['/aion2/character','/aion2/item','/aion2/item']). Each worn item is now read
