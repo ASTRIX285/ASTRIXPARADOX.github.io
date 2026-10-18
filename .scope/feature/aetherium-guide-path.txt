@@ -42,3 +42,4 @@ hub/aetherium/guide/world/index.html
 hub/aetherium/index.html
 hub/aetherium/skills/index.html
 sitemap.xml
+astrix-app/tools/test-aetherium-guide.mjs
