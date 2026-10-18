@@ -256,12 +256,19 @@ function setupFlags({ plan, build, model, data, engine, assessor }) {
     if (skill.skillLevel === null && skill.unlocked) flags.push({ kind: 'skill', title: `${skill.name} not learned yet`, cost: `A key skill in this build. You give up: ${skill.why ?? 'its part in the rotation.'}` });
     else if (skill.skillLevel !== null && skill.equipped === false) flags.push({ kind: 'skill', title: `${skill.name} is not on your skill bar`, cost: `A key skill in this build. You give up: ${skill.why ?? 'its part in the rotation.'}` });
   }
+  // Pieces with the same verdict and reason share one line, so ten Epic pieces read as one flag, not ten.
+  const gear = new Map();
   for (const slot of model.gear ?? []) {
     if (slot.empty) continue;
     const advice = engine.enchantAdvice(slot, { level: model.profile.level, grades: data.grades, progression: data.progression });
     const verdict = assessor.assessItem({ slot, advice, build, stats: data.stats });
-    if (verdict.verdict === 'replace' || verdict.verdict === 'weak') flags.push({ kind: 'gear', title: `${slotLabel(slot.slot)}: ${verdict.title}`, cost: verdict.reasons.join(' ') });
+    if (verdict.verdict !== 'replace' && verdict.verdict !== 'weak') continue;
+    const cost = verdict.reasons.join(' ');
+    const key = `${verdict.title}|${cost}`;
+    if (!gear.has(key)) gear.set(key, { title: verdict.title, cost, slots: [] });
+    gear.get(key).slots.push(slotLabel(slot.slot));
   }
+  for (const item of gear.values()) flags.push({ kind: 'gear', title: `${item.slots.join(', ')}: ${item.title}`, cost: item.cost });
   return flags;
 }
 

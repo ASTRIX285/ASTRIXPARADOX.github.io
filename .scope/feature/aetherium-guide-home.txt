@@ -39,3 +39,5 @@ hub/aetherium/index.html
 hub/aetherium/skills/index.html
 sitemap.xml
 astrix-app/tools/test-aetherium-pages.mjs
+astrix-app/tools/test-aetherium-guide.mjs
+astrix-app/tools/paradox-validator.mjs

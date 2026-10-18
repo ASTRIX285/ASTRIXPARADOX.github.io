@@ -1849,8 +1849,9 @@ html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-
 .ae-gd h3,.ae-gd-h3{margin:0 0 .375rem;font:700 1.0625rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
 .ae-gd h4{margin:.75rem 0 .375rem;font:700 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted)}
 .ae-gd p{margin:0 0 .5rem;line-height:1.55}
-.ae-gd a:not(.ae-btn):not(.ae-gd-tile-head):not(.ae-gw-back){color:var(--ae-ice)}
-.ae-gd a:not(.ae-btn):not(.ae-gd-tile-head):not(.ae-gw-back):hover{color:var(--ae-text)}
+/* Plain links read ice blue; :where keeps this rule weaker than any component's own link colour (the gold class names). */
+.ae-gd :where(a:not(.ae-btn,.ae-gd-tile-head,.ae-gw-back)){color:var(--ae-ice)}
+.ae-gd :where(a:not(.ae-btn,.ae-gd-tile-head,.ae-gw-back)):hover{color:var(--ae-text)}
 .ae-gd-lede{font-size:1.0625rem;color:var(--ae-text)}
 /* Breadcrumb: plain links on the window's dark strip, the page itself in the text colour. */
 .ae-gd-crumbs{padding:0 16px;background:rgba(0,0,0,.25);border-bottom:1px solid var(--ae-hairline)}
@@ -1880,7 +1881,7 @@ html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-
 .ae-gd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr));gap:var(--ae-gap);margin:0;padding:0;list-style:none}
 .ae-gd-tile{position:relative;display:grid;align-content:start;gap:.5rem;padding:1rem 1.125rem 1.125rem;background:var(--ae-well-gradient);border:1px solid var(--ae-hairline-strong);box-shadow:var(--ae-bevel),var(--ae-shadow-tight);clip-path:var(--ae-notch)}
 .ae-gd-tile-head{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;min-height:44px;color:var(--ae-text);text-decoration:none}
-a.ae-gd-tile-head:hover .ae-gd-tile-name,a.ae-gd-tile-head:focus-visible .ae-gd-tile-name{color:var(--ae-gold)}
+.ae-gd-tile-head:is(a):hover .ae-gd-tile-name,.ae-gd-tile-head:is(a):focus-visible .ae-gd-tile-name{color:var(--ae-gold)}
 .ae-gd-icon{flex:0 0 auto;width:40px;height:40px;padding:6px;box-sizing:border-box;color:var(--ae-gold);background:var(--ae-well);border:1px solid var(--ae-hairline-strong);border-radius:10px;box-shadow:0 0 14px color-mix(in srgb,var(--ae-strobe) 18%,transparent)}
 .ae-gd-tile-name{font:700 1.125rem/1.2 var(--ae-font-ui);letter-spacing:.02em}
 .ae-gd-tile-blurb{margin:0;font-size:.9375rem;color:var(--ae-text-muted)}

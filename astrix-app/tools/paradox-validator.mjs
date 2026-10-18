@@ -18,6 +18,7 @@ const validators=[
   'test-aion2-adapter.mjs', // AION 2 armory adapter: ASTRIX285 fixtures to the character model.
   'test-aion2-advisor.mjs', // AION 2 Ascent Plan advisor: data coverage, sources, level-aware plans.
   'test-aetherium-ascent.mjs', // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout.
+  'test-aetherium-guide.mjs', // The Aetherium AION 2 Guide: shell, home grid, class roles table, class pages, setup flag, layout.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
