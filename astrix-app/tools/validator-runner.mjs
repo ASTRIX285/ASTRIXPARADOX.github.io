@@ -1,6 +1,6 @@
 // The PARADOX validator runner (18 Oct 2026). paradox-validator.mjs owns the suite list; this module runs it.
 //   - A pool of child processes: CPU cores minus one at a time, at most 3 of them suites that start Chromium.
-//     Suites marked serial run alone, one after another, once the pool has finished.
+//     --browsers=N sets the Chromium cap (the GitHub check uses 1 on its 4-core runner). Suites marked serial run alone, one after another, once the pool has finished.
 //   - Each suite's output is held until it ends and printed in one block, with its time and exit code.
 //   - --changed (default on a branch, outside CI) runs the core set plus the areas the changed files touch,
 //     from validator-areas.json. --all runs every suite. --serial runs the old way: one by one, stop at the first failure.
@@ -21,13 +21,14 @@ export function suiteSpec(entry){
 }
 
 export function parseArgs(argv){
-  const options={mode:null,serial:false,jobs:null};
+  const options={mode:null,serial:false,jobs:null,browsers:null};
   for(const arg of argv){
     if(arg==='--all')options.mode='all';
     else if(arg==='--changed')options.mode='changed';
     else if(arg==='--serial')options.serial=true;
     else if(/^--jobs=\d+$/.test(arg)){options.jobs=Number(arg.slice(7));if(options.jobs<1)throw new Error('--jobs must be 1 or more');}
-    else throw new Error(`Unknown validator option: ${arg} (use --all, --changed, --serial, --jobs=N)`);
+    else if(/^--browsers=\d+$/.test(arg)){options.browsers=Number(arg.slice(11));if(options.browsers<1)throw new Error('--browsers must be 1 or more');}
+    else throw new Error(`Unknown validator option: ${arg} (use --all, --changed, --serial, --jobs=N, --browsers=N)`);
   }
   return options;
 }
@@ -201,7 +202,7 @@ export async function main(argv,entries,overrides={}){
   }
   if(mode==='all'){log(`VALIDATOR_MODE=all`);selected=specs;}
   const jobs=options.serial?1:(options.jobs??overrides.jobs??defaultJobs());
-  const browserLimit=Math.min(BROWSER_LIMIT,jobs);
+  const browserLimit=Math.min(options.browsers??BROWSER_LIMIT,BROWSER_LIMIT,jobs);
   log(`VALIDATOR_SUITES=${selected.length} of ${specs.length} ${options.serial?'serial':`pool of ${jobs}, at most ${browserLimit} Chromium, ${selected.filter(spec=>spec.serial).length} serial after`}`);
   const runOptions={jobs,browserLimit,run:overrides.run||runSuite,tools:overrides.tools||TOOLS,cwd:overrides.cwd||ROOT,env:overrides.env||process.env};
   const started=Date.now();

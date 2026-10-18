@@ -53,6 +53,13 @@ try {
   }
   assert.ok(result.lines.some(line=>/^VALIDATOR_TIME=10 suite\(s\) ran in \d+\.\ds$/.test(line)));
   assert.equal(result.lines.filter(line=>line.startsWith('VALIDATOR_SLOWEST=')).length,10);
+  // --browsers=1: one Chromium suite at a time, plain suites still alongside.
+  reset();
+  result=await run(['--all','--jobs=8','--browsers=1'],entries);
+  assert.equal(result.code,0);
+  assert.equal(peak(chromium),1,`--browsers=1 runs one Chromium suite at a time (peak ${peak(chromium)})`);
+  assert.ok(peak()>=2,'plain suites still run beside it');
+  assert.ok(result.lines.includes('VALIDATOR_SUITES=10 of 10 pool of 8, at most 1 Chromium, 1 serial after'));
   console.log(`RUNNER_POOL=PASS peak ${peak()} at once, Chromium peak ${peak(chromium)}, serial after, ${pooled} ms`);
 
   // 2. A failing suite fails the run with its exit code and the old result line; the others still run.
@@ -83,8 +90,9 @@ try {
   console.log('RUNNER_SERIAL=PASS one by one, list order, stops at the first failure, same verdict as the pool');
 
   // 4. Options.
-  assert.deepEqual(parseArgs([]),{mode:null,serial:false,jobs:null});
-  assert.deepEqual(parseArgs(['--changed','--jobs=2']),{mode:'changed',serial:false,jobs:2});
+  assert.deepEqual(parseArgs([]),{mode:null,serial:false,jobs:null,browsers:null});
+  assert.deepEqual(parseArgs(['--changed','--jobs=2','--browsers=1']),{mode:'changed',serial:false,jobs:2,browsers:1});
+  assert.throws(()=>parseArgs(['--browsers=0']),/--browsers/);
   assert.throws(()=>parseArgs(['--fast']),/Unknown validator option/);
   assert.throws(()=>parseArgs(['--jobs=0']),/--jobs/);
   assert.ok(patternMatches('astrix-app/pages/','astrix-app/pages/journey/index.html'));

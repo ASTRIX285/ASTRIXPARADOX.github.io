@@ -20,12 +20,12 @@ export const validators=[
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
   browser('test-aetherium-pages.mjs'), // The Aetherium Daeva Card and Gear page: demo, live, roster, faction, Worker down, layout.
-  browser('test-aetherium-character.mjs'), // The Aetherium character menu, Gear, Skills and Daevanion pages: cards, tabs, hover card, board totals, layout.
+  {name:'test-aetherium-character.mjs',browser:true,serial:true}, // The Aetherium character menu, Gear, Skills and Daevanion pages: cards, tabs, hover card, board totals, layout. Serial: its Gear tile look check failed under load (18 Oct 2026).
   'test-aetherium-worker.mjs', // AION 2 armory Worker: whitelist, cache, rate limit, CORS, 502.
   browser('test-hub-cards.mjs'), // The Hub: full-bleed card art, text backdrop, spare card map image.
   'test-aion2-adapter.mjs', // AION 2 armory adapter: ASTRIX285 fixtures to the character model.
   'test-aion2-advisor.mjs', // AION 2 Ascent Plan advisor: data coverage, sources, level-aware plans.
-  browser('test-aetherium-ascent.mjs'), // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout.
+  {name:'test-aetherium-ascent.mjs',browser:true,serial:true}, // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout. Serial: its title and data line layout check failed under load (18 Oct 2026).
   browser('test-aetherium-guide.mjs'), // The Aetherium AION 2 Guide: shell, home grid, class roles table, class pages, setup flag, layout.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
@@ -67,7 +67,7 @@ export const validators=[
   'validate-portal-loader.mjs',
   'validate-single-loader.mjs',
   browser('validate-single-module-urls.mjs'),
-  browser('test-portal-single-skin.mjs'),
+  {name:'test-portal-single-skin.mjs',browser:true,serial:true}, // Serial: its 200 ms breach readiness window failed under load (18 Oct 2026).
   browser('test-seamless-transitions.mjs'), // feature/seamless-tool-transitions: no frame before readiness.
   browser('test-home-browser.mjs'),
   browser('test-asset-weight.mjs'), // perf/asset-weight: no first-load image over 300 KB, no full manifest.

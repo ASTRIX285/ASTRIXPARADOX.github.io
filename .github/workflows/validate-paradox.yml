@@ -42,4 +42,6 @@ jobs:
         env:
           CODEX_PRIMARY_RUNTIME_NODE_MODULES: ${{ runner.temp }}/paradox-browser/node_modules
           PLAYWRIGHT_MODULE_PATH: ${{ runner.temp }}/paradox-browser/node_modules/playwright/index.mjs
-        run: node astrix-app/tools/paradox-validator.mjs --all
+        # One Chromium suite at a time on the 4-core runner: three at once made the browser suites 4x slower and broke
+        # their timing and layout checks on the first run of this check. Plain suites still run beside it.
+        run: node astrix-app/tools/paradox-validator.mjs --all --browsers=1
