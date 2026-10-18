@@ -1929,7 +1929,7 @@ html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-
 .ae-gd-build-head h3{margin:0}
 .ae-gd-build-role{color:var(--ae-gold);margin-right:.25rem}
 .ae-gd-chips{display:flex;flex-wrap:wrap;gap:.375rem;margin:0}
-.ae-tag.is-main{color:var(--ae-gold-ink);background:var(--ae-gold);border:1px solid var(--ae-gold)}
+.ae-gd .ae-tag.is-main{color:var(--ae-gold-ink);background:var(--ae-gold);border:1px solid var(--ae-gold)}
 .ae-gd-build-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:1rem 1.5rem}
 .ae-gd-build-grid h4:first-child{margin-top:0}
 .ae-gd-skills{margin:0;padding:0;list-style:none;display:grid;gap:.5rem}
