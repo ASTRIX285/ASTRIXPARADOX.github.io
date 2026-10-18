@@ -1,0 +1,45 @@
+name: Validate PARADOX
+# The full validator on every pull request to main: every suite, on Linux, so the long run happens on GitHub and
+# not on Miguel's PC. This is the check that must be green before merging. Needs no secrets.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: validate-paradox-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  PLAYWRIGHT_VERSION: 1.62.1
+jobs:
+  paradox-validator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The scope guard compares the branch with origin/main.
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Cache Playwright browsers
+        id: browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ env.PLAYWRIGHT_VERSION }}
+      - name: Install the browser test runtime (outside the repo, no new dependencies)
+        run: |
+          npm install --prefix "$RUNNER_TEMP/paradox-browser" --no-save --no-audit --no-fund "playwright@$PLAYWRIGHT_VERSION"
+          if [ "${{ steps.browsers.outputs.cache-hit }}" = "true" ]; then
+            node "$RUNNER_TEMP/paradox-browser/node_modules/playwright/cli.js" install-deps chromium
+          else
+            node "$RUNNER_TEMP/paradox-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          fi
+      - name: Every suite
+        env:
+          CODEX_PRIMARY_RUNTIME_NODE_MODULES: ${{ runner.temp }}/paradox-browser/node_modules
+          PLAYWRIGHT_MODULE_PATH: ${{ runner.temp }}/paradox-browser/node_modules/playwright/index.mjs
+        run: node astrix-app/tools/paradox-validator.mjs --all
