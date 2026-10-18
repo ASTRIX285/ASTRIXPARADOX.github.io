@@ -1071,7 +1071,9 @@ await check('Daeva Card role line: class, build and team under the class line; C
   const {page,context,errors}=await open(`/hub/aetherium/?${daevaRef}`,{live:true,storage:{entries:[saved0],active:`1308:${info.profile.characterId}`}});
   await page.waitForSelector('#aeFirstMove.is-ready');
   assert.equal(await plainText(page,'#aeRoleLine'),'Gladiator · Greatsword bruiser DPS','Main role by default, no team for a build without variants');
-  const chips=await page.$eval('#aeSummary .ae-chips',el=>el.getBoundingClientRect().bottom),line=await page.$eval('#aeRolePick',el=>el.getBoundingClientRect().top);
+  // Both edges in one read: the first-visit guide smooth-scrolls the Daeva Card into view after the page is ready, and
+  // two reads can land on either side of a scroll step (Linux CI caught an 82px shift between them).
+  const {chips,line}=await page.evaluate(()=>({chips:document.querySelector('#aeSummary .ae-chips').getBoundingClientRect().bottom,line:document.querySelector('#aeRolePick').getBoundingClientRect().top}));
   assert.ok(line>=chips-0.5,'The role line sits under the class line');
   assert.equal(await page.isHidden('#aeRoleForm'),true);
   assert.ok((await page.$eval('#aeRoleChange',el=>el.getBoundingClientRect().height))>=44,'Change is a 44px target');

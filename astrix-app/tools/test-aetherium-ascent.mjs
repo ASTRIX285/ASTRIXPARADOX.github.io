@@ -798,7 +798,9 @@ const AGE_LINE=/^Read from the official AION 2 site (just now|\d+ minutes? ago)\
 await check('title first: the data age sits under the title, small; on a screen it sits in the window bar',async()=>{
   const {page,context}=await open(ascent(ref),{live:true});
   assert.equal(await page.isVisible('#aeSource'),true);
-  const title=await page.$eval('#aeAscentTitle',el=>el.getBoundingClientRect().toJSON()),source=await page.$eval('#aeSource',el=>el.getBoundingClientRect().toJSON());
+  // Both boxes in one read: the first-visit guide smooth-scrolls the page after it is ready, and two reads can land on
+  // either side of a scroll step (Linux CI caught a 30px shift between them).
+  const {title,source}=await page.evaluate(()=>({title:document.querySelector('#aeAscentTitle').getBoundingClientRect().toJSON(),source:document.querySelector('#aeSource').getBoundingClientRect().toJSON()}));
   assert.ok(source.top>=title.bottom-0.5,`The data line is under the title (${source.top} vs ${title.bottom})`);
   assert.ok(await page.$eval('#aeSource',el=>el.closest('.ae-ascent-intro')!==null),'Inside the intro, after the title');
   assert.equal(await page.evaluate(()=>[...document.querySelector('main').children].find(el=>el.getBoundingClientRect().height>0).id),'aeSteps','The step bar comes first, never the data line');

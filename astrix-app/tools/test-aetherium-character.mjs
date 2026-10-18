@@ -1626,6 +1626,9 @@ await check('crisp menu cards and buttons: notched bevelled tiles, accent ring o
   }
   await context.close();
   const gear=await open(`/hub/aetherium/gear/equipment/${refQuery(BASIC)}`);
+  // Item details land after ready and each one rebuilds its tile: read the tiles once they have all landed, never a
+  // tile that was just swapped out (Linux CI read an empty clip-path from a detached tile).
+  await settled(gear.page);
   const count=await lookOf(gear.page,'#aeGearCount');
   assert.ok(parseFloat(count.radius)>=count.height/2,'The worn count is a pill');
   assert.equal(count.border,'1px','with a hairline');
