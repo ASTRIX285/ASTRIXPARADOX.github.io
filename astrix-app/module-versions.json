@@ -118,6 +118,8 @@
 
   "/astrix-app/pages/aetherium/aetherium-guide.mjs": "abb196f217",
 
+  "/astrix-app/pages/aetherium/aetherium-memory.mjs": "d0e3c88149",
+
   "/astrix-app/pages/aetherium/aetherium-ui.mjs": "aed77c45f5",
 
   "/astrix-app/pages/aetherium/ascent-plan.mjs": "e88482f52c",
@@ -135,6 +137,12 @@
   "/astrix-app/pages/aetherium/daevanion-page.mjs": "9f06294d08",
 
   "/astrix-app/pages/aetherium/gear-ledger.mjs": "66049992a6",
+
+  "/astrix-app/pages/aetherium/guide-classes.mjs": "c98d06b7a5",
+
+  "/astrix-app/pages/aetherium/guide-page.mjs": "72f7494bc7",
+
+  "/astrix-app/pages/aetherium/guide-shell.mjs": "2c8b1c70f0",
 
   "/astrix-app/pages/aetherium/skills-page.mjs": "06db635fde",
 

@@ -1423,7 +1423,7 @@ await check('crisp ribbon: one raised bar, exactly one active tab as a dark gold
   assert.equal(bar.border,'1px');assert.notEqual(bar.shadow,'none');assert.equal(bar.blur,'none');
   const tabs=await page.$$eval('[data-forge-destination-ribbon] .apx-destination-ribbon a',links=>links.map(a=>{const s=getComputedStyle(a),after=getComputedStyle(a,'::after');
     return {text:a.textContent,current:a.getAttribute('aria-current')==='page',color:s.color,bg:s.backgroundColor,radius:s.borderTopLeftRadius,spacing:Math.round(parseFloat(s.letterSpacing)/parseFloat(s.fontSize)*1000)/1000,underline:after.display!=='none'&&after.content!=='none',font:s.fontFamily,size:parseFloat(s.fontSize),height:a.getBoundingClientRect().height};}));
-  assert.deepEqual(tabs.map(t=>t.text),['Daeva Card','Gear Ledger','Ascent Plan','The Hub']);
+  assert.deepEqual(tabs.map(t=>t.text),['Daeva Card','Gear Ledger','Ascent Plan','Guide','The Hub']);
   assert.equal(tabs.filter(t=>t.current).length,1,'Exactly one active tab');
   for(const tab of tabs){
     assert.equal(tab.underline,false,`${tab.text}: no underline bar`);
