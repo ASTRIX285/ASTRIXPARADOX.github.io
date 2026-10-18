@@ -1,0 +1,4 @@
+# fix/aetherium-linux-ci: three Aetherium checks that failed on Linux CI only. Two read two boxes in separate calls while the first-visit guide smooth-scrolls; one read a gear tile that was being rebuilt as item details landed.
+astrix-app/tools/test-aetherium-ascent.mjs
+astrix-app/tools/test-aetherium-character.mjs
+astrix-app/tools/test-aetherium-pages.mjs
