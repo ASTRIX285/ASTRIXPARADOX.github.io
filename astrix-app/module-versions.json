@@ -88,6 +88,8 @@
 
   "/astrix-app/games/aion2/engine/enhancement-advisor.mjs": "b535e325be",
 
+  "/astrix-app/games/aion2/engine/gear-sources.mjs": "cd1a6cbdad",
+
   "/astrix-app/games/aion2/engine/guide-advisor.mjs": "a595a24052",
 
   "/astrix-app/games/aion2/engine/item-assessor.mjs": "b8921910e3",
@@ -138,15 +140,17 @@
 
   "/astrix-app/pages/aetherium/daevanion-page.mjs": "9f06294d08",
 
-  "/astrix-app/pages/aetherium/gear-ledger.mjs": "e71d306da9",
+  "/astrix-app/pages/aetherium/gear-ledger.mjs": "08394faf49",
 
   "/astrix-app/pages/aetherium/guide-classes.mjs": "d879cdd14e",
 
-  "/astrix-app/pages/aetherium/guide-page.mjs": "d9305ee6ca",
+  "/astrix-app/pages/aetherium/guide-equipment.mjs": "6f7f9fe81e",
+
+  "/astrix-app/pages/aetherium/guide-page.mjs": "160a8a6231",
 
   "/astrix-app/pages/aetherium/guide-path.mjs": "ce94ec714b",
 
-  "/astrix-app/pages/aetherium/guide-shell.mjs": "2c8b1c70f0",
+  "/astrix-app/pages/aetherium/guide-shell.mjs": "913fa301da",
 
   "/astrix-app/pages/aetherium/skills-page.mjs": "a60c345bed",
 

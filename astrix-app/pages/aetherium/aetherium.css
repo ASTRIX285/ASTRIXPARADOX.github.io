@@ -2027,3 +2027,79 @@ html body.aetherium-page .ae-bar-block.is-game .ae-keycap:focus-visible:not(#ax-
   .ae-gp-cycle{justify-self:start}
   .ae-gp-clocks{grid-template-columns:minmax(0,1fr)}
 }
+
+/* The Guide: Equipment and Crafting (feature/aetherium-guide-equipment, 18 Oct 2026). Topic tiles, fact lists with their
+   status tags, the tables (scroll inside their own box on a phone, never the page), and Where to get it: one row per slot
+   with the worn item's game icon, the best place to get a better piece now, the next goal and its gate. */
+.ae-gx-topicnav ul{margin:0 0 16px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.ae-gx-topicnav .ae-btn{min-height:40px;padding:0 .875rem}
+.ae-gx-tiles{margin:0 0 20px;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--ae-gap)}
+.ae-gx-tile a{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:center;height:100%;box-sizing:border-box;padding:14px;text-decoration:none;color:var(--ae-text);background:var(--ae-raised);border:1px solid var(--ae-hairline);clip-path:var(--ae-notch);box-shadow:var(--ae-bevel);transition:border-color var(--ae-ease)}
+.ae-gx-tile a:hover,.ae-gx-tile a:focus-visible{border-color:color-mix(in srgb,var(--ae-ice) 60%,var(--ae-hairline))}
+.ae-gx-icon{grid-row:span 2;color:var(--ae-ice)}
+.ae-gx-tile-name{font:700 1rem/1.25 var(--ae-font-ui)}
+.ae-gx-tile-blurb{grid-column:2;color:var(--ae-text-muted);font-size:.875rem}
+.ae-gx-block{margin:0 0 20px;min-width:0}
+.ae-gx-h2{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;font:700 1.0625rem/1.3 var(--ae-font-ui);color:var(--ae-text)}
+.ae-gx-block p{margin:0 0 10px;color:var(--ae-text-muted);overflow-wrap:anywhere}
+.ae-gx-facts,.ae-gx-list,.ae-gx-cards,.ae-gx-tabs,.ae-gx-gates,.ae-gx-steps,.ae-gx-grades,.ae-gx-ladder,.ae-gx-stages,.ae-gx-slots,.ae-gx-offers{margin:0 0 12px;padding:0;list-style:none;display:grid;gap:8px;min-width:0}
+.ae-gx-fact{padding:8px 12px;border-left:2px solid var(--ae-hairline-strong);background:rgba(0,0,0,.18);overflow-wrap:anywhere}
+.ae-gx-fact .ae-tag,.ae-gx-h2 .ae-tag{font-size:.75rem;padding:2px 8px;vertical-align:middle}
+.ae-gx-list li{display:grid;gap:2px;padding:8px 12px;background:rgba(0,0,0,.18);border:1px solid var(--ae-hairline)}
+.ae-gx-list li span{color:var(--ae-text-muted);font-size:.875rem}
+.ae-gx-cards{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.ae-gx-card,.ae-gx-tab,.ae-gx-gate,.ae-gx-steps li,.ae-gx-rung{display:grid;gap:4px;align-content:start;min-width:0;padding:12px 14px;background:var(--ae-raised);border:1px solid var(--ae-hairline);box-shadow:var(--ae-bevel);overflow-wrap:anywhere}
+.ae-gx-card span,.ae-gx-tab span,.ae-gx-gate span,.ae-gx-steps li span,.ae-gx-rung span{color:var(--ae-text-muted);font-size:.875rem}
+.ae-gx-slotnames{color:var(--ae-ice)!important}
+.ae-gx-tabs{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.ae-gx-tab{grid-template-columns:auto minmax(0,1fr);align-items:center}
+.ae-gx-tab span{grid-column:1/-1}
+.ae-gx-tabicon{color:var(--ae-gold)}
+.ae-gx-gates,.ae-gx-steps,.ae-gx-ladder{counter-reset:gx}
+.ae-gx-gate strong::before,.ae-gx-steps li strong::before,.ae-gx-rung strong::before{counter-increment:gx;content:counter(gx) ". ";color:var(--ae-gold)}
+.ae-gx-grades{max-width:560px}
+.ae-gx-grades li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:8px 12px;background:rgba(0,0,0,.18);border:1px solid var(--ae-hairline)}
+.ae-gx-stages li{display:flex;flex-wrap:wrap;gap:4px 10px;padding:6px 10px;border-left:2px solid var(--ae-hairline-strong)}
+.ae-gx-tablewrap{max-width:100%;overflow-x:auto;margin:0 0 10px;border:1px solid var(--ae-hairline);background:rgba(0,0,0,.2)}
+.ae-gx-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.ae-gx-table caption{caption-side:top;padding:8px 10px;text-align:left;color:var(--ae-text-muted);font-size:.8125rem}
+.ae-gx-table th,.ae-gx-table td{padding:8px 10px;text-align:left;vertical-align:top;border-top:1px solid var(--ae-hairline)}
+.ae-gx-table thead th{font:700 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-ice);border-top:0}
+.ae-gx-table tbody th{color:var(--ae-text);font-weight:700}
+.ae-gx-swatch{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px;background:var(--ae-g,var(--ae-hairline-strong));box-shadow:0 0 6px var(--ae-g,transparent)}
+.ae-gx-swatch[data-grade="common"]{--ae-g:var(--ae-grade-common)}.ae-gx-swatch[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}.ae-gx-swatch[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}.ae-gx-swatch[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}.ae-gx-swatch[data-grade="heroic"]{--ae-g:var(--ae-grade-heroic)}.ae-gx-swatch[data-grade="mythic"]{--ae-g:var(--ae-grade-mythic)}.ae-gx-swatch[data-grade="special"]{--ae-g:var(--ae-grade-special)}
+.ae-gx-star{color:var(--ae-gold)}
+.ae-gx-note{font-size:.8125rem}
+.ae-gx-cta{margin:12px 0 0!important}
+.ae-gx-where{display:grid;gap:10px;min-width:0}
+.ae-gx-who{font:700 1rem/1.3 var(--ae-font-ui);color:var(--ae-text)!important}
+.ae-gx-reset,.ae-gx-side{margin:0;padding:8px 12px;border-left:2px solid var(--ae-ice);background:rgba(0,0,0,.18);color:var(--ae-text-muted);overflow-wrap:anywhere}
+.ae-gx-slot{display:grid;gap:8px;min-width:0;padding:12px 14px;background:var(--ae-raised);border:1px solid var(--ae-hairline);clip-path:var(--ae-notch);box-shadow:var(--ae-bevel);scroll-margin-top:16px}
+.ae-gx-slot:target{border-color:var(--ae-gold);box-shadow:var(--ae-bevel),0 0 0 1px var(--ae-gold)}
+.ae-gx-slot-head{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center}
+.ae-gx-slot-head .ae-gtile{width:56px;height:56px}
+.ae-gx-slot-copy{display:grid;gap:2px;min-width:0;overflow-wrap:anywhere}
+.ae-gx-slot-copy strong{font:700 1rem/1.25 var(--ae-font-ui)}
+.ae-gx-worn,.ae-gx-group{color:var(--ae-text-muted);font-size:.875rem}
+.ae-gx-offer{display:grid;gap:4px;min-width:0;padding:10px 12px;background:rgba(0,0,0,.22);border:1px solid var(--ae-hairline);overflow-wrap:anywhere}
+.ae-gx-offer[data-offer="best"]{border-color:color-mix(in srgb,var(--ae-gold) 55%,var(--ae-hairline))}
+.ae-gx-offer-kind{font:700 .75rem/1.2 var(--ae-font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--ae-ice)}
+.ae-gx-offer[data-offer="best"] .ae-gx-offer-kind{color:var(--ae-gold)}
+.ae-gx-highlight{font:700 .9375rem/1.35 var(--ae-font-ui);color:var(--ae-text)}
+.ae-gx-offer[data-offer="best"] .ae-gx-highlight{color:var(--ae-gold)}
+.ae-gx-offer-meta{color:var(--ae-text-muted);font-size:.8125rem}
+.ae-gx-open{font-weight:700}
+.ae-gx-open[data-open="yes"]{color:var(--ae-manual)}
+.ae-gx-open[data-open="no"]{color:var(--ae-text-dim)}
+.ae-gx-gap{color:var(--ae-gold)}
+.ae-gx-cycle{display:inline-block;padding:2px 8px;border-radius:var(--ae-pill);border:1px solid var(--ae-hairline-strong);font:700 .75rem/1.3 var(--ae-font-ui);color:var(--ae-ice)}
+.ae-gx-more summary{cursor:pointer;min-height:36px;display:flex;align-items:center;color:var(--ae-ice);font-size:.875rem}
+.ae-gx-hold,.ae-gx-top,.ae-gx-pending,.ae-gx-lookfor{margin:0;color:var(--ae-text-muted);font-size:.875rem}
+.ae-gx-stray{margin:0;padding:8px 12px;border-left:2px solid var(--ae-warn);background:color-mix(in srgb,var(--ae-warn) 10%,transparent);color:var(--ae-text);font-size:.875rem}
+@media (max-width:600px){
+  .ae-gx-tiles,.ae-gx-cards,.ae-gx-tabs{grid-template-columns:minmax(0,1fr)}
+  .ae-gx-slot{padding:10px 12px}
+}
+@media (min-width:1100px){
+  .ae-gx-slots{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+}

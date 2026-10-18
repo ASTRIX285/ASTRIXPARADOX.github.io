@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1&amp;recovery=20261004-1&amp;neutral=20261016-1&amp;forge-tint=20261016-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="AION 2 Guide, Crafting: coming soon in The Aetherium's Guide.">
+  <meta name="description" content="AION 2 Guide, Crafting: the five professions, gathering and the crafted gear ladder.">
   <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/guide/crafting/">
   <title>Crafting | Guide | The Aetherium | AION 2 | ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
@@ -16,10 +16,22 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261018-path-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261019-equip-1">
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d",
+
+"/astrix-app/games/aion2/engine/ascent-advisor.mjs":"/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=17af6a1ba7",
+
+"/astrix-app/games/aion2/engine/daevanion-planner.mjs":"/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=009d0b5160",
+
+"/astrix-app/games/aion2/engine/gear-sources.mjs":"/astrix-app/games/aion2/engine/gear-sources.mjs?v=cd1a6cbdad",
+
+"/astrix-app/games/aion2/engine/item-assessor.mjs":"/astrix-app/games/aion2/engine/item-assessor.mjs?v=b8921910e3",
+
+"/astrix-app/games/aion2/engine/level-planner.mjs":"/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1",
+
+"/astrix-app/games/aion2/engine/stat-advisor.mjs":"/astrix-app/games/aion2/engine/stat-advisor.mjs?v=17b4c6fdfa",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
@@ -31,12 +43,24 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5",
 
-"/astrix-app/pages/aetherium/guide-page.mjs":"/astrix-app/pages/aetherium/guide-page.mjs?v=d9305ee6ca",
+"/astrix-app/pages/aetherium/guide-equipment.mjs":"/astrix-app/pages/aetherium/guide-equipment.mjs?v=6f7f9fe81e",
 
-"/astrix-app/pages/aetherium/guide-shell.mjs":"/astrix-app/pages/aetherium/guide-shell.mjs?v=2c8b1c70f0"
+"/astrix-app/pages/aetherium/guide-shell.mjs":"/astrix-app/pages/aetherium/guide-shell.mjs?v=913fa301da"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/ascent-advisor.mjs?v=17af6a1ba7" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/daevanion-planner.mjs?v=009d0b5160" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/gear-sources.mjs?v=cd1a6cbdad" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/item-assessor.mjs?v=b8921910e3" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/stat-advisor.mjs?v=17b4c6fdfa" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb" data-head-hint>
 
@@ -48,12 +72,12 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-page.mjs?v=d9305ee6ca" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-equipment.mjs?v=6f7f9fe81e" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-shell.mjs?v=2c8b1c70f0" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/guide-page.mjs?v=d9305ee6ca"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-shell.mjs?v=913fa301da" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/guide-equipment.mjs?v=6f7f9fe81e"></script>
 </head>
-<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="guide" data-guide="soon" data-guide-section="crafting">
+<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="guide" data-guide="section" data-guide-section="crafting" data-guide-page="home">
   <a class="ae-skip" href="#aeMain">Skip to the Guide</a>
   <header class="apx-destination-header">
     <a class="apx-destination-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>

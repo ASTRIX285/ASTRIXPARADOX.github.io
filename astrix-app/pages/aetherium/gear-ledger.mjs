@@ -309,6 +309,11 @@ function transferPanel() {
  * grade, cap, now and target in one row, then the Enhancement window's five tabs with the next one lit. The Growth tab
  * holds the chance of each step and the cost; nothing in the card is said twice.
  */
+/** The Guide's Where to get it page at this slot: what drops a better piece for it, the gate and the reward cycle. */
+const whereLine = slot => (state.ref && Number.isFinite(slot?.slotPos)
+  ? `<p class="ae-card-line ae-where-line"><a href="/hub/aetherium/guide/equipment/where-to-get/?${esc(cardUrl(state.ref).split('?')[1] ?? '')}#slot-${esc(slot.slotPos)}" data-where-to-get>Where to get a better ${esc(slotLabel(slot.slot).toLowerCase())}</a></p>`
+  : '');
+
 function planBlock(slot, rules, chosen = null) {
   const advice = adviceOf(slot);
   const item = planOf(slot);
@@ -684,7 +689,7 @@ async function renderEnhanceDetail() {
   const grade = gradeOf(slot);
   const action = adviceOf(slot)?.action;
   // A piece not to enhance (hold or replace): the assessment says so; no Enhancement window repeating it.
-  box.innerHTML = `${head(grade)}${assessHtml(slot, d)}${action === 'hold' || action === 'replace' ? '' : planBlock(slot, rules, state.etab)}`;
+  box.innerHTML = `${head(grade)}${assessHtml(slot, d)}${action === 'hold' || action === 'replace' ? '' : planBlock(slot, rules, state.etab)}${whereLine(slot)}`;
 }
 
 /* The hover name: the item name in its grade colour, the grade, the slot and +N of the cap. Mouse hover or keyboard focus
@@ -951,6 +956,7 @@ startCharacterPage({
   async render({ model, source, ref }) {
     const [catalogue, grades, progression, stats, builds, enhancement, mechanics] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null), loadEnhancement().catch(() => null), loadMechanics().catch(() => null)]);
     state.stats = stats;
+    state.ref = ref;
     // The Enhancement window record and the enchant rules: without them the page simply has no enhance marks.
     state.enhancement = enhancement;
     state.mechanics = mechanics;

@@ -20,7 +20,12 @@ const ICONS = {
 const icon = id => `<svg class="ae-gd-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[id] ?? ''}</svg>`;
 
 /* Built pages inside a section, by topic: a topic with a page is a link, the rest wait for their phase. */
-const TOPIC_PAGES = { character: { Classes: `${GUIDE_ROOT}classes/` }, guides: { 'Your path by level': `${GUIDE_ROOT}path/` } };
+const TOPIC_PAGES = {
+  character: { Classes: `${GUIDE_ROOT}classes/` },
+  equipment: { 'Slots and grades': `${GUIDE_ROOT}equipment/slots/`, Enhancement: `${GUIDE_ROOT}equipment/enhancement/`, Manastones: `${GUIDE_ROOT}equipment/manastones/`, Theostones: `${GUIDE_ROOT}equipment/theostones/`, Arcana: `${GUIDE_ROOT}equipment/arcana/`, 'Pets and wings': `${GUIDE_ROOT}equipment/pets-wings/`, Titles: `${GUIDE_ROOT}equipment/titles/` },
+  guides: { 'Your path by level': `${GUIDE_ROOT}path/` },
+  crafting: { Professions: `${GUIDE_ROOT}crafting/professions/`, Gathering: `${GUIDE_ROOT}crafting/gathering/`, 'Crafted gear': `${GUIDE_ROOT}crafting/crafted-gear/` }
+};
 
 const soonTag = '<span class="ae-gd-soon-tag">Coming soon</span>';
 
