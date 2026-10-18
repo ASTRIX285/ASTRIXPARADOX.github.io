@@ -1,0 +1,309 @@
+{
+  "description": "Per class role ratings for the Guide class roles table (feature/aetherium-guide-home, 18 Oct 2026). Each rating is the source's own tier, tagged Reported on the page and cited; it is the source's view, never ours. A role the source does not rank is pending: the page then shows what our build data says (main role, can play, pending or a dash). Only one source found grades classes per role (MeinMMO PvE tier list: Damage, Tanks and Healers, no Support list); other sources give role words, not grades, and are not used here.",
+  "records": [
+    {
+      "id": "gladiator-roles",
+      "class": "Gladiator",
+      "ratings": {
+        "tank": {
+          "rating": "A tier",
+          "evidence": "Ranked second of the two tanks: can hold the boss when no Templar is in the group.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        },
+        "healer": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "A tier",
+          "evidence": "In the top damage group (no class is ranked S for damage).",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "templar-roles",
+      "class": "Templar",
+      "ratings": {
+        "tank": {
+          "rating": "S tier",
+          "evidence": "Ranked the best tank: highest threat and stronger party buffs.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        },
+        "healer": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "B tier",
+          "evidence": "Solid damage, behind the damage specialists.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "assassin-roles",
+      "class": "Assassin",
+      "ratings": {
+        "tank": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "healer": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "A tier",
+          "evidence": "In the top damage group: the highest burst in short fights.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "ranger-roles",
+      "class": "Ranger",
+      "ratings": {
+        "tank": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "healer": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "A tier",
+          "evidence": "In the top damage group: easy to play, mobile, steady damage.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer-roles",
+      "class": "Sorcerer",
+      "ratings": {
+        "tank": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "healer": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "A tier",
+          "evidence": "In the top damage group (named Wizard on the source).",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "spiritmaster-roles",
+      "class": "Spiritmaster",
+      "ratings": {
+        "tank": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "healer": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "A tier",
+          "evidence": "In the top damage group (named Summoner on the source).",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "cleric-roles",
+      "class": "Cleric",
+      "ratings": {
+        "tank": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "healer": {
+          "rating": "S tier",
+          "evidence": "Ranked the best healer: the widest choice of heals and shields.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "C tier",
+          "evidence": "Ranked lowest for damage: it heals first.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "chanter-roles",
+      "class": "Chanter",
+      "ratings": {
+        "tank": {
+          "pending": true,
+          "reason": "The source does not rank this class for this role."
+        },
+        "healer": {
+          "rating": "A tier",
+          "evidence": "Second healer (named Cantor on the source): less healing, stronger party buffs.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        },
+        "support": {
+          "pending": true,
+          "reason": "The source has no Support tier list."
+        },
+        "dps": {
+          "rating": "B tier",
+          "evidence": "Solid damage from melee, behind the damage specialists.",
+          "ref": "meinmmo-pve-tiers",
+          "status": "reported"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "meinmmo-pve-tiers",
+          "title": "Aion 2: Tier List, the best classes in PvE for Tank, Healer and Damage",
+          "publisher": "MeinMMO",
+          "url": "https://mein-mmo.de/en/aion-2-tier-list-the-best-classes-in-pve-for-tank-healer-and-damage,1589844/",
+          "retrievedOn": "2026-10-18",
+          "publishedOn": "2026-10-13",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}
