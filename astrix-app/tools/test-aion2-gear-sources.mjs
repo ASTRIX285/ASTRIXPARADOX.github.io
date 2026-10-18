@@ -131,7 +131,7 @@ check('Arcana, belt and unlisted slots: Transcendence Stage, Stronghold scrolls,
   const belt=whereToGet({slot:'Belt',grade:'Rare',enchant:6},{level:45,itemLevel:795,data:sources,grades,progression});
   assert.equal(belt.best.reward,'Noble Belt Enhance Scrolls');assert.equal(belt.stray,null,'Belt enhancing is its own rule, never a stray');
   const amulet=whereToGet({slot:'Amulet',grade:'Rare'},{level:45,itemLevel:795,data:sources,grades,progression});
-  assert.equal(amulet.status,'pending');assert.match(amulet.pending.reason,/No source/);
+  assert.equal(amulet.status,'pending');assert.match(amulet.pending.reason,/No drop location listed/);
 });
 
 check('strays are flagged, never blocked; before Lv 35 the plan says hold',()=>{
@@ -148,7 +148,7 @@ check('gearSourcePlan: slots in work order, side missions pending, the weekly re
   assert.equal(plan.level,45);assert.equal(plan.itemLevel,795);
   assert.deepEqual(plan.slots.slice(0,2).map(entry=>entry.slot),['MainHand','SubHand']);
   assert.ok(plan.upgrades.length>=10);
-  assert.equal(plan.sideMissions.status,'pending');assert.match(plan.sideMissions.reason,/No quest source yet/);
+  assert.equal(plan.sideMissions.status,'pending');assert.match(plan.sideMissions.reason,/No side mission listed/);
   assert.deepEqual([plan.weeklyReset.day,plan.weeklyReset.timeUtc],['Wednesday','07:00']);
   assert.ok(plan.slots.filter(entry=>entry.status==='pending').every(entry=>entry.pending.reason));
   assert.equal(highlightText({source:'Fire Temple',difficulty:'Conquest',reward:'Unique gloves',gate:{itemLevel:2100}}),'Fire Temple, Conquest: Unique gloves, entry item level 2,100');

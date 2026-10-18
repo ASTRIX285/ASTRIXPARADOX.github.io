@@ -1701,7 +1701,7 @@
       "status": "pending",
       "rewards": {
         "pending": true,
-        "reason": "No quest source yet. The official item data names only the kind of source (Quest, Reward Chest, Expedition), never the mission."
+        "reason": "No side mission listed for this piece."
       },
       "provenance": [
         {

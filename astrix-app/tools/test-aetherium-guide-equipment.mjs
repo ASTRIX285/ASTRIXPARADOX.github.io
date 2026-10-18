@@ -170,7 +170,7 @@ for(const width of [1600,390]){
       assert.equal(await glovesRow.locator('[data-stray]').count(),0,'A Unique piece is no stray');
       assert.ok(await glovesRow.locator('[data-cycle="odyle-energy"]').first().isVisible(),'The reward cycle');
       assert.match(await page.textContent('[data-slot="Amulet"]'),/No drop location listed\./);
-      assert.match(await page.textContent('[data-side-missions]'),/No quest source yet.*Pending/s);
+      assert.match(await page.textContent('[data-side-missions]'),/No side mission listed for this piece./);
       assert.match(await page.textContent('#aeWhere'),/Wednesday 07:00 UTC/);
       const icon=await weapon.locator('.ae-gtile img').getAttribute('src');
       assert.match(icon,/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\//,'The worn item\'s game icon');
