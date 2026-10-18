@@ -115,7 +115,7 @@ export function dropTableHtml(sources) {
   return `<div class="ae-gx-tablewrap"><table class="ae-gx-table" id="aeDropTable"><caption>Expedition Conquest drops, with every boss defeated ${statusTag('reported')}</caption>
       <thead><tr><th scope="col">Expedition</th><th scope="col">Slots</th><th scope="col">Grade</th><th scope="col">Item level</th><th scope="col">Entry</th></tr></thead>
       <tbody>${rows.join('')}</tbody></table></div>
-    <p class="ae-gx-note"><span aria-hidden="true">*</span> The wiki names armour and accessory drops as a series; which slots a series covers is our reading ${statusTag('unconfirmed')}. Exploration drops are not listed yet ${statusTag('pending')}.</p>`;
+    <p class="ae-gx-note"><span aria-hidden="true">*</span> Armour and accessory drops come as a series.</p>`;
 }
 
 async function renderEquipmentHome(linked) {
