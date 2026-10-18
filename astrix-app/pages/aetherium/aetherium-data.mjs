@@ -587,6 +587,13 @@ export function loadProgression() {
   return advisorProgression;
 }
 
+/** The Guide's path, item level gates, weekly loop and power order (data/advisor/guide.json). A small file, loaded once. */
+let advisorGuide;
+export function loadGuide() {
+  advisorGuide ??= getJson(`${ADVISOR}guide.json`).catch(error => { advisorGuide = undefined; throw error; });
+  return advisorGuide;
+}
+
 /** One class's builds (static, cached). */
 export function loadBuilds(className) {
   const slug = String(className).toLowerCase();
