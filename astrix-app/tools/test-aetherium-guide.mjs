@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 // The AION 2 Guide, phase 1 (feature/aetherium-guide-home, 18 Oct 2026) on a local static server, the Worker mocked from
 // the fixtures (never NCSOFT, never the real Worker):
-//   - the shell contract the later phases build on: window, breadcrumb, section nav (8 sections, current lit), coming soon pages;
+//   - the shell contract the sections build on: photo band (kicker, H1, lede), side menu (Guide home, this section's pages with
+//     this one lit, the other sections under More), no breadcrumb or section pill row, coming soon pages;
 //   - the Guide link in the ribbon and the menu drawer of every Aetherium page;
-//   - the home: intro, "New player? Start here", a tile per section, every link reaches a page;
+//   - the home: photo band with its gold and navy buttons, a tile per section, the path strip, every link reaches a page;
 //   - the class roles table: 8 rows, class names gold, ratings bold, each cell from the data (a Reported tier cited, else our build);
 //   - the 8 class pages: builds by role, key skills, stat order, Ascent Plan links;
 //   - "Your setup vs the build": flags with what they cost, the read's age, the device memory, never a block; Worker down;
 //   - the memory helper: per Daeva key, savedAt, blocked storage is never an error;
-//   - looks: no sideways scroll at 390, buttons 44px tall, usable well inside 4 s.
+//   - looks: no sideways scroll at 390, buttons 44px tall, the side menu folds behind a toggle on a phone, usable well inside 4 s.
 // AE_SHOTS=<dir outside the repo> also saves screenshots at 390 and 1600.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -107,35 +108,60 @@ async function htmlPages(dir){
 }
 const allPages=(await htmlPages(resolve(root,'hub/aetherium'))).map(path=>`/${relative(root,path).split(sep).join('/').replace(/index\.html$/,'')}`);
 
-await check('shell contract: the Guide window, breadcrumb and section nav, the current section lit, on every Guide page',async()=>{
+await check('shell contract: the photo band, the side menu with this page lit, no breadcrumb or section pills, on every Guide page',async()=>{
   const {page,context,errors,calls}=await open('/hub/aetherium/guide/');
   assert.deepEqual(errors,[]);
   assert.deepEqual(calls,[],'The home never calls the official site');
-  assert.equal(await page.locator('.ae-gw.ae-gd[data-guide-shell="home"]').count(),1,'One Guide window');
-  assert.equal(await plain(page,'#aeScreenTitle'),'AION 2 Guide');
-  assert.deepEqual(await page.$$eval('.ae-gd-crumbs li',items=>items.map(li=>li.textContent.trim())),['Guide','Home']);
-  const nav=await page.$$eval('.ae-gd-nav a',links=>links.map(a=>({id:a.dataset.guideSection,text:a.textContent,href:a.getAttribute('href'),current:a.getAttribute('aria-current')})));
-  assert.deepEqual(nav.map(item=>[item.id,item.text,item.href]),SECTIONS,'Eight sections in order, each with its page');
-  assert.deepEqual(nav.filter(item=>item.current==='page').map(item=>item.id),['home'],'Only Home is lit');
-  assert.equal(await page.$eval('.ae-gd-nav a[aria-current="page"]',a=>getComputedStyle(a).color),GOLD,'The current section is gold');
-  // The module API the later phases use.
+  assert.equal(await page.locator('.ae-gd[data-guide-shell="home"]').count(),1,'One Guide');
+  assert.equal(await plain(page,'#aeScreenTitle'),'Know where to look.');
+  assert.equal(await page.$eval('#aeScreenTitle',el=>el.tagName),'H1');
+  assert.equal(await plain(page,'.ae-gd-kicker'),'AION 2 Guide');
+  assert.equal(await page.$eval('.ae-gd-kicker',el=>getComputedStyle(el).color),GOLD,'The kicker is gold');
+  const hero=await page.$eval('.ae-gd-hero-img',img=>({src:img.getAttribute('src'),alt:img.alt,w:img.getAttribute('width'),h:img.getAttribute('height'),loading:img.getAttribute('loading'),priority:img.getAttribute('fetchpriority'),fit:getComputedStyle(img).objectFit,focus:getComputedStyle(img).objectPosition}));
+  assert.equal(hero.focus,'50% 70%','The home band focus sits low so the floating rock and the sea show');
+  assert.equal(hero.src,'/astrix-app/pages/aetherium/images/photos/golden-sea-01.jpg','The home band is the golden sea');
+  assert.ok(hero.alt.length>10&&hero.w==='2560'&&hero.h==='1440','The band photo has alt, width and height');
+  assert.deepEqual([hero.loading,hero.priority,hero.fit],['eager','high','cover']);
+  assert.equal(await page.locator('.ae-gd-side').count(),0,'The home has no side menu');
+  // Gone: the window bar, the breadcrumb, the corner label, the section pill row.
+  assert.equal(await page.locator('.ae-gw-bar,.ae-gw-back,.ae-gw-who,.ae-gd-crumbs,.ae-gd-nav').count(),0,'No title bar, breadcrumb, corner label or pill row');
+  // The module API the sections use.
   const api=await page.evaluate(async()=>{const shell=await import('/astrix-app/pages/aetherium/guide-shell.mjs');const advisor=await import('/astrix-app/games/aion2/engine/ascent-advisor.mjs');
-    return {exports:Object.keys(shell).sort(),classes:[...shell.GUIDE_CLASSES],advisor:[...advisor.AION2_CLASSES],href:shell.guideHref('world'),cls:shell.classHref('Spiritmaster')};});
+    return {exports:Object.keys(shell).sort(),classes:[...shell.GUIDE_CLASSES],advisor:[...advisor.AION2_CLASSES],href:shell.guideHref('world'),cls:shell.classHref('Spiritmaster'),sections:shell.GUIDE_SECTIONS.map(item=>[item.id,item.label,item.href]),heroes:shell.GUIDE_SECTIONS.map(item=>item.hero.src.split('/').pop())};});
   for(const name of ['GUIDE_CLASSES','GUIDE_ROOT','GUIDE_SECTIONS','classHref','comingSoonHtml','guideHref','renderGuideShell','startGuidePage'])assert.ok(api.exports.includes(name),`guide-shell exports ${name}`);
   assert.deepEqual(api.classes,api.advisor,'GUIDE_CLASSES matches the advisor class list');
+  assert.deepEqual(api.sections,SECTIONS,'Eight sections in order, each with its page');
+  assert.deepEqual(api.heroes,['golden-sea-01.jpg',...Array(7).fill('atreia-vista-01.jpg')],'Home has the golden sea, every section the vista');
   assert.equal(api.href,'/hub/aetherium/guide/world/');
   assert.equal(api.cls,'/hub/aetherium/guide/classes/spiritmaster/');
   await context.close();
   for(const [id,label,href] of SECTIONS.slice(1)){
     const {page,context,errors}=await open(href);
     assert.deepEqual(errors,[],`${href}: no page errors`);
-    assert.deepEqual(await page.$$eval('.ae-gd-nav a[aria-current="page"]',links=>links.map(a=>a.dataset.guideSection)),[id],`${href}: ${label} lit`);
-    assert.deepEqual(await page.$$eval('.ae-gd-crumbs li',items=>items.map(li=>li.textContent.trim())),['Guide',label]);
-    assert.equal(await page.getAttribute('.ae-gd-crumbs a','href'),'/hub/aetherium/guide/','The first crumb leads home');
+    assert.equal(await plain(page,'.ae-gd-kicker'),label,`${href}: section kicker`);
+    assert.equal(await page.getAttribute('.ae-gd-hero-img','src'),'/astrix-app/pages/aetherium/images/photos/atreia-vista-01.jpg');
+    assert.equal(await page.locator('.ae-gd-crumbs,.ae-gd-nav,.ae-gw-bar,.ae-gg-sub,.ae-gx-topicnav').count(),0,`${href}: one menu only`);
+    assert.equal(await page.getAttribute('.ae-gd-side-home','href'),'/hub/aetherium/guide/','Guide home tops the side menu');
+    const lit=await page.$$eval('.ae-gd-side a[aria-current="page"]',links=>links.map(a=>({href:a.getAttribute('href'),color:getComputedStyle(a).color,edge:getComputedStyle(a).borderLeftColor})));
+    assert.deepEqual(lit.map(link=>link.href),[href],`${href}: this page lit in the side menu`);
+    assert.equal(lit[0].color,GOLD,`${href}: lit page in gold`);
+    assert.equal(lit[0].edge,GOLD,`${href}: lit page has a gold edge`);
+    const more=await page.$$eval('[data-guide-side-more] a',links=>links.map(a=>a.dataset.guideSection));
+    assert.deepEqual(more,SECTIONS.slice(1).map(([key])=>key).filter(key=>key!==id),`${href}: the other sections under More`);
     if(SOON.includes(id)){
       assert.equal(await page.locator(`[data-guide-soon="${id}"]`).count(),1,`${href}: coming soon page`);
       assert.match(await plain(page,'[data-guide-soon]'),/Coming soon in this guide/);
     }
+    await context.close();
+  }
+  // A page's own list moves into the side menu, this page lit (General pages, Equipment topics).
+  for(const [path,first,current] of [['/hub/aetherium/guide/general/about/','Overview','About AION 2'],['/hub/aetherium/guide/equipment/enhancement/','Overview','Enhancement']]){
+    const {page,context,errors}=await open(path);
+    assert.deepEqual(errors,[],`${path}: no page errors`);
+    const items=await page.$$eval('[data-guide-side-pages] a',links=>links.map(a=>({text:a.textContent.trim(),current:a.getAttribute('aria-current')})));
+    assert.equal(items[0].text,first,`${path}: Overview first`);
+    assert.deepEqual(items.filter(item=>item.current==='page').map(item=>item.text),[current],`${path}: ${current} lit`);
+    assert.ok(items.length>=4,`${path}: the section's pages`);
     await context.close();
   }
 });
@@ -167,20 +193,41 @@ await check('the Guide link sits in the ribbon and the menu drawer of every Aeth
   await context.close();
 });
 
-await check('home: intro, "New player? Start here", a tile per section, every link reaches a page',async()=>{
+await check('home: the band and its buttons, a tile per section, the path strip, no example panel without a screenshot, every link reaches a page',async()=>{
   const {page,context}=await open('/hub/aetherium/guide/');
-  assert.match(await plain(page,'.ae-gd-intro'),/AION 2 Guide by ASTRIX PARADOX/);
-  assert.equal(await plain(page,'#aeStartTitle'),'New player? Start here');
-  const steps=await page.$$eval('[data-guide-start]',links=>links.map(a=>({href:a.getAttribute('href'),text:a.querySelector('strong').textContent})));
-  assert.deepEqual(steps.map(step=>step.text),['Pick a class','Find your Daeva','Plan your build','Your path by level']);
-  assert.equal(steps[0].href,'/hub/aetherium/guide/classes/');
-  const tiles=await page.$$eval('[data-guide-tile]',items=>items.map(li=>({id:li.dataset.guideTile,href:li.querySelector('.ae-gd-tile-head').getAttribute('href'),soon:Boolean(li.querySelector('.ae-gd-soon-tag')),icon:Boolean(li.querySelector('svg.ae-gd-icon'))})));
+  assert.match(await plain(page,'.ae-gd-hero .ae-gd-lede'),/AION 2 Guide by ASTRIX PARADOX/);
+  const ctas=await page.$$eval('.ae-gd-actions a',links=>links.map(a=>({href:a.getAttribute('href'),text:a.textContent,bg:getComputedStyle(a).backgroundColor,color:getComputedStyle(a).color,h:a.getBoundingClientRect().height})));
+  assert.deepEqual(ctas.map(cta=>cta.text),['Start with About AION 2','Open your Daeva Card']);
+  assert.equal(ctas[0].href,'/hub/aetherium/guide/general/about/');
+  assert.equal(ctas[0].bg,'rgb(233, 194, 79)','The main action is solid gold');
+  assert.equal(ctas[0].color,'rgb(31, 22, 4)','Dark label on gold');
+  assert.equal(ctas[1].bg,'rgb(22, 32, 46)','The second action is a navy button');
+  assert.ok(ctas.every(cta=>cta.h>=44),'Buttons at least 44px');
+  assert.equal(await plain(page,'#aeGridTitle'),'Browse the guide');
+  const tiles=await page.$$eval('[data-guide-tile]',items=>items.map(li=>({id:li.dataset.guideTile,href:li.querySelector('.ae-gd-tile-head').getAttribute('href'),emblem:Boolean(li.querySelector('.ae-gd-tile-art svg')),border:getComputedStyle(li).borderTopWidth})));
   assert.deepEqual(tiles.map(tile=>[tile.id,tile.href]),SECTIONS.slice(1).map(([id,,href])=>[id,href]),'A tile per section, in nav order');
-  assert.ok(tiles.every(tile=>tile.icon),'Every tile has its icon');
-  assert.deepEqual(tiles.filter(tile=>!tile.soon).map(tile=>tile.id),SECTIONS.slice(1).map(([id])=>id).filter(id=>!SOON.includes(id)),'Built sections carry no Coming soon tag');
+  assert.ok(tiles.every(tile=>tile.emblem),'Every tile has its emblem');
+  assert.ok(tiles.every(tile=>tile.border==='1px'),'Tiles are bordered cards');
+  for(const width of [1600,1280]){
+    await page.setViewportSize({width,height:1000});
+    const rows=await page.$$eval('[data-guide-tile]',items=>items.map(li=>Math.round(li.getBoundingClientRect().top)));
+    assert.deepEqual([...new Set(rows)].map(top=>rows.filter(row=>row===top).length),[4,3],`At ${width} the seven tiles sit 4 then 3`);
+  }
+  await page.setViewportSize({width:1600,height:1000});
+  assert.doesNotMatch(await plain(page,'.ae-gd'),/Every fact comes from/,'No sources line on the home');
+  assert.equal(await page.locator('.ae-gd-soon-tag').count(),0,'No status tags on the home');
   assert.equal(await page.getAttribute('[data-guide-tile="character"] .ae-gd-topics a','href'),'/hub/aetherium/guide/classes/','Classes topic links to its page');
+  assert.equal(await page.locator('.ae-gd-example').count(),0,'No example panel until a real screenshot is set');
+  assert.equal(await plain(page,'#aeStartTitle'),'New to AION 2? Go in this order');
+  const steps=await page.$$eval('[data-guide-start]',links=>links.map(a=>({href:a.getAttribute('href'),text:a.querySelector('strong').textContent})));
+  assert.deepEqual(steps,[{href:'/hub/aetherium/guide/general/about/',text:'About AION 2'},{href:'/hub/aetherium/guide/general/controls/',text:'Controls and the skill bar'},{href:'/hub/aetherium/guide/equipment/enhancement/',text:'Enhancement'},{href:'/hub/aetherium/guide/character/',text:'Daevanion'}]);
+  // Every heading of a section opens with a gold diamond.
+  assert.equal(await page.$eval('#aeGridTitle',el=>getComputedStyle(el,'::before').backgroundColor),GOLD);
+  // The only way out is the official AION 2 site, in a new tab.
+  const out=await page.$$eval('a[href^="http"]',links=>links.map(a=>({href:a.href,target:a.target,rel:a.rel})));
+  assert.ok(out.length>=1&&out.every(link=>/^https:\/\/aion2\.plaync\.com\//.test(link.href)&&link.target==='_blank'&&/noopener/.test(link.rel)&&/noreferrer/.test(link.rel)),'Only the official site links out');
   // Every link on the home that stays on this site answers 200.
-  const hrefs=[...new Set(await page.$$eval('#aeGuideBody a[href^="/"]',links=>links.map(a=>a.getAttribute('href').split('#')[0])))];
+  const hrefs=[...new Set(await page.$$eval('#aeStage a[href^="/"]',links=>links.map(a=>a.getAttribute('href').split('#')[0])))];
   for(const href of hrefs){const response=await fetch(`${base}${href}`);assert.equal(response.status,200,`${href} answers`);}
   await context.close();
 });
@@ -240,8 +287,8 @@ await check('the 8 class pages: overview, its roles row, every build by role wit
     assert.deepEqual(errors,[],`${name}: no page errors`);
     assert.deepEqual(calls,[],`${name}: no Daeva linked, no call to the official site`);
     assert.equal(await plain(page,'#aeScreenTitle'),name);
-    assert.deepEqual(await page.$$eval('.ae-gd-crumbs li',items=>items.map(li=>li.textContent.trim())),['Guide','Character','Classes',name]);
-    assert.deepEqual(await page.$$eval('.ae-gd-nav a[aria-current="page"]',links=>links.map(a=>a.dataset.guideSection)),['character']);
+    assert.equal(await plain(page,'.ae-gd-kicker'),'Character');
+    assert.deepEqual(await page.$$eval('[data-guide-side-pages] a',links=>links.map(a=>[a.textContent,a.getAttribute('aria-current')])),[['Overview',null],['Classes',null],[name,'page']],`${name}: lit in the side menu`);
     assert.deepEqual(await page.$$eval('[data-roles-table] tbody tr',rows=>rows.map(tr=>tr.dataset.class)),[name],`${name}: its own row`);
     const records=builds[name];
     const shown=await page.$$eval('[data-build]',items=>items.map(el=>el.dataset.build));
@@ -342,16 +389,42 @@ await check('memory helper: per Daeva key, savedAt, merge, age words, blocked st
   await blocked.context.close();
 });
 
-const LAYOUT=['/hub/aetherium/guide/','/hub/aetherium/guide/classes/','/hub/aetherium/guide/classes/chanter/','/hub/aetherium/guide/world/','/hub/aetherium/guide/character/'];
+const LAYOUT=['/hub/aetherium/guide/','/hub/aetherium/guide/classes/','/hub/aetherium/guide/classes/chanter/','/hub/aetherium/guide/world/','/hub/aetherium/guide/character/','/hub/aetherium/guide/general/about/'];
 for(const [width,height] of [[390,844],[1600,1000]]){
-  await check(`looks at ${width}: no sideways scroll, every button at least 44px tall, the nav inside the window, usable well inside 4 s`,async()=>{
+  await check(`looks at ${width}: no sideways scroll, every button at least 44px tall, the side menu in place, usable well inside 4 s`,async()=>{
     for(const path of LAYOUT){
       const {page,context,readyMs}=await open(path,{viewport:{width,height}});
       assert.ok(readyMs<4000,`${path}: usable in ${readyMs}ms`);
-      const box=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth-innerWidth,buttons:[...document.querySelectorAll('#aeStage .ae-btn')].filter(el=>el.offsetParent).map(el=>({text:el.textContent.trim().slice(0,30),h:el.getBoundingClientRect().height})),nav:(()=>{const n=document.querySelector('.ae-gd-nav').getBoundingClientRect(),w=document.querySelector('.ae-gd').getBoundingClientRect();return {left:n.left-w.left,right:w.right-n.right};})()}));
+      const box=await page.evaluate(()=>{
+        const rect=el=>el?.getBoundingClientRect()??null;
+        const side=document.querySelector('.ae-gd-side'),body=document.querySelector('#aeGuideBody'),hero=document.querySelector('.ae-gd-hero'),h1=document.querySelector('#aeScreenTitle');
+        return {scroll:document.documentElement.scrollWidth-innerWidth,
+          buttons:[...document.querySelectorAll('#aeStage :is(.ae-btn,.ae-gd-btn)')].filter(el=>el.offsetParent).map(el=>({text:el.textContent.trim().slice(0,30),h:el.getBoundingClientRect().height})),
+          hero:{w:rect(hero).width,h:rect(hero).height,h1:parseFloat(getComputedStyle(h1).fontSize)},
+          side:side?{right:rect(side).right,top:rect(side).top,listShown:getComputedStyle(side.querySelector('.ae-gd-side-list')).display!=='none',toggleShown:getComputedStyle(side.querySelector('.ae-gd-side-toggle')).display!=='none',position:getComputedStyle(side).position}:null,
+          body:{left:rect(body).left,right:rect(body).right,top:rect(body).top}};
+      });
       assert.ok(box.scroll<=0,`${path}: ${box.scroll}px sideways scroll`);
       for(const button of box.buttons)assert.ok(button.h>=44,`${path}: "${button.text}" is ${button.h}px tall`);
-      assert.ok(box.nav.left>=0&&box.nav.right>=0,`${path}: nav inside the window`);
+      assert.ok(Math.abs(box.hero.w-width)<=1,`${path}: the band runs full width (${box.hero.w})`);
+      if(width===390){
+        assert.ok(box.hero.h>=340&&box.hero.h<=560,`${path}: band about 360px tall on a phone (${box.hero.h})`);
+        assert.equal(box.hero.h1,42,`${path}: H1 42px on a phone`);
+      } else assert.ok([60,64].includes(box.hero.h1),`${path}: H1 ${box.hero.h1}px`);
+      if(box.side){
+        if(width===390){
+          assert.ok(box.side.toggleShown&&!box.side.listShown,`${path}: the menu folds behind "In this section"`);
+          assert.equal(box.side.position,'static','The toggle is neither sticky nor fixed');
+          assert.ok(box.side.top<box.body.top,'The toggle sits above the page');
+          await page.click('.ae-gd-side-toggle');
+          assert.equal(await page.getAttribute('.ae-gd-side-toggle','aria-expanded'),'true');
+          assert.ok(await page.$eval('.ae-gd-side-list',el=>getComputedStyle(el).display!=='none'),`${path}: the toggle opens the menu`);
+        } else {
+          assert.ok(!box.side.toggleShown&&box.side.listShown,`${path}: the menu shows on the left`);
+          assert.ok(box.side.right<=box.body.left,`${path}: the menu sits left of the page`);
+          assert.ok(box.body.right-box.body.left>=700,`${path}: the page runs wide (${box.body.right-box.body.left}px)`);
+        }
+      }
       if(process.env.AE_SHOTS)await page.screenshot({path:`${process.env.AE_SHOTS}/guide-${path.replace(/\W+/g,'-')}-${width}.png`,fullPage:true});
       await context.close();
     }
