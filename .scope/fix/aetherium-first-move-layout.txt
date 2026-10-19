@@ -37,7 +37,13 @@ hub/aetherium/guide/equipment/slots/index.html
 hub/aetherium/guide/equipment/theostones/index.html
 hub/aetherium/guide/equipment/titles/index.html
 hub/aetherium/guide/equipment/where-to-get/index.html
+hub/aetherium/guide/general/about/index.html
+hub/aetherium/guide/general/controls/index.html
+hub/aetherium/guide/general/faq/index.html
 hub/aetherium/guide/general/index.html
+hub/aetherium/guide/general/loadouts/index.html
+hub/aetherium/guide/general/market/index.html
+hub/aetherium/guide/general/resets/index.html
 hub/aetherium/guide/guides/index.html
 hub/aetherium/guide/index.html
 hub/aetherium/guide/path/index.html
