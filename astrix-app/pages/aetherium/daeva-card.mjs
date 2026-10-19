@@ -106,7 +106,7 @@ function renderSummary() {
     </aside>
     <section class="ae-panel ae-first-move" id="aeFirstMove" aria-labelledby="aeFirstMoveTitle" aria-live="polite">
       <p class="ae-eyebrow" id="aeFirstMoveTitle">Your first move</p>
-      <p class="ae-first-move-text" id="aeFirstMoveText">Working out your first move.</p>
+      <div class="ae-first-move-body"><p class="ae-first-move-text" id="aeFirstMoveText">Working out your first move.</p><p class="ae-first-move-detail" id="aeFirstMoveDetail" hidden></p></div>
       <a class="btn" id="aeFirstMoveGo" href="${esc(ascentUrl(state.ref, p.class))}" data-first-move hidden>Show me</a>
       <div class="ae-card-setup" id="aeCardSetup" hidden></div>
     </section>
@@ -237,6 +237,9 @@ async function loadFirstMove() {
   if ($('#aeAscentLink')) $('#aeAscentLink').href = ascentUrl(state.ref, p.class, links);
   const move = plan?.now?.[0] ?? null;
   text.textContent = move ? move.title : plan ? 'Nothing to fix right now. Your plan has what comes next.' : 'Your plan could not load here. Open the Ascent Plan to see it.';
+  // The move's own line says what it means ("Open Zikel to see your next node for your role"), so a short title never stands alone.
+  const detail = $('#aeFirstMoveDetail');
+  if (detail) { detail.textContent = move?.detail ?? ''; detail.hidden = !move?.detail; }
   go.href = moveHref(move, p);
   go.textContent = move ? 'Show me' : 'Open Ascent Plan';
   if (move) { go.dataset.moveView = move.view; if (move.board) go.dataset.moveBoard = move.board; }
