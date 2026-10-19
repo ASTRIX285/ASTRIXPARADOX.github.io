@@ -1,0 +1,6 @@
+# perf/validator-speed-fix: module-versions.json picks the areas of the modules it bumps, Chromium cap by core count.
+CLAUDE.md
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-paradox-validator-runner.mjs
+astrix-app/tools/validator-areas.json
+astrix-app/tools/validator-runner.mjs

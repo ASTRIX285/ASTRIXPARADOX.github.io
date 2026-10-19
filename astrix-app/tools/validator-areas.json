@@ -1,5 +1,5 @@
 {
-  "about": "paradox-validator --changed: which suites a changed file needs. core always runs. A file matching everything, or a file no area claims, runs every suite. A changed suite file runs itself. Patterns: dir/ is everything under dir, * stays inside one path part, ** crosses parts. When several areas claim a file, the most specific pattern wins (astrix-app/pages/aetherium/ beats astrix-app/pages/); areas tied on the same pattern length all run. Each suite must sit in core or at least one area (test-paradox-validator-runner.mjs checks it).",
+  "about": "paradox-validator --changed: which suites a changed file needs. core always runs. A file matching everything, or a file no area claims, runs every suite. A changed suite file runs itself. Patterns: dir/ is everything under dir, * stays inside one path part, ** crosses parts. When several areas claim a file, the most specific pattern wins (astrix-app/pages/aetherium/ beats astrix-app/pages/); areas tied on the same pattern length all run. astrix-app/module-versions.json is not in everything: its diff is read and each module it bumps picks the areas that own that module path; a change to its format, or to build-module-versions.mjs, runs every suite. Each suite must sit in core or at least one area (test-paradox-validator-runner.mjs checks it).",
   "core": [
     "validate-scope-guard.mjs",
     "validate-journey-visual-pass.mjs",
@@ -24,7 +24,6 @@
     "astrix-app/services/",
     "astrix-app/vendor/",
     "astrix-app/components/",
-    "astrix-app/module-versions.json",
     "astrix-app/index.html",
     "astrix-app/*.js",
     "astrix-app/*.mjs",
