@@ -1,5 +1,4 @@
 # feature/aetherium-guide-general: phase 5 of the AION 2 Guide (Miguel, 18 Oct 2026): General section and FAQ.
-astrix-app/data/armor-information.catalogue.json
 astrix-app/games/aion2/data/advisor/general.json
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/aetherium.css
@@ -33,8 +32,19 @@ hub/aetherium/guide/classes/ranger/index.html
 hub/aetherium/guide/classes/sorcerer/index.html
 hub/aetherium/guide/classes/spiritmaster/index.html
 hub/aetherium/guide/classes/templar/index.html
+hub/aetherium/guide/crafting/crafted-gear/index.html
+hub/aetherium/guide/crafting/gathering/index.html
 hub/aetherium/guide/crafting/index.html
+hub/aetherium/guide/crafting/professions/index.html
+hub/aetherium/guide/equipment/arcana/index.html
+hub/aetherium/guide/equipment/enhancement/index.html
 hub/aetherium/guide/equipment/index.html
+hub/aetherium/guide/equipment/manastones/index.html
+hub/aetherium/guide/equipment/pets-wings/index.html
+hub/aetherium/guide/equipment/slots/index.html
+hub/aetherium/guide/equipment/theostones/index.html
+hub/aetherium/guide/equipment/titles/index.html
+hub/aetherium/guide/equipment/where-to-get/index.html
 hub/aetherium/guide/general/about/index.html
 hub/aetherium/guide/general/controls/index.html
 hub/aetherium/guide/general/faq/index.html
