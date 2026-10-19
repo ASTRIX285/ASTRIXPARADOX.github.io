@@ -1,0 +1,1325 @@
+{
+  "description": "AION 2 dungeons for the Guide (phase 4): entry, difficulties, cycles and short boss notes, in our own words. Loot lists live in gear-sources.json (phase 3); lootRef points there.",
+  "retrievedOn": "2026-10-18",
+  "resets": {
+    "weekly": {
+      "day": 3,
+      "dayName": "Wednesday",
+      "hourUtc": 7,
+      "status": "confirmed",
+      "text": "Weekly entries and reward limits reset every Wednesday at 07:00 UTC.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "note": "Weekly reset Wednesday 07:00 UTC."
+        }
+      ]
+    },
+    "daily": {
+      "hourUtc": 7,
+      "status": "confirmed",
+      "text": "Daily attempts and keys refill at 07:00 UTC.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "note": "Daily reset 07:00 UTC."
+        }
+      ]
+    },
+    "conflicts": [
+      "The Dungeons overview also says 5:00 AM with no time zone. We use 07:00 UTC, which the Nightmare and Ascension Trial pages give and an in game check confirms."
+    ]
+  },
+  "categories": [
+    {
+      "id": "expedition",
+      "name": "Expedition",
+      "players": "1 to 5",
+      "entryCycle": "Spend Odyle Energy on the reward",
+      "mainRewards": "Expedition gear and Kina",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sealed",
+      "name": "Sealed Dungeons and Strongholds",
+      "players": "1",
+      "entryCycle": "Once each",
+      "mainRewards": "Daevanion Crystals, Enhance Stones, Noble Belt scrolls",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "transcendence",
+      "name": "Transcendence",
+      "players": "5",
+      "entryCycle": "Weekly reward count",
+      "mainRewards": "Arcana, Theostones, Kina",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sanctuary",
+      "name": "Sanctuary",
+      "players": "8 (2 parties)",
+      "entryCycle": "Weekly kill count",
+      "mainRewards": "Top tier gear, crafting materials",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "nightmare",
+      "name": "Nightmare",
+      "players": "1",
+      "entryCycle": "Daily attempts",
+      "mainRewards": "Phantasmal Fragments",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "ascension-trial",
+      "name": "Ascension Trial",
+      "players": "1",
+      "entryCycle": "Weekly entries",
+      "mainRewards": "Enhance Stones, Amplify Stone Fragments, chests",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "daily-dungeon",
+      "name": "Daily Dungeon",
+      "players": "1",
+      "entryCycle": "Weekly entries",
+      "mainRewards": "Enhance Stones",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "event",
+      "name": "Shugo Festival",
+      "players": "Varies",
+      "entryCycle": "Daily keys",
+      "mainRewards": "Centuryroot Tokens, growth materials",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shugo-festival",
+          "title": "Shugo Festival (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Shugo_Festival",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ],
+  "records": [
+    {
+      "category": "expedition",
+      "status": "reported",
+      "players": {
+        "min": 1,
+        "max": 5
+      },
+      "cycle": {
+        "kind": "odyle-energy",
+        "resets": "weekly",
+        "text": "No entry limit. You spend Odyle Energy only when you open the reward cube after the final boss. Each claim adds to your cube count; on Conquest enough claims give a Condensed Cube Energy pick of one Unique item. On Exploration that pick is limited.",
+        "note": "Also called Odd Energy.",
+        "status": "reported"
+      },
+      "rewardFocus": "Unique weapons and accessories (item Lv 54)",
+      "lootRef": "krao-cave",
+      "id": "krao-cave",
+      "name": "Krao Cave",
+      "src": "krao",
+      "stars": 1,
+      "order": 1,
+      "mainQuest": true,
+      "summary": "The first Expedition. A short cave run with a simple route: two mid-bosses on a fork, then a sealed creation as the final boss.",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 20,
+          "itemLevel": 200,
+          "note": "A gentle version for learning the bosses."
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "itemLevel": 700,
+          "note": "The usual farm. The final boss gains one-hit kill attacks."
+        }
+      ],
+      "conflicts": [
+        "The Expedition list page gives Conquest item level 800; the Krao Cave page gives 700. We show 700 from the dungeon page."
+      ],
+      "extra": [
+        {
+          "kind": "community-guide",
+          "ref": "pn-cap",
+          "title": "Dungeon livestream confirms level cap of 45",
+          "publisher": "playnews.gg",
+          "url": "https://www.playnews.gg/en/news/aion-2-dungeon-livestream-confirms-level-cap-of-45-and-no-heroic-items-in-season-1",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-09-04"
+        }
+      ],
+      "bosses": [
+        {
+          "name": "Neglected Gadioton",
+          "role": "mid",
+          "note": "Ranged. Wide fire zones you can read early; its pull then blast is the one to respect."
+        },
+        {
+          "name": "Enhanced Harcon",
+          "role": "mid",
+          "note": "Melee. Summons snipers around the edge that fire crossing lines; look for the gaps."
+        },
+        {
+          "name": "Ultimate Berk",
+          "role": "final",
+          "note": "Stand behind it to dodge the sweep, run to the edge when its hands turn red, and jump a beat early over the waves in the stagger phase."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-krao-cave",
+          "title": "Krao Cave (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "pn-cap",
+          "title": "Dungeon livestream confirms level cap of 45",
+          "publisher": "playnews.gg",
+          "url": "https://www.playnews.gg/en/news/aion-2-dungeon-livestream-confirms-level-cap-of-45-and-no-heroic-items-in-season-1",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-09-04"
+        }
+      ]
+    },
+    {
+      "category": "expedition",
+      "status": "reported",
+      "players": {
+        "min": 1,
+        "max": 5
+      },
+      "cycle": {
+        "kind": "odyle-energy",
+        "resets": "weekly",
+        "text": "No entry limit. You spend Odyle Energy only when you open the reward cube after the final boss. Each claim adds to your cube count; on Conquest enough claims give a Condensed Cube Energy pick of one Unique item. On Exploration that pick is limited.",
+        "note": "Also called Odd Energy.",
+        "status": "reported"
+      },
+      "rewardFocus": "Unique armour and a Guard (item Lv 54)",
+      "lootRef": "draupnir",
+      "id": "draupnir",
+      "name": "Draupnir",
+      "src": "draupnir",
+      "stars": 1,
+      "order": 2,
+      "mainQuest": true,
+      "entrance": "abyss",
+      "summary": "A three floor dive whose entrance sits in the Abyss, the PvP zone. Clearing Exploration once in the main quest gives a Unique weapon for your class. Expect gliding, flying and Kisk hops.",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 45,
+          "itemLevel": 700,
+          "note": "Learn the route and the bosses."
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "itemLevel": 700,
+          "note": "Stronger bosses with one-hit kill attacks."
+        }
+      ],
+      "extraRewards": [
+        "Ten clears give a Pantheon item."
+      ],
+      "bosses": [
+        {
+          "name": "Predator Saraswati",
+          "role": "mid",
+          "note": "Poison pools that stack fast, plus bind then poison cone. Watch your HP."
+        },
+        {
+          "name": "Phantasmal Lakshmi",
+          "role": "mid",
+          "note": "Stop hitting it while it reflects. Below half HP kill the healing handmaidens first."
+        },
+        {
+          "name": "Transcendent Bakarma",
+          "role": "final",
+          "note": "Stay behind it. At two thirds and one third HP, jump the waves early, reach it fast and break its whole stagger bar in time or the party wipes."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-draupnir",
+          "title": "Draupnir (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Draupnir",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "category": "expedition",
+      "status": "reported",
+      "players": {
+        "min": 1,
+        "max": 5
+      },
+      "cycle": {
+        "kind": "odyle-energy",
+        "resets": "weekly",
+        "text": "No entry limit. You spend Odyle Energy only when you open the reward cube after the final boss. Each claim adds to your cube count; on Conquest enough claims give a Condensed Cube Energy pick of one Unique item. On Exploration that pick is limited.",
+        "note": "Also called Odd Energy.",
+        "status": "reported"
+      },
+      "rewardFocus": "Unique weapons and accessories (item Lv 70)",
+      "lootRef": "urugugu-canyon",
+      "id": "urugugu-canyon",
+      "name": "Urugugu Canyon",
+      "src": "urugugu",
+      "stars": 2,
+      "order": 3,
+      "mainQuest": true,
+      "zone": "tolbas-forest",
+      "summary": "A canyon in Tolbas Forest crossed with windstreams and gliding. Easy on Exploration; on Conquest the final boss has a hard damage check.",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 28,
+          "itemLevel": 300,
+          "note": "Learn the route and the bosses."
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "itemLevel": 1600,
+          "note": "Packed trash and a very high damage check on the final boss."
+        }
+      ],
+      "bosses": [
+        {
+          "name": "Guardian Captain Raur",
+          "role": "mid",
+          "note": "Do not hit into its shield counter stance; watch for a charge with no warning."
+        },
+        {
+          "name": "Judge Urahum",
+          "role": "mid",
+          "note": "Wide hits and poison zones, no wipe mechanic."
+        },
+        {
+          "name": "Divine Auldor",
+          "role": "final",
+          "note": "Glide in carefully: a missed glide starts the fight with less HP. Whirlwind combos, a one-hit kill attack and an enrage timer."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-urugugu-canyon",
+          "title": "Urugugu Canyon (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "category": "expedition",
+      "status": "reported",
+      "players": {
+        "min": 2,
+        "max": 5
+      },
+      "cycle": {
+        "kind": "odyle-energy",
+        "resets": "weekly",
+        "text": "No entry limit. You spend Odyle Energy only when you open the reward cube after the final boss. Each claim adds to your cube count; on Conquest enough claims give a Condensed Cube Energy pick of one Unique item. On Exploration that pick is limited.",
+        "note": "Also called Odd Energy.",
+        "status": "reported"
+      },
+      "rewardFocus": "Unique armour and a Guard (item Lv 70)",
+      "lootRef": "vakron-sky-island",
+      "id": "vakron-sky-island",
+      "name": "Vakron Sky Island",
+      "src": "vakron",
+      "stars": 2,
+      "order": 4,
+      "mainQuest": false,
+      "summary": "The first optional Expedition, off the main quest route. It needs at least two players because some mechanics cannot be broken alone. Conquest drops a Guard, which few dungeons give.",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 45,
+          "itemLevel": 1400,
+          "players": {
+            "min": 2,
+            "max": 5
+          },
+          "note": "Learn the route, the element puzzle and the bosses."
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "itemLevel": 1400,
+          "players": {
+            "min": 2,
+            "max": 5
+          },
+          "note": "Stronger wipe mechanics; groups often ask for more than the entry item level."
+        }
+      ],
+      "bosses": [
+        {
+          "name": "Tiere",
+          "role": "mid",
+          "note": "Venom debuff and a dodge pattern that turns clockwise."
+        },
+        {
+          "name": "Thamon",
+          "role": "mid",
+          "note": "Petrify and bind; it heals depending on the attack type it takes."
+        },
+        {
+          "name": "Vakron",
+          "role": "final",
+          "note": "Binds that spread, a jump and glide wipe check, a rock prison and an enrage. Clear the Surveillance stacks at Mist Spirit Stones on the way."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-vakron-sky-island",
+          "title": "Vakron Sky Island (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Vakron_Sky_Island",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "category": "expedition",
+      "status": "reported",
+      "players": {
+        "min": 1,
+        "max": 5
+      },
+      "cycle": {
+        "kind": "odyle-energy",
+        "resets": "weekly",
+        "text": "No entry limit. You spend Odyle Energy only when you open the reward cube after the final boss. Each claim adds to your cube count; on Conquest enough claims give a Condensed Cube Energy pick of one Unique item. On Exploration that pick is limited.",
+        "note": "Also called Odd Energy.",
+        "status": "reported"
+      },
+      "rewardFocus": "Unique extendable weapons and accessories (item Lv 86)",
+      "lootRef": "fire-temple",
+      "id": "fire-temple",
+      "name": "Fire Temple",
+      "src": "fire",
+      "stars": 3,
+      "order": 5,
+      "mainQuest": true,
+      "summary": "A lava temple full of Burn. Clearly harder than the earlier Expeditions, and the home of the extendable weapons that widen your reach.",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 35,
+          "itemLevel": 500,
+          "note": "Learn the coolant route and the bosses."
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "itemLevel": 2100,
+          "note": "Heavy damage and a very high damage check on the final boss."
+        }
+      ],
+      "prepare": "Bring healing and cleansing potions for Burn, plus speed, defence and damage scrolls and food for the final boss.",
+      "bosses": [
+        {
+          "name": "Black Smoke Murute",
+          "role": "mid",
+          "note": "Mostly ground zones. The easiest of the three."
+        },
+        {
+          "name": "Red Spark Ignus",
+          "role": "mid",
+          "note": "Curse of Flame and zones that need the party to spread out."
+        },
+        {
+          "name": "Kromede's Desire",
+          "role": "final",
+          "note": "Chained attacks, bow attacks and the Fire Curtain, with a very high damage check."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "category": "expedition",
+      "status": "reported",
+      "players": {
+        "min": 1,
+        "max": 5
+      },
+      "cycle": {
+        "kind": "odyle-energy",
+        "resets": "weekly",
+        "text": "No entry limit. You spend Odyle Energy only when you open the reward cube after the final boss. Each claim adds to your cube count; on Conquest enough claims give a Condensed Cube Energy pick of one Unique item. On Exploration that pick is limited.",
+        "note": "Also called Odd Energy.",
+        "status": "reported"
+      },
+      "rewardFocus": "Unique armour and a Guard (item Lv 86)",
+      "lootRef": "ferocious-horn-den",
+      "id": "ferocious-horn-den",
+      "name": "Ferocious Horn Den",
+      "src": "horn",
+      "stars": 3,
+      "order": 6,
+      "mainQuest": false,
+      "summary": "The last Expedition gate and the most teamwork heavy. It drops the best Unique Expedition armour and the highest scoring Unique Guard.",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 45,
+          "itemLevel": 2100,
+          "note": "Learn the route, the bombs and the bosses."
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "itemLevel": 2100,
+          "note": "Many shared mechanics and heavy basic attacks; groups often ask for more than the entry item level."
+        }
+      ],
+      "bosses": [
+        {
+          "name": "Watchdog Kwapo",
+          "role": "mid",
+          "note": "Tracking orbs and an orb collecting mechanic."
+        },
+        {
+          "name": "Glowing Mau Totem",
+          "role": "mechanic",
+          "note": "Survive the waves and use bombs on the Totemists. It gives no extra loot but opens the way."
+        },
+        {
+          "name": "Necromancer Duanka",
+          "role": "mid",
+          "note": "Ranged. Kill the spirits and handle its soul calling wipe check."
+        },
+        {
+          "name": "Nuakum the Ferocious Horn",
+          "role": "final",
+          "note": "Clone assaults, guiding a blue orb and blocking for allies. Keep damage taken low."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ferocious-horn-den",
+          "title": "Ferocious Horn Den (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Ferocious_Horn_Den",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "deus-research-base",
+      "name": "Deus Research Base",
+      "category": "transcendence",
+      "status": "reported",
+      "order": 7,
+      "summary": "A Transcendence dungeon and the only home of Compass and Bell Arcana. Watch the drops along the route and the chain binds of the final boss.",
+      "players": {
+        "min": 5,
+        "max": 5
+      },
+      "level": null,
+      "levelNote": "No character level is listed for Transcendence: item level is the gate.",
+      "seasonal": true,
+      "arcanaSlots": [
+        "Compass",
+        "Bell",
+        "Chalice"
+      ],
+      "onlyHere": [
+        "Compass",
+        "Bell"
+      ],
+      "difficulties": [
+        {
+          "id": "stage-1",
+          "name": "Stage 1",
+          "itemLevel": 1600,
+          "arcanaGrades": "Common to Rare",
+          "guaranteedUnique": false,
+          "effect": null
+        },
+        {
+          "id": "stage-2",
+          "name": "Stage 2",
+          "itemLevel": 1900,
+          "arcanaGrades": "Common to Epic",
+          "guaranteedUnique": false,
+          "effect": {
+            "name": "Balance",
+            "text": "Strong elites leave a zone when they die that boosts monsters and hurts you."
+          }
+        },
+        {
+          "id": "stage-3",
+          "name": "Stage 3",
+          "itemLevel": 2200,
+          "arcanaGrades": "Common to Unique",
+          "guaranteedUnique": false,
+          "effect": {
+            "name": "Rage",
+            "text": "Monsters that are not bosses hit harder below half HP."
+          }
+        },
+        {
+          "id": "stage-4",
+          "name": "Stage 4",
+          "itemLevel": 2500,
+          "arcanaGrades": "Common to Unique",
+          "guaranteedUnique": true,
+          "effect": {
+            "name": "Judgment",
+            "text": "Boss hits stack a mark that explodes for damage to those near you."
+          }
+        }
+      ],
+      "cycle": {
+        "kind": "weekly-count",
+        "resets": "weekly",
+        "status": "reported",
+        "text": "Every Stage is open from the start. Kina from runs drops after the first 55 clears in a week; the count resets on Wednesday."
+      },
+      "rewardFocus": "Arcana (Compass, Bell, Chalice), Theostones, Manastones and Soulstones",
+      "lootRef": "deus-research-base",
+      "rank": "Each clear gets a Rank from time, revives, Kisks used and monsters killed. Monsters killed after the final boss spawns do not count.",
+      "bosses": [
+        {
+          "name": "Gelcos",
+          "role": "mid",
+          "note": "Take the left path at the first fork."
+        },
+        {
+          "name": "Nazmun",
+          "role": "mid",
+          "note": "Further along the same path."
+        },
+        {
+          "name": "Atiel",
+          "role": "final",
+          "note": "Kill the set number of monsters first. Its chains bind players together: hold position until they break, or move away from the centre player when the whole party is bound."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-deus-research-base",
+          "title": "Deus Research Base (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Deus_Research_Base",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-arcana",
+          "title": "Arcana (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Arcana",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "shattered-arkanis",
+      "name": "Shattered Arkanis",
+      "category": "transcendence",
+      "status": "reported",
+      "order": 8,
+      "summary": "A Transcendence dungeon and the only home of Mirror and Parchment Arcana. Many ranged trash mobs, so do not pull too many at once on high Stages.",
+      "players": {
+        "min": 5,
+        "max": 5
+      },
+      "level": null,
+      "levelNote": "No character level is listed for Transcendence: item level is the gate.",
+      "seasonal": true,
+      "arcanaSlots": [
+        "Mirror",
+        "Parchment",
+        "Chalice"
+      ],
+      "onlyHere": [
+        "Mirror",
+        "Parchment"
+      ],
+      "difficulties": [
+        {
+          "id": "stage-1",
+          "name": "Stage 1",
+          "itemLevel": 1600,
+          "arcanaGrades": "Common to Rare",
+          "guaranteedUnique": false,
+          "effect": null
+        },
+        {
+          "id": "stage-2",
+          "name": "Stage 2",
+          "itemLevel": 1900,
+          "arcanaGrades": "Common to Epic",
+          "guaranteedUnique": false,
+          "effect": {
+            "name": "Poison Blood",
+            "text": "Strong elites leave a zone when they die that heals monsters and hurts you."
+          }
+        },
+        {
+          "id": "stage-3",
+          "name": "Stage 3",
+          "itemLevel": 2200,
+          "arcanaGrades": "Common to Unique",
+          "guaranteedUnique": false,
+          "effect": {
+            "name": "Elevation",
+            "text": "When a monster dies, nearby monsters hit harder."
+          }
+        },
+        {
+          "id": "stage-4",
+          "name": "Stage 4",
+          "itemLevel": 2500,
+          "arcanaGrades": "Common to Unique",
+          "guaranteedUnique": true,
+          "effect": {
+            "name": "Tolerance",
+            "text": "Bosses have a bigger stagger bar."
+          }
+        }
+      ],
+      "cycle": {
+        "kind": "weekly-count",
+        "resets": "weekly",
+        "status": "reported",
+        "text": "Every Stage is open from the start. Kina from runs drops after the first 55 clears in a week; the count resets on Wednesday."
+      },
+      "rewardFocus": "Arcana (Mirror, Parchment, Chalice), Theostones, Manastones and Soulstones",
+      "lootRef": "shattered-arkanis",
+      "rank": "Each clear gets a Rank from time, revives, Kisks used and monsters killed. Monsters killed after the final boss spawns do not count.",
+      "bosses": [
+        {
+          "name": "Siliator of Deceit",
+          "role": "mid",
+          "note": "Up the stairs on the left. Higher Stages add a frost zone."
+        },
+        {
+          "name": "Ruthilis of Pain",
+          "role": "mid",
+          "note": "Further along the path."
+        },
+        {
+          "name": "Talisra of the Void",
+          "role": "final",
+          "note": "Appears after the kill count. Guide its Refracting Spear into the crystals to free trapped allies; top Stages add moving fire pillars."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shattered-arkanis",
+          "title": "Shattered Arkanis (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Shattered_Arkanis",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-arcana",
+          "title": "Arcana (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Arcana",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "nightmare",
+      "name": "Nightmare",
+      "category": "nightmare",
+      "status": "reported",
+      "order": 9,
+      "players": {
+        "min": 1,
+        "max": 1
+      },
+      "level": 45,
+      "summary": "Solo boss fights straight from the menu. Each boss has ten challenge levels; clears pay Phantasmal Fragments for the Nightmare shop.",
+      "difficulties": [
+        {
+          "id": "common",
+          "name": "the four Common bosses",
+          "itemLevel": 1000,
+          "itemLevelTo": 1600,
+          "suggested": true,
+          "note": "Open from the start."
+        },
+        {
+          "id": "rare",
+          "name": "the two Rare bosses",
+          "itemLevel": 1700,
+          "itemLevelTo": 2300,
+          "suggested": true,
+          "note": "Clear all four Common bosses at level 10 first."
+        },
+        {
+          "id": "epic",
+          "name": "Zikel's Apparition (Epic)",
+          "itemLevel": 2400,
+          "itemLevelTo": 3000,
+          "suggested": true,
+          "note": "Clear both Rare bosses at level 10 first."
+        }
+      ],
+      "itemLevelNote": "These item levels are suggestions for challenge levels 1 to 10, not entry gates.",
+      "cycle": {
+        "kind": "daily-tickets",
+        "resets": "daily",
+        "perDay": 2,
+        "cap": 14,
+        "status": "reported",
+        "text": "Two attempts a day at the daily reset, stacking to 14. An attempt is spent only when you win, so a failed try costs nothing."
+      },
+      "rewardFocus": "Phantasmal Fragments for the Nightmare shop (Daevanion Crystals, Stigma Shards, wings)",
+      "lootRef": "nightmare",
+      "conflicts": [
+        "The Dungeons overview says the daily recharge is at 5:00 AM and that an attempt is used on entry; the Nightmare page says 07:00 UTC and only on a clear. We follow the Nightmare page."
+      ],
+      "bosses": [
+        {
+          "name": "Zikel's Apparition",
+          "role": "final",
+          "note": "Fast and punishing. Wait for the first line to explode then dash through it, jump just before the floor gauge fills, and step out of sword circles."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "ascension-trial",
+      "name": "Ascension Trial",
+      "category": "ascension-trial",
+      "status": "reported",
+      "order": 10,
+      "players": {
+        "min": 1,
+        "max": 1
+      },
+      "level": 45,
+      "itemLevel": 1000,
+      "summary": "A solo timed run through rooms to a final boss, scored at the end. Side objectives buff you or weaken the boss. The dungeon changes each week.",
+      "difficulties": [
+        {
+          "id": "easy",
+          "name": "Easy",
+          "itemLevel": 1000,
+          "note": "5 deaths allowed, 18 minutes."
+        },
+        {
+          "id": "normal",
+          "name": "Normal",
+          "itemLevel": 1500,
+          "note": "3 deaths allowed, 16 minutes."
+        },
+        {
+          "id": "hard",
+          "name": "Hard",
+          "itemLevel": 2000,
+          "note": "2 deaths allowed, 14 minutes."
+        },
+        {
+          "id": "extreme",
+          "name": "Extreme",
+          "itemLevel": 2500,
+          "note": "2 deaths allowed, 13 minutes. Wrath: monsters below half HP hit harder."
+        }
+      ],
+      "cycle": {
+        "kind": "weekly-entries",
+        "resets": "weekly",
+        "perWeek": 3,
+        "status": "reported",
+        "text": "Three entries a week. An entry is spent the moment you go in, win or lose, so pick a difficulty you can finish."
+      },
+      "rotation": [
+        "Nightmare Altar",
+        "Sanctum of Loathing"
+      ],
+      "rewardFocus": "Enhance Stones, Unique Amplify Stone Fragments, Growth Pet Chests and Ascension Binding Chests",
+      "lootRef": "ascension-trial",
+      "bosses": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "daily-dungeon",
+      "name": "Daily Dungeon",
+      "category": "daily-dungeon",
+      "status": "reported",
+      "order": 11,
+      "players": {
+        "min": 1,
+        "max": 1
+      },
+      "level": null,
+      "itemLevel": null,
+      "summary": "Solo waves against the clock. Pick one of three random combat boosts during the run; your score sets the reward. Despite the name it refills weekly.",
+      "entryPending": "No entry level or item level listed yet.",
+      "difficulties": [],
+      "cycle": {
+        "kind": "weekly-entries",
+        "resets": "weekly",
+        "perWeek": 14,
+        "status": "reported",
+        "text": "14 attempts a week, refilled on Wednesday."
+      },
+      "rewardFocus": "Enhance Stones in bulk",
+      "lootRef": "daily-dungeon",
+      "bosses": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sealed-dungeons",
+      "name": "Sealed Dungeons and Strongholds",
+      "category": "sealed",
+      "status": "reported",
+      "order": 12,
+      "players": {
+        "min": 1,
+        "max": 1
+      },
+      "level": null,
+      "itemLevel": null,
+      "summary": "Solo spots marked with a question mark on the map. Sealed Dungeons are small caves of about ten minutes; Strongholds are enemy bases with two or three objectives. Each pays out once.",
+      "entryPending": "No level gate is listed. Loot from mobs scales with your level, so they are best done at Lv 45; the fixed rewards do not change.",
+      "difficulties": [],
+      "cycle": {
+        "kind": "one-time",
+        "resets": "none",
+        "status": "reported",
+        "text": "Each one is cleared once and its marker leaves the map. Kina and some items have a daily cap shared with field hunting."
+      },
+      "rewardFocus": "Daevanion Crystals, Wisdom Stones, Enhance Stones, titles, and Noble Belt Enhance Scrolls from Strongholds",
+      "lootRef": "sealed-dungeons",
+      "daevaGauge": "Clears fill the Daeva Gauge. At 100% the final main quest opens.",
+      "bosses": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "shugo-festival",
+      "name": "Shugo Festival",
+      "category": "event",
+      "status": "reported",
+      "order": 13,
+      "players": null,
+      "level": null,
+      "itemLevel": null,
+      "summary": "Nine five minute mini games every hour on the hour: flying, racing, memory and hide and seek. Gear does not matter, only your rank.",
+      "entryPending": "No level gate listed.",
+      "difficulties": [],
+      "cycle": {
+        "kind": "daily-keys",
+        "resets": "daily",
+        "perDay": 3,
+        "cap": 12,
+        "status": "reported",
+        "text": "Three Reward Keys a day per server, up to 12. A key is spent only when you open a reward card, so you can skip a poor result."
+      },
+      "rewardFocus": "Centuryroot Tokens, Enhance Stones, Soul Codex, Abyss Points and a small chance of Unique gear",
+      "lootRef": "shugo-festival",
+      "bosses": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shugo-festival",
+          "title": "Shugo Festival (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Shugo_Festival",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sanctuary",
+      "name": "Sanctuary",
+      "category": "sanctuary",
+      "status": "pending",
+      "order": 14,
+      "players": {
+        "min": 8,
+        "max": 8
+      },
+      "level": null,
+      "itemLevel": null,
+      "summary": "The end game raid for two parties. Its entry rules and bosses are not listed yet.",
+      "entryPending": "Entry level, item level and bosses not listed yet.",
+      "conflicts": [
+        "The Dungeons overview says 8 players in 2 parties; the Expedition page says 10 player raids. We show 8 from the overview."
+      ],
+      "difficulties": [],
+      "cycle": {
+        "kind": "weekly-kills",
+        "resets": "weekly",
+        "status": "reported",
+        "text": "Final boss kills are limited each week."
+      },
+      "rewardFocus": "Top tier gear and crafting materials (pending detail)",
+      "lootRef": "sanctuary",
+      "bosses": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "description": "AION 2 world for the Guide (phase 4): zones, the Abyss, exploration spots and events the wiki covers. Anything with no source says pending.",
+  "retrievedOn": "2026-10-18",
+  "records": [
+    {
+      "id": "base-of-dawn",
+      "kind": "zone",
+      "name": "Base of Dawn",
+      "status": "reported",
+      "region": "Cantas Valley, Verteron",
+      "text": "The Dawn Legion's hidden command base, tucked in a gorge of Cantas Valley.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-base-of-dawn",
+          "title": "Base of Dawn (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Base_of_Dawn",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "cantas-valley",
+      "kind": "zone",
+      "name": "Cantas Valley",
+      "status": "reported",
+      "region": "Verteron",
+      "text": "Once a supply point rich in Odium for the Daevas, left empty when the Odium ran out. The Dawn Legion now draws the last of its Aether with collectors.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-cantas-valley",
+          "title": "Cantas Valley (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Cantas_Valley",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-base-of-dawn",
+          "title": "Base of Dawn (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Base_of_Dawn",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "tolbas-forest",
+      "kind": "zone",
+      "name": "Tolbas Forest",
+      "status": "reported",
+      "region": null,
+      "text": "Forest that hides Urugugu Canyon, sacred land of the Aulau tribe.",
+      "dungeons": [
+        "urugugu-canyon"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-urugugu-canyon",
+          "title": "Urugugu Canyon (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "abyss",
+      "kind": "abyss",
+      "name": "The Abyss",
+      "status": "reported",
+      "region": null,
+      "text": "A PvP zone. The entrance to Draupnir lies inside it, so expect players of the other faction on the way in.",
+      "dungeons": [
+        "draupnir"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-draupnir",
+          "title": "Draupnir (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Draupnir",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "spacetime-rift",
+      "kind": "rift",
+      "name": "Spacetime Rift",
+      "status": "reported",
+      "region": null,
+      "text": "Opens every three hours for about ten minutes and takes you into the other faction's land, where you can clear their Sealed Dungeons, Strongholds and regional quests. PvP is on there.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sealed-dungeons",
+      "kind": "exploration",
+      "name": "Sealed Dungeons and Strongholds",
+      "status": "reported",
+      "region": null,
+      "text": "Question marks on the map in both factions' lands. Clear them for Daevanion Crystals and Noble Belt scrolls and to fill the Daeva Gauge.",
+      "dungeons": [
+        "sealed-dungeons"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "shugo-festival",
+      "kind": "event",
+      "name": "Shugo Festival",
+      "status": "reported",
+      "region": null,
+      "text": "Opens every hour on the hour from the Shugo icon beside the minimap.",
+      "dungeons": [
+        "shugo-festival"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shugo-festival",
+          "title": "Shugo Festival (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Shugo_Festival",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "dimensional-invasion",
+      "kind": "event",
+      "name": "Dimensional Invasion",
+      "status": "pending",
+      "region": null,
+      "text": "A separate event that opens at half past each hour. More detail is not listed yet.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shugo-festival",
+          "title": "Shugo Festival (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Shugo_Festival",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "zone-list",
+      "kind": "zone",
+      "name": "Other zones",
+      "status": "pending",
+      "region": null,
+      "text": "The other zones are not listed yet.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-story",
+          "title": "Story (AION2 Wiki)",
+          "publisher": "AION2 Fandom wiki",
+          "url": "https://aion2.fandom.com/wiki/Story",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}
