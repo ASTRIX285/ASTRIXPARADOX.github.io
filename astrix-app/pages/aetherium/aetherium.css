@@ -1106,6 +1106,11 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-first-move:not(.is-ready) .ae-first-move-text{font-weight:500;color:var(--ae-muted)}
 .ae-first-move .btn{justify-self:end}
 .ae-first-move .btn[hidden]{display:none}
+/* The move and its line sit in the middle column; the setup for now spans the whole card under them. */
+.ae-first-move-body{display:grid;gap:4px;min-width:0}
+.ae-first-move-detail{margin:0;font-size:.9375rem;line-height:1.45;color:var(--ae-text-muted)}
+.ae-first-move-detail[hidden]{display:none}
+.ae-first-move>.ae-card-setup{grid-column:1/-1}
 @media (max-width:819px){.ae-first-move{grid-template-columns:minmax(0,1fr)}.ae-first-move .btn{justify-self:stretch}}
 
 .ae-summary-card.is-skeleton .ae-reading{grid-column:1/-1}
