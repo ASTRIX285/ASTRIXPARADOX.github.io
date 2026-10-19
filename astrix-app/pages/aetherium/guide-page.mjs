@@ -1,56 +1,73 @@
 /**
- * The Guide's light pages (feature/aetherium-guide-home, 18 Oct 2026): the Guide home, the Character section and the
- * "coming soon" page of each section not written yet. The page says which one it is on <body data-guide="home|section|soon"
- * data-guide-section="<id>">. Static: no call to the official site, no data file. Classes live in guide-classes.mjs.
+ * The Guide's light pages (feature/aetherium-guide-home, 18 Oct 2026; remodelled in design/aetherium-guide-remodel,
+ * 19 Oct 2026): the Guide home, the Character section and the "coming soon" page of each section not written yet. The page
+ * says which one it is on <body data-guide="home|section|soon" data-guide-section="<id>">. Static: no call to the official
+ * site, no data file. Classes live in guide-classes.mjs.
  */
 import { esc } from './aetherium-ui.mjs';
 import { cardUrl } from './aetherium-data.mjs';
-import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, guideHref, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 
-/* Our own line icons for the section tiles (24 px grid, drawn in currentColor). */
-const ICONS = {
-  general: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
-  character: '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
-  skills: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
-  equipment: '<path d="M14.5 3.5l6 6-9 9H5.5v-6z"/><path d="M12 7l5 5M4 20l3-3"/>',
-  crafting: '<path d="M14 4l6 6-3 3-6-6z"/><path d="M11 7L3.5 14.5a2 2 0 0 0 0 3l3 3a2 2 0 0 0 3 0L17 13"/>',
-  world: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
-  guides: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7M8 11h7"/>'
+/*
+ * The Guide home's settings. exampleShot is the "See it on the screen you already use" panel: a real in-game screenshot
+ * with its numbered steps, { src, alt, width, height, label, steps: [{ title, text }] }. The panel only draws when it is set,
+ * so a placeholder never shows on the site.
+ */
+const HOME = Object.freeze({ exampleShot: null });
+
+/* Our own emblems for the section tiles (48 px grid): pale blue lines, one gold accent stroke each. */
+const EMBLEMS = {
+  general: '<path d="M8 12 Q16 9 24 13 Q32 9 40 12 V36 Q32 33 24 37 Q16 33 8 36 Z"/><path d="M24 13 V37" class="is-gold"/>',
+  character: '<path d="M24 30 C18 22 10 20 4 22 C10 26 14 30 18 34 Z"/><path d="M24 30 C30 22 38 20 44 22 C38 26 34 30 30 34 Z"/><circle cx="24" cy="18" r="4" class="is-gold"/>',
+  skills: '<path d="M24 6 L28 20 L42 24 L28 28 L24 42 L20 28 L6 24 L20 20 Z"/><circle cx="24" cy="24" r="3" class="is-gold"/>',
+  equipment: '<path d="M24 6 V34"/><path d="M20 10 L24 6 L28 10"/><path d="M15 30 H33" class="is-gold"/><path d="M24 34 V42"/>',
+  crafting: '<path d="M10 32 H38 L34 38 H14 Z"/><path d="M14 32 Q14 26 22 26 H34 Q38 26 38 32"/><path d="M30 8 L38 16" class="is-gold"/><path d="M34 12 L24 22" class="is-gold"/>',
+  world: '<circle cx="24" cy="24" r="16"/><path d="M24 11 L28 24 L24 37 L20 24 Z" class="is-gold"/>',
+  guides: '<path d="M14 42 V6"/><path d="M14 8 H36 L32 14 L36 20 H14" class="is-gold"/><path d="M8 42 H20"/>'
 };
-const icon = id => `<svg class="ae-gd-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[id] ?? ''}</svg>`;
+const emblem = id => `<svg class="ae-gd-emblem" viewBox="0 0 48 48" width="60" height="60" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${EMBLEMS[id] ?? ''}</svg>`;
 
-/* Built pages inside a section, by topic: a topic with a page is a link, the rest wait for their phase. */
-const TOPIC_PAGES = {
-  character: { Classes: `${GUIDE_ROOT}classes/` },
-  equipment: { 'Slots and grades': `${GUIDE_ROOT}equipment/slots/`, Enhancement: `${GUIDE_ROOT}equipment/enhancement/`, Manastones: `${GUIDE_ROOT}equipment/manastones/`, Theostones: `${GUIDE_ROOT}equipment/theostones/`, Arcana: `${GUIDE_ROOT}equipment/arcana/`, 'Pets and wings': `${GUIDE_ROOT}equipment/pets-wings/`, Titles: `${GUIDE_ROOT}equipment/titles/` },
-  general: { 'About AION 2': `${GUIDE_ROOT}general/about/`, Factions: `${GUIDE_ROOT}general/about/`, 'Season 1': `${GUIDE_ROOT}general/about/`, 'Reset times': `${GUIDE_ROOT}general/resets/`, 'Membership and Market': `${GUIDE_ROOT}general/market/`, Controls: `${GUIDE_ROOT}general/controls/`, FAQ: `${GUIDE_ROOT}general/faq/` },
-  world: { Zones: `${GUIDE_ROOT}world/#aeWorld-zone`, 'Sealed Dungeons and Strongholds': `${GUIDE_ROOT}dungeons/sealed-dungeons/`, 'The Abyss': `${GUIDE_ROOT}world/#abyss`, Events: `${GUIDE_ROOT}world/#aeWorld-event` },
-  guides: { 'Your path by level': `${GUIDE_ROOT}path/`, Dungeons: `${GUIDE_ROOT}dungeons/`, 'Lv 45 weekly loop': `${GUIDE_ROOT}weekly/` },
-  skills: { 'Skills by class': `${GUIDE_ROOT}classes/`, Mastery: `${GUIDE_ROOT}skills/`, 'Specialty picks': `${GUIDE_ROOT}skills/`, 'Skill bar and macro': `${GUIDE_ROOT}general/controls/` },
-  crafting: { Professions: `${GUIDE_ROOT}crafting/professions/`, Gathering: `${GUIDE_ROOT}crafting/gathering/`, 'Crafted gear': `${GUIDE_ROOT}crafting/crafted-gear/` }
-};
-
-const soonTag = '<span class="ae-gd-soon-tag">Coming soon</span>';
+/** A gold diamond and the heading, as every section of the Guide opens. */
+const h2 = (id, text) => `<h2 class="ae-gd-h2" id="${esc(id)}">${esc(text)}</h2>`;
 
 function tileHtml(item) {
-  const pages = TOPIC_PAGES[item.id] ?? {};
   return `<li class="ae-gd-tile" data-guide-tile="${esc(item.id)}">
-      <a class="ae-gd-tile-head" href="${esc(item.href)}">${icon(item.id)}<span class="ae-gd-tile-name">${esc(item.label)}</span>${item.built ? '' : soonTag}</a>
-      <p class="ae-gd-tile-blurb">${esc(item.blurb)}</p>
-      <ul class="ae-gd-topics">${item.topics.map(topic => `<li>${pages[topic] ? `<a href="${esc(pages[topic])}">${esc(topic)}</a>` : `<span>${esc(topic)}</span>`}</li>`).join('')}</ul>
+      <div class="ae-gd-tile-art">${emblem(item.id)}</div>
+      <div class="ae-gd-tile-copy">
+        <h3 class="ae-gd-tile-name"><a class="ae-gd-tile-head" href="${esc(item.href)}">${esc(item.label)}</a></h3>
+        <p class="ae-gd-tile-blurb">${esc(item.blurb)}</p>
+        <ul class="ae-gd-topics">${item.topics.map(topic => `<li>${item.pages[topic] ? `<a href="${esc(item.pages[topic])}">${esc(topic)}</a>` : `<span>${esc(topic)}</span>`}</li>`).join('')}</ul>
+      </div>
     </li>`;
 }
 
-function startRowHtml(linked) {
+/** "See it on the screen you already use": only with a real screenshot in HOME.exampleShot. */
+function exampleHtml(shot) {
+  if (!shot?.src) return '';
+  return `<section class="ae-gd-example" aria-labelledby="aeExampleTitle">
+      ${h2('aeExampleTitle', 'See it on the screen you already use')}
+      <p class="ae-gd-section-lede">Every guide starts from a real in-game window. We mark what matters, so you know where to click and what the numbers mean.</p>
+      <div class="ae-gd-showcase">
+        <figure class="ae-gd-shot">
+          ${shot.label ? `<figcaption class="ae-gd-shot-label">${esc(shot.label)}</figcaption>` : ''}
+          <img src="${esc(shot.src)}" alt="${esc(shot.alt)}" width="${esc(shot.width)}" height="${esc(shot.height)}" loading="lazy" decoding="async">
+        </figure>
+        <ol class="ae-gd-shot-steps">${(shot.steps ?? []).map((step, index) => `<li><span class="ae-gd-num" aria-hidden="true">${index + 1}</span><div><h3>${esc(step.title)}</h3><p>${esc(step.text)}</p></div></li>`).join('')}</ol>
+      </div>
+    </section>`;
+}
+
+/** "New to AION 2? Go in this order": four steps, each an existing page. Daevanion has no page yet, so it opens Character. */
+function pathHtml() {
   const steps = [
-    { n: 1, title: 'Pick a class', text: 'See what each of the eight classes does and which role it plays.', href: `${GUIDE_ROOT}classes/` },
-    { n: 2, title: 'Find your Daeva', text: 'Type your character name to read your gear, skills and boards.', href: linked ? cardUrl(linked.ref) : '/hub/aetherium/#aeSearch' },
-    { n: 3, title: 'Plan your build', text: 'The Ascent Plan says what to level, slot and spend next.', href: '/hub/aetherium/ascent/' },
-    { n: 4, title: 'Your path by level', text: 'What to do at each level, from Lv 1 to the Lv 45 weekly loop.', href: `${GUIDE_ROOT}path/` }
+    { title: 'About AION 2', text: 'The two factions, the story so far and what Season 1 holds.', href: `${GUIDE_ROOT}general/about/` },
+    { title: 'Controls and the skill bar', text: 'Control modes, keys, macros and how to lay out your bar.', href: `${GUIDE_ROOT}general/controls/` },
+    { title: 'Enhancement', text: 'The five tabs of the Enhancement window and what to enhance, when.', href: `${GUIDE_ROOT}equipment/enhancement/` },
+    { title: 'Daevanion', text: 'Your Daevanion boards, with your class and stats in the Character section.', href: `${GUIDE_ROOT}character/` }
   ];
-  return `<section class="ae-gd-start" aria-labelledby="aeStartTitle">
-      <h2 id="aeStartTitle">New player? Start here</h2>
-      <ol class="ae-gd-steps">${steps.map(step => `<li><a class="ae-btn ae-gd-step" href="${esc(step.href)}" data-guide-start="${step.n}"><b class="ae-gd-step-n" aria-hidden="true">${step.n}</b><span class="ae-gd-step-copy"><strong>${esc(step.title)}</strong><small>${esc(step.text)}</small></span>${step.soon ? soonTag : ''}</a></li>`).join('')}</ol>
+  return `<section class="ae-gd-path" aria-labelledby="aeStartTitle">
+      ${h2('aeStartTitle', 'New to AION 2? Go in this order')}
+      <ol class="ae-gd-steps">${steps.map((step, index) => `<li><a class="ae-gd-step" href="${esc(step.href)}" data-guide-start="${index + 1}"><span class="ae-gd-step-n" aria-hidden="true">${index + 1}</span><strong>${esc(step.title)}</strong><small>${esc(step.text)}</small></a></li>`).join('')}</ol>
     </section>`;
 }
 
@@ -61,28 +78,32 @@ function linkedHtml(linked) {
 }
 
 function renderHome(linked) {
-  const body = renderGuideShell({ section: 'home', title: 'AION 2 Guide' });
+  const card = linked ? cardUrl(linked.ref) : '/hub/aetherium/#aeSearch';
+  const body = renderGuideShell({
+    section: 'home',
+    kicker: 'AION 2 Guide',
+    title: 'Know where to look.',
+    lede: 'Welcome to the AION 2 Guide by ASTRIX PARADOX. It explains the game in plain words, from your first class pick to the Lv 45 weekly loop, and ties every part back to your own Daeva when you link one.',
+    actions: `<a class="ae-gd-btn is-gold" href="${GUIDE_ROOT}general/about/" data-guide-cta="about">Start with About AION 2</a><a class="ae-gd-btn" href="${esc(card)}" data-guide-cta="card">Open your Daeva Card</a>`
+  });
   body.insertAdjacentHTML('beforeend', `
-    <div class="ae-gd-intro">
-      <p class="ae-gd-lede">Welcome to the AION 2 Guide by ASTRIX PARADOX. It explains the game in plain words, from your first class pick to the Lv 45 weekly loop, and ties every part back to your own Daeva when you link one.</p>
-      <p>Every fact comes from our build data or a cited source. Where nothing confirms a detail yet, the Guide says so instead of guessing.</p>
-    </div>
     ${linkedHtml(linked)}
-    ${startRowHtml(linked)}
-    <section class="ae-gd-grid-wrap" aria-labelledby="aeGridTitle">
-      <h2 id="aeGridTitle">Browse the Guide</h2>
+    <section class="ae-gd-browse" aria-labelledby="aeGridTitle">
+      ${h2('aeGridTitle', 'Browse the guide')}
       <ul class="ae-gd-grid">${GUIDE_SECTIONS.filter(item => item.id !== 'home').map(tileHtml).join('')}</ul>
-    </section>`);
+    </section>
+    ${exampleHtml(HOME.exampleShot)}
+    ${pathHtml()}
+    <p class="ae-gd-note-line">Every fact comes from our build data or a cited source.</p>`);
 }
 
 function renderCharacter() {
   const item = GUIDE_SECTIONS.find(entry => entry.id === 'character');
   const body = renderGuideShell({ section: 'character', title: 'Character', crumbs: [{ label: 'Character' }], lede: item.blurb });
-  const pages = TOPIC_PAGES.character;
   body.insertAdjacentHTML('beforeend', `
-    <ul class="ae-gd-grid is-topics">${item.topics.map(topic => `<li class="ae-gd-tile" data-guide-topic="${esc(topic)}">${pages[topic]
-      ? `<a class="ae-gd-tile-head" href="${esc(pages[topic])}">${icon('character')}<span class="ae-gd-tile-name">${esc(topic)}</span></a><p class="ae-gd-tile-blurb">The eight classes, the roles they play and the builds for each.</p>`
-      : `<span class="ae-gd-tile-head">${icon('character')}<span class="ae-gd-tile-name">${esc(topic)}</span>${soonTag}</span><p class="ae-gd-tile-blurb">Coming soon in this guide.</p>`}</li>`).join('')}</ul>
+    <ul class="ae-gd-grid is-topics">${item.topics.map(topic => `<li class="ae-gd-tile" data-guide-topic="${esc(topic)}"><div class="ae-gd-tile-copy">${item.pages[topic]
+      ? `<h3 class="ae-gd-tile-name"><a class="ae-gd-tile-head" href="${esc(item.pages[topic])}">${esc(topic)}</a></h3><p class="ae-gd-tile-blurb">The eight classes, the roles they play and the builds for each.</p>`
+      : `<h3 class="ae-gd-tile-name"><span class="ae-gd-tile-head">${esc(topic)}</span></h3><p class="ae-gd-tile-blurb">Coming soon in this guide.</p>`}</div></li>`).join('')}</ul>
     <h2 class="ae-gd-h2">The eight classes</h2>
     <ul class="ae-gd-classlinks">${GUIDE_CLASSES.map(name => `<li><a class="ae-btn" href="${esc(classHref(name))}">${esc(name)}</a></li>`).join('')}</ul>`);
 }
