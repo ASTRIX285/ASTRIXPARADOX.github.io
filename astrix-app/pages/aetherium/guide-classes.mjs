@@ -67,7 +67,7 @@ function rolesTableHtml(all, ratings, only = null) {
 
 function rolesKeyHtml(ratings) {
   return `<div class="ae-gd-key">
-      <p><b>Main role</b>: the role the class's main build plays. <b>Can play</b>: we have a build for it. <b>Pending</b>: a build is being sourced. <b>-</b>: no build for that role.</p>
+      <p><b>Main role</b>: the role the class's main build plays. <b>Can play</b>: we have a build for it. <b>Pending</b>: a build is coming. <b>-</b>: no build for that role.</p>
     </div>`;
 }
 
@@ -141,7 +141,6 @@ function buildHtml(name, build, icons, linked) {
   const iconOf = skill => { const found = icons?.records?.[0]?.skills?.find(item => item.name === skill); return found ? `${icons.records[0].iconBase}${found.icon}` : null; };
   const stats = isPending(build.stats) ? null : build.stats;
   const stones = stats?.manastones && !isPending(stats.manastones) ? stats.manastones : null;
-  const sources = new Map((build.provenance ?? []).filter(source => source.url).map(source => [source.publisher, source.url]));
   return `<article class="ae-gd-build" id="build-${esc(build.role)}" data-build="${esc(build.id)}" data-role="${esc(build.role)}" aria-labelledby="aeBuild${esc(build.role)}">
       <header class="ae-gd-build-head">
         <h3 id="aeBuild${esc(build.role)}"><span class="ae-gd-build-role">${esc(ROLE_LABEL[build.role])}</span> ${esc(build.label)}</h3>
@@ -156,7 +155,6 @@ function buildHtml(name, build, icons, linked) {
         </section>
       </div>
       ${ascentLinks(name, build.role, linked)}
-      ${sources.size ? `<p class="ae-gd-cite">Sources: ${[...sources].map(([publisher, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(publisher)}</a>`).join(', ')}</p>` : ''}
     </article>`;
 }
 

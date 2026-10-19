@@ -124,7 +124,7 @@ function gatesHtml() {
   return `<section class="ae-gp-card ae-gp-item" aria-labelledby="aeGpItemTitle">
       <h2 id="aeGpItemTitle">What your item level enters</h2>
       ${label}${form}${open}${next}
-      <p class="ae-gp-note">Entry item levels from the AION2 Wiki. Many parties ask for more.</p>
+      <p class="ae-gp-note">Many parties ask for more.</p>
     </section>`;
 }
 
@@ -196,9 +196,7 @@ const loadoutsHtml = () => `<section class="ae-gp-card ae-gp-loadouts" aria-labe
   </section>`;
 
 function sourcesHtml() {
-  const seen = new Map();
-  for (const record of state.data.guide.records) for (const source of record.provenance ?? []) if (source.url) seen.set(source.url, `${source.publisher}: ${source.title}`);
-  return `<details class="ae-gp-sources"><summary>Sources</summary><ul>${[...seen].map(([url, label]) => `<li><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a></li>`).join('')}</ul><p>Wiki facts are written in our own words. Level unlocks come from our progression data.</p></details>`;
+  return ''; // Sources stay in the data, never on the page (Miguel, 19 Oct 2026).
 }
 
 function render() {

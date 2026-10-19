@@ -22,7 +22,7 @@ export const GENERAL_PAGES = Object.freeze([
   { id: 'market', slug: 'market/', title: 'Membership and the Market', blurb: 'Why you cannot trade directly, and what Membership unlocks.' },
   { id: 'controls', slug: 'controls/', title: 'Controls and the skill bar', blurb: 'Control modes, keys, macros and how to lay out your bar.' },
   { id: 'loadouts', slug: 'loadouts/', title: 'Loadouts', blurb: 'The 3 loadouts for looks, armour and skills, and how to plan them.' },
-  { id: 'faq', slug: 'faq/', title: 'FAQ', blurb: 'Quick answers, grouped like the game\'s settings, each with its source.' }
+  { id: 'faq', slug: 'faq/', title: 'FAQ', blurb: 'Quick answers, grouped like the game\'s settings.' }
 ]);
 
 const zone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'your time zone';
@@ -31,17 +31,8 @@ const dayOf = date => new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).form
 const whenOf = date => new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(date);
 const utcClock = rule => `${String(rule.hourUtc).padStart(2, '0')}:${String(rule.minuteUtc ?? 0).padStart(2, '0')} UTC`;
 
-/* Sources and status, shown under every fact. */
-const DATE = on => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${on}T00:00:00Z`));
-function sourceItem(source) {
-  if (source.kind === 'in-game-capture') return `<li data-source-kind="in-game">${esc(source.capturedBy)}, in game, ${esc(DATE(source.capturedOn))}</li>`;
-  return `<li data-source-kind="guide"><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer" data-source-url>${esc(source.title)}</a> <small>${esc(source.publisher)}</small></li>`;
-}
-function sources(list) {
-  const seen = new Set();
-  const unique = (list ?? []).filter(source => { const key = source.url ?? `${source.capturedBy}${source.capturedOn}${source.where}`; if (seen.has(key)) return false; seen.add(key); return true; });
-  return unique.length ? `<ul class="ae-gg-src" aria-label="Sources">${unique.map(sourceItem).join('')}</ul>` : '';
-}
+/* Sources stay in the data, never on the page (Miguel, 19 Oct 2026). */
+const sources = () => '';
 /* Facts show no status tags or in-game checks (Miguel, 18 Oct 2026). Status and tests stay in the data. */
 const statusTag = () => '';
 const pendingWhy = () => '';
@@ -169,7 +160,7 @@ function faqPage(r, data) {
     return fact(record, rows ? `<dl class="ae-gg-dl">${rows.map(([what, fix]) => `<div><dt>${esc(what)}</dt><dd>${esc(fix)}</dd></div>`).join('')}</dl>` : '', { tag: 'h3' });
   };
   const groups = Object.entries(data.groups);
-  return `<p class="ae-gg-lead">Short answers to the questions new and returning players ask most. Each answer names its source.</p>
+  return `<p class="ae-gg-lead">Short answers to the questions new and returning players ask most.</p>
     <nav class="ae-gg-jump" aria-label="FAQ groups"><ul>${groups.map(([id, name]) => `<li><a class="ae-btn" href="#faq-${id}">${esc(name)}</a></li>`).join('')}</ul></nav>
     ${groups.map(([id, name]) => `<section class="ae-gg-group" id="faq-${id}" data-faq-group="${id}" aria-labelledby="faq-${id}-h">
       <h2 class="ae-gg-h2" id="faq-${id}-h">${esc(name)}</h2>
