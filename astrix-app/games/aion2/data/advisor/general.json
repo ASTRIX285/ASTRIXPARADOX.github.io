@@ -1,0 +1,1778 @@
+{
+  "description": "General facts for the Aetherium Guide (General section and FAQ), one record per fact. status: confirmed (seen in game by Miguel), reported (from the cited source, not tested by us), pending (not known yet: the page says so). Every record carries its provenance; the pages cite each source by its url. Facts are in our own words; no text, image or code is copied from any source.",
+  "groups": {
+    "controls": "Controls and keys",
+    "ui": "Screen and graphics",
+    "items": "Items and conveniences",
+    "social": "Community and account",
+    "trouble": "Troubleshooting"
+  },
+  "records": [
+    {
+      "id": "launch",
+      "section": "about",
+      "label": "Global launch",
+      "status": "reported",
+      "value": {
+        "advancedAccess": "2026-09-30",
+        "launch": "2026-10-05"
+      },
+      "text": "The global servers opened with Advanced Access on 30 September 2026. The full launch followed on 5 October 2026.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-user-guide",
+          "title": "User Guide",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faction-elyos",
+      "section": "about",
+      "label": "Elyos",
+      "status": "reported",
+      "text": "The Elyos are the Daevas of light. When the Tower of Aion fell and the Balaur poured into their home of Elysea, their Empyrean Lords gave themselves up to raise a wall of light that sealed the realm away. Siel was lost holding it.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-elyos",
+          "title": "Elyos",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Elyos",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faction-asmodians",
+      "section": "about",
+      "label": "Asmodians",
+      "status": "reported",
+      "text": "The Asmodians are the Daevas of shadow. When the barrier fell, Asmodae lay open to the Balaur. With Israphel gone, their five remaining Empyrean Lords spent everything to raise the Bulwark that shields their realm.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-asmodians",
+          "title": "Asmodians",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Asmodians",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faction-rules",
+      "section": "about",
+      "label": "Picking a faction",
+      "status": "reported",
+      "value": {
+        "lockedAtCreation": true,
+        "meetIn": "Abyss",
+        "crossFactionParty": false,
+        "legionSameFaction": true
+      },
+      "text": "You pick Elyos or Asmodian when you make a character and cannot change it. The two factions play on separate servers and only meet in the Abyss, so they cannot party together. A Legion only takes members of one faction. To play with friends, pick the same faction and server.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "story",
+      "section": "about",
+      "label": "The story so far",
+      "status": "reported",
+      "lines": [
+        "The war between Elyos and Asmodians ended when the Tower of Aion collapsed. That last battle is remembered as the Final War.",
+        "With the tower gone, the Dragonkin (the Balaur) broke into the realms of the gods. The surviving gods used the last of their power to raise a barrier, the Veil of Light, which split the world and cut it off.",
+        "Building it cost them dearly: Siel, guardian of the tower, vanished, and the other Archdeities poured themselves into it until some were destroyed and others faded.",
+        "Outside the barrier, Atreia became a battlefield. The Dragon Lords Ishtar and Fafnir burned and darkened Poeta.",
+        "Daevas were hunted and twisted. Under Ishtar, captured Daevas were experimented on and came back as mutants that turn on their own kind. This is the world your Daeva wakes up in."
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-story",
+          "title": "Story",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Story",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-elyos",
+          "title": "Elyos",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Elyos",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-asmodians",
+          "title": "Asmodians",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Asmodians",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "season-1",
+      "section": "about",
+      "label": "Season 1",
+      "status": "reported",
+      "value": {
+        "levelCap": 45,
+        "daevanionPoints": 415,
+        "heroicItems": false
+      },
+      "text": "Season 1 on the global servers (EU and NA) caps at Lv 45. Korea is at Lv 50, so Korean guides past Lv 45 do not apply here. Season 1 has no Heroic items and gives 415 Daevanion points to spend.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "pn-cap",
+          "title": "Dungeon livestream confirms level cap of 45",
+          "publisher": "playnews.gg",
+          "url": "https://www.playnews.gg/en/news/aion-2-dungeon-livestream-confirms-level-cap-of-45-and-no-heroic-items-in-season-1",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-09-04"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "ql-gladiator",
+          "title": "Gladiator skill builds 9181 and 10896, Daevanion builds 3576 and 5406",
+          "publisher": "questlog.gg",
+          "url": "https://questlog.gg/aion-2",
+          "retrievedOn": "2026-10-17",
+          "region": "global",
+          "reliability": "high"
+        }
+      ]
+    },
+    {
+      "id": "reset-times",
+      "section": "resets",
+      "label": "Reset times",
+      "status": "reported",
+      "value": {
+        "daily": {
+          "hourUtc": 7,
+          "minuteUtc": 0
+        },
+        "weekly": {
+          "weekdayUtc": 3,
+          "weekdayName": "Wednesday",
+          "hourUtc": 7,
+          "minuteUtc": 0
+        }
+      },
+      "text": "The daily reset is at 07:00 UTC every day. The weekly reset is on Wednesday at 07:00 UTC.",
+      "notes": [
+        "Your local time for a reset moves by an hour when your clocks change for summer time; the UTC time does not.",
+        "Hover over an entry counter in game to see how long until it recharges."
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-user-guide",
+          "title": "User Guide",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "shared-entries",
+      "section": "resets",
+      "label": "Entries shared by server",
+      "status": "reported",
+      "text": "Some entry counts, such as Daily Dungeon entries, are shared by every character on the same server. Using them on an alt also uses them up for your main there.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "trading",
+      "section": "market",
+      "label": "Trading",
+      "status": "reported",
+      "value": {
+        "directTrade": false
+      },
+      "text": "Direct trading between players is turned off on the global servers, to stop bots. You buy and sell through the Market instead.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "membership",
+      "section": "market",
+      "label": "Membership",
+      "status": "reported",
+      "value": {
+        "name": "Special Quai Membership",
+        "unlocks": [
+          "Market",
+          "Quna Exchange"
+        ],
+        "scope": "per character"
+      },
+      "text": "The Market and the Quna Exchange need Special Quai Membership. Membership is bought for one character on one server, not for the whole account, so put it on the character you play most. The Daeva Pass is also bought per character.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "market-tip",
+      "section": "market",
+      "label": "Buying for less",
+      "status": "reported",
+      "text": "In the Market, sort by price per unit, not by the price of the whole stack. A big stack can look cheap and still cost more for each item.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "control-modes",
+      "section": "controls",
+      "label": "Control modes",
+      "status": "reported",
+      "value": {
+        "modes": [
+          {
+            "id": "aion2",
+            "name": "AION2",
+            "default": true,
+            "text": "Action controls. The mouse turns the camera and the reticle in the middle of the screen picks your target. Hold Alt to see the cursor."
+          },
+          {
+            "id": "aion1",
+            "name": "AION1",
+            "default": false,
+            "text": "Classic MMO controls. The cursor is always on screen, you hold a mouse button to turn the camera and click to pick a target. Handy for healers who watch party frames."
+          }
+        ],
+        "path": [
+          "Settings",
+          "Combat",
+          "Controls",
+          "Control Mode"
+        ],
+        "quickSwitch": "/"
+      },
+      "text": "There are two control modes and you can swap at any time: AION2 (the default, action style) and AION1 (classic, cursor always on).",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "default-keys",
+      "section": "controls",
+      "label": "Default keys",
+      "status": "reported",
+      "value": {
+        "keys": [
+          [
+            "W A S D",
+            "Move"
+          ],
+          [
+            "Shift",
+            "Sprint, or dodge in combat"
+          ],
+          [
+            "V",
+            "Fly (open your wings)"
+          ],
+          [
+            "Tab",
+            "Change or lock target"
+          ],
+          [
+            "F",
+            "Interact"
+          ],
+          [
+            "Alt",
+            "Show the cursor (AION2 mode)"
+          ],
+          [
+            "C",
+            "Mount"
+          ],
+          [
+            "K",
+            "Skills window"
+          ],
+          [
+            "Alt + C",
+            "Wings"
+          ],
+          [
+            "X",
+            "Potion auto use on or off"
+          ],
+          [
+            "O",
+            "Settings"
+          ],
+          [
+            "F12",
+            "Hide or show all UI"
+          ],
+          [
+            "Alt + M",
+            "See-through map"
+          ],
+          [
+            "Ctrl + R",
+            "Fly up"
+          ],
+          [
+            "Ctrl + F",
+            "Fly down"
+          ]
+        ],
+        "held": {
+          "key": "Space",
+          "reason": "The wiki lists Space as jump and glide; Miguel has Defiance on Space bar in game. Not shown until Miguel rules which the guide should say."
+        }
+      },
+      "text": "The defaults from the global client. Every key can be changed.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "key-settings",
+      "section": "controls",
+      "label": "Key Settings",
+      "status": "reported",
+      "value": {
+        "path": [
+          "Settings",
+          "Key Settings"
+        ],
+        "tabs": [
+          [
+            "General",
+            "Moving, combat, flying and other actions"
+          ],
+          [
+            "Menu",
+            "Keys that open windows and menus"
+          ],
+          [
+            "Quickslot",
+            "Skill and item slots"
+          ],
+          [
+            "Marker",
+            "Target markers"
+          ]
+        ],
+        "resetPerTab": true
+      },
+      "text": "Change keys in Settings, Key Settings. It has four tabs, and each tab has its own Reset button that only resets that tab.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "no-hotkey-menus",
+      "section": "controls",
+      "label": "Menus with no key",
+      "status": "reported",
+      "value": {
+        "menus": [
+          "Expedition",
+          "Daily Dungeon",
+          "Nightmare",
+          "Transcendence",
+          "Shugo Festival",
+          "Abyss",
+          "Arena",
+          "Market"
+        ],
+        "path": [
+          "Settings",
+          "Key Settings",
+          "Menu"
+        ]
+      },
+      "text": "Expedition, Daily Dungeon, Nightmare, Transcendence, Shugo Festival, Abyss, Arena and the Market have no key by default. Give the ones you open often a key in Settings, Key Settings, Menu.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "space-defiance",
+      "section": "controls",
+      "label": "Defiance on Space bar",
+      "status": "confirmed",
+      "value": {
+        "key": "Space",
+        "skill": "Defiance"
+      },
+      "text": "Every class has Defiance, the skill that breaks crowd control, on Space bar. It never takes a number key.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Defiance sits on Space bar for every class."
+        }
+      ]
+    },
+    {
+      "id": "bar-layout",
+      "section": "controls",
+      "label": "How the skill bar is laid out",
+      "status": "confirmed",
+      "value": {
+        "order": [
+          "1 to 8",
+          "Q",
+          "E",
+          "Left click",
+          "Right click",
+          "Second macro stack"
+        ],
+        "fill": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "Q",
+          "E",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "stackKeys": [
+          "Q",
+          "E"
+        ],
+        "mainAttack": "Left click",
+        "mainLine": "Right click",
+        "rows": 4
+      },
+      "lines": [
+        "The bar reads 1 to 8, Q, E, then left click (your main attack), right click (your main line) and a second macro stack.",
+        "Own keys fill 1 to 4 first, because those sit right above Q and E where your fingers rest. Then Q and E, then 5 to 8.",
+        "A key that holds a stack of skills goes on Q or E: they are easier to reach while you move than 5 to 8.",
+        "Each key holds up to four skills in rows 0 to 3. Press it and the lowest ready skill fires, row 0 first.",
+        "The two stacks either side of your main attack are the only entries in your macro."
+      ],
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Own keys fill 1 to 4 (right above Q and E), then Q and E, then 5 to 8; stacked keys go on Q and E."
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-16",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar and Macro window, Templar",
+          "note": "The right-hand block holds stack A, the main attack, stack B. Macro 1 has two entries, stack A and stack B, 10 ms delay each."
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-10",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Four rows on a key, row 0 at the bottom, the key fires the lowest ready skill."
+        }
+      ]
+    },
+    {
+      "id": "macro-presets",
+      "section": "controls",
+      "label": "Macros",
+      "status": "confirmed",
+      "value": {
+        "keys": 1,
+        "presets": 3,
+        "path": [
+          "Settings",
+          "Key Settings",
+          "General",
+          "Gameplay",
+          "Macro"
+        ],
+        "delayMs": 10
+      },
+      "text": "There is one macro key and 3 macro presets. Hold the key and the macro uses its skills in order; any skill you press by hand goes first. To change preset you open the Macro window, as there is only one key. In AION1 mode a mouse button cannot be the macro key.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-06",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Macro window",
+          "note": "Macro slots 1 to 3, entries numbered with a Delay (ms) box between each pair, 10 ms by default."
+        }
+      ]
+    },
+    {
+      "id": "targeting",
+      "section": "controls",
+      "label": "Targeting",
+      "status": "reported",
+      "text": "Tab locks the target in front of you. In big fights, give Target Hostile Players its own key (for example the middle mouse button) in Settings, Key Settings, General, so Tab does not grab NPCs.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "camera",
+      "section": "controls",
+      "label": "Mouse and camera",
+      "status": "reported",
+      "text": "There is no mouse sensitivity slider: set the horizontal and vertical camera speeds in Settings, Graphics, Camera/Direction. The game cannot invert the mouse.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "controller",
+      "section": "controls",
+      "label": "Controller",
+      "status": "reported",
+      "text": "A controller works but is not officially supported, and you cannot change its buttons. It will not work through Steam Remote Play, Steam Link or cloud PCs, because the anti-cheat blocks outside input.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "loadouts",
+      "section": "loadouts",
+      "label": "Loadouts",
+      "status": "confirmed",
+      "value": {
+        "looks": 3,
+        "armour": 3,
+        "skills": 3
+      },
+      "text": "Each character has 3 loadouts for looks, 3 for armour and 3 for skills. You can keep, for example, a damage set and a tank set and swap between them.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Loadouts",
+          "note": "Three loadout options each for character looks, armour (gear) and skills."
+        }
+      ]
+    },
+    {
+      "id": "loadouts-aetherium",
+      "section": "loadouts",
+      "label": "Loadouts in the Aetherium",
+      "status": "confirmed",
+      "lines": [
+        "The official AION 2 site only shows what your Daeva is wearing and using right now, so the Daeva Card and Gear Ledger show that one set.",
+        "The Ascent Plan builds one role at a time. Switch the Role on the plan to work out each of your loadouts, for example damage on one and tank on another.",
+        "Each macro preset belongs to its skill setup, so set the macro up again on every skill loadout you use."
+      ],
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Loadouts",
+          "note": "Plan for up to 3 setups per Daeva; the armory data only shows what is equipped now."
+        }
+      ]
+    },
+    {
+      "id": "auto-potions",
+      "section": "items",
+      "label": "Potions used for you",
+      "status": "reported",
+      "value": {
+        "thresholdHp": 70,
+        "toggleKey": "X",
+        "path": [
+          "Settings",
+          "Combat",
+          "Auto Use"
+        ]
+      },
+      "text": "Life Potions are used for you below 70% HP. Lower the threshold in Settings, Combat, Auto Use if you get through too many while questing. X turns it on and off.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "looting",
+      "section": "items",
+      "label": "Looting filter",
+      "status": "reported",
+      "value": {
+        "path": [
+          "Settings",
+          "Combat",
+          "Looting"
+        ]
+      },
+      "text": "Pick which grades and kinds of item the loot key picks up in Settings, Combat, Looting, so low value items stay out of your bag (the Cube).",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "auto-extract",
+      "section": "items",
+      "label": "Auto Extract",
+      "status": "reported",
+      "value": {
+        "path": [
+          "Inventory",
+          "Extract"
+        ]
+      },
+      "text": "Auto Extract breaks down equipment of the grades you choose as soon as it drops. It can also take gear you cannot wear or gear under an item level you set. Quick Select marks many items so you can extract them in one go.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "lock-items",
+      "section": "items",
+      "label": "Lock your gear",
+      "status": "reported",
+      "text": "The extract, dismantle and enhance windows look alike, so it is easy to lose a good piece with one wrong click. Lock the weapons and accessories you care about straight away.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "flight",
+      "section": "items",
+      "label": "Flying further",
+      "status": "reported",
+      "text": "Collecting more wings raises your Flight Power, and owned wings count even when you are not wearing them. To glide further, cancel flight in the air right after a Quick Gliding Dash: you keep your speed as you fall.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "characters",
+      "section": "items",
+      "label": "Characters per account",
+      "status": "reported",
+      "value": {
+        "start": 4,
+        "max": 8
+      },
+      "text": "An account starts with 4 character slots and can grow to 8. Some settings are kept per character, so check them after you switch.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "trouble-basics",
+      "section": "trouble",
+      "label": "First steps",
+      "status": "reported",
+      "lines": [
+        "Check the official Steam news or Discord for maintenance first.",
+        "Restart the game and the launcher.",
+        "Make sure both are fully updated.",
+        "Check your internet connection.",
+        "See if the problem is on one character or the whole account.",
+        "Look at the related setting in game again."
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "trouble-codes",
+      "section": "trouble",
+      "label": "Error codes",
+      "status": "reported",
+      "value": {
+        "codes": [
+          [
+            "Queue",
+            "Not an error. Reinstalling does not help: stay in the queue."
+          ],
+          [
+            "S:8970",
+            "The server is busy. Close the game and launcher fully, wait, then try again rather than pressing Retry over and over."
+          ],
+          [
+            "S:17",
+            "Reconnect failed. Log in again; a wired connection helps."
+          ],
+          [
+            "40309:500",
+            "A login error. Stop asking for new codes, update PURPLE, set your PC clock to automatic, then wait."
+          ],
+          [
+            "0xE0000013, 0xE0000011",
+            "The anti-cheat is blocking a program hooked into the game. Remove npcap (it comes with some damage meters and Wireshark) and close macro, RGB lighting and remote control tools."
+          ],
+          [
+            "0xE0000027",
+            "Often a second copy of the game is still running. End every AION2.exe in Task Manager and restart Steam."
+          ],
+          [
+            "Closes at the logo",
+            "Update your graphics driver, then use Verify integrity of game files in Steam. Turn off overlays, recorders and RGB tools one at a time."
+          ]
+        ]
+      },
+      "text": "What the common connection and launch codes mean, and what to try.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "trouble-known",
+      "section": "trouble",
+      "label": "Known problems",
+      "status": "reported",
+      "value": {
+        "items": [
+          [
+            "Chat says Please Try Again Later",
+            "A known bug. Switch character, go through a loading screen or log in again."
+          ],
+          [
+            "Duty quests missing at Lv 45",
+            "Happens if you opened the Duty tab before Lv 45. They come back the next day."
+          ],
+          [
+            "Sent back to server select",
+            "Not a bug: the game logs you out to server select after 3 hours with no input."
+          ],
+          [
+            "UI vanished",
+            "You probably pressed F12. Press it again."
+          ]
+        ]
+      },
+      "text": "Problems many players hit, and the fix.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-ui",
+          "title": "User Guide: UI and Graphics",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/UI_and_Graphics",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "trouble-report",
+      "section": "trouble",
+      "label": "Reporting a problem",
+      "status": "reported",
+      "lines": [
+        "Write down the exact message or code.",
+        "Note when and where it happened.",
+        "Note your platform and the settings involved.",
+        "Report bugs in the official Discord bug report channel. For account problems, contact NC support."
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "skill-mastery-cap",
+      "section": "skills",
+      "label": "Mastery cap",
+      "status": "confirmed",
+      "value": {
+        "cap": 11,
+        "beyond": [
+          "Daevanion skill nodes (+1 each)",
+          "gear stat lines",
+          "Arcana"
+        ]
+      },
+      "text": "Mastery takes a skill to Lv 11 at most. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-10",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Mastery window",
+          "note": "Mastery stops at skill Lv 11. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "skill-daevanion-nodes",
+      "section": "skills",
+      "label": "Skill nodes on the Daevanion boards",
+      "status": "reported",
+      "value": {
+        "boardsWithSkillNodes": [
+          "Nezekan",
+          "Zikel",
+          "Vaizel",
+          "Triniel"
+        ],
+        "perBoard": 1
+      },
+      "text": "Each core skill has one +1 level node on each of the first four Daevanion boards: Nezekan, Zikel, Vaizel and Triniel. The fifth board, Azphel, has none.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-daev",
+          "title": "Daevanion guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/daevanion-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "skill-specialty",
+      "section": "skills",
+      "label": "Specialty perks",
+      "status": "reported",
+      "value": {
+        "perkLevels": {
+          "8": 3,
+          "12": 1,
+          "16": 1
+        },
+        "slotLevels": [
+          8,
+          12,
+          20
+        ]
+      },
+      "lines": [
+        "Every active skill has 5 Specialty perks.",
+        "Skill Lv 8 opens three perks and your first perk slot.",
+        "Skill Lv 12 opens a fourth perk and a second slot.",
+        "Skill Lv 16 opens the fifth perk.",
+        "Skill Lv 20 opens the third slot, so you use three of the five."
+      ],
+      "test": "Open a skill in the Mastery window and check at which skill levels its perks and perk slots open.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-classes",
+          "title": "AION 2 classes",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/classes",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "skill-stigma",
+      "section": "skills",
+      "label": "Stigmas",
+      "status": "reported",
+      "value": {
+        "unlockLevel": 22,
+        "quest": "The One Who Hears the Voice",
+        "slots": [
+          22,
+          27,
+          32,
+          37
+        ],
+        "perkLevels": [
+          5,
+          10,
+          15,
+          20
+        ]
+      },
+      "text": "Stigmas open at Lv 22 through the quest The One Who Hears the Voice. You get one stigma slot at Lv 22 and one more at Lv 27, 32 and 37, four in all. Stigma Specialty perks open at stigma Lv 5, 10, 15 and 20.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "mb-stigma",
+          "title": "Stigma guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/guides/stigma-guide",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "skill-wisdom-stones",
+      "section": "skills",
+      "label": "How skills level up",
+      "status": "pending",
+      "value": {
+        "pending": true,
+        "reason": "One Korean guide says Wisdom Stones take a skill to Lv 10; Miguel saw Mastery reach Lv 11 in game. Which item levels skills, and its cap, needs checking in game."
+      },
+      "text": "Skills are raised in the Mastery window. What it costs to level a skill is not confirmed for the global servers yet.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-10",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Mastery window",
+          "note": "Mastery stops at skill Lv 11."
+        }
+      ]
+    },
+    {
+      "id": "faq-01",
+      "section": "faq",
+      "group": "controls",
+      "status": "reported",
+      "q": "I cannot see my mouse cursor.",
+      "a": "Hold Alt to show it, or switch to AION1 mode, where the cursor is always on screen.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-02",
+      "section": "faq",
+      "group": "controls",
+      "status": "reported",
+      "q": "How do I change my keys?",
+      "a": "Open Settings, Key Settings. The General, Menu, Quickslot and Marker tabs hold every key.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-03",
+      "section": "faq",
+      "group": "controls",
+      "status": "reported",
+      "q": "Expedition and Nightmare have no key. Can I add one?",
+      "a": "Yes. Give them a key in Settings, Key Settings, Menu.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-04",
+      "section": "faq",
+      "group": "controls",
+      "status": "confirmed",
+      "q": "Where should Defiance go?",
+      "a": "On Space bar, for every class. It breaks crowd control, so keep it off your number keys.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Defiance sits on Space bar for every class."
+        }
+      ]
+    },
+    {
+      "id": "faq-05",
+      "section": "faq",
+      "group": "controls",
+      "status": "reported",
+      "q": "Can I swap macro presets with a key?",
+      "a": "No. There is one macro key, so open the Macro window to change between your 3 presets.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-06",
+      "section": "faq",
+      "group": "controls",
+      "status": "reported",
+      "q": "Skill use requirements not met keeps popping up with my macro.",
+      "a": "You cannot move or hide that message. A slightly longer delay between macro skills makes it show less often.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-07",
+      "section": "faq",
+      "group": "ui",
+      "status": "reported",
+      "q": "My whole UI disappeared.",
+      "a": "You pressed F12. Press it again. If it keeps happening, move Hide UI to another key.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-ui",
+          "title": "User Guide: UI and Graphics",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/UI_and_Graphics",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-controls",
+          "title": "User Guide: Controls and Keybindings",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Controls",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-08",
+      "section": "faq",
+      "group": "ui",
+      "status": "reported",
+      "q": "My FPS is stuck at 60.",
+      "a": "Set the Screen Refresh Rate to your monitor's highest and turn Vertical Sync off.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-ui",
+          "title": "User Guide: UI and Graphics",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/UI_and_Graphics",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-09",
+      "section": "faq",
+      "group": "ui",
+      "status": "reported",
+      "q": "How do I see the map while I play?",
+      "a": "Press Alt + M for a see-through map over the game. Press it again to close it.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-ui",
+          "title": "User Guide: UI and Graphics",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/UI_and_Graphics",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-10",
+      "section": "faq",
+      "group": "ui",
+      "status": "reported",
+      "q": "How do I hide my helmet?",
+      "a": "In the Closet, click the eye icon next to your helmet.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-ui",
+          "title": "User Guide: UI and Graphics",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/UI_and_Graphics",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-11",
+      "section": "faq",
+      "group": "ui",
+      "status": "reported",
+      "q": "Too many numbers cover the boss attacks.",
+      "a": "Hide damage numbers by type, or all of them, in Settings, Info Display, Floater.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-ui",
+          "title": "User Guide: UI and Graphics",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/UI_and_Graphics",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-12",
+      "section": "faq",
+      "group": "items",
+      "status": "reported",
+      "q": "Potions get used in the middle of a fight.",
+      "a": "They are used below 70% HP by default. Change the threshold in Settings, Combat, Auto Use, or press X to turn it off.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-13",
+      "section": "faq",
+      "group": "items",
+      "status": "reported",
+      "q": "My bag keeps filling with junk.",
+      "a": "Set the Looting filter and turn on Auto Extract for the grades you do not want.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-14",
+      "section": "faq",
+      "group": "items",
+      "status": "reported",
+      "q": "I lost a good item to extraction.",
+      "a": "Lock the gear you care about in your inventory: the extract, dismantle and enhance windows look alike.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-15",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "Why can I not trade with another player?",
+      "a": "Direct trading is turned off on the global servers. Use the Market, which needs Membership.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-items",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-16",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "Does Membership cover my whole account?",
+      "a": "No. It is bought for one character on one server.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-17",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "When are the resets?",
+      "a": "Daily at 07:00 UTC, weekly on Wednesday at 07:00 UTC. The Reset times page shows them in your own time.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-18",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "Can Elyos and Asmodians group up?",
+      "a": "No. They play on separate servers and only meet in the Abyss.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-19",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "How do I invite someone nearby to my party?",
+      "a": "Hold Alt, click their character and pick the party invite. A party holds 5 players and a raid 10.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-20",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "I cannot heal players in the open world.",
+      "a": "Heals only work on party members, so make a party first.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-21",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "Why do my Daily Dungeon entries drop when I play an alt?",
+      "a": "Some entry counts are shared by every character on the same server.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-social",
+          "title": "User Guide: Community and Account",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Social_and_Account",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-22",
+      "section": "faq",
+      "group": "social",
+      "status": "reported",
+      "q": "What is the level cap?",
+      "a": "Lv 45 on the global servers in Season 1. Guides for Korea go to Lv 50 and do not apply past 45.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "pn-cap",
+          "title": "Dungeon livestream confirms level cap of 45",
+          "publisher": "playnews.gg",
+          "url": "https://www.playnews.gg/en/news/aion-2-dungeon-livestream-confirms-level-cap-of-45-and-no-heroic-items-in-season-1",
+          "retrievedOn": "2026-10-06",
+          "region": "global",
+          "reliability": "high",
+          "publishedOn": "2026-09-04"
+        }
+      ]
+    },
+    {
+      "id": "faq-23",
+      "section": "faq",
+      "group": "trouble",
+      "status": "reported",
+      "q": "The game will not start.",
+      "a": "Most crashes come from clashes with other programs. Look up the error code on the Troubleshooting part of the General section.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fw-user-guide",
+          "title": "User Guide",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-24",
+      "section": "faq",
+      "group": "trouble",
+      "status": "reported",
+      "q": "Chat says Please Try Again Later.",
+      "a": "A known bug. Switch character, go through a loading screen or log in again.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "faq-25",
+      "section": "faq",
+      "group": "trouble",
+      "status": "reported",
+      "q": "I keep getting sent back to server select.",
+      "a": "After 3 hours with no input the game returns you there. It is not a bug.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fw-trouble",
+          "title": "User Guide: Troubleshooting",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Troubleshooting",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}
