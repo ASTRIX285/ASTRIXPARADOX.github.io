@@ -47,7 +47,8 @@ const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 
 const CLASSES=['Gladiator','Templar','Assassin','Ranger','Sorcerer','Spiritmaster','Cleric','Chanter'];
 const SECTIONS=[['home','Home','/hub/aetherium/guide/'],['general','General','/hub/aetherium/guide/general/'],['character','Character','/hub/aetherium/guide/character/'],['skills','Skills','/hub/aetherium/guide/skills/'],['equipment','Equipment','/hub/aetherium/guide/equipment/'],['crafting','Crafting','/hub/aetherium/guide/crafting/'],['world','World','/hub/aetherium/guide/world/'],['guides','Guides','/hub/aetherium/guide/guides/']];
-const SOON=['general','skills','equipment','crafting','world','guides'];
+// Sections still coming soon: phase 3 built Equipment and Crafting (feature/aetherium-guide-equipment).
+const SOON=['general','skills','world','guides'];
 const ROLES=['tank','healer','support','dps'];
 const GOLD='rgb(226, 181, 79)';
 const builds=Object.fromEntries(await Promise.all(CLASSES.map(async name=>[name,(await json(`astrix-app/games/aion2/data/advisor/builds/${name.toLowerCase()}.json`)).records])));
@@ -176,7 +177,7 @@ await check('home: intro, "New player? Start here", a tile per section, every li
   const tiles=await page.$$eval('[data-guide-tile]',items=>items.map(li=>({id:li.dataset.guideTile,href:li.querySelector('.ae-gd-tile-head').getAttribute('href'),soon:Boolean(li.querySelector('.ae-gd-soon-tag')),icon:Boolean(li.querySelector('svg.ae-gd-icon'))})));
   assert.deepEqual(tiles.map(tile=>[tile.id,tile.href]),SECTIONS.slice(1).map(([id,,href])=>[id,href]),'A tile per section, in nav order');
   assert.ok(tiles.every(tile=>tile.icon),'Every tile has its icon');
-  assert.deepEqual(tiles.filter(tile=>!tile.soon).map(tile=>tile.id),['character'],'Only Character is built in phase 1');
+  assert.deepEqual(tiles.filter(tile=>!tile.soon).map(tile=>tile.id),SECTIONS.slice(1).map(([id])=>id).filter(id=>!SOON.includes(id)),'Built sections carry no Coming soon tag');
   assert.equal(await page.getAttribute('[data-guide-tile="character"] .ae-gd-topics a','href'),'/hub/aetherium/guide/classes/','Classes topic links to its page');
   // Every link on the home that stays on this site answers 200.
   const hrefs=[...new Set(await page.$$eval('#aeGuideBody a[href^="/"]',links=>links.map(a=>a.getAttribute('href').split('#')[0])))];

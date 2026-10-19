@@ -1,0 +1,1717 @@
+{
+  "description": "AION 2: where gear and growth items come from (The Aetherium Guide, phase 3, 18 Oct 2026). One record per content or reward cycle. Expedition loot is per difficulty (name, slot group, grade, item level), from the AION2 Wiki loot tables; Transcendence Arcana by Stage; the Conquest cube; Sealed Dungeon, Stronghold, Nightmare and Daily Dungeon rewards; and the cycle each runs on. Every record has a status and provenance; anything the sources do not give is pending, never guessed. itemLevel on a drop is the item's own level; entryItemLevel is the character item level a difficulty asks for.",
+  "records": [
+    {
+      "id": "slot-groups",
+      "kind": "slot-groups",
+      "label": "Which slots a drop fills",
+      "text": "The wiki names drops by series (a weapon series, an armour series, an accessory series, a Guard). The weapon and the Guard are one slot each. Which slots an armour or accessory series covers is not listed, so those are our reading of the series name.",
+      "groups": [
+        {
+          "id": "weapon",
+          "name": "Weapon",
+          "slots": [
+            "MainHand"
+          ],
+          "status": "confirmed"
+        },
+        {
+          "id": "guard",
+          "name": "Guard",
+          "slots": [
+            "SubHand"
+          ],
+          "status": "confirmed"
+        },
+        {
+          "id": "armour",
+          "name": "Armour",
+          "slots": [
+            "Helmet",
+            "Shoulder",
+            "Torso",
+            "Pants",
+            "Gloves",
+            "Boots"
+          ],
+          "status": "unconfirmed",
+          "note": "The cloak is not named in any Expedition table."
+        },
+        {
+          "id": "accessory",
+          "name": "Accessory",
+          "slots": [
+            "Necklace",
+            "Earring1",
+            "Earring2",
+            "Ring1",
+            "Ring2"
+          ],
+          "status": "unconfirmed",
+          "note": "Bracelets are not named in any Expedition table."
+        },
+        {
+          "id": "belt",
+          "name": "Belt",
+          "slots": [
+            "Belt"
+          ],
+          "status": "confirmed"
+        },
+        {
+          "id": "arcana",
+          "name": "Arcana",
+          "slots": [
+            "Arcana1",
+            "Arcana2",
+            "Arcana3",
+            "Arcana4",
+            "Arcana5"
+          ],
+          "status": "confirmed"
+        }
+      ],
+      "unlisted": {
+        "slots": [
+          "Cape",
+          "Bracelet1",
+          "Bracelet2",
+          "Amulet",
+          "Rune1",
+          "Rune2"
+        ],
+        "reason": "No drop location listed."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "weekly-reset",
+      "kind": "cycle",
+      "label": "Weekly reset",
+      "day": "Wednesday",
+      "timeUtc": "07:00",
+      "status": "reported",
+      "text": "Weekly entry and reward limits reset every Wednesday at 07:00 UTC. Use what is left before then.",
+      "note": "One line of the wiki page says 5:00 AM, which reads as a local server time. The brief for this guide (Miguel, 18 Oct 2026) uses 07:00 UTC.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "odyle-energy",
+      "kind": "cycle",
+      "label": "Odyle Energy",
+      "resets": "weekly-reset",
+      "status": "reported",
+      "text": "Expeditions cost Odyle Energy only when you open the reward cube after the final boss. No energy, no reward: wait for it to refill or use a refill item. Entering and learning the route is free.",
+      "refill": {
+        "pending": true,
+        "reason": "How fast Odyle Energy refills is not listed yet."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "transcendence-weekly",
+      "kind": "cycle",
+      "label": "Transcendence weekly count",
+      "resets": "weekly-reset",
+      "status": "reported",
+      "text": "Transcendence rewards run on a weekly count. Kina is paid in full for the first 55 runs of the week, then less.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "one-time",
+      "kind": "cycle",
+      "label": "Once per site",
+      "status": "reported",
+      "text": "Each Sealed Dungeon and Stronghold pays its completion reward once, then its marker leaves the map. Kina and some items from them, and from field hunting, have a daily limit.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "nightmare-daily",
+      "kind": "cycle",
+      "label": "Nightmare attempts",
+      "status": "reported",
+      "text": "Two attempts a day at 07:00 UTC, stacking up to 14. An attempt is used when you clear.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "ascension-weekly",
+      "kind": "cycle",
+      "label": "Ascension Trial entries",
+      "resets": "weekly-reset",
+      "status": "reported",
+      "text": "Three entries a week. An entry is used as soon as you go in, even if you fail.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "daily-dungeon-weekly",
+      "kind": "cycle",
+      "label": "Daily Dungeon attempts",
+      "resets": "weekly-reset",
+      "status": "reported",
+      "text": "Despite the name, the Daily Dungeon gives 14 attempts a week.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "krao-cave",
+      "kind": "expedition",
+      "name": "Krao Cave",
+      "stars": 1,
+      "players": "1 to 5",
+      "cycle": "odyle-energy",
+      "status": "reported",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 20,
+          "entryItemLevel": 200,
+          "status": "reported",
+          "loot": {
+            "pending": true,
+            "reason": "The wiki lists the drops for Conquest only. Exploration drops are not listed yet."
+          },
+          "cube": {
+            "status": "reported",
+            "text": "On Exploration the cube reward can be claimed a limited number of times."
+          }
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "entryItemLevel": 700,
+          "status": "reported",
+          "loot": [
+            {
+              "name": "Rupture Weapon series",
+              "group": "weapon",
+              "grade": "Unique",
+              "itemLevel": 54,
+              "type": "Weapon",
+              "status": "reported"
+            },
+            {
+              "name": "Berk Accessory series",
+              "group": "accessory",
+              "grade": "Unique",
+              "itemLevel": 54,
+              "type": "Accessory",
+              "status": "reported"
+            },
+            {
+              "name": "Sealed Black Fragment Wings",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Substance Morph material",
+              "status": "reported"
+            },
+            {
+              "name": "Artwork: Krao",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Pantheon decor",
+              "status": "reported"
+            },
+            {
+              "name": "Wrathful Mind",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Crafting material",
+              "status": "reported"
+            }
+          ],
+          "lootNote": "Drops with every boss defeated. Each mid-boss you defeat adds its own drops to the final reward cube.",
+          "dropRates": {
+            "finalBoss": "Ultimate Berk",
+            "finalUnique": 15,
+            "midBossUnique": 7.5,
+            "status": "reported"
+          },
+          "cube": {
+            "status": "reported",
+            "text": "Each claim adds to the cube count. At the count, a Cube Condensed Energy item lets you pick one Unique item.",
+            "claimsNeeded": {
+              "pending": true,
+              "reason": "The wiki does not give the claim count yet."
+            }
+          }
+        }
+      ],
+      "extras": [],
+      "notes": [
+        {
+          "status": "reported",
+          "text": "The Expedition list gives Conquest entry as item level 800; the Krao Cave page gives 700. We show the page figure."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-krao-cave",
+          "title": "Krao Cave",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "draupnir",
+      "kind": "expedition",
+      "name": "Draupnir",
+      "stars": 1,
+      "players": "1 to 5",
+      "cycle": "odyle-energy",
+      "status": "reported",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 45,
+          "entryItemLevel": 700,
+          "status": "reported",
+          "loot": {
+            "pending": true,
+            "reason": "The wiki lists the drops for Conquest only. Exploration drops are not listed yet."
+          },
+          "cube": {
+            "status": "reported",
+            "text": "On Exploration the cube reward can be claimed a limited number of times."
+          }
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "entryItemLevel": 700,
+          "status": "reported",
+          "loot": [
+            {
+              "name": "Bakarma Armour series",
+              "group": "armour",
+              "grade": "Unique",
+              "itemLevel": 54,
+              "type": "Armour",
+              "status": "reported"
+            },
+            {
+              "name": "Bakarma Guard",
+              "group": "guard",
+              "grade": "Unique",
+              "itemLevel": 54,
+              "type": "Guard",
+              "status": "reported"
+            },
+            {
+              "name": "Sealed Blue Wave Wings",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Substance Morph material",
+              "status": "reported"
+            },
+            {
+              "name": "Artwork: Draupnir",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Pantheon decor",
+              "status": "reported"
+            },
+            {
+              "name": "Wrathful Mind",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Crafting material",
+              "status": "reported"
+            }
+          ],
+          "lootNote": "Drops with every boss defeated. Each mid-boss you defeat adds its own drops to the final reward cube.",
+          "dropRates": {
+            "finalBoss": "Transcendent Bakarma",
+            "finalUnique": 15,
+            "midBossUnique": 7.5,
+            "status": "reported"
+          },
+          "cube": {
+            "status": "reported",
+            "text": "Each claim adds to the cube count. At the count, a Cube Condensed Energy item lets you pick one Unique item.",
+            "claimsNeeded": {
+              "pending": true,
+              "reason": "The wiki does not give the claim count yet."
+            }
+          }
+        }
+      ],
+      "extras": [
+        {
+          "status": "reported",
+          "text": "Clearing it 10 times gives a Pantheon item."
+        }
+      ],
+      "notes": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-draupnir",
+          "title": "Draupnir",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Draupnir",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "urugugu-canyon",
+      "kind": "expedition",
+      "name": "Urugugu Canyon",
+      "stars": 2,
+      "players": "1 to 5",
+      "cycle": "odyle-energy",
+      "status": "reported",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 28,
+          "entryItemLevel": 300,
+          "status": "reported",
+          "loot": {
+            "pending": true,
+            "reason": "The wiki lists the drops for Conquest only. Exploration drops are not listed yet."
+          },
+          "cube": {
+            "status": "reported",
+            "text": "On Exploration the cube reward can be claimed a limited number of times."
+          }
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "entryItemLevel": 1600,
+          "status": "reported",
+          "loot": [
+            {
+              "name": "Aulamus Weapon series",
+              "group": "weapon",
+              "grade": "Unique",
+              "itemLevel": 70,
+              "type": "Weapon",
+              "status": "reported"
+            },
+            {
+              "name": "Aulamus Accessory series",
+              "group": "accessory",
+              "grade": "Unique",
+              "itemLevel": 70,
+              "type": "Accessory",
+              "status": "reported"
+            },
+            {
+              "name": "Sealed Ancient Aullaeu Wings",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Substance Morph material",
+              "status": "reported"
+            },
+            {
+              "name": "Artwork: Urugugu",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Pantheon decor",
+              "status": "reported"
+            },
+            {
+              "name": "Wrathful Mind, Wrathful Will",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Crafting material",
+              "status": "reported"
+            }
+          ],
+          "lootNote": "Drops with every boss defeated. Each mid-boss you defeat adds its own drops to the final reward cube.",
+          "dropRates": {
+            "finalBoss": "Divine Auldor",
+            "finalUnique": 10,
+            "midBossUnique": 5,
+            "status": "reported"
+          },
+          "cube": {
+            "status": "reported",
+            "text": "Each claim adds to the cube count. At the count, a Cube Condensed Energy item lets you pick one Unique item.",
+            "claimsNeeded": {
+              "pending": true,
+              "reason": "The wiki does not give the claim count yet."
+            }
+          }
+        }
+      ],
+      "extras": [],
+      "notes": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-urugugu-canyon",
+          "title": "Urugugu Canyon",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "vakron-sky-island",
+      "kind": "expedition",
+      "name": "Vakron Sky Island",
+      "stars": 2,
+      "players": "2 to 5",
+      "cycle": "odyle-energy",
+      "status": "reported",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 45,
+          "entryItemLevel": 1400,
+          "status": "reported",
+          "loot": {
+            "pending": true,
+            "reason": "The wiki lists the drops for Conquest only. Exploration drops are not listed yet."
+          },
+          "cube": {
+            "status": "reported",
+            "text": "On Exploration the cube reward can be claimed a limited number of times."
+          }
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "entryItemLevel": 1400,
+          "status": "reported",
+          "loot": [
+            {
+              "name": "Vakron Armour series",
+              "group": "armour",
+              "grade": "Unique",
+              "itemLevel": 70,
+              "type": "Armour",
+              "status": "reported"
+            },
+            {
+              "name": "Vakron Guard",
+              "group": "guard",
+              "grade": "Unique",
+              "itemLevel": 70,
+              "type": "Guard",
+              "status": "reported"
+            },
+            {
+              "name": "Sealed Forest Spirit Wings",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Substance Morph material",
+              "status": "reported"
+            },
+            {
+              "name": "Artwork: Vakron Sky Island",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Pantheon decor",
+              "status": "reported"
+            },
+            {
+              "name": "Wrathful Mind, Wrathful Will",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Crafting material",
+              "status": "reported"
+            }
+          ],
+          "lootNote": "Drops with every boss defeated. Each mid-boss you defeat adds its own drops to the final reward cube.",
+          "dropRates": {
+            "finalBoss": "Vakron",
+            "finalUnique": 10,
+            "midBossUnique": null,
+            "status": "reported"
+          },
+          "cube": {
+            "status": "reported",
+            "text": "Each claim adds to the cube count. At the count, a Cube Condensed Energy item lets you pick one Unique item.",
+            "claimsNeeded": {
+              "pending": true,
+              "reason": "The wiki does not give the claim count yet."
+            }
+          }
+        }
+      ],
+      "extras": [],
+      "notes": [
+        {
+          "status": "reported",
+          "text": "Optional: it is off the main quest route. Parties often ask for more than the entry item level."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-vakron-sky-island",
+          "title": "Vakron Sky Island",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Vakron_Sky_Island",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "fire-temple",
+      "kind": "expedition",
+      "name": "Fire Temple",
+      "stars": 3,
+      "players": "1 to 5",
+      "cycle": "odyle-energy",
+      "status": "reported",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 35,
+          "entryItemLevel": 500,
+          "status": "reported",
+          "loot": {
+            "pending": true,
+            "reason": "The wiki lists the drops for Conquest only. Exploration drops are not listed yet."
+          },
+          "cube": {
+            "status": "reported",
+            "text": "On Exploration the cube reward can be claimed a limited number of times."
+          }
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "entryItemLevel": 2100,
+          "status": "reported",
+          "loot": [
+            {
+              "name": "Enraged Kromede Weapon series",
+              "group": "weapon",
+              "grade": "Unique",
+              "itemLevel": 86,
+              "type": "Weapon",
+              "status": "reported"
+            },
+            {
+              "name": "Enraged Kromede Accessory series",
+              "group": "accessory",
+              "grade": "Unique",
+              "itemLevel": 86,
+              "type": "Accessory",
+              "status": "reported"
+            },
+            {
+              "name": "Sealed Kromede Wings",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Substance Morph material",
+              "status": "reported"
+            },
+            {
+              "name": "Artwork: Fire Temple",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Pantheon decor",
+              "status": "reported"
+            },
+            {
+              "name": "Wrathful Mind, Wrathful Will, Wrathful Ego",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Crafting material",
+              "status": "reported"
+            }
+          ],
+          "lootNote": "Drops with every boss defeated. Each mid-boss you defeat adds its own drops to the final reward cube.",
+          "dropRates": {
+            "finalBoss": "Kromede's Desire",
+            "finalUnique": 10,
+            "midBossUnique": 5,
+            "status": "reported"
+          },
+          "cube": {
+            "status": "reported",
+            "text": "Each claim adds to the cube count. At the count, a Cube Condensed Energy item lets you pick one Unique item.",
+            "claimsNeeded": {
+              "pending": true,
+              "reason": "The wiki does not give the claim count yet."
+            }
+          }
+        }
+      ],
+      "extras": [
+        {
+          "status": "reported",
+          "text": "Clearing it 10 times gives a Pantheon item."
+        },
+        {
+          "status": "reported",
+          "text": "Its weapons are Extendable Weapons, with a longer reach and a wider area."
+        },
+        {
+          "status": "reported",
+          "text": "A hidden achievement after the final boss gives the title Kromede Will Remember That (PvE attack)."
+        }
+      ],
+      "notes": [],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "ferocious-horn-den",
+      "kind": "expedition",
+      "name": "Ferocious Horn Den",
+      "stars": 3,
+      "players": "1 to 5",
+      "cycle": "odyle-energy",
+      "status": "reported",
+      "difficulties": [
+        {
+          "id": "exploration",
+          "name": "Exploration",
+          "level": 45,
+          "entryItemLevel": 2100,
+          "status": "reported",
+          "loot": {
+            "pending": true,
+            "reason": "The wiki lists the drops for Conquest only. Exploration drops are not listed yet."
+          },
+          "cube": {
+            "status": "reported",
+            "text": "On Exploration the cube reward can be claimed a limited number of times."
+          }
+        },
+        {
+          "id": "conquest",
+          "name": "Conquest",
+          "level": 45,
+          "entryItemLevel": 2100,
+          "status": "reported",
+          "loot": [
+            {
+              "name": "Nuakum Armour series",
+              "group": "armour",
+              "grade": "Unique",
+              "itemLevel": 86,
+              "type": "Armour",
+              "status": "reported"
+            },
+            {
+              "name": "Nuakum Guard",
+              "group": "guard",
+              "grade": "Unique",
+              "itemLevel": 86,
+              "type": "Guard",
+              "status": "reported"
+            },
+            {
+              "name": "Sealed Dark Veil Wings",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Substance Morph material",
+              "status": "reported"
+            },
+            {
+              "name": "Artwork: Ferocious Horn Den",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Pantheon decor",
+              "status": "reported"
+            },
+            {
+              "name": "Wrathful Mind, Wrathful Will, Wrathful Ego",
+              "group": null,
+              "grade": "Unique",
+              "itemLevel": null,
+              "type": "Crafting material",
+              "status": "reported"
+            }
+          ],
+          "lootNote": "Drops with every boss defeated. Each mid-boss you defeat adds its own drops to the final reward cube.",
+          "dropRates": {
+            "finalBoss": "Nuakum the Ferocious Horn",
+            "finalUnique": 10,
+            "midBossUnique": 5,
+            "status": "reported"
+          },
+          "cube": {
+            "status": "reported",
+            "text": "Each claim adds to the cube count. At the count, a Cube Condensed Energy item lets you pick one Unique item.",
+            "claimsNeeded": {
+              "pending": true,
+              "reason": "The wiki does not give the claim count yet."
+            }
+          }
+        }
+      ],
+      "extras": [],
+      "notes": [
+        {
+          "status": "reported",
+          "text": "Parties usually ask for more than the entry item level."
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ferocious-horn-den",
+          "title": "Ferocious Horn Den",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ferocious_Horn_Den",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "conquest-cube",
+      "kind": "cube",
+      "label": "Cube Condensed Energy",
+      "status": "reported",
+      "text": "Every Expedition reward you claim adds to your cube count. At the count you get a Cube Condensed Energy item: on Conquest it lets you pick one Unique item. On Exploration it can be claimed only a limited number of times.",
+      "claimsNeeded": {
+        "pending": true,
+        "reason": "The wiki does not give the claim count yet."
+      },
+      "choices": {
+        "pending": true,
+        "reason": "Which Unique items the cube offers is not listed yet."
+      },
+      "cycle": "odyle-energy",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-krao-cave",
+          "title": "Krao Cave",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "arcana-grades",
+      "kind": "arcana-grades",
+      "label": "Arcana item level by grade",
+      "status": "reported",
+      "grades": [
+        {
+          "grade": "Common",
+          "itemLevel": 20
+        },
+        {
+          "grade": "Rare",
+          "itemLevel": 40
+        },
+        {
+          "grade": "Epic",
+          "itemLevel": 60
+        },
+        {
+          "grade": "Unique",
+          "itemLevel": 80
+        }
+      ],
+      "slots": [
+        {
+          "id": "chalice",
+          "name": "Chalice",
+          "skills": "Active and passive",
+          "from": [
+            "deus-research-base",
+            "shattered-arkanis"
+          ],
+          "note": "Drops at higher Stages than the other slots."
+        },
+        {
+          "id": "parchment",
+          "name": "Parchment",
+          "skills": "Active",
+          "from": [
+            "shattered-arkanis"
+          ]
+        },
+        {
+          "id": "compass",
+          "name": "Compass",
+          "skills": "Active",
+          "from": [
+            "deus-research-base"
+          ]
+        },
+        {
+          "id": "bell",
+          "name": "Bell",
+          "skills": "Passive",
+          "from": [
+            "deus-research-base"
+          ]
+        },
+        {
+          "id": "mirror",
+          "name": "Mirror",
+          "skills": "Passive",
+          "from": [
+            "shattered-arkanis"
+          ]
+        }
+      ],
+      "lines": [
+        {
+          "id": "primal-vigor",
+          "name": "Primal Vigor",
+          "set2": "PvE attack +60 while HP is 70% or more",
+          "set4": "PvE attack +150 while HP is 70% or more"
+        },
+        {
+          "id": "magic-armour",
+          "name": "Magic Armour",
+          "set2": "Restores 1,500 MP when MP drops to 20% or less (30 second cooldown)",
+          "set4": "PvE defence +1,000 while MP is 50% or more"
+        }
+      ],
+      "transmute": {
+        "status": "reported",
+        "text": "Some Arcana, Unique ones included, can be made with materials through Transmute."
+      },
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-arcana",
+          "title": "Arcana",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Arcana",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "deus-research-base",
+      "kind": "transcendence",
+      "name": "Deus Research Base",
+      "players": "5",
+      "season": 1,
+      "cycle": "transcendence-weekly",
+      "status": "reported",
+      "level": {
+        "pending": true,
+        "reason": "The wiki gives the item level for each Stage, not a character level."
+      },
+      "arcana": [
+        "compass",
+        "bell",
+        "chalice"
+      ],
+      "stages": [
+        {
+          "stage": 1,
+          "entryItemLevel": 1600,
+          "arcanaGrades": [
+            "Common",
+            "Rare"
+          ]
+        },
+        {
+          "stage": 2,
+          "entryItemLevel": 1900,
+          "arcanaGrades": [
+            "Common",
+            "Rare",
+            "Epic"
+          ]
+        },
+        {
+          "stage": 3,
+          "entryItemLevel": 2200,
+          "arcanaGrades": [
+            "Common",
+            "Rare",
+            "Epic",
+            "Unique"
+          ]
+        },
+        {
+          "stage": 4,
+          "entryItemLevel": 2500,
+          "arcanaGrades": [
+            "Common",
+            "Rare",
+            "Epic",
+            "Unique"
+          ],
+          "guaranteed": "One Unique Arcana"
+        }
+      ],
+      "stagesNote": "Every Stage is open from the start: you do not have to clear the one before.",
+      "other": [
+        "Theostones",
+        "Manastones",
+        "Soulstones",
+        "Unique Amplify Stone Fragment",
+        "Kina"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-deus-research-base",
+          "title": "Deus Research Base",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Deus_Research_Base",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-arcana",
+          "title": "Arcana",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Arcana",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "shattered-arkanis",
+      "kind": "transcendence",
+      "name": "Shattered Arkanis",
+      "players": "5",
+      "season": 1,
+      "cycle": "transcendence-weekly",
+      "status": "reported",
+      "level": {
+        "pending": true,
+        "reason": "The wiki gives the item level for each Stage, not a character level."
+      },
+      "arcana": [
+        "mirror",
+        "parchment",
+        "chalice"
+      ],
+      "stages": [
+        {
+          "stage": 1,
+          "entryItemLevel": 1600,
+          "arcanaGrades": [
+            "Common",
+            "Rare"
+          ]
+        },
+        {
+          "stage": 2,
+          "entryItemLevel": 1900,
+          "arcanaGrades": [
+            "Common",
+            "Rare",
+            "Epic"
+          ]
+        },
+        {
+          "stage": 3,
+          "entryItemLevel": 2200,
+          "arcanaGrades": [
+            "Common",
+            "Rare",
+            "Epic",
+            "Unique"
+          ]
+        },
+        {
+          "stage": 4,
+          "entryItemLevel": 2500,
+          "arcanaGrades": [
+            "Common",
+            "Rare",
+            "Epic",
+            "Unique"
+          ],
+          "guaranteed": "One Unique Arcana"
+        }
+      ],
+      "stagesNote": "Every Stage is open from the start: you do not have to clear the one before.",
+      "other": [
+        "Theostones",
+        "Manastones",
+        "Soulstones",
+        "Unique Amplify Stone Fragment",
+        "Kina"
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-shattered-arkanis",
+          "title": "Shattered Arkanis",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Shattered_Arkanis",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-transcendence",
+          "title": "Transcendence",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Transcendence",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-arcana",
+          "title": "Arcana",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Arcana",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sealed-dungeons",
+      "kind": "sealed-dungeon",
+      "name": "Sealed Dungeons",
+      "players": "1",
+      "cycle": "one-time",
+      "status": "reported",
+      "level": {
+        "value": 45,
+        "status": "reported",
+        "text": "Best done at the level cap: their drops scale with your level. The fixed completion reward does not."
+      },
+      "rewards": [
+        {
+          "name": "Daevanion Crystal",
+          "for": "Daevanion points",
+          "status": "reported"
+        },
+        {
+          "name": "Wisdom Stone",
+          "for": "Skill points",
+          "status": "reported"
+        },
+        {
+          "name": "Enhance Stone",
+          "for": "Growth",
+          "status": "reported"
+        },
+        {
+          "name": "Wing and statue materials",
+          "for": "Wings",
+          "status": "reported"
+        },
+        {
+          "name": "Titles",
+          "for": "Stats",
+          "status": "reported"
+        },
+        {
+          "name": "Manastones",
+          "for": "Manastone tab",
+          "status": "reported"
+        }
+      ],
+      "text": "Small solo caves hidden on the map as question marks, about 10 minutes each. Do the rival faction's too, through the Spacetime Rift.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "strongholds",
+      "kind": "stronghold",
+      "name": "Strongholds",
+      "players": "1",
+      "cycle": "one-time",
+      "status": "reported",
+      "rewards": [
+        {
+          "name": "Noble Belt Enhance Scroll",
+          "for": "Belt",
+          "status": "reported"
+        }
+      ],
+      "belt": {
+        "status": "reported",
+        "text": "The Noble Belt goes to +10 with its own scrolls, then moves up a grade in Substance Morph: Advanced, then Epic, then Unique. The Unique step needs Strongholds in the rival faction's land too."
+      },
+      "text": "Enemy camps on the map: finish two or three objectives, no need to clear every enemy.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "spacetime-rift",
+      "kind": "access",
+      "label": "Spacetime Rift",
+      "status": "reported",
+      "text": "Opens every 3 hours for about 10 minutes and takes you into the rival faction's land, PvP on.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "daeva-gauge",
+      "kind": "quest",
+      "label": "Daeva Gauge",
+      "status": "reported",
+      "text": "Regional Quests, Sealed Dungeons and Strongholds fill the Daeva Gauge. At 100% the last main quest, Daeva Trapped in a Nightmare, opens. It gives the Unique wings Ultimate Daeva Wings and the Unique title Encountering Zikel's Core.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "nightmare",
+      "kind": "nightmare",
+      "name": "Nightmare",
+      "players": "1",
+      "cycle": "nightmare-daily",
+      "status": "reported",
+      "level": {
+        "value": 45,
+        "status": "reported"
+      },
+      "text": "Solo boss fights with 10 levels each. Clears pay Phantasmal Fragments for the Nightmare shop.",
+      "shop": [
+        {
+          "name": "Daevanion Crystal",
+          "price": 300,
+          "status": "reported"
+        },
+        {
+          "name": "Stigma Shard",
+          "price": 1500,
+          "status": "reported"
+        },
+        {
+          "name": "Unique Amplify Stone Fragment",
+          "price": 500,
+          "status": "reported"
+        },
+        {
+          "name": "Conqueror Wings",
+          "price": 20000,
+          "status": "reported"
+        },
+        {
+          "name": "Nightmare Wings",
+          "price": 160000,
+          "status": "reported"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "ascension-trial",
+      "kind": "ascension-trial",
+      "name": "Ascension Trial",
+      "players": "1",
+      "cycle": "ascension-weekly",
+      "status": "reported",
+      "level": {
+        "value": 45,
+        "status": "reported"
+      },
+      "entryItemLevel": 1000,
+      "rewards": [
+        {
+          "name": "Enhance Stone",
+          "for": "Growth",
+          "status": "reported"
+        },
+        {
+          "name": "Unique Amplify Stone Fragment",
+          "for": "Amplified Enhancement",
+          "status": "reported"
+        },
+        {
+          "name": "Growth Pet Chest",
+          "for": "Pets",
+          "status": "reported"
+        },
+        {
+          "name": "Ascension Binding Chest",
+          "for": "A Manastone or a Soulstone",
+          "status": "reported"
+        }
+      ],
+      "text": "A solo, score based run with a weekly rotation and four difficulties. Your score decides the reward.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "daily-dungeon",
+      "kind": "daily-dungeon",
+      "name": "Daily Dungeon",
+      "players": "1",
+      "cycle": "daily-dungeon-weekly",
+      "status": "reported",
+      "rewards": [
+        {
+          "name": "Enhance Stone",
+          "for": "Growth",
+          "status": "reported"
+        }
+      ],
+      "text": "Waves of enemies against the clock. Your score decides the reward; it is the biggest source of Enhance Stones.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-dungeons",
+          "title": "Dungeons",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Dungeons",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "side-missions",
+      "kind": "side-missions",
+      "name": "Side missions",
+      "status": "pending",
+      "rewards": {
+        "pending": true,
+        "reason": "No side mission listed for this piece."
+      },
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+        }
+      ]
+    }
+  ]
+}

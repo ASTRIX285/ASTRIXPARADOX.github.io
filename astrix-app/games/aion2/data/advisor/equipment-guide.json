@@ -1,0 +1,736 @@
+{
+  "description": "AION 2 Guide text for the Equipment and Crafting sections that no other record holds (The Aetherium Guide, phase 3, 18 Oct 2026): pets, wings, titles, the five professions, how a craft works, gathering and the crafted gear ladder. Facts in our own words, each with a status: confirmed, reported, disputed (sources disagree), pending (nothing confirms it yet) or opinion (what players say, never a rule). Crafting facts are summarised from docs/CRAFTING-RESEARCH.md (its statuses kept). Enhancement, grades and where gear drops live in enhancement.json, grades.json and gear-sources.json; the Guide pages read those directly.",
+  "records": [
+    {
+      "id": "slots",
+      "label": "Gear slots",
+      "page": "slots",
+      "status": "confirmed",
+      "lede": "Your Daeva wears a weapon and a guard, seven armour pieces, nine accessories with the belt and amulet, two runes and five Arcana.",
+      "groups": [
+        {
+          "id": "weapon",
+          "name": "Weapon and guard",
+          "slots": [
+            "MainHand",
+            "SubHand"
+          ],
+          "text": "The weapon comes first in every plan, then the guard."
+        },
+        {
+          "id": "armour",
+          "name": "Armour",
+          "slots": [
+            "Helmet",
+            "Shoulder",
+            "Torso",
+            "Pants",
+            "Gloves",
+            "Boots",
+            "Cape"
+          ],
+          "text": "Helm, pauldrons, breastplate, greaves, gloves, boots and cloak."
+        },
+        {
+          "id": "accessory",
+          "name": "Accessories",
+          "slots": [
+            "Necklace",
+            "Earring1",
+            "Earring2",
+            "Ring1",
+            "Ring2",
+            "Bracelet1",
+            "Bracelet2"
+          ],
+          "text": "Accessories take Soulstones, not Manastones."
+        },
+        {
+          "id": "belt",
+          "name": "Belt and amulet",
+          "slots": [
+            "Belt",
+            "Amulet"
+          ],
+          "text": "They enhance with their own scrolls, to +10 at every grade."
+        },
+        {
+          "id": "rune",
+          "name": "Runes",
+          "slots": [
+            "Rune1",
+            "Rune2"
+          ],
+          "text": "Runes enhance their own way. How is not confirmed yet."
+        },
+        {
+          "id": "arcana",
+          "name": "Arcana",
+          "slots": [
+            "Arcana1",
+            "Arcana2",
+            "Arcana3",
+            "Arcana4",
+            "Arcana5"
+          ],
+          "text": "Card-like items from Transcendence that raise item level and skill levels."
+        }
+      ],
+      "facts": [
+        {
+          "id": "official-data",
+          "text": "The official character data lists every worn item with its slot, grade and enhance level. A slot shows only when something is worn there.",
+          "status": "confirmed"
+        },
+        {
+          "id": "loadouts",
+          "text": "The game keeps 3 loadouts each for looks, armour and skills.",
+          "status": "confirmed"
+        },
+        {
+          "id": "item-level",
+          "text": "Your item level is the sum the official data sends with your character. Content gates (Expedition entry and so on) ask for it.",
+          "status": "confirmed"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-equipment.json"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-17",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Loadouts",
+          "note": "Miguel: the game has 3 loadouts each for looks, armour and skills."
+        }
+      ]
+    },
+    {
+      "id": "pets",
+      "label": "Pets",
+      "page": "pets-wings",
+      "status": "reported",
+      "lede": "Pets are collected, not just worn. Every pet you collect and level gives a small permanent bonus, even when it is not out.",
+      "facts": [
+        {
+          "id": "shared",
+          "text": "The collection is shared by every character on the same server.",
+          "status": "reported"
+        },
+        {
+          "id": "souls",
+          "text": "A monster pet comes from its souls: 5 to collect it at level 1, 30 in all for level 2, 105 in all for level 3.",
+          "status": "reported"
+        },
+        {
+          "id": "source-tab",
+          "text": "A pet's Source tab names the monsters that drop its souls, where they are, and any chest or shop that sells it.",
+          "status": "reported"
+        },
+        {
+          "id": "insight",
+          "text": "Each pet at level 3 adds 1,000 EXP to its genus board, and genus Insight rolls add more stats.",
+          "status": "reported"
+        },
+        {
+          "id": "special",
+          "text": "Special pets give no owned stat bonus.",
+          "status": "reported"
+        },
+        {
+          "id": "growth-chest",
+          "text": "Ascension Trial pays Growth Pet Chests, materials for raising pets.",
+          "status": "reported"
+        }
+      ],
+      "genera": [
+        {
+          "name": "Cogni",
+          "pets": 41,
+          "perPet": "HP +30, Critical Hit +2, Might +1",
+          "status": "reported"
+        },
+        {
+          "name": "Fera",
+          "pets": 65,
+          "perPet": "Accuracy Bonus +2, Dexterity +1",
+          "status": "reported"
+        },
+        {
+          "name": "Natura",
+          "pets": 48,
+          "perPet": "Critical Hit Resist +2, Precision +1",
+          "status": "reported"
+        },
+        {
+          "name": "Varian",
+          "pets": 46,
+          "perPet": "Evasion Bonus +2, Constitution +1",
+          "status": "reported"
+        }
+      ],
+      "generaNote": "Per pet at level 3, for the 200 monster pets on the global servers.",
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-pets",
+          "title": "Pets",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Pets",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-ascension-trial",
+          "title": "Ascension Trial",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Ascension_Trial",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "wings",
+      "label": "Wings",
+      "page": "pets-wings",
+      "status": "reported",
+      "lede": "Wings work like pets: the more you own, the more Flight Power you have, worn or not.",
+      "facts": [
+        {
+          "id": "collection",
+          "text": "Flight Power rises as you collect more wings. Owned wings give their collection effect even when not worn.",
+          "status": "reported"
+        },
+        {
+          "id": "sealed",
+          "text": "Every Expedition can drop a set of Sealed Wings, a Substance Morph material. Sealed Wings can also be morphed into Enhance Stones, with a weekly limit per server.",
+          "status": "reported"
+        },
+        {
+          "id": "sealed-limit",
+          "text": "The weekly limit on morphing Sealed Wings into Enhance Stones.",
+          "status": "pending"
+        },
+        {
+          "id": "materials",
+          "text": "Sealed Dungeons give materials for wings and statues.",
+          "status": "reported"
+        },
+        {
+          "id": "nightmare",
+          "text": "The Nightmare shop sells Conqueror Wings for 20,000 Phantasmal Fragments and Nightmare Wings for 160,000, once each.",
+          "status": "reported"
+        },
+        {
+          "id": "daeva-gauge",
+          "text": "The last main quest, Daeva Trapped in a Nightmare, opens at a full Daeva Gauge and gives the Unique Ultimate Daeva Wings.",
+          "status": "reported"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-user-guide-items-and-convenience",
+          "title": "User Guide: Items and Convenience",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/User_Guide/Items_and_Convenience",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-expedition",
+          "title": "Expedition",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Expedition",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-nightmare",
+          "title": "Nightmare",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Nightmare",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "titles",
+      "label": "Titles",
+      "page": "titles",
+      "status": "reported",
+      "lede": "Titles give stats. You show one title by name, and you equip title effects for their stats.",
+      "facts": [
+        {
+          "id": "equipped",
+          "text": "The official character data lists the titles you own and the title effects you have equipped.",
+          "status": "confirmed"
+        },
+        {
+          "id": "sealed",
+          "text": "Some Sealed Dungeons give a title with stats the first time you clear them.",
+          "status": "reported"
+        },
+        {
+          "id": "fire-temple",
+          "text": "After the Fire Temple final boss, a hidden achievement gives the title Kromede Will Remember That, which raises PvE attack.",
+          "status": "reported"
+        },
+        {
+          "id": "final-quest",
+          "text": "The last main quest gives the Unique title Encountering Zikel's Core.",
+          "status": "reported"
+        },
+        {
+          "id": "list",
+          "text": "A full list of titles and how to get each one.",
+          "status": "pending"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "fandom-sealed-dungeon-26-stronghold",
+          "title": "Sealed Dungeon & Stronghold",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Sealed_Dungeon_%26_Stronghold",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "professions",
+      "label": "The five professions",
+      "page": "professions",
+      "status": "confirmed",
+      "lede": "One character can learn all five crafts. Each one levels on its own, and every craft you try gives proficiency, success or not.",
+      "professions": [
+        {
+          "id": "blacksmithing",
+          "name": "Blacksmithing",
+          "makes": "Greatswords, longswords, daggers, maces and Guards",
+          "refines": "Orichalcum Ingots",
+          "status": "confirmed"
+        },
+        {
+          "id": "armorsmithing",
+          "name": "Armorsmithing",
+          "makes": "Helm, pauldrons, breastplate, gloves, greaves, boots and cloak",
+          "refines": "Leathers",
+          "status": "confirmed"
+        },
+        {
+          "id": "handicrafting",
+          "name": "Handicrafting",
+          "makes": "Rings, earrings, necklaces, bracelets, bows and staffs",
+          "refines": "Wood and gem decorations",
+          "status": "confirmed"
+        },
+        {
+          "id": "alchemy",
+          "name": "Alchemy",
+          "makes": "Spellbooks, orbs, potions, serums, scrolls, Manastones and Soulstones",
+          "refines": "Magic Crystals, papers and powders",
+          "status": "confirmed"
+        },
+        {
+          "id": "cooking",
+          "name": "Cooking",
+          "makes": "Buff food and drinks, no gear",
+          "refines": null,
+          "status": "confirmed"
+        }
+      ],
+      "facts": [
+        {
+          "id": "names",
+          "text": "Some sites use other names (Weaponsmithing, Tailoring, Jewelcrafting). These are the names in the global client menu.",
+          "status": "disputed"
+        },
+        {
+          "id": "free",
+          "text": "Crafting is free to use. Membership gates the Market, not crafting.",
+          "status": "reported"
+        },
+        {
+          "id": "unlock",
+          "text": "Crafting opens at about Lv 10, at the Crafting Table in each town's crafting area.",
+          "status": "reported"
+        },
+        {
+          "id": "proficiency",
+          "text": "Proficiency runs from 1 to 50 as a Novice, then on to 100 after a promotion quest.",
+          "status": "confirmed"
+        },
+        {
+          "id": "every-craft",
+          "text": "Every craft gives proficiency, success or not.",
+          "status": "confirmed"
+        },
+        {
+          "id": "before-35",
+          "text": "Before Lv 35, gather all the time and level your crafting, so that by the time you are proficient you can farm enough material to succeed.",
+          "status": "confirmed"
+        }
+      ],
+      "players": [
+        {
+          "text": "Handicrafting first: accessories fill five slots and gain most from the extra Soul Binding line on crafted gear.",
+          "status": "opinion"
+        },
+        {
+          "text": "Alchemy first, gathering Odyle alongside, then the weapon and the Guard. Good Manastones sell well.",
+          "status": "opinion"
+        },
+        {
+          "text": "Armorsmithing last for PvE; crafted armour may matter more in PvP.",
+          "status": "opinion"
+        },
+        {
+          "text": "Cooking is cheap and useful early.",
+          "status": "opinion"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-18",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Gear and Enhancement",
+          "note": "Miguel, in game: before Lv 35, gather and level crafting (armour, weapons, food, jewellery) so you can farm enough material to succeed."
+        }
+      ]
+    },
+    {
+      "id": "craft-rules",
+      "label": "How a craft works",
+      "page": "professions",
+      "status": "confirmed",
+      "facts": [
+        {
+          "id": "gauges",
+          "text": "Two gauges, success and failure, fill turn by turn. The first one full decides the result.",
+          "status": "confirmed"
+        },
+        {
+          "id": "failure",
+          "text": "A failure uses up all the materials. Being hit or moving during a craft counts as a failure.",
+          "status": "confirmed"
+        },
+        {
+          "id": "chance",
+          "text": "The higher your proficiency above the recipe, the better the chance. The recipe window shows the chance.",
+          "status": "confirmed"
+        },
+        {
+          "id": "no-100",
+          "text": "Gear crafts never reach 100%, except recipes that use a Core: those always succeed and give a bound item.",
+          "status": "reported"
+        },
+        {
+          "id": "combo",
+          "text": "A successful gear craft can trigger a combo that gives the Splendent version, one grade higher.",
+          "status": "confirmed"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "gathering",
+      "label": "Gathering",
+      "page": "gathering",
+      "status": "confirmed",
+      "lede": "Gathering (essence extraction) feeds every craft. Gather as you quest: it levels at the same time.",
+      "types": [
+        {
+          "name": "Ore",
+          "examples": "Orichalcum Ore",
+          "usedFor": "Ingots for Blacksmithing and Armorsmithing",
+          "status": "confirmed"
+        },
+        {
+          "name": "Wood",
+          "examples": "Yggdrasil Log (Elyos), Asvata Log (Asmodian)",
+          "usedFor": "Bows and staffs",
+          "status": "confirmed"
+        },
+        {
+          "name": "Gems",
+          "examples": "Sapphire, Diamond and Ruby Gemstones",
+          "usedFor": "Jewellery decorations and Alchemy powders",
+          "status": "confirmed"
+        },
+        {
+          "name": "Herbs",
+          "examples": "Aria and Targena (Elyos), Azpha and Calendula (Asmodian)",
+          "usedFor": "Alchemy serums and potions",
+          "status": "confirmed"
+        },
+        {
+          "name": "Cooking ingredients",
+          "examples": "Mela, Cypri (Elyos); Raydam, Pujery (Asmodian)",
+          "usedFor": "Cooking",
+          "status": "confirmed"
+        },
+        {
+          "name": "Odyle",
+          "examples": "Odyle",
+          "usedFor": "Nearly every gear recipe",
+          "status": "confirmed"
+        }
+      ],
+      "qualities": {
+        "text": "Most materials come in four qualities: Base, Fine, Pure and Radiant. A recipe asks for the matching quality.",
+        "status": "confirmed"
+      },
+      "facts": [
+        {
+          "id": "nodes",
+          "text": "Each node has 2 to 4 uses, with a lockout per spot. Gathering has its own success and failure gauges.",
+          "status": "confirmed"
+        },
+        {
+          "id": "where",
+          "text": "Verteron and Altgard have the most nodes. Odyle is also found in Chaotic Lower Reshanta.",
+          "status": "reported"
+        },
+        {
+          "id": "odyle",
+          "text": "Odyle floats in the air near camps, towns and points of interest. You need wings, and running out of wing stamina stops the extraction.",
+          "status": "reported"
+        },
+        {
+          "id": "leather",
+          "text": "Raw Leather comes from certain monsters only, never from nodes.",
+          "status": "confirmed"
+        },
+        {
+          "id": "merchant",
+          "text": "Each profession's merchant sells the additives: Solvent, Catalyst, Spiritstones, Glass Bottles, Abrasive, Sandpaper and condiments.",
+          "status": "confirmed"
+        },
+        {
+          "id": "skills",
+          "text": "Gathering skills include Search (shows nodes on the map), Bountiful Harvest (double yield) and Appraiser (higher quality). Resetting them costs 50,000 Kina.",
+          "status": "confirmed"
+        },
+        {
+          "id": "unlock",
+          "text": "Whether gathering opens from the start or at Lv 45.",
+          "status": "disputed"
+        },
+        {
+          "id": "conversion",
+          "text": "Material Conversion turns a higher quality into a lower one, never up.",
+          "status": "reported"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        }
+      ]
+    },
+    {
+      "id": "crafted-ladder",
+      "label": "The crafted gear ladder",
+      "page": "crafted-gear",
+      "status": "confirmed",
+      "lede": "Crafted gear climbs a ladder. Each step is made from the Splendent version of the step below, so you move up only with a combo.",
+      "steps": [
+        {
+          "name": "Base",
+          "example": "Orichalcum Greatsword; Yggdrasil or Asvata Bow",
+          "proficiency": 3,
+          "bowItemLevel": "18 (Splendent 22)"
+        },
+        {
+          "name": "Expert's",
+          "example": "Expert's ...",
+          "proficiency": 15,
+          "bowItemLevel": "28 (35)"
+        },
+        {
+          "name": "Artisan's",
+          "example": "Artisan's ...",
+          "proficiency": 30,
+          "bowItemLevel": "39 (44)"
+        },
+        {
+          "name": "Dragon Lord",
+          "example": "True Dragon Lord (Elyos), Star Dragon Lord (Asmodian)",
+          "proficiency": 55,
+          "bowItemLevel": "62 (70)",
+          "grade": "Unique"
+        },
+        {
+          "name": "Transfer step 1",
+          "example": "White Dragon Lord, Dark Dragon Lord",
+          "proficiency": null,
+          "bowItemLevel": "78 (86)",
+          "status": "disputed"
+        },
+        {
+          "name": "Transfer step 2",
+          "example": "Wise Dragon Lord, Ebony Dragon Lord",
+          "proficiency": null,
+          "bowItemLevel": "94 (102)",
+          "status": "disputed"
+        }
+      ],
+      "stepsStatus": "confirmed",
+      "itemLevelsStatus": "reported",
+      "facts": [
+        {
+          "id": "dead-end",
+          "text": "A result that is not Splendent is a dead end: wear it or sell it.",
+          "status": "confirmed"
+        },
+        {
+          "id": "dragon-lord",
+          "text": "Dragon Lord gear needs proficiency 55, is Unique, and has one more Soul Binding line than dungeon drops (5 lines against 3 or 4).",
+          "status": "confirmed"
+        },
+        {
+          "id": "other-slots",
+          "text": "Guards need proficiency 5, 20, 35 and 60; boots and cloaks 10, 25, 40 and 60. Bracelets combine three of the bracelet below.",
+          "status": "reported"
+        },
+        {
+          "id": "accessory-bases",
+          "text": "Accessory bases: rings from Sapphire, earrings from Diamond, necklaces from Ruby.",
+          "status": "confirmed"
+        },
+        {
+          "id": "transfer-craft",
+          "text": "Transfer crafting keeps the base item's enhance, amplification and Soul Binding levels and binds the new item to you. If it fails you keep the transfer piece; the other materials are lost.",
+          "status": "confirmed"
+        },
+        {
+          "id": "global",
+          "text": "Whether the White and Wise (Dark and Ebony) Dragon Lord steps are in the global client yet.",
+          "status": "disputed"
+        },
+        {
+          "id": "wrathful",
+          "text": "The Dragon Lord and transfer steps use Wrathful Mind, Will and Ego. Expeditions drop them: Mind from Krao Cave up, Will from Urugugu Canyon up, Ego from Fire Temple and Ferocious Horn Den.",
+          "status": "reported"
+        },
+        {
+          "id": "weapon-bonus",
+          "text": "A crafted weapon adds PvE damage.",
+          "status": "reported"
+        }
+      ],
+      "provenance": [
+        {
+          "kind": "community-guide",
+          "ref": "tgw-crafting",
+          "title": "Crafting",
+          "publisher": "The Games Wiki",
+          "url": "https://thegameswiki.com/aion-2/wiki/crafting",
+          "retrievedOn": "2026-10-07",
+          "region": "not-stated",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-fire-temple",
+          "title": "Fire Temple",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Fire_Temple",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-krao-cave",
+          "title": "Krao Cave",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Krao_Cave",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "fandom-urugugu-canyon",
+          "title": "Urugugu Canyon",
+          "publisher": "AION2 Wiki (Fandom)",
+          "url": "https://aion2.fandom.com/wiki/Urugugu_Canyon",
+          "retrievedOn": "2026-10-18",
+          "region": "global",
+          "reliability": "medium"
+        }
+      ]
+    }
+  ]
+}
