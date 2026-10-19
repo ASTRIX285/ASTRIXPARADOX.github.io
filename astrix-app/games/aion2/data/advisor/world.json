@@ -170,7 +170,7 @@
       "name": "Dimensional Invasion",
       "status": "pending",
       "region": null,
-      "text": "A separate event that opens at half past each hour. Pending: no wiki page yet.",
+      "text": "A separate event that opens at half past each hour. More detail is not listed yet.",
       "provenance": [
         {
           "kind": "community-guide",
@@ -190,7 +190,7 @@
       "name": "Other zones",
       "status": "pending",
       "region": null,
-      "text": "Pending: the wiki has no pages for the other zones yet.",
+      "text": "The other zones are not listed yet.",
       "provenance": [
         {
           "kind": "community-guide",

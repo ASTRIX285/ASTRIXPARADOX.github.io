@@ -753,7 +753,7 @@
         "max": 5
       },
       "level": null,
-      "levelNote": "The wiki gives no character level for Transcendence: item level is the gate.",
+      "levelNote": "No character level is listed for Transcendence: item level is the gate.",
       "seasonal": true,
       "arcanaSlots": [
         "Compass",
@@ -878,7 +878,7 @@
         "max": 5
       },
       "level": null,
-      "levelNote": "The wiki gives no character level for Transcendence: item level is the gate.",
+      "levelNote": "No character level is listed for Transcendence: item level is the gate.",
       "seasonal": true,
       "arcanaSlots": [
         "Mirror",
@@ -1283,7 +1283,7 @@
       },
       "level": null,
       "itemLevel": null,
-      "summary": "The end game raid for two parties. The wiki lists it in its overview but has no page for it yet.",
+      "summary": "The end game raid for two parties. Its entry rules and bosses are not listed yet.",
       "entryPending": "Entry level, item level and bosses not listed yet.",
       "conflicts": [
         "The Dungeons overview says 8 players in 2 parties; the Expedition page says 10 player raids. We show 8 from the overview."
