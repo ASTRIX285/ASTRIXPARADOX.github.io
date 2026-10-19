@@ -146,11 +146,15 @@
 
   "/astrix-app/pages/aetherium/guide-equipment.mjs": "d3ac3f705c",
 
-  "/astrix-app/pages/aetherium/guide-page.mjs": "160a8a6231",
+  "/astrix-app/pages/aetherium/guide-general.mjs": "d9917ba893",
+
+  "/astrix-app/pages/aetherium/guide-page.mjs": "31c8896047",
 
   "/astrix-app/pages/aetherium/guide-path.mjs": "ce94ec714b",
 
-  "/astrix-app/pages/aetherium/guide-shell.mjs": "913fa301da",
+  "/astrix-app/pages/aetherium/guide-resets.mjs": "afec4940cb",
+
+  "/astrix-app/pages/aetherium/guide-shell.mjs": "9ada7b2339",
 
   "/astrix-app/pages/aetherium/skills-page.mjs": "a60c345bed",
 

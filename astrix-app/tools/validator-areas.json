@@ -64,6 +64,7 @@
         "test-aion2-advisor.mjs",
         "test-aetherium-ascent.mjs",
         "test-aetherium-guide.mjs",
+        "test-aetherium-guide-general.mjs",
         "test-hub-cards.mjs",
         "test-forge-tint.mjs",
         "validate-single-module-urls.mjs",

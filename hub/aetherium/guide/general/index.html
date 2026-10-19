@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1&amp;recovery=20261004-1&amp;neutral=20261016-1&amp;forge-tint=20261016-1">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="AION 2 Guide, General: coming soon in The Aetherium's Guide.">
+  <meta name="description" content="AION 2 Guide, General: factions, story, Season 1, reset times, Membership and the Market, controls, loadouts and a FAQ.">
   <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/guide/general/">
   <title>General | Guide | The Aetherium | AION 2 | ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
@@ -16,7 +16,8 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261019-equip-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261019-general-1">
+  <link rel="preload" href="/astrix-app/games/aion2/data/advisor/general.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d",
@@ -31,9 +32,11 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5",
 
-"/astrix-app/pages/aetherium/guide-page.mjs":"/astrix-app/pages/aetherium/guide-page.mjs?v=160a8a6231",
+"/astrix-app/pages/aetherium/guide-general.mjs":"/astrix-app/pages/aetherium/guide-general.mjs?v=d9917ba893",
 
-"/astrix-app/pages/aetherium/guide-shell.mjs":"/astrix-app/pages/aetherium/guide-shell.mjs?v=913fa301da"
+"/astrix-app/pages/aetherium/guide-resets.mjs":"/astrix-app/pages/aetherium/guide-resets.mjs?v=afec4940cb",
+
+"/astrix-app/pages/aetherium/guide-shell.mjs":"/astrix-app/pages/aetherium/guide-shell.mjs?v=9ada7b2339"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d" data-head-hint>
@@ -48,12 +51,14 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-page.mjs?v=160a8a6231" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-general.mjs?v=d9917ba893" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-shell.mjs?v=913fa301da" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/guide-page.mjs?v=160a8a6231"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-resets.mjs?v=afec4940cb" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-shell.mjs?v=9ada7b2339" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/guide-general.mjs?v=d9917ba893"></script>
 </head>
-<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="guide" data-guide="soon" data-guide-section="general">
+<body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="guide" data-guide="section" data-guide-section="general" data-guide-page="general">
   <a class="ae-skip" href="#aeMain">Skip to the Guide</a>
   <header class="apx-destination-header">
     <a class="apx-destination-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a>

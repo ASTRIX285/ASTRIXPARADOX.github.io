@@ -27,6 +27,7 @@ export const validators=[
   'test-aion2-advisor.mjs', // AION 2 Ascent Plan advisor: data coverage, sources, level-aware plans.
   {name:'test-aetherium-ascent.mjs',browser:true,serial:true}, // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout. Serial: its title and data line layout check failed under load (18 Oct 2026).
   browser('test-aetherium-guide.mjs'), // The Aetherium AION 2 Guide: shell, home grid, class roles table, class pages, setup flag, layout.
+  browser('test-aetherium-guide-general.mjs'), // The Aetherium Guide, General section and FAQ: facts with sources, resets in the local zone, layout.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',
