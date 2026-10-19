@@ -73,6 +73,7 @@ Gold `#ffd36a`, deep gold `#c88a26`, crimson `#d3202f`, red `#790810`, deep red 
 - Body text line length about 65 characters. Headings use `text-wrap: balance`.
 - Labels never truncate mid-word: wrap, shorten deliberately, or widen the track.
 - No new font hosts. Serif faces are not used.
+- The Aetherium Guide titles use FairyTaleJF from the site’s Adobe Fonts kit (Miguel, 19 Oct 2026). Titles only, never body text.
 
 ## 4. Component Stylings
 

@@ -1860,6 +1860,8 @@ body.aetherium-page[data-ae-page="guide"]{
   --ae-gd-shade:rgba(12,19,29,0.8);--ae-gd-shade-mid:rgba(12,19,29,0.45);--ae-gd-shade-low:rgba(12,19,29,0.55);--ae-gd-clear:rgba(12,19,29,0);
   /* The site's own faces: display headings, and the UI face for the body (every Guide page reads in it). */
   --ae-gd-display:var(--forge-font-display,"Segoe UI",sans-serif);
+  /* Guide titles only, never body text: FairyTaleJF from the site's Adobe Fonts kit (Miguel, 19 Oct 2026). */
+  --ae-gd-font-title:"fairy-tale-jf",var(--forge-font-display);
   --ae-font-ui:var(--forge-font-ui,"Segoe UI",sans-serif);
   background:var(--ae-gd-ground)}
 html:has(body.aetherium-page[data-ae-page="guide"]){background:var(--ae-gd-ground)}
@@ -1978,6 +1980,10 @@ html body.aetherium-page .ae-gd-btn:focus-visible:not(#ae-g1):not(#ae-g2):not(#a
 .ae-gd-step strong{font:400 20px/1.25 var(--ae-gd-display)}
 .ae-gd-step:is(:hover,:focus-visible) strong{color:var(--ae-gd-gold)}
 .ae-gd-step small{font-size:15px;line-height:1.5;color:var(--ae-gd-muted)}
+/* Guide titles (hero H1, section H2s, tile titles, path step titles, side menu section labels) in the title face. The kit
+   has no bold, so weight 400 and no faked bold or italic. Sizes stay as set above. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd :is(.ae-gd-title,h2,.ae-gd-h2,.ae-gd-tile-name,.ae-gd-step strong,.ae-gd-shot-steps h3,.ae-gd-side-label){
+  font-family:var(--ae-gd-font-title);font-weight:400;font-synthesis:none;letter-spacing:normal}
 /* The page footer on Guide pages: quiet lines, the official site link the only way out. */
 body.aetherium-page[data-ae-page="guide"] .ae-footer{max-width:1240px;width:100%;box-sizing:border-box;margin:0 auto;padding:28px 32px;border-top:1px solid var(--ae-gd-line-soft);color:var(--ae-gd-muted)}
 body.aetherium-page[data-ae-page="guide"] .ae-footer p{max-width:none}
