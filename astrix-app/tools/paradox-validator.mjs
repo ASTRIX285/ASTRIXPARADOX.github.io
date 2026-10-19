@@ -2,7 +2,7 @@
 //   node astrix-app/tools/paradox-validator.mjs            changed areas on a branch (every suite on main and in CI)
 //   node astrix-app/tools/paradox-validator.mjs --all      every suite (the GitHub check validate-paradox.yml runs this)
 //   --serial runs one by one and stops at the first failure, as before; --jobs=N sets the pool size.
-// Mark a suite browser(...) when it starts Chromium (at most 3 run at once), and {name,serial:true} when it cannot share
+// Mark a suite browser(...) when it starts Chromium (1 at a time on 8 cores or fewer, 2 above, --browsers=N up to 3), and {name,serial:true} when it cannot share
 // the machine: it times itself against a fixed limit, or writes files inside the repo while it runs.
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';

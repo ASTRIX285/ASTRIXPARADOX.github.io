@@ -1,19 +1,24 @@
 // The PARADOX validator runner (18 Oct 2026). paradox-validator.mjs owns the suite list; this module runs it.
-//   - A pool of child processes: CPU cores minus one at a time, at most 3 of them suites that start Chromium.
-//     --browsers=N sets the Chromium cap (the GitHub check uses 1 on its 4-core runner). Suites marked serial run alone, one after another, once the pool has finished.
+//   - A pool of child processes: CPU cores minus one at a time, a few of them suites that start Chromium:
+//     1 at a time on 8 logical cores or fewer, 2 above that (19 Oct 2026: 3 at once made browser suites about 4x
+//     slower on a 4-core machine). --browsers=N sets the Chromium cap, up to 3 (the GitHub check uses 1).
+//     Suites marked serial run alone, one after another, once the pool has finished.
 //   - Each suite's output is held until it ends and printed in one block, with its time and exit code.
 //   - --changed (default on a branch, outside CI) runs the core set plus the areas the changed files touch,
-//     from validator-areas.json. --all runs every suite. --serial runs the old way: one by one, stop at the first failure.
+//     from validator-areas.json. A module-versions.json change selects the areas of the modules it bumps.
+//     --all runs every suite. --serial runs the old way: one by one, stop at the first failure.
 // Result lines are the ones the validator always printed: VALIDATOR_FAILED=<suite> exit=<n> signal=<s> and
 // PARADOX_VALIDATOR=PASS, with the first failing suite's exit code.
 import {spawn,execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {availableParallelism} from 'node:os';
 import {fileURLToPath} from 'node:url';
+import {formatVersions} from './build-module-versions.mjs';
 
 export const TOOLS=fileURLToPath(new URL('./',import.meta.url));
 export const ROOT=fileURLToPath(new URL('../../',import.meta.url));
 export const BROWSER_LIMIT=3;
+export const MODULE_VERSIONS='astrix-app/module-versions.json';
 
 /** A suite entry from the list: a file name, or {name, browser, serial}. */
 export function suiteSpec(entry){
@@ -37,6 +42,32 @@ export function defaultJobs(){
   return Math.max(1,availableParallelism()-1);
 }
 
+/** Chromium suites at once by default: 1 on 8 logical cores or fewer, 2 above that. */
+export function defaultBrowsers(cores=availableParallelism()){
+  return cores<=8?1:2;
+}
+
+/**
+ * Which modules a module-versions.json change bumps, from the text before and after.
+ * Returns {format:false, paths:[repo paths]}, or {format:true} when anything but the module and
+ * worker-stamped entries changed (schema, note, layout), or either side does not parse.
+ */
+export function moduleVersionChanges(before,after){
+  const clean=text=>String(text).replace(/\r\n/g,'\n');
+  let old,now;
+  try {old=JSON.parse(clean(before));now=JSON.parse(clean(after));}catch {return {format:true,paths:[]};}
+  const shape=data=>data&&typeof data==='object'&&data.modules&&typeof data.modules==='object'&&Array.isArray(data.workerStamped);
+  if(!shape(old)||!shape(now))return {format:true,paths:[]};
+  const keys=data=>Object.keys(data).sort().join(',');
+  if(keys(old)!==keys(now)||old.schemaVersion!==now.schemaVersion||old.note!==now.note)return {format:true,paths:[]};
+  if(clean(after)!==formatVersions(now))return {format:true,paths:[]};
+  const sites=new Set();
+  for(const site of new Set([...Object.keys(old.modules),...Object.keys(now.modules)]))if(old.modules[site]!==now.modules[site])sites.add(site);
+  const was=new Set(old.workerStamped),is=new Set(now.workerStamped);
+  for(const site of new Set([...was,...is]))if(was.has(site)!==is.has(site))sites.add(site);
+  return {format:false,paths:[...sites].map(site=>site.replace(/^\//,'')).sort()};
+}
+
 // Area map patterns: "dir/" is everything under dir, "*" is any run of characters inside one path part,
 // "**" is any run of characters across parts. Anything else is an exact path.
 export function patternMatches(pattern,path){
@@ -52,28 +83,41 @@ export function readAreas(file=`${TOOLS}validator-areas.json`){
 /**
  * Which suites a list of changed files needs. Returns {all, suites:Set, reasons:[{area,label,files}]}.
  * A shared file, or a file no area claims, selects every suite. A changed suite file always runs itself.
+ * module-versions.json selects the areas of the modules it bumps (`moduleVersions`, from moduleVersionChanges),
+ * as if those module files had changed; a format change, or no diff to read, selects every suite.
  */
-export function selectSuites(changed,names,areas){
+export function selectSuites(changed,names,areas,{moduleVersions=null}={}){
   const known=new Set(names);
   const picked=new Set(areas.core);
   const reasons=new Map();
   const note=(area,label,file)=>{if(!reasons.has(area))reasons.set(area,{area,label,files:[]});reasons.get(area).files.push(file);};
   let all=false;
-  for(const file of changed){
-    if(areas.ignore.some(pattern=>patternMatches(pattern,file)))continue;
-    if(areas.everything.some(pattern=>patternMatches(pattern,file))){all=true;note('everything','shared file: every suite',file);continue;}
+  const claim=(file,shown=file)=>{
+    if(areas.everything.some(pattern=>patternMatches(pattern,file))){all=true;note('everything','shared file: every suite',shown);return;}
     const base=file.startsWith('astrix-app/tools/')?file.slice('astrix-app/tools/'.length):null;
     let claimed=false;
-    if(base&&known.has(base)){picked.add(base);note(`suite:${base}`,'changed suite runs itself',file);claimed=true;}
+    if(base&&known.has(base)){picked.add(base);note(`suite:${base}`,'changed suite runs itself',shown);claimed=true;}
     // The most specific pattern wins: astrix-app/pages/aetherium/ claims its files from astrix-app/pages/.
     const matches=Object.entries(areas.areas).map(([key,area])=>[key,area,Math.max(-1,...area.paths.filter(pattern=>patternMatches(pattern,file)).map(pattern=>pattern.length))]).filter(row=>row[2]>=0);
     const best=Math.max(-1,...matches.map(row=>row[2]));
     for(const [key,area,length] of matches){
       if(length<best)continue;
-      claimed=true;note(key,area.label,file);
+      claimed=true;note(key,area.label,shown);
       for(const suite of area.suites)picked.add(suite);
     }
-    if(!claimed){all=true;note('unmapped','file no area claims: every suite',file);}
+    if(!claimed){all=true;note('unmapped','file no area claims: every suite',shown);}
+  };
+  for(const file of changed){
+    if(areas.ignore.some(pattern=>patternMatches(pattern,file)))continue;
+    if(file===MODULE_VERSIONS){
+      if(!moduleVersions||moduleVersions.format){
+        all=true;note('everything',moduleVersions?'module-versions.json format changed: every suite':'module-versions.json diff not read: every suite',file);
+        continue;
+      }
+      for(const path of moduleVersions.paths)claim(path,`${file} (bumps ${path})`);
+      continue;
+    }
+    claim(file);
   }
   return {all,suites:all?new Set(names):picked,reasons:[...reasons.values()]};
 }
@@ -94,7 +138,16 @@ export async function changedFiles(cwd=ROOT){
     ...git(['diff','--no-renames','--name-only','-z','--cached'],cwd).split('\0'),
     ...git(['ls-files','--others','--exclude-standard','-z'],cwd).split('\0'),
   ].filter(Boolean));
-  return {branch,base:ref,files:[...files].sort()};
+  // module-versions.json: the base copy against the working copy, so the modules it bumps pick their areas.
+  let moduleVersions=null;
+  if(files.has(MODULE_VERSIONS)){
+    try {
+      const before=git(['show',`${ref}:${MODULE_VERSIONS}`],cwd);
+      const after=readFileSync(`${cwd.replace(/[\\/]$/,'')}/${MODULE_VERSIONS}`,'utf8');
+      moduleVersions=moduleVersionChanges(before,after);
+    }catch {moduleVersions=null;}
+  }
+  return {branch,base:ref,files:[...files].sort(),moduleVersions};
 }
 
 function currentBranch(cwd=ROOT){
@@ -187,7 +240,7 @@ export async function main(argv,entries,overrides={}){
     try {
       const changed=overrides.changed?await overrides.changed():await changedFiles(overrides.cwd);
       const areas=overrides.areas||readAreas();
-      const pick=selectSuites(changed.files,names,areas);
+      const pick=selectSuites(changed.files,names,areas,{moduleVersions:changed.moduleVersions??null});
       log(`VALIDATOR_MODE=changed against ${changed.base}: ${changed.files.length} changed file(s)`);
       for(const reason of pick.reasons){
         const shown=reason.files.slice(0,6).join(', ')+(reason.files.length>6?` and ${reason.files.length-6} more`:'');
@@ -202,7 +255,7 @@ export async function main(argv,entries,overrides={}){
   }
   if(mode==='all'){log(`VALIDATOR_MODE=all`);selected=specs;}
   const jobs=options.serial?1:(options.jobs??overrides.jobs??defaultJobs());
-  const browserLimit=Math.min(options.browsers??BROWSER_LIMIT,BROWSER_LIMIT,jobs);
+  const browserLimit=Math.min(options.browsers??defaultBrowsers(overrides.cores),BROWSER_LIMIT,jobs);
   log(`VALIDATOR_SUITES=${selected.length} of ${specs.length} ${options.serial?'serial':`pool of ${jobs}, at most ${browserLimit} Chromium, ${selected.filter(spec=>spec.serial).length} serial after`}`);
   const runOptions={jobs,browserLimit,run:overrides.run||runSuite,tools:overrides.tools||TOOLS,cwd:overrides.cwd||ROOT,env:overrides.env||process.env};
   const started=Date.now();
