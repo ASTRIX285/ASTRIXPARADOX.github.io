@@ -154,7 +154,7 @@ await check('the typed item level is saved with its age and names the next gate'
   await page.fill('#aeGpIl','795');
   await page.click('#aeGpIlForm button[type=submit]');
   assert.equal(await page.$eval('[data-gp-il]',el=>el.textContent),'795');
-  assert.match(await page.$eval('[data-gp-il-age]',el=>el.textContent),/You typed this just now\. Not live/);
+  assert.match(await page.$eval('[data-gp-il-age]',el=>el.textContent),/^You typed this just now\.$/);
   assert.equal(await page.$eval('[data-gp-next-gate]',el=>el.dataset.gpNextGate),'ascension-trial');
   assert.match(await page.$eval('[data-gp-next-gate]',el=>el.textContent),/1,000, 205 to go/);
   assert.ok(await page.$('[data-gp-gate="krao-conquest"]'));

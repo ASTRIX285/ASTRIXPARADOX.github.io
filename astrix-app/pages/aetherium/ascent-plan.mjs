@@ -26,7 +26,7 @@ const BEGINNER = { 'very high': 'Very easy to learn', high: 'Easy to learn', med
 const CONFIDENCE = {
   consensus: 'Most top builds agree on these.',
   'top-player data': 'What top players run.',
-  'single-source': 'An early pick, less tested.'
+  'single-source': 'An early pick.'
 };
 
 const pendingNote = () => '';
@@ -526,7 +526,7 @@ function spaceKey(bar) {
 function renderSkillBarScreen(plan) {
   const bar = plan.skillBar;
   if (!bar) return '<p class="ae-callout">The skill list for this class is not loaded yet.</p>';
-  if (!bar.fromBlock) return `<p class="ae-callout">No bar layout is sourced for this build yet.</p>`;
+  if (!bar.fromBlock) return `<p class="ae-callout">No bar layout for this build yet.</p>`;
   const chains = plan.chains?.chains ?? [];
   const chip = (name, icon, note) => `<li>${art(icon)}<span>${esc(name)}${note ? ` <small>${esc(note)}</small>` : ''}</span></li>`;
   const groupStart = new Set(['5', 'Q']);

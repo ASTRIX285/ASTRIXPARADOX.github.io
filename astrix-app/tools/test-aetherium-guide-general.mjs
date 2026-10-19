@@ -8,7 +8,7 @@
 //   - each page at 1600 and 390: the Guide shell with its title, the page's own content, a source under every fact,
 //     no sideways scroll, no overlapping tiles, cylinder cards (computed radius and gradient), no en or em dash;
 //   - Reset times in the player's own zone: Los Angeles and Tokyo with a fixed clock, times and countdown checked;
-//   - FAQ: every answer cites at least one source, each with an https link or an in-game check; Controls links to the
+//   - FAQ: no answer shows a source (sources stay in the data); Controls links to the
 //     Ascent Plan's Skill Bar screen; Loadouts shows 3 each; Skills shows Specialty steps at skill Lv 8, 12, 16 and 20.
 // AE_SHOTS=<dir outside the repo> also saves screenshots at 390 and 1600.
 import assert from 'node:assert/strict';
@@ -111,12 +111,12 @@ try {
       assert.ok(overflow<=0,`${id} at ${width}: no sideways scroll (${overflow}px)`);
       const report=await page.evaluate(()=>{
         const facts=[...document.querySelectorAll('[data-fact]')];
-        const noSource=facts.filter(card=>!card.querySelector('.ae-gg-src li')).map(card=>card.dataset.fact);
+        const noSource=facts.filter(card=>card.querySelector('.ae-gg-src, a[href^="https://aion2.fandom.com/"]')).map(card=>card.dataset.fact);
         const wide=[...document.querySelectorAll('.ae-gg *')].filter(node=>node.getBoundingClientRect().right>document.documentElement.clientWidth+1).map(node=>node.className||node.tagName);
         const card=facts[0]&&getComputedStyle(facts[0]);
         return {facts:facts.length,noSource,wide:wide.slice(0,5),radius:card?parseFloat(card.borderTopLeftRadius):null,gradient:card?card.backgroundImage:null,text:document.body.innerText};
       });
-      assert.deepEqual(report.noSource,[],`${id}: a source under every fact`);
+      assert.deepEqual(report.noSource,[],`${id}: no sources on any fact`);
       assert.deepEqual(report.wide,[],`${id} at ${width}: nothing past the right edge`);
       if(report.facts){assert.ok(report.radius>=12,`${id}: rounded cylinder cards`);assert.match(report.gradient,/linear-gradient/,`${id}: lit card`);}
       assert.ok(!DASH.test(report.text),`${id}: no en or em dash`);
@@ -161,11 +161,9 @@ try {
     const answers=await page.locator('[data-faq]').evaluateAll(nodes=>nodes.map(node=>({id:node.dataset.faq,group:node.closest('[data-faq-group]').dataset.faqGroup,links:[...node.querySelectorAll('[data-source-url]')].map(a=>a.href),inGame:node.querySelectorAll('[data-source-kind="in-game"]').length})));
     assert.equal(answers.length,faq.length,'Every FAQ answer on the page');
     for(const answer of answers){
-      assert.ok(answer.links.length||answer.inGame,`${answer.id}: cites a source`);
-      for(const link of answer.links)assert.match(link,/^https:\/\//,`${answer.id}: https source`);
+      assert.equal(answer.links.length+answer.inGame,0,`${answer.id}: no sources shown`);
       assert.equal(answer.group,byId[answer.id].group,`${answer.id}: in its group`);
     }
-    assert.ok(answers.some(answer=>answer.links.some(link=>link.startsWith('https://aion2.fandom.com/wiki/User_Guide'))),'FAQ cites the wiki User Guide');
     await context.close();
   }
   {
