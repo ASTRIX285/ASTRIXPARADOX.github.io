@@ -1873,7 +1873,7 @@ body.aetherium-page[data-ae-page="guide"] .ae-main>:is(.ae-notice,.ae-source,.ae
 .ae-gd-hero{position:relative;height:520px;overflow:hidden;background:var(--ae-gd-deep)}
 .ae-gd-hero.is-home{height:560px}
 .ae-gd-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%}
-.ae-gd-hero.is-home .ae-gd-hero-img{object-position:50% 30%}
+.ae-gd-hero.is-home .ae-gd-hero-img{object-position:50% 70%}
 .ae-gd-hero::before,.ae-gd-hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none}
 .ae-gd-hero::before{background:linear-gradient(90deg,var(--ae-gd-shade) 0%,var(--ae-gd-shade-mid) 45%,var(--ae-gd-clear) 75%)}
 .ae-gd-hero::after{background:linear-gradient(180deg,var(--ae-gd-clear) 40%,var(--ae-gd-shade-low) 72%,var(--ae-gd-ground) 100%)}
@@ -1941,6 +1941,7 @@ html body.aetherium-page .ae-gd-btn:focus-visible:not(#ae-g1):not(#ae-g2):not(#a
 .ae-gd.is-home .ae-gd-h2::before{width:12px;height:12px}
 .ae-gd-linked{margin:0 0 8px;padding:.625rem .875rem;background:var(--ae-gd-panel);border-left:3px solid var(--ae-gd-gold)}
 .ae-gd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px;margin:0;padding:0;list-style:none}
+@media (min-width:1280px){.ae-gd-browse .ae-gd-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .ae-gd-tile{display:flex;flex-direction:column;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-line);border-radius:10px;overflow:hidden;
   transition:border-color .2s ease,transform .2s ease}
 .ae-gd-tile:hover{border-color:var(--ae-gd-gold-line);transform:translateY(-2px)}
@@ -1977,7 +1978,6 @@ html body.aetherium-page .ae-gd-btn:focus-visible:not(#ae-g1):not(#ae-g2):not(#a
 .ae-gd-step strong{font:400 20px/1.25 var(--ae-gd-display)}
 .ae-gd-step:is(:hover,:focus-visible) strong{color:var(--ae-gd-gold)}
 .ae-gd-step small{font-size:15px;line-height:1.5;color:var(--ae-gd-muted)}
-.ae-gd .ae-gd-note-line{margin:72px 0 0;font-size:14px;color:var(--ae-gd-muted)}
 /* The page footer on Guide pages: quiet lines, the official site link the only way out. */
 body.aetherium-page[data-ae-page="guide"] .ae-footer{max-width:1240px;width:100%;box-sizing:border-box;margin:0 auto;padding:28px 32px;border-top:1px solid var(--ae-gd-line-soft);color:var(--ae-gd-muted)}
 body.aetherium-page[data-ae-page="guide"] .ae-footer p{max-width:none}
@@ -2003,7 +2003,6 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
   .ae-gd-steps::before{left:27px;right:auto;top:27px;bottom:27px;width:1px;height:auto}
   .ae-gd .ae-gd-step{display:grid;grid-template-columns:54px minmax(0,1fr);gap:4px 16px;align-items:start}
   .ae-gd-step-n{grid-row:1/3}
-  .ae-gd .ae-gd-note-line{margin-top:48px}
   body.aetherium-page[data-ae-page="guide"] .ae-footer{padding:24px var(--ae-gutter)}
 }
 @media (prefers-reduced-motion:reduce){.ae-gd-tile,.ae-gd-tile:hover{transition:none;transform:none}}

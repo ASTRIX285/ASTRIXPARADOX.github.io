@@ -117,7 +117,8 @@ await check('shell contract: the photo band, the side menu with this page lit, n
   assert.equal(await page.$eval('#aeScreenTitle',el=>el.tagName),'H1');
   assert.equal(await plain(page,'.ae-gd-kicker'),'AION 2 Guide');
   assert.equal(await page.$eval('.ae-gd-kicker',el=>getComputedStyle(el).color),GOLD,'The kicker is gold');
-  const hero=await page.$eval('.ae-gd-hero-img',img=>({src:img.getAttribute('src'),alt:img.alt,w:img.getAttribute('width'),h:img.getAttribute('height'),loading:img.getAttribute('loading'),priority:img.getAttribute('fetchpriority'),fit:getComputedStyle(img).objectFit}));
+  const hero=await page.$eval('.ae-gd-hero-img',img=>({src:img.getAttribute('src'),alt:img.alt,w:img.getAttribute('width'),h:img.getAttribute('height'),loading:img.getAttribute('loading'),priority:img.getAttribute('fetchpriority'),fit:getComputedStyle(img).objectFit,focus:getComputedStyle(img).objectPosition}));
+  assert.equal(hero.focus,'50% 70%','The home band focus sits low so the floating rock and the sea show');
   assert.equal(hero.src,'/astrix-app/pages/aetherium/images/photos/golden-sea-01.jpg','The home band is the golden sea');
   assert.ok(hero.alt.length>10&&hero.w==='2560'&&hero.h==='1440','The band photo has alt, width and height');
   assert.deepEqual([hero.loading,hero.priority,hero.fit],['eager','high','cover']);
@@ -207,6 +208,13 @@ await check('home: the band and its buttons, a tile per section, the path strip,
   assert.deepEqual(tiles.map(tile=>[tile.id,tile.href]),SECTIONS.slice(1).map(([id,,href])=>[id,href]),'A tile per section, in nav order');
   assert.ok(tiles.every(tile=>tile.emblem),'Every tile has its emblem');
   assert.ok(tiles.every(tile=>tile.border==='1px'),'Tiles are bordered cards');
+  for(const width of [1600,1280]){
+    await page.setViewportSize({width,height:1000});
+    const rows=await page.$$eval('[data-guide-tile]',items=>items.map(li=>Math.round(li.getBoundingClientRect().top)));
+    assert.deepEqual([...new Set(rows)].map(top=>rows.filter(row=>row===top).length),[4,3],`At ${width} the seven tiles sit 4 then 3`);
+  }
+  await page.setViewportSize({width:1600,height:1000});
+  assert.doesNotMatch(await plain(page,'.ae-gd'),/Every fact comes from/,'No sources line on the home');
   assert.equal(await page.locator('.ae-gd-soon-tag').count(),0,'No status tags on the home');
   assert.equal(await page.getAttribute('[data-guide-tile="character"] .ae-gd-topics a','href'),'/hub/aetherium/guide/classes/','Classes topic links to its page');
   assert.equal(await page.locator('.ae-gd-example').count(),0,'No example panel until a real screenshot is set');

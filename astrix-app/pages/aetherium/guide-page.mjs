@@ -93,8 +93,7 @@ function renderHome(linked) {
       <ul class="ae-gd-grid">${GUIDE_SECTIONS.filter(item => item.id !== 'home').map(tileHtml).join('')}</ul>
     </section>
     ${exampleHtml(HOME.exampleShot)}
-    ${pathHtml()}
-    <p class="ae-gd-note-line">Every fact comes from our build data or a cited source.</p>`);
+    ${pathHtml()}`);
 }
 
 function renderCharacter() {
