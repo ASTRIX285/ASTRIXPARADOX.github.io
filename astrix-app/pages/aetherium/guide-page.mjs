@@ -15,24 +15,16 @@ import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, r
  */
 const HOME = Object.freeze({ exampleShot: null });
 
-/* Our own emblems for the section tiles (48 px grid): pale blue lines, one gold accent stroke each. */
-const EMBLEMS = {
-  general: '<path d="M8 12 Q16 9 24 13 Q32 9 40 12 V36 Q32 33 24 37 Q16 33 8 36 Z"/><path d="M24 13 V37" class="is-gold"/>',
-  character: '<path d="M24 30 C18 22 10 20 4 22 C10 26 14 30 18 34 Z"/><path d="M24 30 C30 22 38 20 44 22 C38 26 34 30 30 34 Z"/><circle cx="24" cy="18" r="4" class="is-gold"/>',
-  skills: '<path d="M24 6 L28 20 L42 24 L28 28 L24 42 L20 28 L6 24 L20 20 Z"/><circle cx="24" cy="24" r="3" class="is-gold"/>',
-  equipment: '<path d="M24 6 V34"/><path d="M20 10 L24 6 L28 10"/><path d="M15 30 H33" class="is-gold"/><path d="M24 34 V42"/>',
-  crafting: '<path d="M10 32 H38 L34 38 H14 Z"/><path d="M14 32 Q14 26 22 26 H34 Q38 26 38 32"/><path d="M30 8 L38 16" class="is-gold"/><path d="M34 12 L24 22" class="is-gold"/>',
-  world: '<circle cx="24" cy="24" r="16"/><path d="M24 11 L28 24 L24 37 L20 24 Z" class="is-gold"/>',
-  guides: '<path d="M14 42 V6"/><path d="M14 8 H36 L32 14 L36 20 H14" class="is-gold"/><path d="M8 42 H20"/>'
-};
-const emblem = id => `<svg class="ae-gd-emblem" viewBox="0 0 48 48" width="60" height="60" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${EMBLEMS[id] ?? ''}</svg>`;
+/* Each section's rendered icon, 256 px square, shown at 120 px (96 px on a phone). The tile title names it, so alt is empty. */
+const SECTION_ICONS = '/astrix-app/pages/aetherium/images/section-icons/';
+const sectionIcon = id => `<img class="ae-gd-tile-icon" src="${SECTION_ICONS}${esc(id)}.png" alt="" width="120" height="120" loading="lazy" decoding="async">`;
 
 /** A gold diamond and the heading, as every section of the Guide opens. */
 const h2 = (id, text) => `<h2 class="ae-gd-h2" id="${esc(id)}">${esc(text)}</h2>`;
 
 function tileHtml(item) {
-  return `<li class="ae-gd-tile" data-guide-tile="${esc(item.id)}">
-      <div class="ae-gd-tile-art">${emblem(item.id)}</div>
+  return `<li class="ae-gd-tile is-section" data-guide-tile="${esc(item.id)}">
+      ${sectionIcon(item.id)}
       <div class="ae-gd-tile-copy">
         <h3 class="ae-gd-tile-name"><a class="ae-gd-tile-head" href="${esc(item.href)}">${esc(item.label)}</a></h3>
         <p class="ae-gd-tile-blurb">${esc(item.blurb)}</p>
