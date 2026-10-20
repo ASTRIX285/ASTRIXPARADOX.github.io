@@ -50,8 +50,9 @@ const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 
 const CLASSES=['Gladiator','Templar','Assassin','Ranger','Sorcerer','Spiritmaster','Cleric','Chanter'];
 const SECTIONS=[['home','Home','/hub/aetherium/guide/'],['general','General','/hub/aetherium/guide/general/'],['character','Character','/hub/aetherium/guide/character/'],['skills','Skills','/hub/aetherium/guide/skills/'],['equipment','Equipment','/hub/aetherium/guide/equipment/'],['crafting','Crafting','/hub/aetherium/guide/crafting/'],['world','World','/hub/aetherium/guide/world/'],['guides','Guides','/hub/aetherium/guide/guides/']];
-// Sections still coming soon: phases 3 to 5 built Equipment, Crafting, General, Skills and World.
-const SOON=['guides'];
+// Sections still coming soon: phases 3 to 5 built Equipment, Crafting, General, Skills and World; the Guides Overview
+// (design/aetherium-guide-overviews) lists the guides written so far.
+const SOON=[];
 const ROLES=['tank','healer','support','dps'];
 const GOLD='rgb(226, 181, 79)';
 const builds=Object.fromEntries(await Promise.all(CLASSES.map(async name=>[name,(await json(`astrix-app/games/aion2/data/advisor/builds/${name.toLowerCase()}.json`)).records])));
@@ -130,7 +131,7 @@ await check('shell contract: the photo band, the side menu with this page lit, n
   // The module API the sections use.
   const api=await page.evaluate(async()=>{const shell=await import('/astrix-app/pages/aetherium/guide-shell.mjs');const advisor=await import('/astrix-app/games/aion2/engine/ascent-advisor.mjs');
     return {exports:Object.keys(shell).sort(),classes:[...shell.GUIDE_CLASSES],advisor:[...advisor.AION2_CLASSES],href:shell.guideHref('world'),cls:shell.classHref('Spiritmaster'),sections:shell.GUIDE_SECTIONS.map(item=>[item.id,item.label,item.href]),heroes:shell.GUIDE_SECTIONS.map(item=>item.hero.src.split('/').pop())};});
-  for(const name of ['GUIDE_CLASSES','GUIDE_ROOT','GUIDE_SECTIONS','classHref','comingSoonHtml','guideHref','renderGuideShell','startGuidePage'])assert.ok(api.exports.includes(name),`guide-shell exports ${name}`);
+  for(const name of ['GUIDE_CLASSES','GUIDE_ROOT','GUIDE_SECTIONS','TOPIC_ICONS','classHref','comingSoonHtml','guideHref','overviewHtml','renderGuideShell','startGuidePage'])assert.ok(api.exports.includes(name),`guide-shell exports ${name}`);
   assert.deepEqual(api.classes,api.advisor,'GUIDE_CLASSES matches the advisor class list');
   assert.deepEqual(api.sections,SECTIONS,'Eight sections in order, each with its page');
   assert.deepEqual(api.heroes,['golden-sea-01.jpg',...Array(7).fill('atreia-vista-01.jpg')],'Home has the golden sea, every section the vista');
@@ -523,6 +524,82 @@ for(const [width,scale] of [[1600,{h1:64,section:40,card:28}],[390,{h1:42,sectio
       for(const el of found.titleFace)assert.ok(el.size>=24,`${path}: the title face only at 24px and up ("${el.text}" ${el.size}px)`);
       if(path==='/hub/aetherium/guide/'&&width===390)assert.equal(await page.$eval('.ae-gd-tile-icon',img=>img.getBoundingClientRect().width),96,'Tile icons 96px on a phone');
       await context.close();
+    }
+  });
+}
+
+// Section Overviews (design/aetherium-guide-overviews, 20 Oct 2026): one card style on every section's Overview, the whole
+// card a link, the first card across both columns with a 96px icon, the rest 72px, icon on the left (on top on a phone), an
+// ivory hairline and no notch, gold edge and cyan glow on hover. Icons are our PNGs or real CDN game icons, never drawn SVG.
+const OVERVIEWS=[
+  ['general','/hub/aetherium/guide/general/',['about','resets','market','controls','loadouts','faq'],{about:'art',resets:'art',market:'art',controls:'art',loadouts:'art',faq:'art'}],
+  ['character','/hub/aetherium/guide/character/',['classes','stats','daevanion'],{classes:'art',stats:'art'}],
+  ['skills','/hub/aetherium/guide/skills/',['by-class','mastery','specialty','skill-bar'],{'by-class':'game',mastery:'game',specialty:'game','skill-bar':'game'}],
+  ['equipment','/hub/aetherium/guide/equipment/',['slots','enhancement','manastones','theostones','arcana','pets-wings','titles','where-to-get'],{slots:'game',manastones:'game','pets-wings':'game'}],
+  ['crafting','/hub/aetherium/guide/crafting/',['professions','gathering','crafted-gear'],{}],
+  ['world','/hub/aetherium/guide/world/',['zones','sealed','abyss','rift','events'],{}],
+  ['guides','/hub/aetherium/guide/guides/',['path','dungeons','weekly'],{}]
+];
+for(const width of [1600,390]){
+  await check(`section Overviews at ${width}: one card style, real icons, start card across both columns, no notch`,async()=>{
+    for(const [section,path,ids,icons] of OVERVIEWS){
+      const {page,context,errors}=await open(path,{viewport:{width,height:width===390?844:1000}});
+      try{
+        assert.deepEqual(errors,[],`${path}: no page errors`);
+        assert.equal(await page.locator(`[data-guide-overview="${section}"]`).count(),1,`${path}: one Overview`);
+        const report=await page.$eval(`[data-guide-overview="${section}"]`,list=>{
+          const grid=list.getBoundingClientRect();
+          return [...list.querySelectorAll(':scope > .ae-gd-ocard')].map(card=>{
+            const link=card.querySelector(':scope > a.ae-gd-ocard-link');
+            const icon=card.querySelector('.ae-gd-ocard-icon');
+            const title=card.querySelector('.ae-gd-ocard-title');
+            const style=getComputedStyle(link);
+            const box=card.getBoundingClientRect(),iconBox=icon?.getBoundingClientRect(),titleBox=title.getBoundingClientRect();
+            return {id:card.dataset.guideTopic,href:link?.getAttribute('href'),kids:card.children.length,start:card.classList.contains('is-start'),
+              share:box.width/grid.width,clip:style.clipPath,edge:style.borderTopColor,bg:style.backgroundColor,
+              icon:icon?(icon.classList.contains('is-art')?'art':'game'):null,iconSize:iconBox?Math.round(iconBox.width):0,
+              iconLeft:iconBox?iconBox.right<=titleBox.left+1:null,iconAbove:iconBox?iconBox.bottom<=titleBox.top+1:null,
+              src:icon?.querySelector('img')?.getAttribute('src')??null,svg:card.querySelectorAll('svg').length,
+              titleSize:parseFloat(getComputedStyle(title).fontSize),titleFont:getComputedStyle(title).fontFamily,
+              wide:box.right>document.documentElement.clientWidth+1};
+          });
+        });
+        assert.deepEqual(report.map(card=>card.id),ids,`${path}: the topics in order, nothing unwritten`);
+        for(const [index,card] of report.entries()){
+          assert.equal(card.kids,1,`${card.id}: the whole card is one link`);
+          assert.ok(card.href,`${card.id}: links somewhere`);
+          assert.equal(card.start,index===0,`${card.id}: only the first card is start here`);
+          assert.equal(card.clip,'none',`${card.id}: no notched corner`);
+          assert.equal(card.edge,'rgba(217, 210, 192, 0.35)',`${card.id}: ivory hairline`);
+          assert.equal(card.bg,'rgb(19, 28, 41)',`${card.id}: the Guide panel`);
+          assert.equal(card.svg,0,`${card.id}: no drawn icon`);
+          assert.equal(card.icon,icons[card.id]??null,`${card.id}: ${icons[card.id]??'no'} icon`);
+          if(card.icon){
+            assert.equal(card.iconSize,index===0?96:72,`${card.id}: icon size`);
+            assert.ok(card.icon==='art'?card.src.startsWith('/astrix-app/pages/aetherium/images/'):card.src.startsWith('https://assets.playnccdn.com/static-aion2-gamedata/resources/'),`${card.id}: our PNG or a CDN game icon`);
+            assert.ok(width===390?card.iconAbove:card.iconLeft,`${card.id}: icon ${width===390?'on top':'on the left'}`);
+          }
+          assert.equal(card.titleSize,width===390?24:28,`${card.id}: card title size`);
+          assert.match(card.titleFont,/fairy-tale-jf/,`${card.id}: title face`);
+          assert.ok(!card.wide,`${card.id}: inside the viewport`);
+          if(width===1600)assert.ok(index===0?card.share>0.98:card.share<0.55,`${card.id}: ${index===0?'across both columns':'one column'}`);
+          else assert.ok(card.share>0.98,`${card.id}: one column on a phone`);
+        }
+        if(width===1600){
+          const link=page.locator(`[data-guide-overview="${section}"] .ae-gd-ocard-link`).nth(1);
+          await link.hover();
+          await page.waitForTimeout(260);
+          const hover=await link.evaluate(node=>({edge:getComputedStyle(node).borderTopColor,glow:getComputedStyle(node).boxShadow}));
+          assert.equal(hover.edge,GOLD,`${path}: gold edge on hover`);
+          assert.match(hover.glow,/rgba\(95, 216, 234, 0\.25\)/,`${path}: soft cyan glow on hover`);
+        }
+        if(section==='character'){
+          assert.equal(await page.getAttribute('[data-guide-topic="stats"] a','href'),'/hub/aetherium/ascent/stats/','Stats opens the Ascent Plan');
+          assert.equal(await page.getAttribute('[data-guide-topic="daevanion"] a','href'),'/hub/aetherium/ascent/daevanion/','Daevanion opens the Ascent Plan');
+          assert.ok(!/Coming soon/i.test(await page.textContent('#aeGuideBody')),'No coming soon cards');
+        }
+        assert.ok(!/[–—]/.test(await page.textContent('#aeGuideBody')),`${path}: no en or em dash`);
+      }finally{await context.close();}
     }
   });
 }

@@ -121,7 +121,7 @@ try {
       if(report.facts){assert.ok(report.radius>=12,`${id}: rounded cylinder cards`);assert.match(report.gradient,/linear-gradient/,`${id}: lit card`);}
       assert.ok(!DASH.test(report.text),`${id}: no en or em dash`);
       if(id==='general'){
-        const boxes=await page.locator('.ae-gg-tile').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().toJSON()));
+        const boxes=await page.locator('.ae-gd-ocard').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().toJSON()));
         assert.equal(boxes.length,6,'Six General pages');
         for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
           const a=boxes[i],b=boxes[j];

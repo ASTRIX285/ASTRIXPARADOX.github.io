@@ -114,7 +114,7 @@ for(const [section,id,path,title] of PAGES){
           const colour=await page.$eval(`[data-guide-topic-link="${id}"]`,node=>getComputedStyle(node).color);
           assert.notEqual(colour,await page.$eval(`[data-guide-topic-link]:not([aria-current])`,node=>getComputedStyle(node).color),'The lit pill looks different');
         }
-        else assert.ok(await page.locator('.ae-gx-tile').count()>=3,'Topic tiles');
+        else assert.ok(await page.locator('.ae-gd-ocard').count()>=3,'Topic cards');
         if(id!=='where-to-get'&&id!=='home'&&id!=='titles')assert.equal(await page.locator('[data-status-tag]').count(),0,'No status tags on facts');
         const {scroll,wide}=await noSideScroll(page);
         assert.ok(scroll<=0,`No horizontal scroll (${scroll}px)`);
@@ -136,8 +136,8 @@ await check('Equipment home: the Expedition drop table (6 dungeons, 2 gear group
     assert.equal(await page.locator('#aeDropTable tbody tr').count(),12);
     assert.match(await page.textContent('[data-drop="fire-temple:weapon"]'),/Fire Temple\s*Weapon\s*Unique\s*86\s*Lv 45, 2,100\+/);
     assert.equal(await page.getAttribute('[data-where-link]','href'),'/hub/aetherium/guide/equipment/where-to-get/');
-    const box=await page.$eval('.ae-gx-tile a',node=>{const style=getComputedStyle(node);return {clip:style.clipPath,shadow:style.boxShadow};});
-    assert.notEqual(box.clip,'none','Tiles keep the notch');assert.notEqual(box.shadow,'none','Tiles keep the bevel');
+    // The Overview cards are clean panels (design/aetherium-guide-overviews): no notch.
+    assert.equal(await page.$eval('.ae-gd-ocard-link',node=>getComputedStyle(node).clipPath),'none','Cards have no notch');
   }finally{await context.close();}
 });
 

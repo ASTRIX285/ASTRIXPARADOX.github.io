@@ -10,7 +10,7 @@
  */
 import { $, esc } from './aetherium-ui.mjs';
 import { getMemory, memoryAge } from './aetherium-memory.mjs';
-import { GUIDE_ROOT, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { GUIDE_ROOT, overviewHtml as topicCardsHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 import { GUIDE_DUNGEONS_ROOT, countdown, dungeonHref, dungeonRecords, entryCheck, findDungeon, lootFor, nextReset, overviewRows, playersText, resetList } from '/astrix-app/games/aion2/engine/dungeon-guide.mjs';
 
 const DATA = '/astrix-app/games/aion2/data/advisor/';
@@ -317,6 +317,15 @@ function weeklyHtml(data) {
 
 /* ---------- World ---------- */
 
+/** The World Overview cards: each part of this page, and the Sealed Dungeons page. */
+const WORLD_TOPICS = [
+  { id: 'zones', label: 'Zones', href: '#aeWorld-zone', blurb: 'The zones you level through.' },
+  { id: 'sealed', label: 'Sealed Dungeons and Strongholds', href: `${GUIDE_ROOT}dungeons/sealed-dungeons/`, blurb: 'The question marks on your map.' },
+  { id: 'abyss', label: 'The Abyss', href: '#aeWorld-abyss', blurb: 'Where the two factions meet.' },
+  { id: 'rift', label: 'Crossing to the other faction', href: '#aeWorld-rift', blurb: 'The Spacetime Rift.' },
+  { id: 'events', label: 'Events', href: '#aeWorld-event', blurb: 'The Shugo Festival and the other timed events.' }
+];
+
 const WORLD_GROUPS = [
   { kind: 'zone', title: 'Zones' },
   { kind: 'exploration', title: 'Sealed Dungeons and Strongholds' },
@@ -328,6 +337,7 @@ const WORLD_GROUPS = [
 function worldHtml(world, data) {
   const records = world.records ?? [];
   return `<p class="ae-gd-lede">Where things are in AION 2: the zones, the Abyss, the exploration spots on the map and the timed events.</p>
+    ${topicCardsHtml('world', WORLD_TOPICS)}
     ${WORLD_GROUPS.map(group => {
       const list = records.filter(record => record.kind === group.kind);
       if (!list.length) return '';
