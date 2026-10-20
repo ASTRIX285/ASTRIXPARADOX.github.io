@@ -1,5 +1,4 @@
 # design/aetherium-guide-hotfix-text: Guide hotfix, three broken text lines on the Crafting pages. Text only.
-.scope/design/aetherium-guide-hotfix-text.txt
 astrix-app/games/aion2/data/advisor/equipment-guide.json
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/guide-equipment.mjs
