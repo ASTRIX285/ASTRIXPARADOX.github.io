@@ -93,7 +93,7 @@ for(const width of [1440,390]){
       assert.match(goal,/True Dragon Lord \(Elyos\), Star Dragon Lord \(Asmodian\)/);
       assert.match(goal,/Bow item level\s*62/);assert.match(goal,/Splendent\s*70/);
       assert.equal(await page.locator('[data-craft-step]').count(),3);
-      assert.ok(await page.locator('.ae-gx-tile').count()>=3,'Topic tiles stay');
+      assert.equal(await page.locator('.ae-gd-ocard').count(),3,'The shared Overview cards stay');
       await common(page,errors,width,'home');
     }finally{await context.close();}
   });
