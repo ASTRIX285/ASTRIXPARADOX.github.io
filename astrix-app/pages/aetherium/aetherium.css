@@ -2536,3 +2536,160 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-ocard-title{font:400 var
   .ae-gd .ae-gd-ocard-link,.ae-gd .ae-gd-ocard.is-start .ae-gd-ocard-link{flex-direction:column;align-items:flex-start;gap:14px;min-height:0;padding:18px 18px 20px}
 }
 @media (prefers-reduced-motion:reduce){.ae-gd .ae-gd-ocard-link,.ae-gd .ae-gd-ocard-title{transition:none}}
+
+/* ==========================================================================================================================
+   The Guide's Crafting pages (design/aetherium-guide-crafting, 20 Oct 2026), drawn by guide-crafting.mjs: tips, the end goal,
+   profession cards, the proficiency bar, the craft rules as key facts, material cards, the quality row and the vertical
+   crafted gear ladder. Every box takes the Overview card base (design/aetherium-guide-overviews): the Guide panel, an ivory
+   hairline and 10px corners. Sizes are the type scale tokens (--ae-gd-fs-*): card titles are h3 (the scale's card role,
+   title face), tip titles and in-card labels are h4 (the sub heading role).
+   ========================================================================================================================== */
+.ae-gc-block ul,.ae-gc-block ol{margin:0;padding:0;list-style:none}
+.ae-gc-block p{margin:0}
+:is(.ae-gc-tip,.ae-gc-goal,.ae-gc-prof,.ae-gc-mat,.ae-gc-key,.ae-gc-rung,.ae-gc-quality li,.ae-gc-picks li,.ae-gc-bar-seg,.ae-gc-bar-open){
+  box-sizing:border-box;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-ivory);border-radius:10px}
+.ae-gc-lede,.ae-gc-tip p,.ae-gc-numbered p,.ae-gc-picks p,.ae-gc-bar-text,.ae-gc-goal-names,.ae-gc-refines,.ae-gc-use{
+  max-width:var(--ae-gd-measure);font-size:var(--ae-gd-fs-body);line-height:var(--ae-gd-lh-body);color:var(--ae-gd-ink-soft);overflow-wrap:anywhere}
+.ae-gc-note{max-width:var(--ae-gd-measure);font:400 var(--ae-gd-fs-small)/1.5 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-gc-art{display:block;width:100%;height:100%;object-fit:contain}
+.ae-gc-num{display:inline-flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;box-sizing:border-box;border-radius:50%;
+  border:1px solid var(--ae-gd-gold-line);color:var(--ae-gd-gold);font:700 var(--ae-gd-fs-small)/1 var(--ae-gd-display)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-gc-h4{margin:14px 0 6px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-gc-tip-title{margin:0 0 6px;color:var(--ae-gd-ink)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-gc-tip.is-gold .ae-gc-tip-title{color:var(--ae-gd-gold)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gc-card-title{margin:0}
+
+/* Tips: an icon, a short title and the fact. The gold one stands out. */
+.ae-gc-tips{display:grid;gap:16px}
+.ae-gc-tips.is-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.ae-gc-tip{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:20px 24px;border-left:3px solid var(--ae-gd-line-strong)}
+.ae-gc-tip:not(:has(.ae-gc-tip-icon)){grid-template-columns:minmax(0,1fr)}
+.ae-gc-tip.is-gold{border-color:var(--ae-gd-gold-line);border-left-color:var(--ae-gd-gold);box-shadow:0 0 24px var(--ae-gd-gold-glow) inset}
+.ae-gc-tip-icon{display:block;width:64px;height:64px}
+.ae-gc-tip-icon .ae-gtile{width:64px;height:64px}
+#aeProf .ae-gc-tip{margin-top:20px}
+
+/* Soul Binding lines: a lit marker per line, an outline for the line a drop may or may not have. */
+.ae-gc-binding{display:grid;gap:8px;margin-top:14px}
+.ae-gc-lines{display:grid;grid-template-columns:minmax(0,170px) auto auto;gap:12px;align-items:center;justify-content:start}
+.ae-gc-lines-label{font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-gc-lines b{font:700 var(--ae-gd-fs-small)/1 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gc-marks{display:flex;gap:8px}
+.ae-gc-mark{display:block;width:14px;height:14px;transform:rotate(45deg);border:1.5px solid var(--ae-gd-line-mid)}
+.ae-gc-mark.is-on{background:var(--ae-gd-gold);border-color:var(--ae-gd-gold);box-shadow:0 0 8px var(--ae-gd-gold-glow)}
+.ae-gc-mark.is-maybe{border-color:var(--ae-gd-gold);border-style:dashed}
+
+/* The end goal: the Dragon Lord piece on its grade edge. */
+.ae-gc-goal{--ae-g:var(--ae-gd-line-strong);display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center;max-width:760px;padding:22px 24px;border-left:3px solid var(--ae-g)}
+.ae-gc-goal[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-gc-goal:not(:has(.ae-gtile)){grid-template-columns:minmax(0,1fr)}
+.ae-gc-goal .ae-gtile{width:80px;height:80px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gc-goal .ae-gc-card-title{color:var(--ae-g)}
+.ae-gc-goal-names{margin-top:4px!important}
+.ae-gc-stats{display:flex;flex-wrap:wrap;gap:10px 28px;margin:16px 0 0}
+.ae-gc-stats div{display:grid;gap:2px}
+.ae-gc-stats dt{font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-gc-stats dd{margin:0;font:700 20px/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gc-path{margin-top:8px}
+
+/* Profession and material cards. */
+.ae-gc-profs,.ae-gc-mats{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:20px;margin-top:20px!important}
+.ae-gc-prof,.ae-gc-mat{display:flex;flex-direction:column;padding:20px 24px}
+.ae-gc-prof-icon{display:block;margin-bottom:12px}
+.ae-gc-prof-icon .ae-gtile{width:64px;height:64px}
+.ae-gc-makes{display:flex!important;flex-wrap:wrap;gap:6px}
+.ae-gc-makes .ae-gtile{width:40px;height:40px}
+.ae-gc-chip{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:2px 10px;border:1px solid var(--ae-gd-line-mid);border-radius:6px;background:var(--ae-gd-raised);
+  font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-gc-chip .ae-gtile{width:24px;height:24px}
+
+/* Proficiency: Lv 10, Novice 1 to 50, the promotion quest, then 51 to 100. */
+.ae-gc-bar{margin:4px 0 0;max-width:860px}
+.ae-gc-bar-track{display:flex;gap:4px;padding-top:44px}
+.ae-gc-bar-open{display:grid;align-content:center;gap:2px;flex:none;padding:12px 14px;border-top:6px solid var(--ae-gd-ink-soft);background:var(--ae-gd-raised)}
+.ae-gc-bar-segs{position:relative;display:flex;flex:1;gap:4px;min-width:0}
+.ae-gc-bar-seg{display:grid;gap:2px;padding:12px 14px;border-top:6px solid var(--ae-gd-line-mid)}
+.ae-gc-bar-seg.is-novice{border-top-color:var(--ae-gd-link)}
+.ae-gc-bar-seg.is-pro{border-top-color:var(--ae-gd-gold)}
+.ae-gc-bar-seg b,.ae-gc-bar-open b{font:600 var(--ae-gd-fs-sub)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gc-bar-seg small,.ae-gc-bar-open small{font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-gc-bar-promo{position:absolute;top:-44px;display:flex;flex-direction:column-reverse;align-items:center;gap:6px;transform:translateX(-50%);white-space:nowrap}
+.ae-gc-bar-promo i{display:block;width:14px;height:14px;transform:rotate(45deg);background:var(--ae-gd-gold);box-shadow:0 0 10px var(--ae-gd-gold-glow)}
+.ae-gc-bar-promo b{font:600 var(--ae-gd-fs-small)/1 var(--ae-gd-display);color:var(--ae-gd-gold)}
+.ae-gc-bar-text{margin-top:12px!important}
+
+/* How a craft works: numbered steps beside the craft window screenshot (when there is one), then the key facts. */
+.ae-gc-how{display:grid;gap:24px;margin-bottom:20px}
+.ae-gc-how.has-shot{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}
+.ae-gc-numbered{display:grid;gap:16px}
+.ae-gc-numbered li{display:flex;gap:14px;align-items:flex-start}
+.ae-gc-numbered p{padding-top:4px}
+.ae-gc-shot{margin:0}
+.ae-gc-shot img{display:block;width:100%;height:auto;border:1px solid var(--ae-gd-ivory);border-radius:10px}
+.ae-gc-keys{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ae-gc-key{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-top:3px solid var(--ae-gd-line-strong)}
+.ae-gc-key:is([data-key="fail"],[data-key="hit"]){border-top-color:var(--ae-grade-mythic)}
+.ae-gc-key:is([data-key="core"],[data-key="combo"]){border-top-color:var(--ae-gd-gold)}
+.ae-gc-key-lead{font:600 var(--ae-gd-fs-sub)/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gc-key p{font-size:16px;line-height:1.55;color:var(--ae-gd-ink-soft)}
+.ae-gc-combo{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:6px}
+.ae-gc-combo-item{display:grid;gap:2px;padding:8px 10px;border:1px solid var(--ae-gd-line-mid);border-radius:6px;background:var(--ae-gd-raised);font:600 var(--ae-gd-fs-small)/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gc-combo-item.is-up{border-color:var(--ae-gd-gold);color:var(--ae-gd-gold)}
+.ae-gc-combo-item small{font-weight:400;color:var(--ae-gd-muted)}
+.ae-gc-combo-arrow{font:400 var(--ae-gd-fs-small)/1 var(--ae-gd-display);color:var(--ae-gd-muted)}
+
+/* Short lists of single facts. */
+.ae-gc-picks{display:grid!important;gap:10px;max-width:860px}
+.ae-gc-picks li{padding:12px 16px;border-left:3px solid var(--ae-gd-gold-line)}
+
+/* Material cards: faction tags and the profession each feeds. */
+.ae-gc-mat .ae-gc-shot{margin:-20px -24px 16px}
+.ae-gc-mat-list{display:grid!important;gap:6px;margin-top:12px!important}
+.ae-gc-mat-list li{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ae-gc-mat-list .ae-gtile{width:40px;height:40px}
+.ae-gc-mat-name{font:600 var(--ae-gd-fs-body)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gc-faction{padding:2px 8px;border:1px solid currentColor;border-radius:6px;font:600 12px/1.3 var(--ae-gd-display);letter-spacing:.06em;text-transform:uppercase}
+.ae-gc-faction[data-faction="elyos"]{color:var(--ae-elyos)}
+.ae-gc-faction[data-faction="asmodian"]{color:var(--ae-asmodian-hi)}
+.ae-gc-mat .ae-gc-makes{margin-top:10px!important}
+
+/* The four qualities, in order. */
+.ae-gc-quality{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:760px;margin-bottom:14px!important}
+.ae-gc-quality li{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.ae-gc-quality b{font:600 var(--ae-gd-fs-sub)/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
+#aeGatherQuality .ae-gc-note+.ae-gc-note{margin-top:6px}
+
+/* The crafted gear ladder: the top step first, Base at the bottom, a combo link between steps. */
+.ae-gc-ladder{display:flex!important;flex-direction:column;align-items:stretch;max-width:760px;margin:20px 0 10px!important}
+.ae-gc-rung{--ae-g:var(--ae-gd-line-strong);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 24px;border-left:3px solid var(--ae-g)}
+.ae-gc-rung[data-grade="unique"]{--ae-g:var(--ae-grade-unique);box-shadow:0 0 22px color-mix(in srgb,var(--ae-grade-unique) 18%,transparent)}
+.ae-gc-rung:not(:has(.ae-gtile)){grid-template-columns:minmax(0,1fr) auto}
+.ae-gc-rung .ae-gtile{width:56px;height:56px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gc-rung-name{margin:0}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gc-rung[data-grade] .ae-gc-rung-name{color:var(--ae-g)}
+.ae-gc-rung-name .ae-grade-name{margin-left:6px;font:700 var(--ae-gd-fs-small)/1 var(--ae-gd-display);vertical-align:middle}
+.ae-gc-rung-eg{margin-top:4px!important;font-size:16px;line-height:1.4;color:var(--ae-gd-ink-soft)}
+.ae-gc-rung-meta{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px!important;font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-gc-rung-splendent{display:grid;justify-items:center;gap:2px;min-width:84px;padding:8px 10px;border:1px solid var(--ae-gd-gold-line);border-radius:6px}
+.ae-gc-rung-splendent small{font:400 12px/1.2 var(--ae-gd-display);letter-spacing:.04em;color:var(--ae-gd-muted)}
+.ae-gc-rung-splendent b{font:700 22px/1 var(--ae-gd-display);color:var(--ae-gd-gold)}
+.ae-gc-link{display:flex;align-items:center;gap:10px;padding:8px 0 8px 28px;font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-gold)}
+.ae-gc-link-arrow{position:relative;display:block;width:2px;height:26px;background:var(--ae-gd-gold)}
+.ae-gc-link-arrow::before{content:"";position:absolute;left:-5px;top:-2px;width:8px;height:8px;border-left:2px solid var(--ae-gd-gold);border-top:2px solid var(--ae-gd-gold);transform:rotate(45deg)}
+
+@media (max-width:1180px){.ae-gc-keys{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+  .ae-gc-tip{padding:16px 18px;gap:12px}
+  .ae-gc-tip-icon,.ae-gc-tip-icon .ae-gtile{width:48px;height:48px}
+  .ae-gc-goal,.ae-gc-prof,.ae-gc-mat{padding:18px}
+  .ae-gc-mat .ae-gc-shot{margin:-18px -18px 14px}
+  .ae-gc-how.has-shot{grid-template-columns:minmax(0,1fr)}
+  .ae-gc-lines{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
+  .ae-gc-lines-label{grid-column:1/-1}
+  .ae-gc-quality{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ae-gc-bar-seg,.ae-gc-bar-open{padding:10px}
+  .ae-gc-rung{gap:12px;padding:14px 16px}
+  .ae-gc-rung-splendent{min-width:64px}
+  .ae-gc-link{padding-left:20px}
+}
+@media (max-width:560px){.ae-gc-keys{grid-template-columns:minmax(0,1fr)}}

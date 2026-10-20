@@ -9,6 +9,7 @@
 import { $, esc, gradeTile, number, showNotice, showSource, slotLabel } from './aetherium-ui.mjs';
 import { ArmoryUnavailable, cardUrl, explain, gearPageUrl, loadBuilds, loadCharacter, loadEnhancement, loadGrades, loadProgression, preloadItemDetails, refFromUrl, rolePick, titlesUrl } from './aetherium-data.mjs';
 import { GUIDE_ROOT, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { craftedGearHtml, craftingHomeHtml, gatheringHtml, professionsHtml } from './guide-crafting.mjs';
 import { buildFor, indexGrades, uniqueGearLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { gearSourcePlan, indexGearSources, slotGroupOf } from '/astrix-app/games/aion2/engine/gear-sources.mjs';
 
@@ -116,9 +117,7 @@ async function renderEquipmentHome(linked) {
 async function renderCraftingHome() {
   const body = shell('crafting', null);
   body.insertAdjacentHTML('beforeend', tilesHtml('crafting'));
-  const text = byId(await loadGuideText());
-  const before = text.professions?.facts?.find(item => item.id === 'before-35');
-  if (before) body.insertAdjacentHTML('beforeend', sectionHtml('aeCraftWhy', 'Why craft before Lv 35', `${factsHtml([before])}${factsHtml(text['crafted-ladder']?.facts?.filter(item => item.id === 'dragon-lord'))}`));
+  body.insertAdjacentHTML('beforeend', craftingHomeHtml(byId(await loadGuideText())));
 }
 
 /* ----- Equipment topic pages ----- */
@@ -259,37 +258,15 @@ async function renderTitles(linked) {
       <p class="ae-gx-cta"><a class="ae-btn" href="${esc(titlesUrl(ref))}" data-titles-link>${ref ? 'See your titles' : 'See a Daeva\'s titles'}</a></p>`)}`);
 }
 
-/* ----- Crafting topic pages ----- */
+/* ----- Crafting topic pages (their markup lives in guide-crafting.mjs) ----- */
 
-async function renderProfessions() {
-  const body = shell('crafting', 'professions');
-  const text = byId(await loadGuideText());
-  const record = text.professions;
-  const cards = record.professions.map(item => `<li class="ae-gx-card" data-profession="${esc(item.id)}"><strong>${esc(item.name)}</strong><span><b>Makes:</b> ${esc(item.makes)}</span>${item.refines ? `<span><b>Refines:</b> ${esc(item.refines)}</span>` : ''}</li>`).join('');
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aeProf', 'The five professions', `<p>${esc(record.lede)}</p><ul class="ae-gx-cards">${cards}</ul>${factsHtml(record.facts)}`, statusTag(record.status))}
-    ${sectionHtml('aeCraftRules', 'How a craft works', factsHtml(text['craft-rules'].facts))}
-    ${sectionHtml('aeCraftFirst', 'Which first: what players say', `<p>Players disagree on the order. These are their reasons, not a rule.</p>${factsHtml(record.players.map((item, n) => ({ id: `players-${n + 1}`, ...item })))}`)}`);
-}
-
-async function renderGathering() {
-  const body = shell('crafting', 'gathering');
-  const record = byId(await loadGuideText()).gathering;
-  const rows = record.types.map(type => `<tr><th scope="row">${esc(type.name)}</th><td>${esc(type.examples)}</td><td>${esc(type.usedFor)}</td></tr>`).join('');
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aeGatherTypes', 'What you gather', `<p>${esc(record.lede)}</p><div class="ae-gx-tablewrap"><table class="ae-gx-table"><thead><tr><th scope="col">Type</th><th scope="col">Examples</th><th scope="col">Used for</th></tr></thead><tbody>${rows}</tbody></table></div>${factsHtml([{ id: 'qualities', text: record.qualities.text, status: record.qualities.status }])}`, statusTag(record.status))}
-    ${sectionHtml('aeGatherFacts', 'Nodes, places and skills', factsHtml(record.facts))}`);
-}
-
-async function renderCraftedGear() {
-  const body = shell('crafting', 'crafted-gear');
-  const record = byId(await loadGuideText())['crafted-ladder'];
-  const steps = record.steps.map(step => `<li class="ae-gx-rung" data-rung="${esc(step.name)}"><strong>${esc(step.name)}</strong>${step.example ? `<span>${esc(step.example)}</span>` : ''}<span>${step.proficiency ? `Proficiency ${esc(step.proficiency)}` : 'Transfer crafting'}${step.grade ? `, <span class="ae-grade-name" data-grade="${esc(step.grade.toLowerCase())}">${esc(step.grade)}</span>` : ''}</span><span>Bow item level ${esc(step.bowItemLevel)}</span>${step.status ? statusTag(step.status) : ''}</li>`).join('');
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aeLadder', 'The ladder', `<p>${esc(record.lede)}</p><ol class="ae-gx-ladder">${steps}</ol><p class="ae-gx-note">Steps ${statusTag(record.stepsStatus)} Item levels ${statusTag(record.itemLevelsStatus)}</p>`)}
-    ${sectionHtml('aeLadderFacts', 'What to know', factsHtml(record.facts))}
-    ${sectionHtml('aeLadderNext', 'Then enhance it', `<p>A crafted Dragon Lord piece is Unique, so it follows the Unique steps. <a href="${esc(topicHref('equipment', 'enhancement'))}">What to enhance, and when</a></p>`)}`);
-}
+const craftingPage = (page, html) => async () => {
+  const body = shell('crafting', page);
+  body.insertAdjacentHTML('beforeend', html(byId(await loadGuideText())));
+};
+const renderProfessions = craftingPage('professions', professionsHtml);
+const renderGathering = craftingPage('gathering', gatheringHtml);
+const renderCraftedGear = craftingPage('crafted-gear', craftedGearHtml);
 
 /* ----- Where to get it ----- */
 
