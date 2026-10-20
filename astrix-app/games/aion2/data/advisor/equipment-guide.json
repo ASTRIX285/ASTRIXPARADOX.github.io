@@ -381,11 +381,6 @@
       ],
       "facts": [
         {
-          "id": "names",
-          "text": "Some sites use other names (Weaponsmithing, Tailoring, Jewelcrafting). These are the names in the global client menu.",
-          "status": "disputed"
-        },
-        {
           "id": "free",
           "text": "Crafting is free to use. Membership gates the Market, not crafting.",
           "status": "reported"
@@ -575,11 +570,6 @@
           "status": "confirmed"
         },
         {
-          "id": "unlock",
-          "text": "Whether gathering opens from the start or at Lv 45.",
-          "status": "disputed"
-        },
-        {
           "id": "conversion",
           "text": "Material Conversion turns a higher quality into a lower one, never up.",
           "status": "reported"
@@ -613,13 +603,13 @@
         },
         {
           "name": "Expert's",
-          "example": "Expert's ...",
+          "example": "Expert's Longsword",
           "proficiency": 15,
           "bowItemLevel": "28 (35)"
         },
         {
           "name": "Artisan's",
-          "example": "Artisan's ...",
+          "example": "Artisan's Longsword",
           "proficiency": 30,
           "bowItemLevel": "39 (44)"
         },

@@ -282,7 +282,7 @@ async function renderProfessions() {
   const body = shell('crafting', 'professions');
   const text = byId(await loadGuideText());
   const record = text.professions;
-  const cards = record.professions.map(item => `<li class="ae-gx-card" data-profession="${esc(item.id)}"><strong>${esc(item.name)}</strong><span><b>Makes:</b> ${esc(item.makes)}</span><span><b>Refines:</b> ${esc(item.refines ?? 'nothing')}</span></li>`).join('');
+  const cards = record.professions.map(item => `<li class="ae-gx-card" data-profession="${esc(item.id)}"><strong>${esc(item.name)}</strong><span><b>Makes:</b> ${esc(item.makes)}</span>${item.refines ? `<span><b>Refines:</b> ${esc(item.refines)}</span>` : ''}</li>`).join('');
   body.insertAdjacentHTML('beforeend', `
     ${sectionHtml('aeProf', 'The five professions', `<p>${esc(record.lede)}</p><ul class="ae-gx-cards">${cards}</ul>${factsHtml(record.facts)}`, statusTag(record.status))}
     ${sectionHtml('aeCraftRules', 'How a craft works', factsHtml(text['craft-rules'].facts))}
@@ -301,7 +301,7 @@ async function renderGathering() {
 async function renderCraftedGear() {
   const body = shell('crafting', 'crafted-gear');
   const record = byId(await loadGuideText())['crafted-ladder'];
-  const steps = record.steps.map(step => `<li class="ae-gx-rung" data-rung="${esc(step.name)}"><strong>${esc(step.name)}</strong><span>${esc(step.example)}</span><span>${step.proficiency ? `Proficiency ${esc(step.proficiency)}` : 'Transfer crafting'}${step.grade ? `, <span class="ae-grade-name" data-grade="${esc(step.grade.toLowerCase())}">${esc(step.grade)}</span>` : ''}</span><span>Bow item level ${esc(step.bowItemLevel)}</span>${step.status ? statusTag(step.status) : ''}</li>`).join('');
+  const steps = record.steps.map(step => `<li class="ae-gx-rung" data-rung="${esc(step.name)}"><strong>${esc(step.name)}</strong>${step.example ? `<span>${esc(step.example)}</span>` : ''}<span>${step.proficiency ? `Proficiency ${esc(step.proficiency)}` : 'Transfer crafting'}${step.grade ? `, <span class="ae-grade-name" data-grade="${esc(step.grade.toLowerCase())}">${esc(step.grade)}</span>` : ''}</span><span>Bow item level ${esc(step.bowItemLevel)}</span>${step.status ? statusTag(step.status) : ''}</li>`).join('');
   body.insertAdjacentHTML('beforeend', `
     ${sectionHtml('aeLadder', 'The ladder', `<p>${esc(record.lede)}</p><ol class="ae-gx-ladder">${steps}</ol><p class="ae-gx-note">Steps ${statusTag(record.stepsStatus)} Item levels ${statusTag(record.itemLevelsStatus)}</p>`)}
     ${sectionHtml('aeLadderFacts', 'What to know', factsHtml(record.facts))}
