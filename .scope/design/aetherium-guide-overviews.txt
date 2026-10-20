@@ -1,5 +1,4 @@
 # design/aetherium-guide-overviews: Aetherium Guide 2, section Overview cards with real icons.
-.scope/design/aetherium-guide-overviews.txt
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/aetherium.css
 astrix-app/pages/aetherium/guide-dungeons.mjs
