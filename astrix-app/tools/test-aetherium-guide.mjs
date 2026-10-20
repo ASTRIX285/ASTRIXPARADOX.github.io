@@ -6,7 +6,9 @@
 //   - the Guide link in the ribbon and the menu drawer of every Aetherium page;
 //   - the home: photo band with its gold and navy buttons, a tile per section, the path strip, every link reaches a page;
 //   - the class roles table: 8 rows, class names gold, ratings bold, each cell from the data (a Reported tier cited, else our build);
-//   - the 8 class pages: builds by role, key skills, stat order, Ascent Plan links;
+//   - the class emblems (Character, Classes and every class page): eight buttons, the current class lit;
+//   - the 8 class pages: the class hero (figure, Class label, divider, role tags, gold button), builds by role, key skills,
+//     stat order, Ascent Plan links;
 //   - "Your setup vs the build": flags with what they cost, the read's age, the device memory, never a block; Worker down;
 //   - the memory helper: per Daeva key, savedAt, blocked storage is never an error;
 //   - looks: no sideways scroll at 390, buttons 44px tall, the side menu folds behind a toggle on a phone, usable well inside 4 s;
@@ -131,7 +133,7 @@ await check('shell contract: the photo band, the side menu with this page lit, n
   // The module API the sections use.
   const api=await page.evaluate(async()=>{const shell=await import('/astrix-app/pages/aetherium/guide-shell.mjs');const advisor=await import('/astrix-app/games/aion2/engine/ascent-advisor.mjs');
     return {exports:Object.keys(shell).sort(),classes:[...shell.GUIDE_CLASSES],advisor:[...advisor.AION2_CLASSES],href:shell.guideHref('world'),cls:shell.classHref('Spiritmaster'),sections:shell.GUIDE_SECTIONS.map(item=>[item.id,item.label,item.href]),heroes:shell.GUIDE_SECTIONS.map(item=>item.hero.src.split('/').pop())};});
-  for(const name of ['GUIDE_CLASSES','GUIDE_ROOT','GUIDE_SECTIONS','TOPIC_ICONS','classHref','comingSoonHtml','guideHref','overviewHtml','renderGuideShell','startGuidePage'])assert.ok(api.exports.includes(name),`guide-shell exports ${name}`);
+  for(const name of ['GUIDE_CLASSES','GUIDE_ROOT','GUIDE_SECTIONS','TOPIC_ICONS','classHref','classPickerHtml','comingSoonHtml','guideHref','overviewHtml','renderGuideShell','startGuidePage'])assert.ok(api.exports.includes(name),`guide-shell exports ${name}`);
   assert.deepEqual(api.classes,api.advisor,'GUIDE_CLASSES matches the advisor class list');
   assert.deepEqual(api.sections,SECTIONS,'Eight sections in order, each with its page');
   assert.deepEqual(api.heroes,['golden-sea-01.jpg',...Array(7).fill('atreia-vista-01.jpg')],'Home has the golden sea, every section the vista');
@@ -315,14 +317,10 @@ await check('class roles table: 8 rows in game order, class names gold, ratings 
     assert.equal(rated.status,'reported');
     assert.ok(record.provenance.some(source=>source.ref===rated.ref&&/^https:\/\//.test(source.url)),`${record.class} ${role} cited`);
   }
-  // Gallery, suggestions, choosing.
-  const cards=await page.$$eval('[data-class-gallery] a',links=>links.map(a=>({cls:a.dataset.class,href:a.getAttribute('href'),art:a.querySelector('img')?.src??'',tagline:a.querySelector('.ae-gd-tagline').textContent})));
-  assert.deepEqual(cards.map(card=>card.cls),CLASSES);
-  for(const card of cards){
-    assert.match(card.art,/^https:\/\/assets\.playnccdn\.com\/static-aion2\/characters\/img\/daevanion\/board_icon_start_/,`${card.cls}: the game's own class art`);
-    const main=builds[card.cls].find(build=>build.main);
-    assert.ok(main.summary.startsWith(card.tagline.replace(/\.$/,'')),`${card.cls}: tagline from the build record`);
-  }
+  // The class emblems lead the page; no class is lit here. The key line has no Pending.
+  assert.equal(await page.$eval('[data-class-picker]',ul=>ul.closest('section').previousElementSibling),null,'The emblems come first');
+  await checkPicker(page,null);
+  assert.doesNotMatch(await plain(page,'.ae-gd-key'),/Pending/);
   assert.deepEqual(await page.$$eval('[data-suggest-role]',items=>items.map(li=>li.dataset.suggestRole)),ROLES);
   assert.match(await plain(page,'[data-suggest-role="tank"]'),/Main role for Templar\. Also played by Gladiator\./);
   assert.match(await plain(page,'[data-suggest-role="support"]'),/Main role for Chanter\./);
@@ -330,17 +328,73 @@ await check('class roles table: 8 rows in game order, class names gold, ratings 
   await context.close();
 });
 
-await check('the 8 class pages: overview, its roles row, every build by role with key skills, stat order and Ascent Plan links',async()=>{
+/** The class emblems: eight buttons in game order, each its class page with its rendered emblem; only current is lit. */
+async function checkPicker(page,current){
+  const picks=await page.$$eval('[data-class-picker] a',links=>links.map(a=>({cls:a.dataset.class,href:a.getAttribute('href'),src:a.querySelector('img').getAttribute('src'),text:a.textContent.trim(),current:a.getAttribute('aria-current'),color:getComputedStyle(a).color,border:getComputedStyle(a).borderTopColor,glow:getComputedStyle(a).boxShadow,h:a.getBoundingClientRect().height,img:a.querySelector('img').getBoundingClientRect().width})));
+  assert.deepEqual(picks.map(pick=>pick.cls),CLASSES,'Eight emblems in game order');
+  for(const pick of picks){
+    const slug=pick.cls.toLowerCase();
+    assert.equal(pick.href,`/hub/aetherium/guide/classes/${slug}/`);
+    assert.equal(pick.src,`/astrix-app/pages/aetherium/images/class-emblems/${slug}.png`,`${pick.cls}: the rendered emblem`);
+    assert.equal(pick.text,pick.cls);
+    assert.ok(pick.h>=44&&pick.img>=40,`${pick.cls}: a real button (${pick.h}px, emblem ${pick.img}px)`);
+    if(pick.cls===current){
+      assert.equal(pick.current,'page');
+      assert.equal(pick.color,GOLD,`${pick.cls}: lit gold`);
+      assert.equal(pick.border,GOLD,`${pick.cls}: gold edge`);
+      assert.match(pick.glow,/rgba\(95, 216, 234/,`${pick.cls}: cyan glow`);
+    } else {
+      assert.equal(pick.current,null,`${pick.cls}: not lit`);
+      assert.notEqual(pick.color,GOLD,`${pick.cls}: plain`);
+    }
+  }
+}
+
+await check('the Character page: the class emblems in place of the class pills',async()=>{
+  const {page,context,errors}=await open('/hub/aetherium/guide/character/');
+  assert.deepEqual(errors,[]);
+  assert.equal(await page.locator('.ae-gd-classlinks').count(),0,'No class pill row');
+  await checkPicker(page,null);
+  await context.close();
+});
+
+const ACCENT={Gladiator:'rgb(159, 191, 232)',Templar:'rgb(224, 188, 98)',Assassin:'rgb(224, 106, 122)',Ranger:'rgb(159, 207, 151)',Sorcerer:'rgb(185, 147, 240)',Spiritmaster:'rgb(234, 219, 152)',Cleric:'rgb(227, 154, 98)',Chanter:'rgb(115, 194, 154)'};
+await check('the 8 class pages: the class hero, every build by role with key skills, stat order and Ascent Plan links, the emblems',async()=>{
   for(const name of CLASSES){
     const slug=name.toLowerCase();
     const {page,context,errors,calls}=await open(`/hub/aetherium/guide/classes/${slug}/`);
     assert.deepEqual(errors,[],`${name}: no page errors`);
     assert.deepEqual(calls,[],`${name}: no Daeva linked, no call to the official site`);
     assert.equal(await plain(page,'#aeScreenTitle'),name);
-    assert.equal(await plain(page,'.ae-gd-kicker'),'Character');
+    assert.equal(await plain(page,'.ae-gd-kicker'),'Class');
+    assert.equal(await page.$eval('.ae-gd-kicker',el=>getComputedStyle(el).color),'rgb(95, 216, 234)','Class label in cyan');
     assert.deepEqual(await page.$$eval('[data-guide-side-pages] a',links=>links.map(a=>[a.textContent,a.getAttribute('aria-current')])),[['Overview',null],['Classes',null],[name,'page']],`${name}: lit in the side menu`);
-    assert.deepEqual(await page.$$eval('[data-roles-table] tbody tr',rows=>rows.map(tr=>tr.dataset.class)),[name],`${name}: its own row`);
     const records=builds[name];
+    const main=records.find(build=>build.main);
+    // The hero: the class figure left of the words, the divider diamond and role tags in the class accent, the gold button.
+    const hero=await page.evaluate(()=>{const fig=document.querySelector('.ae-gd-figure-img'),copy=document.querySelector('.ae-gd-hero.is-class .ae-gd-hero-copy'),r=el=>el.getBoundingClientRect();
+      return {src:fig.getAttribute('src'),alt:fig.alt,w:fig.getAttribute('width'),h:fig.getAttribute('height'),figW:r(fig).width,figRight:r(fig).right,copyLeft:r(copy).left,mask:getComputedStyle(fig).maskImage||getComputedStyle(fig).webkitMaskImage,
+        diamond:getComputedStyle(document.querySelector('.ae-gd-divider'),'::after').backgroundColor,
+        tags:[...document.querySelectorAll('.ae-gd-roletags li')].map(li=>({role:li.dataset.roleTag,text:li.textContent,color:getComputedStyle(li).color})),
+        lede:document.querySelector('.ae-gd-hero .ae-gd-lede').textContent};});
+    assert.equal(hero.src,`/astrix-app/pages/aetherium/images/class-figures/${slug}.jpg`,`${name}: its class figure`);
+    assert.ok(hero.alt.includes(name)&&hero.w==='1100'&&Number(hero.h)>900,`${name}: figure alt, width and height`);
+    assert.ok(hero.figW>=400,`${name}: the figure is large (${hero.figW}px)`);
+    assert.ok(hero.figRight<=hero.copyLeft+1,`${name}: figure on the left, words on the right`);
+    assert.match(hero.mask,/linear-gradient/,`${name}: the figure fades into the page`);
+    assert.equal(hero.diamond,ACCENT[name],`${name}: divider diamond in the class accent`);
+    assert.equal(hero.lede,main.summary,`${name}: the main build's summary`);
+    const sorted=[...records].sort((a,b)=>Number(b.main)-Number(a.main)||ROLES.indexOf(a.role)-ROLES.indexOf(b.role));
+    const record=ratings.records.find(item=>item.class===name);
+    assert.deepEqual(hero.tags.map(tag=>tag.text),sorted.map(build=>{const rated=record.ratings[build.role];return `${{tank:'Tank',healer:'Healer',support:'Support',dps:'DPS'}[build.role]}${rated&&!rated.pending?` · ${rated.rating}`:''}`;}),`${name}: a role tag per build, tier from the ratings record`);
+    assert.ok(hero.tags.every(tag=>tag.color===ACCENT[name]),`${name}: role tags in the class accent`);
+    const cta=await page.$eval('[data-guide-cta="build"]',a=>({href:a.getAttribute('href'),bg:getComputedStyle(a).backgroundColor,text:a.textContent}));
+    assert.deepEqual(cta,{href:`/hub/aetherium/ascent/?class=${slug}&role=${main.role}`,bg:'rgb(233, 194, 79)',text:`Open the ${name} build`},`${name}: the solid gold button to its build`);
+    assert.equal(await page.locator('.ae-gd-hero.is-class .ae-gd-btn.is-gold,#aeGuideBody .ae-gd-btn.is-gold').count(),1,`${name}: one main action`);
+    // Gone: the roles row and its key, the overview and its emblem tile. The main summary shows once.
+    assert.equal(await page.locator('[data-roles-table],.ae-gd-key,.ae-gd-overview,.ae-gd-overview-art').count(),0,`${name}: no roles table, key or overview`);
+    assert.equal((await page.textContent('#aeStage')).split(main.summary).length-1,1,`${name}: the summary once`);
+    await checkPicker(page,name);
     const shown=await page.$$eval('[data-build]',items=>items.map(el=>el.dataset.build));
     assert.deepEqual([...shown].sort(),records.map(build=>build.id).sort(),`${name}: every build`);
     assert.equal(shown[0],records.find(build=>build.main).id,`${name}: the main build first`);
@@ -396,7 +450,9 @@ await check('your setup vs the build: flags with what they cost, the read\'s age
   // Another class's page: nothing to compare, the way to the Daeva's own class.
   const other=await open('/hub/aetherium/guide/classes/templar/',{roster:rosterWith(LV45)});
   assert.equal(await other.page.getAttribute('#aeSetup','data-setup'),'other-class');
-  assert.equal(await other.page.getAttribute('#aeSetup a.ae-btn','href'),'/hub/aetherium/guide/classes/gladiator/');
+  assert.equal(await other.page.getAttribute('#aeSetup a','href'),'/hub/aetherium/guide/classes/gladiator/');
+  assert.equal(await plain(other.page,'[data-setup-line]'),'Your Daeva GUIDEDAEVA is a Gladiator.Gladiator page');
+  assert.ok(await other.page.$eval('#aeSetup',box=>box.getBoundingClientRect().height<=90),'Collapsed to one line');
   assert.deepEqual(other.calls,[],'No read for another class');
   await other.context.close();
 });
@@ -458,7 +514,8 @@ for(const [width,height] of [[390,844],[1600,1000]]){
       for(const button of box.buttons)assert.ok(button.h>=44,`${path}: "${button.text}" is ${button.h}px tall`);
       assert.ok(Math.abs(box.hero.w-width)<=1,`${path}: the band runs full width (${box.hero.w})`);
       if(width===390){
-        assert.ok(box.hero.h>=340&&box.hero.h<=560,`${path}: band about 360px tall on a phone (${box.hero.h})`);
+        const tallest=path.includes('/classes/')&&path!=='/hub/aetherium/guide/classes/'?720:560;
+        assert.ok(box.hero.h>=340&&box.hero.h<=tallest,`${path}: band about 360px tall on a phone, a class hero up to 720 (${box.hero.h})`);
         assert.equal(box.hero.h1,42,`${path}: H1 42px on a phone`);
       } else assert.ok([60,64].includes(box.hero.h1),`${path}: H1 ${box.hero.h1}px`);
       if(box.side){

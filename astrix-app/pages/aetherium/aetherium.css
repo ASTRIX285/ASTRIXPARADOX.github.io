@@ -1857,6 +1857,10 @@ body.aetherium-page[data-ae-page="guide"]{
   --ae-gd-link:#9cc4ef;--ae-gd-shot-glow:rgba(95,216,234,0.15);
   --ae-gd-gold:#e2b54f;--ae-gd-gold-fill:#e9c24f;--ae-gd-gold-fill-hi:#f2cf66;--ae-gd-gold-edge:#f6dc8a;--ae-gd-gold-ink:#1f1604;
   --ae-gd-gold-glow:rgba(233,194,79,0.35);--ae-gd-gold-line:rgba(226,181,79,0.4);
+  --ae-gd-cyan:#5fd8ea;
+  /* Each class's accent, from the game's class select screen: the class hero's divider diamond and role tags. */
+  --ae-gd-cls-gladiator:#9fbfe8;--ae-gd-cls-templar:#e0bc62;--ae-gd-cls-assassin:#e06a7a;--ae-gd-cls-ranger:#9fcf97;
+  --ae-gd-cls-sorcerer:#b993f0;--ae-gd-cls-spiritmaster:#eadb98;--ae-gd-cls-cleric:#e39a62;--ae-gd-cls-chanter:#73c29a;
   --ae-gd-shade:rgba(12,19,29,0.8);--ae-gd-shade-mid:rgba(12,19,29,0.45);--ae-gd-shade-low:rgba(12,19,29,0.55);--ae-gd-clear:rgba(12,19,29,0);
   /* The site's own faces: display headings, and the UI face for the body (every Guide page reads in it). */
   --ae-gd-display:var(--forge-font-display,"Segoe UI",sans-serif);
@@ -2044,7 +2048,7 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
   body.aetherium-page[data-ae-page="guide"] .ae-footer{padding:24px var(--ae-gutter)}
 }
 @media (prefers-reduced-motion:reduce){.ae-gd-tile,.ae-gd-tile:hover,.ae-gd-tile-icon,.ae-gd-tile.is-section:is(:hover,:focus-within) .ae-gd-tile-icon{transition:none;transform:none}}
-.ae-gd-classlinks,.ae-gd-ascent ul{display:flex;flex-wrap:wrap;gap:.5rem;margin:0;padding:0;list-style:none}
+.ae-gd-ascent ul{display:flex;flex-wrap:wrap;gap:.5rem;margin:0;padding:0;list-style:none}
 .ae-gd-soon{display:grid;gap:.75rem;max-width:72ch}
 /* The class roles table: class names in gold, ratings bold, a Reported tag and its source number. */
 .ae-gd-table-wrap{max-width:100%;overflow-x:auto}
@@ -2065,21 +2069,73 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
 .ae-gd-key .ae-tag{min-height:20px;padding:0 6px;font-size:.6875rem}
 .ae-gd-sources{margin:.375rem 0 0;padding-left:1.25rem;display:grid;gap:.25rem}
 @media (max-width:520px){.ae-gd-roles{font-size:.8125rem}.ae-gd-roles th,.ae-gd-roles td{padding:.5rem .3rem}.ae-gd-roles tbody th a{font-size:.875rem}.ae-gd-rating{font-size:.875rem}.ae-gd-roles thead th{font-size:.6875rem;letter-spacing:0}}
-/* Class cards, suggestions, choosing. */
-.ae-gd-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ae-gap);margin:0;padding:0;list-style:none}
-.ae-gd-gallery li{display:flex}
-@media (min-width:900px){.ae-gd-gallery{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.aetherium-page .ae-gd-class{flex:1 1 auto;white-space:normal;text-align:center;justify-content:center}
-.ae-gd-tagline{font:500 .875rem/1.4 var(--ae-font-ui);color:var(--ae-text-muted)}
-.ae-gd-art{display:block;width:100%;height:100%;object-fit:contain}
+/* Suggestions, choosing. */
 .ae-gd-suggest{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:.75rem;margin:0;padding:0;list-style:none}
 .ae-gd-suggest li{padding:.75rem 1rem;background:rgba(0,0,0,.25);border:1px solid var(--ae-hairline)}
 .ae-gd-suggest p{font-size:.9375rem}
 .ae-gd-choose{margin:0;padding-left:1.25rem;display:grid;gap:.5rem;max-width:80ch;line-height:1.55}
-/* A class page: overview, builds by role, the setup check. */
-.ae-gd-overview{display:grid;grid-template-columns:auto minmax(0,1fr);gap:1rem 1.25rem;align-items:start}
-.ae-gd-overview-art{display:grid;place-items:center;width:96px;height:96px;background:var(--ae-well);border:1px solid var(--ae-hairline-strong);border-radius:12px;box-shadow:0 0 18px color-mix(in srgb,var(--ae-gold) 18%,transparent)}
-@media (max-width:520px){.ae-gd-overview{grid-template-columns:1fr}.ae-gd-overview-art{width:72px;height:72px}}
+/* A class page (design/aetherium-guide-character, 20 Oct 2026): the class hero, builds by role, the setup check, the emblems.
+   The hero: the class figure on the left, faded into the page on its right edge and at the bottom; the words on the right. */
+.ae-gd-hero.is-class{--ae-gd-accent:var(--ae-gd-gold);height:auto;min-height:560px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  align-items:center;width:100%;box-sizing:border-box;padding:0 max(32px,calc((100% - 1176px) / 2));background:var(--ae-gd-ground);overflow:hidden}
+.ae-gd-hero.is-class::before,.ae-gd-hero.is-class::after{content:none}
+.ae-gd-hero.is-class[data-class="gladiator"]{--ae-gd-accent:var(--ae-gd-cls-gladiator)}
+.ae-gd-hero.is-class[data-class="templar"]{--ae-gd-accent:var(--ae-gd-cls-templar)}
+.ae-gd-hero.is-class[data-class="assassin"]{--ae-gd-accent:var(--ae-gd-cls-assassin)}
+.ae-gd-hero.is-class[data-class="ranger"]{--ae-gd-accent:var(--ae-gd-cls-ranger)}
+.ae-gd-hero.is-class[data-class="sorcerer"]{--ae-gd-accent:var(--ae-gd-cls-sorcerer)}
+.ae-gd-hero.is-class[data-class="spiritmaster"]{--ae-gd-accent:var(--ae-gd-cls-spiritmaster)}
+.ae-gd-hero.is-class[data-class="cleric"]{--ae-gd-accent:var(--ae-gd-cls-cleric)}
+.ae-gd-hero.is-class[data-class="chanter"]{--ae-gd-accent:var(--ae-gd-cls-chanter)}
+.ae-gd-figure{position:relative;align-self:stretch;min-height:560px}
+.ae-gd-figure-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:78% 12%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,black 18%,black 62%,transparent 100%),linear-gradient(180deg,black 70%,transparent 100%);
+  -webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0%,black 18%,black 62%,transparent 100%),linear-gradient(180deg,black 70%,transparent 100%);mask-composite:intersect}
+.ae-gd-hero.is-class .ae-gd-hero-copy{height:auto;max-width:none;margin:0;padding:48px 0 48px 8px;justify-content:center;gap:14px}
+.ae-gd .ae-gd-hero.is-class .ae-gd-kicker{color:var(--ae-gd-cyan)}
+/* The divider: a thin ivory line with the class's diamond in the middle. */
+.ae-gd-divider{position:relative;display:block;width:min(100%,360px);height:12px}
+.ae-gd-divider::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--ae-gd-ivory)}
+.ae-gd-divider::after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;background:var(--ae-gd-accent);transform:translate(-50%,-50%) rotate(45deg)}
+.ae-gd .ae-gd-hero.is-class .ae-gd-lede{max-width:52ch;font-size:var(--ae-gd-fs-sub)}
+.ae-gd-roletags{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.ae-gd-roletags li{display:inline-flex;align-items:center;min-height:30px;box-sizing:border-box;padding:4px 12px;
+  font:600 var(--ae-gd-fs-small)/1.2 var(--ae-gd-display);letter-spacing:.02em;color:var(--ae-gd-accent);border:1px solid var(--ae-gd-accent);border-radius:999px;
+  background:color-mix(in srgb,var(--ae-gd-accent) 12%,transparent)}
+@media (max-width:760px){
+  .ae-gd-hero.is-class{grid-template-columns:minmax(0,1fr);min-height:0;padding:0 var(--ae-gutter)}
+  /* The figure stands centred and larger than the photo's own frame; the box fades it out at the bottom. */
+  .ae-gd-figure{min-height:340px;height:340px;margin:0 calc(-1 * var(--ae-gutter));overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg,black 60%,transparent 100%);mask-image:linear-gradient(180deg,black 60%,transparent 100%)}
+  .ae-gd-figure-img{inset:0 auto auto calc(50% - 358px);width:474px;height:auto;object-fit:fill;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,black 30%,black 80%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,black 30%,black 80%,transparent 100%);-webkit-mask-composite:source-over;mask-composite:add}
+  .ae-gd-hero.is-class .ae-gd-hero-copy{position:relative;min-height:0;margin-top:-64px;padding:0 0 28px;gap:10px}
+  .ae-gd .ae-gd-hero.is-class .ae-gd-lede{font-size:var(--ae-gd-fs-body)}
+}
+/* The class emblems: a row of buttons (wraps on a phone). The current class is lit gold with a cyan glow. */
+.ae-gd-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+@media (max-width:760px){.ae-gd-picker{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}}
+.ae-gd-picker li{display:flex;min-width:0}
+@layer astrix-brand{
+html body.aetherium-page .ae-gd-btn.ae-gd-pick:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){
+  flex:1 1 auto;flex-direction:column;gap:6px;min-width:0;padding:10px 4px!important;font:600 var(--ae-gd-fs-small)/1.2 var(--ae-gd-display)!important;color:var(--ae-gd-ink-soft)!important;box-shadow:none!important}
+html body.aetherium-page .ae-gd-btn.ae-gd-pick:hover:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){color:var(--ae-gd-gold)!important}
+html body.aetherium-page .ae-gd-btn.ae-gd-pick[aria-current="page"]:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){
+  color:var(--ae-gd-gold)!important;background:var(--ae-gd-raised)!important;border-color:var(--ae-gd-gold)!important;box-shadow:0 0 16px var(--ae-gd-icon-glow-hi)!important}
+}
+.ae-gd-pick img{display:block;width:56px;height:56px;object-fit:contain;opacity:.85;transition:opacity var(--ae-ease),filter var(--ae-ease)}
+.ae-gd-pick:hover img{opacity:1}
+.ae-gd-pick[aria-current="page"] img{opacity:1;filter:drop-shadow(0 0 8px var(--ae-gd-icon-glow-hi))}
+.ae-gd-pick span{max-width:100%;text-align:center}
+@media (max-width:760px){.ae-gd-pick img{width:44px;height:44px}}
+@layer astrix-brand{@media (max-width:760px){
+html body.aetherium-page .ae-gd-btn.ae-gd-pick:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){padding:8px 2px!important}
+}}
+/* A linked Daeva of another class: one line and the way to their class page, on the Overview card base
+   (design/aetherium-guide-overviews): the Guide panel, an ivory hairline and 10px corners, no notch. */
+.ae-gd-body .ae-panel.ae-gd-setup.is-line{padding:10px 20px;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-ivory);border-radius:10px;box-shadow:none;clip-path:none}
+.ae-gd-body .ae-panel.ae-gd-setup.is-line::before{content:none}
+.ae-gd-setup-line{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin:0}
 .ae-gd-build{display:grid;gap:.75rem;padding:1rem 1.125rem;margin:0 0 var(--ae-gap);background:var(--ae-well-gradient);border:1px solid var(--ae-hairline-strong);box-shadow:var(--ae-bevel);clip-path:var(--ae-notch)}
 .ae-gd-build-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem 1rem}
 .ae-gd-build-head h3{margin:0}

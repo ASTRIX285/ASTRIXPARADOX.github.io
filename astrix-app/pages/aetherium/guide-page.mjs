@@ -6,7 +6,7 @@
  */
 import { esc } from './aetherium-ui.mjs';
 import { cardUrl } from './aetherium-data.mjs';
-import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, classPickerHtml, comingSoonHtml, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 
 /*
  * The Guide home's settings. exampleShot is the "See it on the screen you already use" panel: a real in-game screenshot
@@ -104,7 +104,7 @@ function renderCharacter() {
   body.insertAdjacentHTML('beforeend', `
     ${overviewHtml('character', CHARACTER_TOPICS)}
     <h2 class="ae-gd-h2">The eight classes</h2>
-    <ul class="ae-gd-classlinks">${GUIDE_CLASSES.map(name => `<li><a class="ae-btn" href="${esc(classHref(name))}">${esc(name)}</a></li>`).join('')}</ul>`);
+    ${classPickerHtml()}`);
 }
 
 /** The Guides Overview: the guides written so far. New player help and the endgame stay off the page until written. */
