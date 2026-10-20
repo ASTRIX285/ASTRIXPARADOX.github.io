@@ -1,0 +1,18 @@
+# design/aetherium-guide-hotfix-text: Guide hotfix, three broken text lines on the Crafting pages. Text only.
+.scope/design/aetherium-guide-hotfix-text.txt
+astrix-app/games/aion2/data/advisor/equipment-guide.json
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/guide-equipment.mjs
+hub/aetherium/guide/crafting/crafted-gear/index.html
+hub/aetherium/guide/crafting/gathering/index.html
+hub/aetherium/guide/crafting/index.html
+hub/aetherium/guide/crafting/professions/index.html
+hub/aetherium/guide/equipment/arcana/index.html
+hub/aetherium/guide/equipment/enhancement/index.html
+hub/aetherium/guide/equipment/index.html
+hub/aetherium/guide/equipment/manastones/index.html
+hub/aetherium/guide/equipment/pets-wings/index.html
+hub/aetherium/guide/equipment/slots/index.html
+hub/aetherium/guide/equipment/theostones/index.html
+hub/aetherium/guide/equipment/titles/index.html
+hub/aetherium/guide/equipment/where-to-get/index.html
