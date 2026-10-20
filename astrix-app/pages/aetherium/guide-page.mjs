@@ -15,7 +15,7 @@ import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, r
  */
 const HOME = Object.freeze({ exampleShot: null });
 
-/* Each section's rendered icon, 512 px square, shown at 120 px (96 px on a phone). The tile title names it, so alt is empty. */
+/* Each section's rendered icon, 256 px square, shown at 120 px (96 px on a phone). The tile title names it, so alt is empty. */
 const SECTION_ICONS = '/astrix-app/pages/aetherium/images/section-icons/';
 const sectionIcon = id => `<img class="ae-gd-tile-icon" src="${SECTION_ICONS}${esc(id)}.png" alt="" width="120" height="120" loading="lazy" decoding="async">`;
 
