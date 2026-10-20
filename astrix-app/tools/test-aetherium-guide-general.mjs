@@ -6,7 +6,12 @@
 //     order, one macro key with 3 presets, 3 loadouts each, resets at 07:00 UTC and Wednesday 07:00 UTC, Lv 45);
 //   - reset maths: nextReset for daily and weekly, on and either side of the reset minute;
 //   - each page at 1600 and 390: the Guide shell with its title, the page's own content, a source under every fact,
-//     no sideways scroll, no overlapping tiles, cylinder cards (computed radius and gradient), no en or em dash;
+//     no sideways scroll, no overlapping tiles, cylinder cards on About and Skills (computed radius and gradient), clean
+//     panel cards with an ivory hairline on the five redesigned pages (design/aetherium-guide-general), no en or em dash;
+//   - design/aetherium-guide-general (20 Oct 2026): Reset times has no repeated Reset times box, its tip sits under the cards
+//     and each card has the resets icon at 56px; Controls keeps 1 to 8, Q and E on one row (scrolling in its own box on a
+//     phone) and lights the keys a numbered step names; Loadouts shows plain labels, not buttons; Market has no chips; the FAQ
+//     shows every answer as a tip under a section heading with its topic icon; card and section titles follow the type scale;
 //   - Reset times in the player's own zone: Los Angeles and Tokyo with a fixed clock, times and countdown checked;
 //   - FAQ: no answer shows a source (sources stay in the data); Controls links to the
 //     Ascent Plan's Skill Bar screen; Loadouts shows 3 each; Skills shows Specialty steps at skill Lv 8, 12, 16 and 20.
@@ -87,6 +92,7 @@ const PAGES=[
   ['faq','/hub/aetherium/guide/general/faq/','FAQ'],
   ['skills','/hub/aetherium/guide/skills/','Skills']
 ];
+const REDESIGNED=new Set(['resets','market','controls','loadouts','faq']);
 const browser=await chromium.launch();
 let failed=false;
 const open=async(path,{width=1600,timezoneId='Europe/London',now=null}={})=>{
@@ -112,13 +118,30 @@ try {
       const report=await page.evaluate(()=>{
         const facts=[...document.querySelectorAll('[data-fact]')];
         const noSource=facts.filter(card=>card.querySelector('.ae-gg-src, a[href^="https://aion2.fandom.com/"]')).map(card=>card.dataset.fact);
-        const wide=[...document.querySelectorAll('.ae-gg *')].filter(node=>node.getBoundingClientRect().right>document.documentElement.clientWidth+1).map(node=>node.className||node.tagName);
+        const wide=[...document.querySelectorAll('.ae-gg *')].filter(node=>!node.closest('.ae-gg-keyscroll .ae-gg-keys')&&node.getBoundingClientRect().right>document.documentElement.clientWidth+1).map(node=>node.className||node.tagName);
         const card=facts[0]&&getComputedStyle(facts[0]);
-        return {facts:facts.length,noSource,wide:wide.slice(0,5),radius:card?parseFloat(card.borderTopLeftRadius):null,gradient:card?card.backgroundImage:null,text:document.body.innerText};
+        return {facts:facts.length,noSource,wide:wide.slice(0,5),radius:card?parseFloat(card.borderTopLeftRadius):null,gradient:card?card.backgroundImage:null,background:card?card.backgroundColor:null,edge:card?card.borderTopColor:null,text:document.body.innerText};
       });
       assert.deepEqual(report.noSource,[],`${id}: no sources on any fact`);
       assert.deepEqual(report.wide,[],`${id} at ${width}: nothing past the right edge`);
-      if(report.facts){assert.ok(report.radius>=12,`${id}: rounded cylinder cards`);assert.match(report.gradient,/linear-gradient/,`${id}: lit card`);}
+      if(report.facts&&REDESIGNED.has(id)){
+        assert.equal(report.gradient,'none',`${id}: clean panel card, no gradient`);
+        assert.equal(report.background,'rgb(19, 28, 41)',`${id}: card on the Guide panel colour`);
+        assert.equal(report.edge,'rgba(217, 210, 192, 0.35)',`${id}: ivory hairline edge`);
+      } else if(report.facts){assert.ok(report.radius>=12,`${id}: rounded cylinder cards`);assert.match(report.gradient,/linear-gradient/,`${id}: lit card`);}
+      if(REDESIGNED.has(id)){
+        const scale=await page.evaluate(()=>{
+          const h=document.querySelector('.ae-gg-card .ae-gg-h');
+          const s=h&&getComputedStyle(h);
+          return s?{size:parseFloat(s.fontSize),family:s.fontFamily}:null;
+        });
+        if(scale){
+          assert.equal(scale.size,width>760?28:24,`${id} at ${width}: card title on the type scale`);
+          assert.match(scale.family,/fairy-tale-jf/,`${id}: card title in the title face`);
+        }
+        assert.equal(await page.locator('.ae-gg .ae-btn').count(),0,`${id}: buttons in AION 2 colours (ae-gd-btn)`);
+        assert.ok(await page.locator('.ae-gg .ae-gd-btn.is-gold').count()<=1,`${id}: at most one solid gold main action`);
+      }
       assert.ok(!DASH.test(report.text),`${id}: no en or em dash`);
       if(id==='general'){
         const boxes=await page.locator('.ae-gd-ocard').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().toJSON()));
@@ -153,6 +176,20 @@ try {
         assert.equal(d.next,next,`${timezoneId}: next daily reset`);
     await context.close();
   }
+  {
+    const {context,page}=await open('/hub/aetherium/guide/general/resets/');
+    assert.equal(await page.locator('[data-fact="reset-times"]').count(),0,'No repeated Reset times box');
+    assert.equal((await page.locator('[data-reset-tip]').textContent()).trim(),byId['reset-times'].notes[1],'The entry counter line is a tip');
+    const tipBelow=await page.evaluate(()=>document.querySelector('[data-reset-tip]').getBoundingClientRect().top>=document.querySelector('#aeResets').getBoundingClientRect().bottom);
+    assert.ok(tipBelow,'Tip sits under the reset cards');
+    const icons=await page.locator('[data-reset] .ae-gg-icon').evaluateAll(nodes=>nodes.map(node=>({src:node.getAttribute('src'),w:node.getBoundingClientRect().width,h:node.getBoundingClientRect().height,ok:node.complete&&node.naturalWidth>0})));
+    assert.equal(icons.length,2,'Both reset cards have an icon');
+    for(const icon of icons){
+      assert.match(icon.src,/images\/topic-icons\/resets\.png$/,'Resets topic icon');
+      assert.deepEqual([icon.w,icon.h],[56,56],'Icon at 56px');
+    }
+    await context.close();
+  }
   console.log('ok reset times in the local zone');
 
   /* FAQ sources, Controls, Loadouts, Skills. */
@@ -175,12 +212,65 @@ try {
     const fills=await page.locator('.ae-gg-keys:not(.is-mouse) [data-bar-key] small').allTextContents();
     assert.deepEqual(fills,['1','2','3','4','7','8','9','10','5','6'],'Fill order numbers');
     assert.ok(!(await page.locator('#aeDefaultKeys').textContent()).includes('Space'),'Space row held until Miguel rules');
+    /* Steps beside the bar, each lighting the keys it names. */
+    const steps=byId['bar-layout'].steps;
+    assert.equal(await page.locator('#aeBarSteps .ae-gg-step').count(),steps.length,'One numbered step per line');
+    assert.equal(await page.locator('[data-fact="bar-layout"] .ae-gg-list').count(),0,'No bullet list above the bar');
+    const beside=await page.evaluate(()=>{const bar=document.querySelector('#aeGuideBar').getBoundingClientRect(),list=document.querySelector('#aeBarSteps').getBoundingClientRect();return list.left>=bar.right-1&&list.top<bar.bottom;});
+    assert.ok(beside,'Steps sit beside the bar at 1600');
+    for(const [index,step] of steps.entries()){
+      await page.locator(`[data-bar-step="${index+1}"]`).hover();
+      const lit=await page.locator('#aeGuideBar .is-lit').evaluateAll(nodes=>nodes.map(node=>node.dataset.barKey));
+      assert.deepEqual(lit.sort(),[...step.keys].sort(),`Step ${index+1} lights its keys`);
+      const ring=await page.waitForFunction(key=>{const c=getComputedStyle(document.querySelector(`#aeGuideBar [data-bar-key="${key}"]`)).borderTopColor;return c==='rgb(226, 181, 79)'&&c;},step.keys[0],{timeout:2000}).then(handle=>handle.jsonValue()).catch(()=>'not gold');
+      assert.equal(ring,'rgb(226, 181, 79)',`Step ${index+1}: lit keys have a gold edge`);
+    }
+    await page.mouse.move(0,0);
+    await page.locator('[data-bar-step="3"]').focus();
+    assert.deepEqual((await page.locator('#aeGuideBar .is-lit').evaluateAll(nodes=>nodes.map(node=>node.dataset.barKey))).sort(),['E','Q'],'Focus lights the keys too');
+    assert.equal(await page.locator('[data-bar-step="3"]').evaluate(node=>node.tagName),'BUTTON','Steps are buttons');
+    await context.close();
+  }
+  for(const width of [1600,1100,390]){
+    const {context,page}=await open('/hub/aetherium/guide/general/controls/',{width});
+    const row=await page.evaluate(()=>{
+      const keys=[...document.querySelectorAll('.ae-gg-keyscroll [data-bar-key]')].map(node=>node.getBoundingClientRect().top);
+      const box=document.querySelector('.ae-gg-keyscroll');
+      return {tops:[...new Set(keys.map(Math.round))],scroll:box.scrollWidth>box.clientWidth,overflow:getComputedStyle(box).overflowX};
+    });
+    assert.equal(row.tops.length,1,`Controls at ${width}: 1 to 8, Q and E on one row`);
+    assert.equal(row.overflow,'auto',`Controls at ${width}: the key row scrolls in its own box`);
+    if(width===1600)assert.equal(row.scroll,false,'Controls at 1600: the key row fits without scrolling');
     await context.close();
   }
   {
     const {context,page}=await open('/hub/aetherium/guide/general/loadouts/',{width:390});
-    const counts=await page.locator('[data-loadout]').evaluateAll(nodes=>nodes.map(node=>[node.dataset.loadout,node.querySelectorAll('i').length]));
+    const counts=await page.locator('[data-loadout]').evaluateAll(nodes=>nodes.map(node=>[node.dataset.loadout,node.querySelectorAll('.ae-gg-slot').length]));
     assert.deepEqual(counts,[['looks',3],['armour',3],['skills',3]],'3 loadouts each');
+    const look=await page.locator('.ae-gg-slot').first().evaluate(node=>{const s=getComputedStyle(node);return {tag:node.tagName,border:s.borderTopWidth,radius:s.borderTopLeftRadius,cursor:s.cursor,role:node.getAttribute('role'),tab:node.tabIndex};});
+    assert.deepEqual(look,{tag:'SPAN',border:'0px',radius:'0px',cursor:'default',role:null,tab:-1},'Loadout numbers are plain labels, not buttons');
+    assert.equal(await page.locator('#aeLoadouts button, #aeLoadouts a').count(),0,'Nothing to press in the loadout list');
+    await context.close();
+  }
+  {
+    const {context,page}=await open('/hub/aetherium/guide/general/market/');
+    assert.equal(await page.locator('.ae-gg-chip').count(),0,'Market: no chips repeating the Membership text');
+    assert.match(await page.locator('[data-fact="market-tip"] .ae-gg-icon').getAttribute('src'),/topic-icons\/market\.png$/,'Market tip has the market icon');
+    await context.close();
+  }
+  for(const width of [1600,390]){
+    const {context,page}=await open('/hub/aetherium/guide/general/faq/',{width});
+    assert.equal(await page.locator('details.ae-gg-q').count(),0,'FAQ: no grey bar list of closed questions');
+    assert.equal(await page.locator('.ae-gg-tipcard[data-faq]').count(),faq.length,'FAQ: every answer is a tip');
+    const heads=await page.locator('.ae-gg-group > .ae-gg-h2').evaluateAll(nodes=>nodes.map(node=>{const img=node.querySelector('.ae-gg-icon');return {size:parseFloat(getComputedStyle(node).fontSize),icon:img&&img.getAttribute('src')};}));
+    assert.equal(heads.length,5,'Five FAQ group headings');
+    for(const head of heads){
+      assert.equal(head.size,width>760?40:30,`FAQ at ${width}: section heading on the type scale`);
+      assert.match(head.icon,/topic-icons\/(faq|controls)\.png$/,'Each FAQ group has its topic icon');
+    }
+    const h4=await page.locator('.ae-gg-tipcard h4').first().evaluate(node=>{const s=getComputedStyle(node);return [parseFloat(s.fontSize),s.fontWeight];});
+    assert.deepEqual(h4,[18,'600'],'Tip heading: 18px, weight 600');
+    await context.close();
     await context.close();
   }
   {

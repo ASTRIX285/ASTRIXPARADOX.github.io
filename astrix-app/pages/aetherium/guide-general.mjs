@@ -13,6 +13,10 @@ const BASE = '/hub/aetherium/guide/general/';
 const SKILL_BAR_URL = '/hub/aetherium/ascent/skill-bar/';
 const MACRO_URL = '/hub/aetherium/ascent/macro/';
 const ASCENT_URL = '/hub/aetherium/ascent/';
+const ICONS = '/astrix-app/pages/aetherium/images/topic-icons/';
+
+/** A rendered topic icon (images/topic-icons): decorative, the heading next to it names the topic. */
+const topicIcon = (name, size) => `<img class="ae-gg-icon" src="${ICONS}${name}.png" alt="" width="${size}" height="${size}" loading="lazy" decoding="async">`;
 
 /** The General pages in reading order: slug ('' is the section home), title, one line for the section home. */
 export const GENERAL_PAGES = Object.freeze([
@@ -40,10 +44,10 @@ const testLine = () => '';
 const path = steps => steps.map(esc).join(' <span aria-hidden="true">›</span> ');
 
 /** One fact as a card: its label, status, text or lines, any extra markup, then its sources. */
-function fact(record, extra = '', { tag = 'h2' } = {}) {
+function fact(record, extra = '', { tag = 'h2', cls = '', icon = '' } = {}) {
   if (!record) return '';
-  return `<section class="ae-gg-card" data-fact="${esc(record.id)}" aria-labelledby="gd-${esc(record.id)}">
-    <${tag} class="ae-gg-h" id="gd-${esc(record.id)}">${esc(record.label)} ${statusTag(record)}</${tag}>
+  return `<section class="ae-gg-card${cls ? ` ${cls}` : ''}" data-fact="${esc(record.id)}" aria-labelledby="gd-${esc(record.id)}">
+    <${tag} class="ae-gg-h" id="gd-${esc(record.id)}">${icon ? topicIcon(icon, 40) : ''}${esc(record.label)} ${statusTag(record)}</${tag}>
     ${record.text ? `<p>${esc(record.text)}</p>` : ''}
     ${record.lines ? `<ul class="ae-gg-list">${record.lines.map(line => `<li>${esc(line)}</li>`).join('')}</ul>` : ''}
     ${extra}${pendingWhy(record)}${testLine(record)}
@@ -72,20 +76,20 @@ function resetsPage(r) {
   return `<p class="ae-gg-lead">Daily and weekly content refreshes at the same time for everyone. Below is that time in your own time zone, worked out on your device.</p>
     <div class="ae-gg-pair" id="aeResets" data-zone="${esc(zone())}">
       <section class="ae-gg-card ae-gg-reset" data-reset="daily" aria-labelledby="gdDaily">
-        <h2 class="ae-gg-h" id="gdDaily">Daily reset</h2>
+        <h2 class="ae-gg-h" id="gdDaily">${topicIcon('resets', 56)}Daily reset</h2>
         <p class="ae-gg-big" data-reset-local></p>
         <p>Every day at <b data-reset-utc>${esc(utcClock(daily))}</b>.</p>
         <p class="ae-gg-next">Next: <span data-reset-next></span> <b data-reset-in></b></p>
       </section>
       <section class="ae-gg-card ae-gg-reset" data-reset="weekly" aria-labelledby="gdWeekly">
-        <h2 class="ae-gg-h" id="gdWeekly">Weekly reset</h2>
+        <h2 class="ae-gg-h" id="gdWeekly">${topicIcon('resets', 56)}Weekly reset</h2>
         <p class="ae-gg-big" data-reset-local></p>
         <p>Every ${esc(weekly.weekdayName)} at <b data-reset-utc>${esc(utcClock(weekly))}</b>.</p>
         <p class="ae-gg-next">Next: <span data-reset-next></span> <b data-reset-in></b></p>
       </section>
     </div>
+    <p class="ae-gg-tip" data-reset-tip>${esc(rule.notes[1])}</p>
     <p class="ae-gg-zone">Shown in <b data-reset-zone>${esc(zone())}</b>. ${esc(rule.notes[0])}</p>
-    ${fact(rule, `<ul class="ae-gg-list"><li>${esc(rule.notes[1])}</li></ul>`)}
     ${fact(r['shared-entries'])}`;
 }
 /** Fills the reset cards from the rule, now and again every 30 seconds so the countdown stays true. */
@@ -110,32 +114,59 @@ function marketPage(r) {
   const m = r.membership;
   return `<p class="ae-gg-lead">On the global servers every sale between players goes through the Market, and the Market needs Membership.</p>
     ${fact(r.trading)}
-    ${fact(m, `<p class="ae-gg-chips">${m.value.unlocks.map(name => `<span class="ae-gg-chip">${esc(name)}</span>`).join('')}</p>`)}
-    ${fact(r['market-tip'])}
+    ${fact(m)}
+    ${fact(r['market-tip'], '', { cls: 'is-tip', icon: 'market' })}
     ${fact(r['shared-entries'])}`;
 }
-/** The bar as the game lays it out: 1 to 8, Q, E, then the mouse and the second stack, with the order own keys fill in. */
+/** The bar as the game lays it out: 1 to 8, Q, E, then the mouse and the second stack, with the order own keys fill in. The
+ * numbered steps beside it light the keys they talk about while hovered, focused or pressed. */
 function barPicture(layout) {
   const fill = new Map(layout.value.fill.map((key, index) => [key, index + 1]));
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E'];
   const cap = key => `<li class="ae-gg-key${layout.value.stackKeys.includes(key) ? ' is-stack' : ''}" data-bar-key="${esc(key)}"><b>${esc(key)}</b><small aria-label="filled ${fill.get(key)}${['st', 'nd', 'rd'][fill.get(key) - 1] ?? 'th'}">${fill.get(key)}</small></li>`;
-  return `<figure class="ae-gg-bar" id="aeGuideBar">
-      <ol class="ae-gg-keys" aria-label="Keys 1 to 8, Q and E, numbered in the order you fill them">${keys.map(cap).join('')}</ol>
+  const step = (item, index) => `<li><button class="ae-gg-step" type="button" aria-pressed="false" data-bar-step="${index + 1}" data-keys="${esc(item.keys.join(' '))}"><b aria-hidden="true">${index + 1}</b><span>${esc(item.text)}</span></button></li>`;
+  return `<div class="ae-gg-barwrap">
+    <figure class="ae-gg-bar" id="aeGuideBar">
+      <div class="ae-gg-keyscroll"><ol class="ae-gg-keys" aria-label="Keys 1 to 8, Q and E, numbered in the order you fill them">${keys.map(cap).join('')}</ol></div>
       <ol class="ae-gg-keys is-mouse" aria-label="Then the mouse and the second stack">
         <li class="ae-gg-key is-wide" data-bar-key="LMB"><b>Left click</b><small>Main attack</small></li>
         <li class="ae-gg-key is-wide is-macro" data-bar-key="RMB"><b>Right click</b><small>Main line</small></li>
         <li class="ae-gg-key is-wide is-macro" data-bar-key="B"><b>Stack</b><small>Second macro stack</small></li>
       </ol>
       <p class="ae-gg-key is-space" data-bar-key="Space"><b>Space bar</b><small>Defiance</small></p>
-      <figcaption>Small numbers: the order own keys fill in. Q and E (marked) take a stack of skills. The two macro stacks sit either side of your main attack.</figcaption>
-    </figure>`;
+      <figcaption>Small gold numbers: the order own keys fill in.</figcaption>
+    </figure>
+    <ol class="ae-gg-barsteps" id="aeBarSteps" aria-label="How to read the bar">${layout.steps.map(step).join('')}</ol>
+  </div>`;
+}
+/** Lights the keys a step talks about while it is hovered or focused; a press keeps it lit, as touch has no hover. */
+function wireBarSteps() {
+  const bar = $('#aeGuideBar'), list = $('#aeBarSteps');
+  if (!bar || !list) return;
+  let pinned = null;
+  const light = button => {
+    const keys = new Set(button ? button.dataset.keys.split(' ') : []);
+    for (const key of bar.querySelectorAll('[data-bar-key]')) key.classList.toggle('is-lit', keys.has(key.dataset.barKey));
+    for (const other of list.querySelectorAll('.ae-gg-step')) other.classList.toggle('is-lit', other === button);
+  };
+  list.addEventListener('pointerover', event => { const button = event.target.closest('.ae-gg-step'); if (button) light(button); });
+  list.addEventListener('pointerleave', () => light(list.contains(document.activeElement) ? document.activeElement.closest('.ae-gg-step') : pinned));
+  list.addEventListener('focusin', event => light(event.target.closest('.ae-gg-step')));
+  list.addEventListener('focusout', () => light(pinned));
+  list.addEventListener('click', event => {
+    const button = event.target.closest('.ae-gg-step');
+    if (!button) return;
+    pinned = pinned === button ? null : button;
+    for (const other of list.querySelectorAll('.ae-gg-step')) other.setAttribute('aria-pressed', String(other === pinned));
+    light(pinned ?? button);
+  });
 }
 function controlsPage(r) {
   const modes = r['control-modes'], keys = r['default-keys'], ks = r['key-settings'], menus = r['no-hotkey-menus'], macro = r['macro-presets'];
   return `<p class="ae-gg-lead">How to move, target and fight, and how to lay out your skill bar so your hand never has to stretch.</p>
-    ${fact(r['bar-layout'], `${barPicture(r['bar-layout'])}<p class="ae-gg-actions"><a class="ae-btn" href="${SKILL_BAR_URL}" data-guide-link="skill-bar">Open the Skill Bar plan</a></p><p class="ae-muted">The Ascent Plan's Skill Bar screen fills this layout with your class's skills, key by key and row by row.</p>`)}
+    ${fact(r['bar-layout'], `${barPicture(r['bar-layout'])}<p class="ae-gg-actions"><a class="ae-gd-btn is-gold" href="${SKILL_BAR_URL}" data-guide-link="skill-bar">Open the Skill Bar plan</a></p><p class="ae-gg-note">The Ascent Plan's Skill Bar screen fills this layout with your class's skills, key by key and row by row.</p>`, { cls: 'is-bar', icon: 'controls' })}
     ${fact(r['space-defiance'])}
-    ${fact(macro, `<p class="ae-gg-path">Set the key in ${path(macro.value.path)}.</p><p class="ae-gg-actions"><a class="ae-btn" href="${MACRO_URL}" data-guide-link="macro">Open the Macro plan</a></p>`)}
+    ${fact(macro, `<p class="ae-gg-path">Set the key in ${path(macro.value.path)}.</p><p class="ae-gg-actions"><a class="ae-gd-btn" href="${MACRO_URL}" data-guide-link="macro">Open the Macro plan</a></p>`)}
     ${fact(modes, `<dl class="ae-gg-dl">${modes.value.modes.map(mode => `<div><dt>${esc(mode.name)}${mode.default ? ' <small>default</small>' : ''}</dt><dd>${esc(mode.text)}</dd></div>`).join('')}</dl><p class="ae-gg-path">Change it in ${path(modes.value.path)}. Swap quickly with the ${esc(modes.value.quickSwitch)} key.</p>`)}
     ${fact(keys, `<dl class="ae-gg-dl is-keys" id="aeDefaultKeys">${keys.value.keys.map(([key, does]) => `<div><dt><kbd>${esc(key)}</kbd></dt><dd>${esc(does)}</dd></div>`).join('')}</dl>`)}
     ${fact(ks, `<dl class="ae-gg-dl">${ks.value.tabs.map(([tab, holds]) => `<div><dt>${esc(tab)}</dt><dd>${esc(holds)}</dd></div>`).join('')}</dl>`)}
@@ -148,28 +179,32 @@ function loadoutsPage(r) {
   const l = r.loadouts;
   const kinds = [['looks', 'Looks'], ['armour', 'Armour'], ['skills', 'Skills']];
   return `<p class="ae-gg-lead">You do not need a second character to play a second role. Save each setup as a loadout and swap.</p>
-    ${fact(l, `<ul class="ae-gg-loadouts" id="aeLoadouts">${kinds.map(([key, name]) => `<li data-loadout="${key}"><b>${esc(name)}</b><span aria-label="${esc(l.value[key])} loadouts">${Array.from({ length: l.value[key] }, (_, i) => `<i>${i + 1}</i>`).join('')}</span></li>`).join('')}</ul>`)}
-    ${fact(r['loadouts-aetherium'], `<p class="ae-gg-actions"><a class="ae-btn" href="${ASCENT_URL}" data-guide-link="ascent">Plan a loadout</a></p>`)}`;
+    ${fact(l, `<ul class="ae-gg-loadouts" id="aeLoadouts">${kinds.map(([key, name]) => `<li data-loadout="${key}"><b>${esc(name)}</b><span class="ae-gg-slots">${Array.from({ length: l.value[key] }, (_, i) => `<span class="ae-gg-slot" data-slot="${i + 1}">Loadout ${i + 1}</span>`).join('')}</span></li>`).join('')}</ul>`, { icon: 'loadouts' })}
+    ${fact(r['loadouts-aetherium'], `<p class="ae-gg-actions"><a class="ae-gd-btn is-gold" href="${ASCENT_URL}" data-guide-link="ascent">Plan a loadout</a></p>`)}`;
 }
+/** The FAQ group icons: Controls has its own topic icon, the other groups share the FAQ one. */
+const FAQ_ICONS = { controls: 'controls' };
+/** Every answer shows as a short tip under its group heading; the longer lists (error codes, known problems) stay as cards. */
 function faqPage(r, data) {
   const faq = Object.values(r).filter(record => record.section === 'faq');
   const extras = { items: ['auto-potions', 'looting', 'auto-extract', 'lock-items', 'flight', 'characters'], trouble: ['trouble-basics', 'trouble-codes', 'trouble-known', 'trouble-report'] };
-  const extra = id => {
-    const record = r[id];
+  const tip = (title, text, attr) => `<li class="ae-gg-tipcard" ${attr}><h4>${esc(title)}</h4><p>${esc(text)}</p></li>`;
+  const isTip = record => record.text && !record.lines && !record.value?.codes && !record.value?.items;
+  const card = record => {
     const rows = record.value?.codes ?? record.value?.items;
     return fact(record, rows ? `<dl class="ae-gg-dl">${rows.map(([what, fix]) => `<div><dt>${esc(what)}</dt><dd>${esc(fix)}</dd></div>`).join('')}</dl>` : '', { tag: 'h3' });
   };
   const groups = Object.entries(data.groups);
   return `<p class="ae-gg-lead">Short answers to the questions new and returning players ask most.</p>
-    <nav class="ae-gg-jump" aria-label="FAQ groups"><ul>${groups.map(([id, name]) => `<li><a class="ae-btn" href="#faq-${id}">${esc(name)}</a></li>`).join('')}</ul></nav>
-    ${groups.map(([id, name]) => `<section class="ae-gg-group" id="faq-${id}" data-faq-group="${id}" aria-labelledby="faq-${id}-h">
-      <h2 class="ae-gg-h2" id="faq-${id}-h">${esc(name)}</h2>
-      <div class="ae-gg-qs">${faq.filter(item => item.group === id).map(item => `<details class="ae-gg-q" data-faq="${esc(item.id)}">
-        <summary>${esc(item.q)}</summary>
-        <p>${esc(item.a)}</p>${sources(item.provenance)}
-      </details>`).join('')}</div>
-      ${(extras[id] ?? []).map(extra).join('')}
-    </section>`).join('')}`;
+    <nav class="ae-gg-jump" aria-label="FAQ groups"><ul>${groups.map(([id, name]) => `<li><a class="ae-gd-btn" href="#faq-${id}">${esc(name)}</a></li>`).join('')}</ul></nav>
+    ${groups.map(([id, name]) => {
+      const more = (extras[id] ?? []).map(key => r[key]).filter(Boolean);
+      return `<section class="ae-gg-group" id="faq-${id}" data-faq-group="${id}" aria-labelledby="faq-${id}-h">
+      <h2 class="ae-gg-h2" id="faq-${id}-h">${topicIcon(FAQ_ICONS[id] ?? 'faq', 48)}${esc(name)}</h2>
+      <ul class="ae-gg-tips">${faq.filter(item => item.group === id).map(item => tip(item.q, item.a, `data-faq="${esc(item.id)}"`)).join('')}${more.filter(isTip).map(record => tip(record.label, record.text, `data-fact="${esc(record.id)}"`)).join('')}</ul>
+      ${more.filter(record => !isTip(record)).map(card).join('')}
+    </section>`;
+    }).join('')}`;
 }
 /** The Skills Overview cards: the class pages, the two facts below on this page, then the skill bar on Controls. */
 const SKILL_TOPICS = Object.freeze([
@@ -201,7 +236,7 @@ const PAGES = {
   about: { section: 'general', render: aboutPage },
   resets: { section: 'general', render: resetsPage, after: r => tickResets(r['reset-times']) },
   market: { section: 'general', render: marketPage },
-  controls: { section: 'general', render: controlsPage },
+  controls: { section: 'general', render: controlsPage, after: wireBarSteps },
   loadouts: { section: 'general', render: loadoutsPage },
   faq: { section: 'general', render: faqPage },
   skills: { section: 'skills', render: skillsPage, title: 'Skills' }

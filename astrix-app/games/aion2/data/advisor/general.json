@@ -590,12 +590,63 @@
         "mainLine": "Right click",
         "rows": 4
       },
-      "lines": [
-        "The bar reads 1 to 8, Q, E, then left click (your main attack), right click (your main line) and a second macro stack.",
-        "Own keys fill 1 to 4 first, because those sit right above Q and E where your fingers rest. Then Q and E, then 5 to 8.",
-        "A key that holds a stack of skills goes on Q or E: they are easier to reach while you move than 5 to 8.",
-        "Each key holds up to four skills in rows 0 to 3. Press it and the lowest ready skill fires, row 0 first.",
-        "The two stacks either side of your main attack are the only entries in your macro."
+      "steps": [
+        {
+          "keys": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "Q",
+            "E",
+            "LMB",
+            "RMB",
+            "B"
+          ],
+          "text": "Read it left to right: 1 to 8, Q, E, then left click (your main attack), right click (your main line) and the second macro stack."
+        },
+        {
+          "keys": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "text": "Fill 1 to 4 first. They sit right above Q and E, where your fingers rest. Then Q and E, then 5 to 8."
+        },
+        {
+          "keys": [
+            "Q",
+            "E"
+          ],
+          "text": "A key that holds a stack of skills goes on Q or E. They are easier to reach on the move than 5 to 8."
+        },
+        {
+          "keys": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "Q",
+            "E"
+          ],
+          "text": "Each key holds up to four skills in rows 0 to 3. Press it and the lowest ready skill fires, row 0 first."
+        },
+        {
+          "keys": [
+            "RMB",
+            "B"
+          ],
+          "text": "The two stacks either side of your main attack are the only entries in your macro."
+        }
       ],
       "provenance": [
         {
