@@ -19,7 +19,8 @@
  *   comingSoonHtml(id)    the short "coming soon in this guide" body for a section not built yet.
  *   startGuidePage(fill)  wires the menu drawer, takes the faction colour from the linked Daeva (aetherium-memory.mjs),
  *                         runs fill(linked) (may be async; linked is linkedDaeva() or null), moves a page's own page list
- *                         into the side menu and reports the page ready once, even on failure.
+ *                         into the side menu, lights exactly one side menu item (this page) and reports the page ready
+ *                         once, even on failure.
  */
 import { $, esc, markReady, setFaction, showNotice, wireDrawer } from './aetherium-ui.mjs';
 import { linkedDaeva } from './aetherium-memory.mjs';
@@ -50,8 +51,13 @@ export const guideHref = id => sectionOf(id).href;
 
 export const classHref = className => `${GUIDE_ROOT}classes/${String(className).toLowerCase()}/`;
 
+/** An address as the side menu compares it: path only, no index.html, always a trailing slash. */
+const pathKey = href => {
+  const path = new URL(href, location.href).pathname.replace(/index\.html$/, '');
+  return path.endsWith('/') ? path : `${path}/`;
+};
 /** The page's own address, so the side menu can light it. */
-const herePath = () => location.pathname.replace(/index\.html$/, '');
+const herePath = () => pathKey(location.pathname);
 
 /** The photo band: the photo, the kicker, the page title and the lede. The home adds its buttons. */
 function heroHtml(item, { title, lede, kicker, actions }) {
@@ -78,7 +84,27 @@ function sectionLinks(item, crumbs) {
   return links;
 }
 
-const linkHtml = ({ label, href }) => `<li><a href="${esc(href)}"${!href.includes('#') && href === herePath() ? ' aria-current="page"' : ''}>${esc(label)}</a></li>`;
+const linkHtml = ({ label, href }) => `<li><a href="${esc(href)}"${!href.includes('#') && pathKey(href) === herePath() ? ' aria-current="page"' : ''}>${esc(label)}</a></li>`;
+
+/**
+ * Light this page, and only this page, in the side menu. One place decides it, after the page's own list has moved in, so a
+ * link that arrived with its own aria-current (or a section link under More) can never leave a second item lit. A link to a
+ * spot on another page (#) is never the current page.
+ */
+function markCurrent() {
+  const links = [...document.querySelectorAll('[data-guide-side] .ae-gd-side-list a')];
+  const here = herePath();
+  let lit = null;
+  for (const link of links) {
+    const href = link.getAttribute('href') ?? '';
+    if (!lit && !href.includes('#') && !link.classList.contains('ae-gd-side-home') && pathKey(href) === here) lit = link;
+  }
+  /* Only touch what is wrong, so the lit item drawn with the menu never flickers through a colour change. */
+  for (const link of links) {
+    if (link === lit) { if (link.getAttribute('aria-current') !== 'page') link.setAttribute('aria-current', 'page'); }
+    else if (link.hasAttribute('aria-current')) link.removeAttribute('aria-current');
+  }
+}
 
 /** The side menu: Guide home, this section's pages with this one lit, then the other sections under More. */
 function sideHtml(item, crumbs) {
@@ -154,9 +180,12 @@ export async function startGuidePage(fill) {
   try {
     await fill(linked);
     adoptPageList();
+    markCurrent();
   } catch (error) {
     showNotice('This part of the Guide could not load. Refresh the page to try again.', 'error');
     console.error(error);
   }
   markReady();
+  /* Back and forward restore a page as it was left: light it again. */
+  addEventListener('pageshow', event => { if (event.persisted) markCurrent(); });
 }

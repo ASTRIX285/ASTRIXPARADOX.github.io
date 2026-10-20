@@ -1854,7 +1854,7 @@ body.aetherium-page[data-ae-page="guide"]{
   --ae-gd-ink:#e8edf6;--ae-gd-ink-soft:#c3cfe2;--ae-gd-muted:#a3b1ca;
   --ae-gd-edge:rgba(156,196,239,0.5);--ae-gd-glow:rgba(95,216,234,0.25);--ae-gd-ivory:rgba(217,210,192,0.35);
   --ae-gd-line:rgba(156,196,239,0.2);--ae-gd-line-soft:rgba(156,196,239,0.14);--ae-gd-line-mid:rgba(156,196,239,0.35);--ae-gd-line-strong:rgba(156,196,239,0.6);
-  --ae-gd-link:#9cc4ef;--ae-gd-emblem-glow:rgba(95,216,234,0.55);--ae-gd-shot-glow:rgba(95,216,234,0.15);
+  --ae-gd-link:#9cc4ef;--ae-gd-shot-glow:rgba(95,216,234,0.15);
   --ae-gd-gold:#e2b54f;--ae-gd-gold-fill:#e9c24f;--ae-gd-gold-fill-hi:#f2cf66;--ae-gd-gold-edge:#f6dc8a;--ae-gd-gold-ink:#1f1604;
   --ae-gd-gold-glow:rgba(233,194,79,0.35);--ae-gd-gold-line:rgba(226,181,79,0.4);
   --ae-gd-shade:rgba(12,19,29,0.8);--ae-gd-shade-mid:rgba(12,19,29,0.45);--ae-gd-shade-low:rgba(12,19,29,0.55);--ae-gd-clear:rgba(12,19,29,0);
@@ -1863,7 +1863,13 @@ body.aetherium-page[data-ae-page="guide"]{
   /* Guide titles only, never body text: FairyTaleJF from the site's Adobe Fonts kit (Miguel, 19 Oct 2026). */
   --ae-gd-font-title:"fairy-tale-jf",var(--forge-font-display);
   --ae-font-ui:var(--forge-font-ui,"Segoe UI",sans-serif);
+  /* The Guide type scale (design/aetherium-guide-foundations, 20 Oct 2026). One step per level, the same on every Guide page.
+     The title face only at 24px and up; everything smaller is in the display face. Phone sizes are set below 761px. */
+  --ae-gd-fs-title:64px;--ae-gd-fs-h2:40px;--ae-gd-fs-card:28px;--ae-gd-fs-sub:18px;--ae-gd-fs-body:17px;--ae-gd-fs-small:14px;
+  --ae-gd-lh-body:1.65;--ae-gd-measure:70ch;--ae-gd-space-h2:40px;
+  --ae-gd-icon:120px;--ae-gd-icon-glow:rgba(95,216,234,0.35);--ae-gd-icon-glow-hi:rgba(95,216,234,0.7);
   background:var(--ae-gd-ground)}
+@media (max-width:760px){body.aetherium-page[data-ae-page="guide"]{--ae-gd-fs-title:42px;--ae-gd-fs-h2:30px;--ae-gd-fs-card:24px;--ae-gd-icon:96px}}
 html:has(body.aetherium-page[data-ae-page="guide"]){background:var(--ae-gd-ground)}
 /* The page runs edge to edge: the photo band is full width, the frame below sets its own gutter. */
 body.aetherium-page[data-ae-page="guide"] .ae-main{max-width:none;padding:calc(var(--ax-shell-top,108px) + 10px + var(--ax-shell-tabs,46px)) 0 0}
@@ -1883,25 +1889,24 @@ body.aetherium-page[data-ae-page="guide"] .ae-main>:is(.ae-notice,.ae-source,.ae
 .ae-gd-hero-copy{position:relative;z-index:2;height:100%;box-sizing:border-box;max-width:1240px;margin:0 auto;padding:0 32px 48px;
   display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:12px}
 .ae-gd-hero.is-home .ae-gd-hero-copy{max-width:1200px;padding-bottom:56px;gap:16px}
-.ae-gd .ae-gd-kicker{margin:0;font:600 13px/1.2 var(--ae-font-ui);letter-spacing:.28em;text-transform:uppercase;color:var(--ae-gd-gold)}
-.ae-gd .ae-gd-title{margin:0;max-width:760px;font:400 64px/1.05 var(--ae-gd-display);letter-spacing:0;color:var(--ae-gd-ink);text-wrap:balance}
-.ae-gd-hero:not(.is-home) .ae-gd-title{font-size:60px}
+.ae-gd .ae-gd-kicker{margin:0;font:600 var(--ae-gd-fs-small)/1.2 var(--ae-gd-display);letter-spacing:.28em;text-transform:uppercase;color:var(--ae-gd-gold)}
+.ae-gd .ae-gd-title{margin:0;max-width:760px;font:400 var(--ae-gd-fs-title)/1.05 var(--ae-gd-display);letter-spacing:0;color:var(--ae-gd-ink);text-wrap:balance}
 .ae-gd .ae-gd-hero .ae-gd-lede{margin:0;max-width:620px;font-size:18px;line-height:1.55;color:var(--ae-gd-ink-soft)}
 .ae-gd .ae-gd-hero.is-home .ae-gd-lede{font-size:19px}
 .ae-gd-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
 /* The frame: the side menu on the left, the page running full width on the right. The home has no side menu. */
 .ae-gd-frame{display:flex;flex-wrap:wrap;align-items:flex-start;gap:48px;width:100%;max-width:1240px;box-sizing:border-box;margin:0 auto;padding:32px 32px 80px}
 .ae-gd.is-home .ae-gd-frame{display:block;max-width:1200px;padding-top:24px}
-.ae-gd-body{flex:999 1 640px;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;align-content:start;font-size:17px;line-height:1.6}
+.ae-gd-body{flex:999 1 640px;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;align-content:start;font-size:var(--ae-gd-fs-body);line-height:var(--ae-gd-lh-body)}
 .ae-gd-body>*{min-width:0}
 .ae-gd.is-home .ae-gd-body{display:block}
-.ae-gd h2,.ae-gd-h2{margin:0 0 .75rem;font:700 1.25rem/1.25 var(--ae-gd-display);letter-spacing:.02em;color:var(--ae-gd-ink)}
+.ae-gd h2,.ae-gd-h2{margin:0 0 .75rem;font:400 var(--ae-gd-fs-h2)/1.15 var(--ae-gd-display);letter-spacing:0;color:var(--ae-gd-ink)}
 /* Every heading of a section opens with a small gold diamond. */
-.ae-gd-body h2{display:flex;align-items:center;gap:12px}
-.ae-gd-body h2::before{content:"";flex:0 0 auto;width:10px;height:10px;background:var(--ae-gd-gold);transform:rotate(45deg)}
-.ae-gd h3,.ae-gd-h3{margin:0 0 .375rem;font:700 1.0625rem/1.3 var(--ae-font-ui);color:var(--ae-gd-ink)}
-.ae-gd h4{margin:.75rem 0 .375rem;font:700 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-gd-muted)}
-.ae-gd p{margin:0 0 .5rem;line-height:1.6}
+.ae-gd-body h2{display:flex;align-items:center;gap:14px}
+.ae-gd-body h2::before{content:"";flex:0 0 auto;width:12px;height:12px;background:var(--ae-gd-gold);transform:rotate(45deg)}
+.ae-gd h3,.ae-gd-h3{margin:0 0 .375rem;font:400 var(--ae-gd-fs-card)/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gd h4{margin:.75rem 0 .375rem;font:600 var(--ae-gd-fs-sub)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-gd p{margin:0 0 .5rem;line-height:var(--ae-gd-lh-body)}
 /* Plain links read pale blue, gold on hover; :where keeps this rule weaker than any component's own link colour. */
 .ae-gd :where(a:not(.ae-btn,.ae-gd-btn,.ae-gd-tile-head,.ae-gd-step)){color:var(--ae-gd-link)}
 .ae-gd :where(a:not(.ae-btn,.ae-gd-btn,.ae-gd-tile-head,.ae-gd-step)):hover{color:var(--ae-gd-gold)}
@@ -1912,10 +1917,12 @@ body.aetherium-page[data-ae-page="guide"] .ae-main>:is(.ae-notice,.ae-source,.ae
 .ae-gd-side ul{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .ae-gd .ae-gd-side a{display:flex;align-items:center;min-height:44px;box-sizing:border-box;padding:6px 14px;border:1px solid transparent;border-radius:6px;
   font:500 15px/1.3 var(--ae-font-ui);color:var(--ae-gd-ink-soft);text-decoration:none}
-.ae-gd .ae-gd-side a:hover{color:var(--ae-gd-gold);border-color:var(--ae-gd-gold-line)}
+/* Gold is only ever the current page. Hover is ivory with a pale edge, and only on a real pointer, so a tapped item (or one
+   still under the mouse when a page comes back from history) never reads as a second lit item. */
+@media (hover:hover){.ae-gd .ae-gd-side a:not([aria-current="page"]):hover{color:var(--ae-gd-ink);border-color:var(--ae-gd-line-mid)}}
 .ae-gd .ae-gd-side a[aria-current="page"]{color:var(--ae-gd-gold);background:var(--ae-gd-raised);border-color:var(--ae-gd-gold)}
 .ae-gd .ae-gd-side .ae-gd-side-home{gap:6px;margin-bottom:10px;color:var(--ae-gd-link)}
-.ae-gd .ae-gd-side-label{margin:0;padding:0 14px 6px;font:600 12px/1.2 var(--ae-font-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-gd .ae-gd-side-label{margin:0;padding:0 14px 6px;font:600 13px/1.2 var(--ae-gd-display);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-gd-muted)}
 .ae-gd .ae-gd-side-label+ul+.ae-gd-side-label{padding-top:20px}
 .ae-gd-side-toggle{display:none!important}
 /* Guide buttons in AION 2's colours: navy fill, pale blue edge, a soft cyan glow; gold edge and label when chosen. The one main
@@ -1939,19 +1946,19 @@ html body.aetherium-page .ae-gd-btn.is-gold:hover:not(#ae-g1):not(#ae-g2):not(#a
 html body.aetherium-page .ae-gd-btn:focus-visible:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){outline:2px solid var(--ae-strobe)!important;outline-offset:2px!important}
 }
 /* Home: the tiles, the screenshot panel (only with a real screenshot) and the path strip. */
-.ae-gd.is-home .ae-gd-h2{margin:24px 0;font:400 32px/1.15 var(--ae-gd-display);letter-spacing:0}
-.ae-gd.is-home .ae-gd-h2::before{width:12px;height:12px}
 .ae-gd-linked{margin:0 0 8px;padding:.625rem .875rem;background:var(--ae-gd-panel);border-left:3px solid var(--ae-gd-gold)}
 .ae-gd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px;margin:0;padding:0;list-style:none}
 @media (min-width:1280px){.ae-gd-browse .ae-gd-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .ae-gd-tile{display:flex;flex-direction:column;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-line);border-radius:10px;overflow:hidden;
   transition:border-color .2s ease,transform .2s ease}
 .ae-gd-tile:hover{border-color:var(--ae-gd-gold-line);transform:translateY(-2px)}
-.ae-gd-tile-art{display:flex;align-items:center;justify-content:center;height:110px;background:var(--ae-gd-deep);border-bottom:1px solid var(--ae-gd-line-soft);color:var(--ae-gd-link)}
-.ae-gd-emblem{filter:drop-shadow(0 0 10px var(--ae-gd-emblem-glow))}
-.ae-gd-emblem .is-gold{stroke:var(--ae-gd-gold)}
-.ae-gd-tile-copy{padding:20px 22px 24px}
-.ae-gd .ae-gd-tile-name{margin:0 0 6px;font:400 22px/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
+/* A section tile on the home: its rendered icon centred at the top (no band behind it), then the title centred over an
+   ivory hairline. Hover lifts the icon a little and brightens its cyan glow; reduced motion keeps it still. */
+.ae-gd-tile-icon{display:block;width:var(--ae-gd-icon);height:var(--ae-gd-icon);margin:24px auto 0;object-fit:contain;
+  filter:drop-shadow(0 0 10px var(--ae-gd-icon-glow));transition:transform .2s ease,filter .2s ease}
+.ae-gd-tile.is-section:is(:hover,:focus-within) .ae-gd-tile-icon{transform:scale(1.05);filter:drop-shadow(0 0 18px var(--ae-gd-icon-glow-hi))}
+.ae-gd-tile-copy{flex:1 1 auto;padding:20px 22px 24px}
+.ae-gd .ae-gd-tile-name{margin:0 0 6px;font:400 var(--ae-gd-fs-card)/1.2 var(--ae-gd-display);color:var(--ae-gd-ink)}
 .ae-gd .ae-gd-tile-head{display:inline-flex;align-items:center;min-height:44px;color:var(--ae-gd-ink);text-decoration:none}
 .ae-gd .ae-gd-tile-head:is(a):is(:hover,:focus-visible){color:var(--ae-gd-gold)}
 .ae-gd .ae-gd-tile-blurb{margin:0 0 14px;font-size:15px;line-height:1.5;color:var(--ae-gd-muted)}
@@ -1959,16 +1966,15 @@ html body.aetherium-page .ae-gd-btn:focus-visible:not(#ae-g1):not(#ae-g2):not(#a
 .ae-gd .ae-gd-topics a{display:inline-flex;align-items:center;min-height:32px;color:var(--ae-gd-ink-soft);text-decoration:none}
 .ae-gd .ae-gd-topics a:hover{color:var(--ae-gd-gold)}
 .ae-gd-topics span{display:inline-flex;align-items:center;min-height:32px;color:var(--ae-gd-muted)}
-.ae-gd.is-home :is(.ae-gd-example,.ae-gd-path) .ae-gd-h2{margin-top:88px}
 .ae-gd .ae-gd-section-lede{margin:-12px 0 32px;max-width:720px;font-size:17px;line-height:1.55;color:var(--ae-gd-muted)}
 .ae-gd-showcase{display:flex;gap:48px;align-items:center}
 .ae-gd-shot{flex:1 1 620px;min-width:0;margin:0}
-.ae-gd-shot-label{margin:0 0 10px;font:600 12px/1.2 var(--ae-font-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-gd-shot-label{margin:0 0 10px;font:600 var(--ae-gd-fs-small)/1.2 var(--ae-gd-display);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-gd-muted)}
 .ae-gd-shot img{display:block;width:100%;height:auto;border:1px solid var(--ae-gd-line-mid);border-radius:8px;box-shadow:0 0 40px var(--ae-gd-shot-glow)}
 .ae-gd-shot-steps{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:26px;margin:0;padding:0;list-style:none}
 .ae-gd-shot-steps li{display:flex;gap:16px}
 .ae-gd-num{flex:0 0 34px;display:flex;align-items:center;justify-content:center;height:34px;border-radius:50%;border:2px solid var(--ae-gd-gold);color:var(--ae-gd-gold);font-weight:600}
-.ae-gd .ae-gd-shot-steps h3{margin:0 0 4px;font:400 21px/1.25 var(--ae-gd-display)}
+.ae-gd .ae-gd-shot-steps h3{margin:0 0 4px;font:400 var(--ae-gd-fs-card)/1.2 var(--ae-gd-display)}
 .ae-gd .ae-gd-shot-steps p{margin:0;color:var(--ae-gd-ink-soft);line-height:1.55}
 .ae-gd-steps{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:28px;margin:32px 0 0;padding:0;list-style:none}
 .ae-gd-steps::before{content:"";position:absolute;left:4%;right:4%;top:27px;height:1px;background:var(--ae-gd-line-mid)}
@@ -1977,13 +1983,42 @@ html body.aetherium-page .ae-gd-btn:focus-visible:not(#ae-g1):not(#ae-g2):not(#a
 .ae-gd-step-n{display:flex;align-items:center;justify-content:center;width:54px;height:54px;box-sizing:border-box;border-radius:50%;background:var(--ae-gd-ground);
   border:2px solid var(--ae-gd-line-strong);color:var(--ae-gd-ink);font:400 22px/1 var(--ae-gd-display);transition:border-color .15s ease,color .15s ease}
 .ae-gd-step:is(:hover,:focus-visible) .ae-gd-step-n{border-color:var(--ae-gd-gold);color:var(--ae-gd-gold)}
-.ae-gd-step strong{font:400 20px/1.25 var(--ae-gd-display)}
+.ae-gd-step strong{font:400 var(--ae-gd-fs-card)/1.2 var(--ae-gd-display)}
 .ae-gd-step:is(:hover,:focus-visible) strong{color:var(--ae-gd-gold)}
 .ae-gd-step small{font-size:15px;line-height:1.5;color:var(--ae-gd-muted)}
-/* Guide titles (hero H1, section H2s, tile titles, path step titles, side menu section labels) in the title face. The kit
-   has no bold, so weight 400 and no faked bold or italic. Sizes stay as set above. */
-body.aetherium-page[data-ae-page="guide"] .ae-gd :is(.ae-gd-title,h2,.ae-gd-h2,.ae-gd-tile-name,.ae-gd-step strong,.ae-gd-shot-steps h3,.ae-gd-side-label){
+/* The type scale on every Guide page, by role, so a heading of one level looks the same everywhere. These come after the
+   sections' own heading rules and carry the page scope, so ae-gg, ae-gx, ae-gp and ae-gd-card cannot set another size.
+   Section heading (H2): 40px, 30px on a phone, a gold diamond before it, 40px above it (none when it opens the page or its box). */
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body :is(h2,.ae-gd-h2,.ae-gx-h2,.ae-gg-h2){
+  margin:var(--ae-gd-space-h2) 0 16px;font-size:var(--ae-gd-fs-h2);line-height:1.15;letter-spacing:0;color:var(--ae-gd-ink)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd.is-home .ae-gd-body .ae-gd-h2{margin:var(--ae-gd-space-h2) 0 24px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body>:first-child h2:first-child,
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body>h2:first-child,
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body :is(.ae-panel,.ae-gd-setup)>h2:first-child{margin-top:0}
+/* Card or tile title: 28px, 24px on a phone. A card's own title is one whatever its tag (the General fact cards and the path
+   cards title their card with an h2), so it has no diamond and no space above. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd :is(h3,.ae-gd-tile-name,.ae-gg-card>.ae-gg-h,.ae-gp-card h2){
+  margin:0 0 .5rem;font-size:var(--ae-gd-fs-card);line-height:1.2;letter-spacing:0;color:var(--ae-gd-ink)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body :is(.ae-gg-card>.ae-gg-h,.ae-gp-card h2){display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body :is(.ae-gg-card>.ae-gg-h,.ae-gp-card h2)::before{content:none}
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body .ae-gp-done summary h2{margin:0}
+/* Sub heading inside a card (H4, and the path cards' own small h3): 18px, display face, weight 600, soft ink. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body :is(h4,.ae-gp-card h3){margin:.875rem 0 .375rem;font:600 var(--ae-gd-fs-sub)/1.3 var(--ae-gd-display);letter-spacing:0;color:var(--ae-gd-ink-soft)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-gd-build-grid h4:first-child{margin-top:0}
+/* Body: 17px at 1.65, lines no longer than about 70 characters. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body p{max-width:var(--ae-gd-measure)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body p:not([class]){font-size:var(--ae-gd-fs-body);line-height:var(--ae-gd-lh-body)}
+/* Small labels and captions: 14px, display face. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd :is(.ae-gd-note,.ae-gg-note,.ae-gp-note,.ae-gd-key,figcaption){font-family:var(--ae-gd-display);font-size:var(--ae-gd-fs-small)}
+/* Guide titles (hero H1, section headings, card and tile titles, path step titles) in the title face, never below 24px. The
+   kit has no bold, so weight 400 and no faked bold or italic. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd :is(.ae-gd-title,.ae-gd-body h2,.ae-gd-h2,.ae-gx-h2,.ae-gg-h2,h3,.ae-gd-tile-name,.ae-gg-card>.ae-gg-h,.ae-gd-step strong,.ae-gd-shot-steps h3){
   font-family:var(--ae-gd-font-title);font-weight:400;font-synthesis:none;letter-spacing:normal}
+/* Small chips and counts inside a title stay in the display face. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd :is(h1,h2,h3,h4) :is(.ae-tag,.ae-gd-pending,.ae-gp-count,small){font-family:var(--ae-gd-display);font-weight:600}
+/* A home section tile's title: centred under the icon, an ivory hairline under it, gold on hover. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-tile.is-section .ae-gd-tile-name{margin:0 0 14px;padding-bottom:12px;text-align:center;border-bottom:1px solid var(--ae-gd-ivory)}
+.ae-gd .ae-gd-tile.is-section .ae-gd-tile-head{display:flex;justify-content:center}
 /* The page footer on Guide pages: quiet lines, the official site link the only way out. */
 body.aetherium-page[data-ae-page="guide"] .ae-footer{max-width:1240px;width:100%;box-sizing:border-box;margin:0 auto;padding:28px 32px;border-top:1px solid var(--ae-gd-line-soft);color:var(--ae-gd-muted)}
 body.aetherium-page[data-ae-page="guide"] .ae-footer p{max-width:none}
@@ -1993,7 +2028,6 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
 @media (max-width:760px){
   .ae-gd-hero,.ae-gd-hero.is-home{height:auto;min-height:360px}
   .ae-gd-hero-copy,.ae-gd-hero.is-home .ae-gd-hero-copy{height:auto;min-height:360px;padding:140px var(--ae-gutter) 28px;gap:10px}
-  .ae-gd .ae-gd-title,.ae-gd-hero:not(.is-home) .ae-gd-title{font-size:42px}
   .ae-gd .ae-gd-hero .ae-gd-lede,.ae-gd .ae-gd-hero.is-home .ae-gd-lede{font-size:16px}
   .ae-gd-actions{gap:8px;margin-top:4px}
   .ae-gd-frame,.ae-gd.is-home .ae-gd-frame{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:20px;padding:20px var(--ae-gutter) 56px}
@@ -2001,9 +2035,7 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
   .ae-gd-side-toggle{display:inline-flex!important;width:100%}
   .ae-gd-side:not(.is-open) .ae-gd-side-list{display:none}
   .ae-gd-side-list{padding-top:8px}
-  .ae-gd-body{flex:1 1 auto;font-size:16px}
-  .ae-gd.is-home .ae-gd-h2{font-size:26px}
-  .ae-gd.is-home :is(.ae-gd-example,.ae-gd-path) .ae-gd-h2{margin-top:56px}
+  .ae-gd-body{flex:1 1 auto}
   .ae-gd-showcase{flex-direction:column;align-items:stretch}
   .ae-gd-steps{grid-template-columns:minmax(0,1fr);gap:24px}
   .ae-gd-steps::before{left:27px;right:auto;top:27px;bottom:27px;width:1px;height:auto}
@@ -2011,7 +2043,7 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
   .ae-gd-step-n{grid-row:1/3}
   body.aetherium-page[data-ae-page="guide"] .ae-footer{padding:24px var(--ae-gutter)}
 }
-@media (prefers-reduced-motion:reduce){.ae-gd-tile,.ae-gd-tile:hover{transition:none;transform:none}}
+@media (prefers-reduced-motion:reduce){.ae-gd-tile,.ae-gd-tile:hover,.ae-gd-tile-icon,.ae-gd-tile.is-section:is(:hover,:focus-within) .ae-gd-tile-icon{transition:none;transform:none}}
 .ae-gd-classlinks,.ae-gd-ascent ul{display:flex;flex-wrap:wrap;gap:.5rem;margin:0;padding:0;list-style:none}
 .ae-gd-soon{display:grid;gap:.75rem;max-width:72ch}
 /* The class roles table: class names in gold, ratings bold, a Reported tag and its source number. */

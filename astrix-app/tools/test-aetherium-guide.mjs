@@ -9,7 +9,9 @@
 //   - the 8 class pages: builds by role, key skills, stat order, Ascent Plan links;
 //   - "Your setup vs the build": flags with what they cost, the read's age, the device memory, never a block; Worker down;
 //   - the memory helper: per Daeva key, savedAt, blocked storage is never an error;
-//   - looks: no sideways scroll at 390, buttons 44px tall, the side menu folds behind a toggle on a phone, usable well inside 4 s.
+//   - looks: no sideways scroll at 390, buttons 44px tall, the side menu folds behind a toggle on a phone, usable well inside 4 s;
+//   - the type scale (design/aetherium-guide-foundations, 20 Oct 2026): H1, section, card and sub headings the same size on every
+//     Guide page, the title face only at 24px and up; exactly one side menu item lit, hover never gold; the home tiles' icons.
 // AE_SHOTS=<dir outside the repo> also saves screenshots at 390 and 1600.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
@@ -154,6 +156,25 @@ await check('shell contract: the photo band, the side menu with this page lit, n
     }
     await context.close();
   }
+  // Exactly one side menu item is lit (aria-current="page", gold) on every Guide page with a side menu, and hovering another
+  // item never turns it gold: only the current page is ever lit.
+  const guidePages=allPages.filter(path=>path.startsWith('/hub/aetherium/guide/')&&path!=='/hub/aetherium/guide/');
+  assert.ok(guidePages.length>=40,`${guidePages.length} Guide sub pages`);
+  for(const path of guidePages){
+    const {page,context}=await open(path);
+    const side=await page.$$eval('.ae-gd-side a',links=>links.map(a=>({href:a.getAttribute('href'),current:a.getAttribute('aria-current'),color:getComputedStyle(a).color})));
+    const lit=side.filter(link=>link.current==='page');
+    assert.equal(lit.length,1,`${path}: exactly one item has aria-current="page" (${lit.map(link=>link.href)})`);
+    assert.equal(new URL(lit[0].href,base).pathname,path,`${path}: the lit item is this page`);
+    assert.deepEqual(side.filter(link=>link.color===GOLD).map(link=>link.href),[lit[0].href],`${path}: only the lit item is gold`);
+    if(path==='/hub/aetherium/guide/general/about/'){
+      await page.hover('.ae-gd-side a[href$="/general/market/"]');
+      assert.notEqual(await page.$eval('.ae-gd-side a[href$="/general/market/"]',a=>getComputedStyle(a).color),GOLD,'Hover never lights an item gold');
+      const back=await page.$$eval('.ae-gd-side a[aria-current="page"]',links=>links.length);
+      assert.equal(back,1,'Still one lit item while hovering another');
+    }
+    await context.close();
+  }
   // A page's own list moves into the side menu, this page lit (General pages, Equipment topics).
   for(const [path,first,current] of [['/hub/aetherium/guide/general/about/','Overview','About AION 2'],['/hub/aetherium/guide/equipment/enhancement/','Overview','Enhancement']]){
     const {page,context,errors}=await open(path);
@@ -204,10 +225,38 @@ await check('home: the band and its buttons, a tile per section, the path strip,
   assert.equal(ctas[1].bg,'rgb(22, 32, 46)','The second action is a navy button');
   assert.ok(ctas.every(cta=>cta.h>=44),'Buttons at least 44px');
   assert.equal(await plain(page,'#aeGridTitle'),'Browse the guide');
-  const tiles=await page.$$eval('[data-guide-tile]',items=>items.map(li=>({id:li.dataset.guideTile,href:li.querySelector('.ae-gd-tile-head').getAttribute('href'),emblem:Boolean(li.querySelector('.ae-gd-tile-art svg')),border:getComputedStyle(li).borderTopWidth})));
+  const tiles=await page.$$eval('[data-guide-tile]',items=>items.map(li=>{
+    const img=li.querySelector('img.ae-gd-tile-icon'),name=li.querySelector('.ae-gd-tile-name'),box=li.getBoundingClientRect(),icon=img?.getBoundingClientRect();
+    return {id:li.dataset.guideTile,href:li.querySelector('.ae-gd-tile-head').getAttribute('href'),svg:li.querySelectorAll('svg').length,band:li.querySelectorAll('.ae-gd-tile-art').length,
+      src:img?.getAttribute('src'),alt:img?.getAttribute('alt'),w:img?.getAttribute('width'),h:img?.getAttribute('height'),loading:img?.getAttribute('loading'),
+      iconW:icon?.width,iconCentre:icon?Math.abs((icon.left+icon.width/2)-(box.left+box.width/2)):null,iconTop:icon?icon.top-box.top:null,
+      nameAlign:getComputedStyle(name).textAlign,nameSize:getComputedStyle(name).fontSize,hairline:`${getComputedStyle(name).borderBottomWidth} ${getComputedStyle(name).borderBottomColor}`,
+      border:getComputedStyle(li).borderTopWidth,height:Math.round(box.height),top:Math.round(box.top)};
+  }));
   assert.deepEqual(tiles.map(tile=>[tile.id,tile.href]),SECTIONS.slice(1).map(([id,,href])=>[id,href]),'A tile per section, in nav order');
-  assert.ok(tiles.every(tile=>tile.emblem),'Every tile has its emblem');
+  for(const tile of tiles){
+    assert.equal(tile.svg+tile.band,0,`${tile.id}: no drawn icon and no icon band`);
+    assert.equal(tile.src,`/astrix-app/pages/aetherium/images/section-icons/${tile.id}.png`,`${tile.id}: its own section icon`);
+    assert.deepEqual([tile.alt,tile.w,tile.h,tile.loading],['','120','120','lazy'],`${tile.id}: empty alt, width, height, lazy`);
+    assert.equal(tile.iconW,120,`${tile.id}: icon 120px on desktop`);
+    assert.ok(tile.iconCentre<=1&&tile.iconTop<=40,`${tile.id}: icon centred at the top`);
+    assert.equal(tile.nameAlign,'center',`${tile.id}: title centred`);
+    assert.equal(tile.nameSize,'28px',`${tile.id}: tile title 28px`);
+    assert.equal(tile.hairline,'1px rgba(217, 210, 192, 0.35)',`${tile.id}: ivory hairline under the title`);
+  }
+  for(const top of new Set(tiles.map(tile=>tile.top)))assert.equal(new Set(tiles.filter(tile=>tile.top===top).map(tile=>tile.height)).size,1,'Tiles in a row are the same height');
   assert.ok(tiles.every(tile=>tile.border==='1px'),'Tiles are bordered cards');
+  // Hover: the icon grows to 1.05 with a brighter glow and the title turns gold; reduced motion keeps the icon still.
+  await page.hover('[data-guide-tile="world"] .ae-gd-tile-head');
+  await page.waitForTimeout(300);
+  const hovered=await page.$eval('[data-guide-tile="world"]',li=>({transform:getComputedStyle(li.querySelector('.ae-gd-tile-icon')).transform,filter:getComputedStyle(li.querySelector('.ae-gd-tile-icon')).filter,color:getComputedStyle(li.querySelector('.ae-gd-tile-head')).color}));
+  assert.equal(hovered.transform,'matrix(1.05, 0, 0, 1.05, 0, 0)','Icon scales to 1.05 on hover');
+  assert.match(hovered.filter,/18px/,'Brighter glow on hover');
+  assert.equal(hovered.color,GOLD,'Tile title gold on hover');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  assert.equal(await page.$eval('[data-guide-tile="world"] .ae-gd-tile-icon',img=>getComputedStyle(img).transform),'none','No movement with reduced motion');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.mouse.move(0,0);
   for(const width of [1600,1280]){
     await page.setViewportSize({width,height:1000});
     const rows=await page.$$eval('[data-guide-tile]',items=>items.map(li=>Math.round(li.getBoundingClientRect().top)));
@@ -426,6 +475,53 @@ for(const [width,height] of [[390,844],[1600,1000]]){
         }
       }
       if(process.env.AE_SHOTS)await page.screenshot({path:`${process.env.AE_SHOTS}/guide-${path.replace(/\W+/g,'-')}-${width}.png`,fullPage:true});
+      await context.close();
+    }
+  });
+}
+
+// The type scale: every heading of one level is the same size on every Guide page, the title face only at 24px and up.
+const SCALE_PAGES=['/hub/aetherium/guide/','/hub/aetherium/guide/general/about/','/hub/aetherium/guide/general/faq/','/hub/aetherium/guide/classes/chanter/','/hub/aetherium/guide/equipment/manastones/','/hub/aetherium/guide/dungeons/','/hub/aetherium/guide/path/','/hub/aetherium/guide/world/'];
+for(const [width,scale] of [[1600,{h1:64,section:40,card:28}],[390,{h1:42,section:30,card:24}]]){
+  await check(`type scale at ${width}: H1 ${scale.h1}, section ${scale.section}, card ${scale.card}, sub 18, body 17, labels readable`,async()=>{
+    for(const path of SCALE_PAGES){
+      const {page,context}=await open(path,{viewport:{width,height:900}});
+      const found=await page.evaluate(()=>{
+        const read=el=>{const s=getComputedStyle(el);return {text:el.textContent.trim().slice(0,30),size:parseFloat(s.fontSize),family:s.fontFamily,weight:s.fontWeight,color:s.color,top:parseFloat(s.marginTop),diamond:getComputedStyle(el,'::before').content!=='none'&&getComputedStyle(el,'::before').backgroundColor};};
+        const card=':is(.ae-gg-card>.ae-gg-h,.ae-gp-card h2)';
+        return {
+          h1:[...document.querySelectorAll('.ae-gd h1')].map(read),
+          section:[...document.querySelectorAll('.ae-gd-body h2')].filter(h=>!h.matches(card)&&h.offsetParent).map(read),
+          card:[...document.querySelectorAll(`.ae-gd :is(h3,.ae-gd-tile-name,${card})`)].filter(h=>!h.matches('.ae-gp-card h3')&&h.offsetParent).map(read),
+          sub:[...document.querySelectorAll('.ae-gd-body :is(h4,.ae-gp-card h3)')].filter(h=>h.offsetParent).map(read),
+          body:[...document.querySelectorAll('.ae-gd-body p:not([class])')].filter(p=>p.offsetParent).map(p=>({size:parseFloat(getComputedStyle(p).fontSize),lh:parseFloat(getComputedStyle(p).lineHeight)/parseFloat(getComputedStyle(p).fontSize),w:p.getBoundingClientRect().width,ch:parseFloat(getComputedStyle(p).fontSize)})),
+          labels:[...document.querySelectorAll('.ae-gd-side-label')].map(read),
+          titleFace:[...document.querySelectorAll('.ae-gd *')].filter(el=>el.offsetParent&&el.childElementCount===0&&el.textContent.trim()&&/fairy-tale/i.test(getComputedStyle(el).fontFamily)).map(read)
+        };
+      });
+      assert.deepEqual(found.h1.map(h=>h.size),[scale.h1],`${path}: H1 ${scale.h1}px`);
+      for(const h of found.section){
+        assert.equal(h.size,scale.section,`${path}: section heading "${h.text}" ${h.size}px`);
+        assert.match(h.family,/fairy-tale/i,`${path}: "${h.text}" in the title face`);
+        assert.equal(h.diamond,GOLD,`${path}: "${h.text}" opens with a gold diamond`);
+        assert.ok(h.top===40||h.top===0,`${path}: "${h.text}" has 40px above (or opens its box), got ${h.top}`);
+      }
+      for(const h of found.card)assert.equal(h.size,scale.card,`${path}: card title "${h.text}" ${h.size}px`);
+      for(const h of found.sub){
+        assert.equal(h.size,18,`${path}: sub heading "${h.text}" 18px`);
+        assert.equal(h.weight,'600',`${path}: sub heading "${h.text}" weight 600`);
+        assert.doesNotMatch(h.family,/fairy-tale/i,`${path}: sub heading "${h.text}" in the display face`);
+      }
+      for(const p of found.body){
+        assert.equal(p.size,17,`${path}: body 17px`);
+        assert.ok(Math.abs(p.lh-1.65)<0.01,`${path}: body line height 1.65`);
+      }
+      for(const label of found.labels){
+        assert.equal(label.size,13,`${path}: side menu label "${label.text}" 13px`);
+        assert.doesNotMatch(label.family,/fairy-tale/i,`${path}: side menu label in the display face`);
+      }
+      for(const el of found.titleFace)assert.ok(el.size>=24,`${path}: the title face only at 24px and up ("${el.text}" ${el.size}px)`);
+      if(path==='/hub/aetherium/guide/'&&width===390)assert.equal(await page.$eval('.ae-gd-tile-icon',img=>img.getBoundingClientRect().width),96,'Tile icons 96px on a phone');
       await context.close();
     }
   });
