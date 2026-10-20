@@ -17,12 +17,19 @@
  *                         fill. crumbs: [{ label, href }] after "Guide"; the last crumb is the page itself (no href needed).
  *                         kicker and actions (markup for the band's buttons) are optional, for the Guide home.
  *   comingSoonHtml(id)    the short "coming soon in this guide" body for a section not built yet.
+ *   overviewHtml(section, cards)
+ *                         a section Overview's topic cards (design/aetherium-guide-overviews, 20 Oct 2026), one style for
+ *                         every section. cards: [{ id, label, href, blurb }] in reading order; the first is "start here"
+ *                         and spans two columns. Each card takes its icon from TOPIC_ICONS[section][id]; a topic with no
+ *                         fitting icon draws none.
+ *   TOPIC_ICONS           the icon of each Overview card: { art } for our rendered PNGs, or { game, grade } for a real
+ *                         item or skill icon on the NCSOFT CDN (never re-hosted), with its item name and id.
  *   startGuidePage(fill)  wires the menu drawer, takes the faction colour from the linked Daeva (aetherium-memory.mjs),
  *                         runs fill(linked) (may be async; linked is linkedDaeva() or null), moves a page's own page list
  *                         into the side menu, lights exactly one side menu item (this page) and reports the page ready
  *                         once, even on failure.
  */
-import { $, esc, markReady, setFaction, showNotice, wireDrawer } from './aetherium-ui.mjs';
+import { $, esc, gradeTile, markReady, setFaction, showNotice, wireDrawer } from './aetherium-ui.mjs';
 import { linkedDaeva } from './aetherium-memory.mjs';
 
 export const GUIDE_ROOT = '/hub/aetherium/guide/';
@@ -40,7 +47,7 @@ export const GUIDE_SECTIONS = Object.freeze([
   { id: 'equipment', label: 'Equipment', href: `${GUIDE_ROOT}equipment/`, blurb: 'Gear slots and grades, Enhancement, Manastones, Theostones, Arcana, pets, wings and titles.', topics: ['Slots and grades', 'Enhancement', 'Manastones', 'Theostones', 'Arcana', 'Pets and wings', 'Titles'], pages: { 'Slots and grades': `${GUIDE_ROOT}equipment/slots/`, Enhancement: `${GUIDE_ROOT}equipment/enhancement/`, Manastones: `${GUIDE_ROOT}equipment/manastones/`, Theostones: `${GUIDE_ROOT}equipment/theostones/`, Arcana: `${GUIDE_ROOT}equipment/arcana/`, 'Pets and wings': `${GUIDE_ROOT}equipment/pets-wings/`, Titles: `${GUIDE_ROOT}equipment/titles/` }, hero: VISTA_HERO, built: true },
   { id: 'crafting', label: 'Crafting', href: `${GUIDE_ROOT}crafting/`, blurb: 'The five professions, gathering and the crafted gear ladder.', topics: ['Professions', 'Gathering', 'Crafted gear'], pages: { Professions: `${GUIDE_ROOT}crafting/professions/`, Gathering: `${GUIDE_ROOT}crafting/gathering/`, 'Crafted gear': `${GUIDE_ROOT}crafting/crafted-gear/` }, hero: VISTA_HERO, built: true },
   { id: 'world', label: 'World', href: `${GUIDE_ROOT}world/`, blurb: 'Zones, Sealed Dungeons and Strongholds, the Abyss and events.', topics: ['Zones', 'Sealed Dungeons and Strongholds', 'The Abyss', 'Events'], pages: { Zones: `${GUIDE_ROOT}world/#aeWorld-zone`, 'Sealed Dungeons and Strongholds': `${GUIDE_ROOT}dungeons/sealed-dungeons/`, 'The Abyss': `${GUIDE_ROOT}world/#abyss`, Events: `${GUIDE_ROOT}world/#aeWorld-event` }, hero: VISTA_HERO, built: true },
-  { id: 'guides', label: 'Guides', href: `${GUIDE_ROOT}guides/`, blurb: 'Your path by level, new player help, dungeons, the Lv 45 weekly loop and the endgame.', topics: ['Your path by level', 'New player help', 'Dungeons', 'Lv 45 weekly loop', 'Endgame'], pages: { 'Your path by level': `${GUIDE_ROOT}path/`, Dungeons: `${GUIDE_ROOT}dungeons/`, 'Lv 45 weekly loop': `${GUIDE_ROOT}weekly/` }, hero: VISTA_HERO, built: false }
+  { id: 'guides', label: 'Guides', href: `${GUIDE_ROOT}guides/`, blurb: 'Your path by level, new player help, dungeons, the Lv 45 weekly loop and the endgame.', topics: ['Your path by level', 'New player help', 'Dungeons', 'Lv 45 weekly loop', 'Endgame'], pages: { 'Your path by level': `${GUIDE_ROOT}path/`, Dungeons: `${GUIDE_ROOT}dungeons/`, 'Lv 45 weekly loop': `${GUIDE_ROOT}weekly/` }, hero: VISTA_HERO, built: true }
 ]);
 
 export const GUIDE_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
@@ -168,6 +175,58 @@ export function comingSoonHtml(id) {
       ${item.topics.length ? `<ul class="ae-coming-list">${item.topics.map(topic => `<li>${esc(topic)}</li>`).join('')}</ul>` : ''}
       <p><a class="ae-btn" href="${GUIDE_ROOT}">Back to the Guide home</a></p>
     </section>`;
+}
+
+const ART = '/astrix-app/pages/aetherium/images/';
+const GAME = 'https://assets.playnccdn.com/static-aion2-gamedata/resources/';
+
+/*
+ * The Overview card icons. General and Character use our rendered PNGs; Skills and Equipment use real game icons as the
+ * official armory sends them (the item names, ids and grades are in the armory fixtures under astrix-app/tools/fixtures/aion2/eu,
+ * the skill icons in data/advisor/icons/gladiator.json). A topic with no fitting icon in our data is left out: no icon is
+ * better than a drawn one. Grades use our ids (grades.json): the armory's Legend is the game's Epic.
+ */
+export const TOPIC_ICONS = Object.freeze({
+  general: {
+    about: { art: `${ART}topic-icons/about.png` },
+    resets: { art: `${ART}topic-icons/resets.png` },
+    market: { art: `${ART}topic-icons/market.png` },
+    controls: { art: `${ART}topic-icons/controls.png` },
+    loadouts: { art: `${ART}topic-icons/loadouts.png` },
+    faq: { art: `${ART}topic-icons/faq.png` }
+  },
+  character: {
+    classes: { art: `${ART}class-emblems/gladiator.png` },
+    stats: { art: `${ART}topic-icons/stats.png` }
+  },
+  skills: {
+    'by-class': { game: `${GAME}ICON_GL_SKILL_002.png`, name: 'Keen Strike' },
+    mastery: { game: `${GAME}ICON_GL_SKILL_001.png`, name: 'Rending Blow' },
+    specialty: { game: `${GAME}ICON_GL_SKILL_017.png`, name: 'Overhead Slam' },
+    'skill-bar': { game: `${GAME}ICON_CO_SKILL_002.png`, name: 'Defiance' }
+  },
+  equipment: {
+    slots: { game: `${GAME}Icon_WP_GS_0078_T05.png`, grade: 'unique', name: 'Spiritforged Greatsword', itemId: 110130047 },
+    manastones: { game: `${GAME}Icon_Item_Usable_Enchant_MagicStone_A_c_003.png`, grade: 'rare', name: 'Manastone, Accuracy Bonus' },
+    'pets-wings': { game: `${GAME}Icon_WingB_007C.png`, grade: 'epic', name: 'Superior Daeva Wings', itemId: 30200703 }
+  }
+});
+
+function cardIconHtml(icon, size) {
+  if (icon?.art) return `<span class="ae-gd-ocard-icon is-art"><img src="${esc(icon.art)}" alt="" width="${size}" height="${size}" loading="lazy" decoding="async"></span>`;
+  if (icon?.game) return `<span class="ae-gd-ocard-icon is-game">${gradeTile({ icon: icon.game, grade: icon.grade ?? null, size })}</span>`;
+  return '';
+}
+
+/** A section Overview: one card per topic, the whole card a link, the first card "start here" across two columns. */
+export function overviewHtml(section, cards) {
+  const icons = TOPIC_ICONS[section] ?? {};
+  return `<ul class="ae-gd-overview" data-guide-overview="${esc(section)}">${cards.map((card, index) => {
+    const icon = cardIconHtml(icons[card.id], index === 0 ? 96 : 72);
+    return `<li class="ae-gd-ocard${index === 0 ? ' is-start' : ''}${icon ? '' : ' is-plain'}" data-guide-topic="${esc(card.id)}">
+        <a class="ae-gd-ocard-link" href="${esc(card.href)}">${icon}<span class="ae-gd-ocard-copy"><span class="ae-gd-ocard-title">${esc(card.label)}</span>${card.blurb ? `<span class="ae-gd-ocard-blurb">${esc(card.blurb)}</span>` : ''}</span></a>
+      </li>`;
+  }).join('')}</ul>`;
 }
 
 let started = false;

@@ -8,7 +8,7 @@
  */
 import { $, esc, gradeTile, number, showNotice, showSource, slotLabel } from './aetherium-ui.mjs';
 import { ArmoryUnavailable, cardUrl, explain, gearPageUrl, loadBuilds, loadCharacter, loadEnhancement, loadGrades, loadProgression, preloadItemDetails, refFromUrl, rolePick, titlesUrl } from './aetherium-data.mjs';
-import { GUIDE_ROOT, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { GUIDE_ROOT, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 import { buildFor, indexGrades, uniqueGearLevel } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
 import { gearSourcePlan, indexGearSources, slotGroupOf } from '/astrix-app/games/aion2/engine/gear-sources.mjs';
 
@@ -56,22 +56,6 @@ const TOPICS = {
 const SECTION = { equipment: { label: 'Equipment', href: EQUIPMENT }, crafting: { label: 'Crafting', href: CRAFTING } };
 const topicHref = (section, id) => `${SECTION[section].href}${id}/`;
 
-/* Our own line icons for the topic tiles (24 px grid, currentColor). Game icons go in tiles that show a real item. */
-const ICONS = {
-  slots: '<rect x="4" y="3" width="7" height="7"/><rect x="13" y="3" width="7" height="7"/><rect x="4" y="14" width="7" height="7"/><rect x="13" y="14" width="7" height="7"/>',
-  enhancement: '<path d="M12 3v18M5 10l7-7 7 7"/>',
-  manastones: '<path d="M12 3l7 6-7 12-7-12z"/><path d="M5 9h14"/>',
-  theostones: '<circle cx="12" cy="12" r="7"/><path d="M12 5v14M5 12h14"/>',
-  arcana: '<rect x="6" y="3" width="12" height="18" rx="1"/><path d="M12 8l2 4-2 4-2-4z"/>',
-  'pets-wings': '<path d="M12 12c-3-6-8-6-9-3 2 0 5 1 9 3zM12 12c3-6 8-6 9-3-2 0-5 1-9 3z"/><path d="M12 12v8"/>',
-  titles: '<path d="M6 4h12v6a6 6 0 0 1-12 0z"/><path d="M9 20h6M12 16v4"/>',
-  'where-to-get': '<circle cx="12" cy="10" r="3"/><path d="M12 21c-4-5-7-8-7-11a7 7 0 0 1 14 0c0 3-3 6-7 11z"/>',
-  professions: '<path d="M14 4l6 6-3 3-6-6z"/><path d="M11 7L3.5 14.5a2 2 0 0 0 0 3l3 3a2 2 0 0 0 3 0L17 13"/>',
-  gathering: '<path d="M5 20c0-8 6-14 14-15-1 8-7 14-14 15z"/><path d="M5 20l8-8"/>',
-  'crafted-gear': '<path d="M14.5 3.5l6 6-9 9H5.5v-6z"/><path d="M12 7l5 5M4 20l3-3"/>'
-};
-const icon = id => `<svg class="ae-gx-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[id] ?? ''}</svg>`;
-
 /** Facts show as plain text (Miguel, 18 Oct 2026: no status tags on any page). Status stays in the data. */
 export function statusTag() {
   return '';
@@ -96,9 +80,8 @@ function shell(section, page) {
 
 /* ----- Section home pages ----- */
 
-function tilesHtml(section) {
-  return `<ul class="ae-gx-tiles">${TOPICS[section].map(topic => `<li class="ae-gx-tile" data-guide-topic="${esc(topic.id)}"><a href="${esc(topicHref(section, topic.id))}">${icon(topic.id)}<span class="ae-gx-tile-name">${esc(topic.label)}</span><span class="ae-gx-tile-blurb">${esc(topic.blurb)}</span></a></li>`).join('')}</ul>`;
-}
+/** The section's topics as the shared Overview cards (guide-shell.mjs), each with its real game icon where we have one. */
+const tilesHtml = section => overviewHtml(section, TOPICS[section].map(topic => ({ id: topic.id, label: topic.label, href: topicHref(section, topic.id), blurb: topic.blurb })));
 
 /** Where each slot group drops, from every Expedition's Conquest loot: the table the Equipment home shows to everyone. */
 export function dropTableHtml(sources) {

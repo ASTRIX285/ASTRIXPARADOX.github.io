@@ -1,12 +1,12 @@
 /**
  * The Guide's light pages (feature/aetherium-guide-home, 18 Oct 2026; remodelled in design/aetherium-guide-remodel,
- * 19 Oct 2026): the Guide home, the Character section and the "coming soon" page of each section not written yet. The page
+ * 19 Oct 2026): the Guide home, the Character and Guides Overviews and the "coming soon" page of each section not written yet. The page
  * says which one it is on <body data-guide="home|section|soon" data-guide-section="<id>">. Static: no call to the official
  * site, no data file. Classes live in guide-classes.mjs.
  */
 import { esc } from './aetherium-ui.mjs';
 import { cardUrl } from './aetherium-data.mjs';
-import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, comingSoonHtml, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 
 /*
  * The Guide home's settings. exampleShot is the "See it on the screen you already use" panel: a real in-game screenshot
@@ -88,15 +88,35 @@ function renderHome(linked) {
     ${pathHtml()}`);
 }
 
+/*
+ * The Character Overview. Stats and Daevanion are planned in the Ascent Plan, so their cards open it; Stigmas and Builds
+ * stay off the page until they are written.
+ */
+const CHARACTER_TOPICS = Object.freeze([
+  { id: 'classes', label: 'Classes', href: `${GUIDE_ROOT}classes/`, blurb: 'The eight classes, the roles they play and the builds for each.' },
+  { id: 'stats', label: 'Stats', href: '/hub/aetherium/ascent/stats/', blurb: 'Plan where your stat points go in the Ascent Plan.' },
+  { id: 'daevanion', label: 'Daevanion', href: '/hub/aetherium/ascent/daevanion/', blurb: 'Plan your Daevanion boards in the Ascent Plan.' }
+]);
+
 function renderCharacter() {
   const item = GUIDE_SECTIONS.find(entry => entry.id === 'character');
   const body = renderGuideShell({ section: 'character', title: 'Character', crumbs: [{ label: 'Character' }], lede: item.blurb });
   body.insertAdjacentHTML('beforeend', `
-    <ul class="ae-gd-grid is-topics">${item.topics.map(topic => `<li class="ae-gd-tile" data-guide-topic="${esc(topic)}"><div class="ae-gd-tile-copy">${item.pages[topic]
-      ? `<h3 class="ae-gd-tile-name"><a class="ae-gd-tile-head" href="${esc(item.pages[topic])}">${esc(topic)}</a></h3><p class="ae-gd-tile-blurb">The eight classes, the roles they play and the builds for each.</p>`
-      : `<h3 class="ae-gd-tile-name"><span class="ae-gd-tile-head">${esc(topic)}</span></h3><p class="ae-gd-tile-blurb">Coming soon in this guide.</p>`}</div></li>`).join('')}</ul>
+    ${overviewHtml('character', CHARACTER_TOPICS)}
     <h2 class="ae-gd-h2">The eight classes</h2>
     <ul class="ae-gd-classlinks">${GUIDE_CLASSES.map(name => `<li><a class="ae-btn" href="${esc(classHref(name))}">${esc(name)}</a></li>`).join('')}</ul>`);
+}
+
+/** The Guides Overview: the guides written so far. New player help and the endgame stay off the page until written. */
+const GUIDES_TOPICS = Object.freeze([
+  { id: 'path', label: 'Your path by level', href: `${GUIDE_ROOT}path/`, blurb: 'What to do next at your level, step by step.' },
+  { id: 'dungeons', label: 'Dungeons', href: `${GUIDE_ROOT}dungeons/`, blurb: 'Every dungeon and repeatable run: who can go, how often and what it gives.' },
+  { id: 'weekly', label: 'Lv 45 weekly loop', href: `${GUIDE_ROOT}weekly/`, blurb: 'Everything at Lv 45 that refills on a timer.' }
+]);
+
+function renderGuides() {
+  const body = renderGuideShell({ section: 'guides', title: 'Guides', crumbs: [{ label: 'Guides' }] });
+  body.insertAdjacentHTML('beforeend', overviewHtml('guides', GUIDES_TOPICS));
 }
 
 function renderSoon(id) {
@@ -110,5 +130,6 @@ startGuidePage(linked => {
   const section = document.body.dataset.guideSection;
   if (kind === 'home') renderHome(linked);
   else if (kind === 'section' && section === 'character') renderCharacter();
+  else if (kind === 'section' && section === 'guides') renderGuides();
   else renderSoon(section);
 });

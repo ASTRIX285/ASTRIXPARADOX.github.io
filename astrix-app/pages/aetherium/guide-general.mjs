@@ -5,7 +5,7 @@
  * Reset times are worked out from the UTC rule and shown in the player's own time zone, with a live countdown.
  */
 import { $, esc } from './aetherium-ui.mjs';
-import { GUIDE_CLASSES, classHref, renderGuideShell, startGuidePage } from './guide-shell.mjs';
+import { GUIDE_CLASSES, GUIDE_ROOT, classHref, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 import { nextReset, countdownWords } from './guide-resets.mjs';
 
 const DATA_URL = '/astrix-app/games/aion2/data/advisor/general.json';
@@ -54,7 +54,7 @@ function fact(record, extra = '', { tag = 'h2' } = {}) {
 /* Pages. Each takes the records by id and returns the page body. */
 function generalHome() {
   return `<p class="ae-gg-lead">The basics every Daeva needs: who you fight for, when the game resets, how buying and selling works, how to set up your keys, and quick answers to common questions.</p>
-    <ul class="ae-gg-tiles">${GENERAL_PAGES.slice(1).map(page => `<li><a class="ae-gg-tile" href="${BASE}${page.slug}" data-guide-link="${page.id}"><b>${esc(page.title)}</b><span>${esc(page.blurb)}</span></a></li>`).join('')}</ul>`;
+    ${overviewHtml('general', GENERAL_PAGES.slice(1).map(page => ({ id: page.id, label: page.title, href: `${BASE}${page.slug}`, blurb: page.blurb })))}`;
 }
 function aboutPage(r) {
   const season = r['season-1'];
@@ -171,10 +171,18 @@ function faqPage(r, data) {
       ${(extras[id] ?? []).map(extra).join('')}
     </section>`).join('')}`;
 }
+/** The Skills Overview cards: the class pages, the two facts below on this page, then the skill bar on Controls. */
+const SKILL_TOPICS = Object.freeze([
+  { id: 'by-class', label: 'Skills by class', href: `${GUIDE_ROOT}classes/`, blurb: 'Pick your class to open its page.' },
+  { id: 'mastery', label: 'Mastery', href: '#gd-skill-mastery-cap', blurb: 'How far Mastery takes a skill, and what lifts it higher.' },
+  { id: 'specialty', label: 'Specialty picks', href: '#gd-skill-specialty', blurb: 'The perks a skill opens as it levels.' },
+  { id: 'skill-bar', label: 'Skill bar and macro', href: `${BASE}controls/`, blurb: 'Lay out your bar and set up your macros.' }
+]);
 function skillsPage(r) {
   const spec = r['skill-specialty'];
   const steps = [[8, '3 perks open, first perk slot'], [12, '4th perk, second slot'], [16, '5th perk'], [20, 'third slot']];
   return `<p class="ae-gg-lead">How skill levels work for every class. Your own class's skills, and where to put them, are on its class page and in the Ascent Plan.</p>
+    ${overviewHtml('skills', SKILL_TOPICS)}
     ${fact(r['skill-mastery-cap'], `<p class="ae-gg-chips">${r['skill-mastery-cap'].value.beyond.map(item => `<span class="ae-gg-chip">${esc(item)}</span>`).join('')}</p>`)}
     ${fact(spec, `<ol class="ae-gg-steps" id="aeSpecialtySteps">${steps.map(([lv, what]) => `<li data-skill-level="${lv}"><b>Skill Lv ${lv}</b><span>${esc(what)}</span></li>`).join('')}</ol>`)}
     ${fact(r['skill-daevanion-nodes'])}
