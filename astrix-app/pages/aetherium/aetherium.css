@@ -2338,8 +2338,6 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
 /* A card title with its topic icon: the icon sits before the words. */
 body.aetherium-page[data-ae-page="guide"] .ae-gd-body .ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) .ae-gg-card>.ae-gg-h{gap:14px;margin:0 0 12px}
 .ae-gg[data-guide-content] .ae-gg-icon{flex:none;object-fit:contain}
-/* A section heading with its topic icon needs no gold diamond as well. */
-.ae-gd-body .ae-gg[data-guide-content] h2:has(>.ae-gg-icon)::before{content:none}
 .ae-gg[data-guide-content] .ae-gg-note{margin:0;line-height:1.5;color:var(--ae-gd-muted)}
 .ae-gg[data-guide-content] .ae-gg-actions{margin:14px 0 10px}
 /* A tip: one useful line, set apart by a gold rule. */
