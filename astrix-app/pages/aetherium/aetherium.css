@@ -2327,6 +2327,88 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
   .ae-gg-dl.is-keys{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
 }
 
+/* The Guide: General section pages (design/aetherium-guide-general, 20 Oct 2026): Reset times, Membership and the Market,
+   Controls and the skill bar, Loadouts and the FAQ. Scoped to those five pages so About AION 2 and Skills keep their look.
+   Sizes come from the Guide type scale tokens (--ae-gd-fs-*, design/aetherium-guide-foundations) and the heading roles set
+   with them; cards and FAQ tips take the shared Guide card surface (the Overview cards, design/aetherium-guide-overviews). */
+.ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]){gap:20px;color:var(--ae-gd-ink)}
+.ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) :is(.ae-gg-lead,.ae-gg-card>p,.ae-gg-card>ul){font-size:var(--ae-gd-fs-body);line-height:var(--ae-gd-lh-body)}
+.ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) :is(.ae-gg-lead,.ae-gg-card>p,.ae-gg-tipcard p,.ae-gg-tip,.ae-gg-zone){max-width:var(--ae-gd-measure)}
+.ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) .ae-gg-card{padding:22px 24px;box-shadow:none}
+/* A card title with its topic icon: the icon sits before the words. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body .ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) .ae-gg-card>.ae-gg-h{gap:14px;margin:0 0 12px}
+.ae-gg[data-guide-content] .ae-gg-icon{flex:none;object-fit:contain}
+.ae-gg[data-guide-content] .ae-gg-note{margin:0;line-height:1.5;color:var(--ae-gd-muted)}
+.ae-gg[data-guide-content] .ae-gg-actions{margin:14px 0 10px}
+/* A tip: one useful line, set apart by a gold rule. */
+.ae-gg[data-guide-content] .ae-gg-tip{margin:0;padding:10px 14px;border-left:3px solid var(--ae-gd-gold);background:var(--ae-gd-raised);border-radius:0 8px 8px 0;
+  font:400 var(--ae-gd-fs-small)/1.5 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-gd-body .ae-gg[data-guide-content] .ae-gg-card.is-tip{border-left:3px solid var(--ae-gd-gold)}
+
+/* Reset times: the two cards, each with the resets icon at 56px. */
+.ae-gg[data-guide-content="resets"] .ae-gg-reset .ae-gg-big{margin:0 0 8px;font:700 32px/1.2 var(--ae-gd-display);color:var(--ae-gd-gold)}
+.ae-gg[data-guide-content="resets"] .ae-gg-reset p{margin:0 0 6px}
+.ae-gg[data-guide-content="resets"] .ae-gg-next b{color:var(--ae-gd-muted);white-space:nowrap}
+.ae-gg[data-guide-content="resets"] .ae-gg-zone{font:400 var(--ae-gd-fs-small)/1.5 var(--ae-gd-display);color:var(--ae-gd-muted)}
+
+/* Controls: the bar and its numbered steps side by side. 1 to 8, Q and E stay on one row; on a narrow screen that row scrolls
+   inside its own box. */
+.ae-gg[data-guide-content="controls"] .ae-gg-barwrap{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);margin:4px 0 8px}
+.ae-gg[data-guide-content="controls"] .ae-gg-bar{display:flex;flex-direction:column;gap:10px;min-width:0;margin:0;padding:14px;background:var(--ae-gd-deep);border:1px solid var(--ae-gd-line);border-radius:12px}
+.ae-gg[data-guide-content="controls"] .ae-gg-keyscroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.ae-gg[data-guide-content="controls"] .ae-gg-keyscroll .ae-gg-keys{flex-wrap:nowrap;width:max-content;padding:4px}
+.ae-gg[data-guide-content="controls"] .ae-gg-keys.is-mouse{flex-wrap:wrap}
+.ae-gg[data-guide-content="controls"] .ae-gg-key{flex:none;transition:border-color var(--ae-ease),box-shadow var(--ae-ease),background-color var(--ae-ease)}
+.ae-gg[data-guide-content="controls"] .ae-gg-key.is-space{align-self:flex-start}
+.ae-gg[data-guide-content="controls"] .ae-gg-key.is-lit{border-color:var(--ae-gd-gold);background:var(--ae-gd-raised);box-shadow:0 0 0 1px var(--ae-gd-gold),0 0 14px var(--ae-gd-gold-glow)}
+.ae-gg[data-guide-content="controls"] .ae-gg-bar figcaption{font:400 var(--ae-gd-fs-small)/1.5 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-gg[data-guide-content="controls"] .ae-gg-barsteps{display:grid;gap:8px;align-content:start;margin:0;padding:0;list-style:none}
+/* The steps are buttons in AION 2 colours, set in the same layer and weight as .ae-gd-btn so the site button tiers stay out. */
+@layer astrix-brand{
+html body.aetherium-page .ae-gg[data-guide-content="controls"] .ae-gg-step:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){display:grid!important;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start;width:100%;min-height:44px;box-sizing:border-box;
+  padding:10px 12px!important;text-align:left;font:400 15px/1.5 var(--ae-font-ui)!important;text-transform:none!important;letter-spacing:normal!important;color:var(--ae-gd-ink-soft)!important;
+  background:var(--ae-gd-button)!important;background-image:none!important;border:1px solid var(--ae-gd-line-mid)!important;border-radius:6px!important;clip-path:none!important;box-shadow:none!important;
+  cursor:pointer;transition:border-color var(--ae-ease),color var(--ae-ease),box-shadow var(--ae-ease)!important}
+html body.aetherium-page .ae-gg[data-guide-content="controls"] .ae-gg-step:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6)::before,html body.aetherium-page .ae-gg[data-guide-content="controls"] .ae-gg-step:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6)::after{content:none!important;display:none!important}
+html body.aetherium-page .ae-gg[data-guide-content="controls"] .ae-gg-step:is(:hover,.is-lit,[aria-pressed="true"]):not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){color:var(--ae-gd-ink)!important;border-color:var(--ae-gd-gold)!important;box-shadow:0 0 12px var(--ae-gd-glow)!important}
+html body.aetherium-page .ae-gg[data-guide-content="controls"] .ae-gg-step:focus-visible:not(#ae-g1):not(#ae-g2):not(#ae-g3):not(#ae-g4):not(#ae-g5):not(#ae-g6){outline:2px solid var(--ae-strobe)!important;outline-offset:2px!important}
+}
+.ae-gg[data-guide-content="controls"] .ae-gg-step b{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--ae-gd-gold-line);border-radius:50%;
+  font:700 14px/1 var(--ae-gd-display);color:var(--ae-gd-gold)}
+.ae-gg[data-guide-content="controls"] .ae-gg-step span{color:inherit}
+.ae-gg[data-guide-content="controls"] .ae-gg-step[aria-pressed="true"] b{background:var(--ae-gd-gold-fill);color:var(--ae-gd-gold-ink);border-color:var(--ae-gd-gold-edge)}
+@media (min-width:1100px){
+  .ae-gg[data-guide-content="controls"] .ae-gg-barwrap{grid-template-columns:auto minmax(260px,1fr);align-items:start}
+}
+@media (prefers-reduced-motion:reduce){
+  .ae-gg[data-guide-content="controls"] :is(.ae-gg-key,.ae-gg-step){transition:none}
+}
+
+/* Loadouts: the 3 loadouts of each kind as plain labels, nothing to press. */
+.ae-gg[data-guide-content="loadouts"] .ae-gg-loadouts{display:grid;gap:8px;margin:0 0 4px;padding:0;list-style:none}
+.ae-gg[data-guide-content="loadouts"] .ae-gg-loadouts li{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding:10px 0;
+  background:none;border:0;border-bottom:1px solid var(--ae-gd-line-soft);border-radius:0}
+.ae-gg[data-guide-content="loadouts"] .ae-gg-loadouts b{font:600 var(--ae-gd-fs-sub)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-gg[data-guide-content="loadouts"] .ae-gg-slots{display:flex;flex-wrap:wrap;gap:4px 18px}
+.ae-gg[data-guide-content="loadouts"] .ae-gg-slot{font:400 var(--ae-gd-fs-small)/1.4 var(--ae-gd-display);letter-spacing:.06em;text-transform:uppercase;color:var(--ae-gd-muted);cursor:default}
+
+/* FAQ: group headings at section size with their icon, every answer a short tip. */
+.ae-gg[data-guide-content="faq"] .ae-gg-jump ul{margin:0}
+.ae-gg[data-guide-content="faq"] .ae-gg-group{gap:14px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd-body .ae-gg[data-guide-content="faq"] .ae-gg-h2{display:flex;align-items:center;gap:14px;margin-bottom:0}
+.ae-gg[data-guide-content="faq"] .ae-gg-tips{display:grid;gap:12px;margin:0;padding:0;list-style:none;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.ae-gg[data-guide-content="faq"] .ae-gg-tipcard{min-width:0;box-sizing:border-box;padding:16px 18px;overflow-wrap:anywhere}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-gg[data-guide-content="faq"] .ae-gg-tipcard h4{margin:0 0 6px}
+.ae-gg[data-guide-content="faq"] .ae-gg-tipcard p{margin:0;font-size:15px;line-height:1.6;color:var(--ae-gd-ink)}
+.ae-gg[data-guide-content="faq"] .ae-gg-dl dt{color:var(--ae-gd-ink)}
+.ae-gg[data-guide-content="faq"] .ae-gg-dl dd{color:var(--ae-gd-ink-soft)}
+.ae-gg[data-guide-content="faq"] .ae-gg-dl div{border-bottom-color:var(--ae-gd-line-soft)}
+
+@media (max-width:760px){
+  .ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) .ae-gg-card{padding:16px}
+  .ae-gg[data-guide-content="faq"] .ae-gg-h2 .ae-gg-icon{width:40px;height:40px}
+}
+
 /* The Guide: Dungeons, weekly loop and World (phase 4, feature/aetherium-guide-dungeons, 18 Oct 2026).
    Navy panels, pale-blue edges, gold for what the player is after. Tables fold into labelled cards under 720px
    so nothing scrolls sideways on a phone. */
@@ -2434,6 +2516,9 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
 .ae-gd .ae-gd-ocard-link{display:flex;align-items:center;gap:20px;width:100%;min-height:112px;box-sizing:border-box;padding:20px 24px;
   color:var(--ae-gd-ink);text-decoration:none;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-ivory);border-radius:10px;
   transition:border-color .2s ease,box-shadow .2s ease}
+/* The same card surface for the General section's fact cards and FAQ tips (design/aetherium-guide-general), which are not
+   links: no hover. The page scope lifts it over the older .ae-gg-card cylinder. */
+.ae-gd-body .ae-gg:is([data-guide-content="resets"],[data-guide-content="market"],[data-guide-content="controls"],[data-guide-content="loadouts"],[data-guide-content="faq"]) :is(.ae-gg-card,.ae-gg-tipcard){background:var(--ae-gd-panel);border:1px solid var(--ae-gd-ivory);border-radius:10px}
 .ae-gd .ae-gd-ocard-link:is(:hover,:focus-visible){border-color:var(--ae-gd-gold);box-shadow:0 0 18px var(--ae-gd-glow)}
 .ae-gd .ae-gd-ocard-link:focus-visible{outline:2px solid var(--ae-gd-gold);outline-offset:2px}
 .ae-gd .ae-gd-ocard.is-start .ae-gd-ocard-link{gap:28px;min-height:144px;padding:24px 28px}
