@@ -1,3 +1,4 @@
+# design/aetherium-guide-foundations: Guide type scale, side menu lit-state fix, home section tiles with the section PNG icons. aetherium.css ?v= bumped on every page that loads it.
 .scope/design/aetherium-guide-foundations.txt
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/aetherium.css
