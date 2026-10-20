@@ -348,35 +348,72 @@
           "name": "Blacksmithing",
           "makes": "Greatswords, longswords, daggers, maces and Guards",
           "refines": "Orichalcum Ingots",
-          "status": "confirmed"
+          "status": "confirmed",
+          "makesList": [
+            "Greatswords",
+            "Longswords",
+            "Daggers",
+            "Maces",
+            "Guards"
+          ]
         },
         {
           "id": "armorsmithing",
           "name": "Armorsmithing",
           "makes": "Helm, pauldrons, breastplate, gloves, greaves, boots and cloak",
           "refines": "Leathers",
-          "status": "confirmed"
+          "status": "confirmed",
+          "makesList": [
+            "Helm",
+            "Pauldrons",
+            "Breastplate",
+            "Gloves",
+            "Greaves",
+            "Boots",
+            "Cloak"
+          ]
         },
         {
           "id": "handicrafting",
           "name": "Handicrafting",
           "makes": "Rings, earrings, necklaces, bracelets, bows and staffs",
           "refines": "Wood and gem decorations",
-          "status": "confirmed"
+          "status": "confirmed",
+          "makesList": [
+            "Rings",
+            "Earrings",
+            "Necklaces",
+            "Bracelets",
+            "Bows",
+            "Staffs"
+          ]
         },
         {
           "id": "alchemy",
           "name": "Alchemy",
           "makes": "Spellbooks, orbs, potions, serums, scrolls, Manastones and Soulstones",
           "refines": "Magic Crystals, papers and powders",
-          "status": "confirmed"
+          "status": "confirmed",
+          "makesList": [
+            "Spellbooks",
+            "Orbs",
+            "Potions",
+            "Serums",
+            "Scrolls",
+            "Manastones",
+            "Soulstones"
+          ]
         },
         {
           "id": "cooking",
           "name": "Cooking",
           "makes": "Buff food and drinks, no gear",
           "refines": null,
-          "status": "confirmed"
+          "status": "confirmed",
+          "makesList": [
+            "Buff food",
+            "Drinks"
+          ]
         }
       ],
       "facts": [
@@ -443,7 +480,16 @@
           "where": "Gear and Enhancement",
           "note": "Miguel, in game: before Lv 35, gather and level crafting (armour, weapons, food, jewellery) so you can farm enough material to succeed."
         }
-      ]
+      ],
+      "proficiencyBar": {
+        "opensAtLevel": 10,
+        "noviceTo": 50,
+        "max": 100,
+        "from": [
+          "unlock",
+          "proficiency"
+        ]
+      }
     },
     {
       "id": "craft-rules",
@@ -501,42 +547,133 @@
           "name": "Ore",
           "examples": "Orichalcum Ore",
           "usedFor": "Ingots for Blacksmithing and Armorsmithing",
-          "status": "confirmed"
+          "status": "confirmed",
+          "materials": [
+            {
+              "name": "Orichalcum Ore"
+            }
+          ],
+          "professions": [
+            "blacksmithing",
+            "armorsmithing"
+          ]
         },
         {
           "name": "Wood",
           "examples": "Yggdrasil Log (Elyos), Asvata Log (Asmodian)",
           "usedFor": "Bows and staffs",
-          "status": "confirmed"
+          "status": "confirmed",
+          "materials": [
+            {
+              "name": "Yggdrasil Log",
+              "faction": "Elyos"
+            },
+            {
+              "name": "Asvata Log",
+              "faction": "Asmodian"
+            }
+          ],
+          "professions": [
+            "handicrafting"
+          ]
         },
         {
           "name": "Gems",
           "examples": "Sapphire, Diamond and Ruby Gemstones",
           "usedFor": "Jewellery decorations and Alchemy powders",
-          "status": "confirmed"
+          "status": "confirmed",
+          "materials": [
+            {
+              "name": "Sapphire Gemstone"
+            },
+            {
+              "name": "Diamond Gemstone"
+            },
+            {
+              "name": "Ruby Gemstone"
+            }
+          ],
+          "professions": [
+            "handicrafting",
+            "alchemy"
+          ]
         },
         {
           "name": "Herbs",
           "examples": "Aria and Targena (Elyos), Azpha and Calendula (Asmodian)",
           "usedFor": "Alchemy serums and potions",
-          "status": "confirmed"
+          "status": "confirmed",
+          "materials": [
+            {
+              "name": "Aria",
+              "faction": "Elyos"
+            },
+            {
+              "name": "Targena",
+              "faction": "Elyos"
+            },
+            {
+              "name": "Azpha",
+              "faction": "Asmodian"
+            },
+            {
+              "name": "Calendula",
+              "faction": "Asmodian"
+            }
+          ],
+          "professions": [
+            "alchemy"
+          ]
         },
         {
           "name": "Cooking ingredients",
           "examples": "Mela, Cypri (Elyos); Raydam, Pujery (Asmodian)",
           "usedFor": "Cooking",
-          "status": "confirmed"
+          "status": "confirmed",
+          "materials": [
+            {
+              "name": "Mela",
+              "faction": "Elyos"
+            },
+            {
+              "name": "Cypri",
+              "faction": "Elyos"
+            },
+            {
+              "name": "Raydam",
+              "faction": "Asmodian"
+            },
+            {
+              "name": "Pujery",
+              "faction": "Asmodian"
+            }
+          ],
+          "professions": [
+            "cooking"
+          ]
         },
         {
           "name": "Odyle",
           "examples": "Odyle",
           "usedFor": "Nearly every gear recipe",
-          "status": "confirmed"
+          "status": "confirmed",
+          "materials": [
+            {
+              "name": "Odyle"
+            }
+          ],
+          "professions": []
         }
       ],
       "qualities": {
         "text": "Most materials come in four qualities: Base, Fine, Pure and Radiant. A recipe asks for the matching quality.",
-        "status": "confirmed"
+        "status": "confirmed",
+        "list": [
+          "Base",
+          "Fine",
+          "Pure",
+          "Radiant"
+        ]
       },
       "facts": [
         {
@@ -646,7 +783,14 @@
         {
           "id": "dragon-lord",
           "text": "Dragon Lord gear needs proficiency 55, is Unique, and has one more Soul Binding line than dungeon drops (5 lines against 3 or 4).",
-          "status": "confirmed"
+          "status": "confirmed",
+          "soulBindingLines": {
+            "crafted": 5,
+            "drops": [
+              3,
+              4
+            ]
+          }
         },
         {
           "id": "other-slots",
@@ -662,11 +806,6 @@
           "id": "transfer-craft",
           "text": "Transfer crafting keeps the base item's enhance, amplification and Soul Binding levels and binds the new item to you. If it fails you keep the transfer piece; the other materials are lost.",
           "status": "confirmed"
-        },
-        {
-          "id": "global",
-          "text": "Whether the White and Wise (Dark and Ebony) Dragon Lord steps are in the global client yet.",
-          "status": "disputed"
         },
         {
           "id": "wrathful",
