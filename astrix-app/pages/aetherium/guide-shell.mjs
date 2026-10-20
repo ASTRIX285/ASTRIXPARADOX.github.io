@@ -11,11 +11,14 @@
  *                         kept here so the light pages need not load the advisor; the Guide test checks they match).
  *   guideHref(id)         a section's address (/hub/aetherium/guide/<id>/, home for 'home').
  *   classHref(className)  a class page's address (/hub/aetherium/guide/classes/<class>/).
- *   renderGuideShell({ section, title, crumbs, lede, kicker, actions })
+ *   renderGuideShell({ section, title, crumbs, lede, kicker, actions, hero })
  *                         draws the Guide into #aeStage: the photo band with the section kicker, the page title (H1) and
  *                         the lede, then the side menu (sub pages only) and an empty body. Returns the body for the page to
  *                         fill. crumbs: [{ label, href }] after "Guide"; the last crumb is the page itself (no href needed).
  *                         kicker and actions (markup for the band's buttons) are optional, for the Guide home.
+ *                         hero (markup) takes the place of the photo band, for a class page; it holds the H1 #aeScreenTitle.
+ *   classPickerHtml(current)
+ *                         the eight class emblems as buttons, each to its class page; current (a class name) is lit.
  *   comingSoonHtml(id)    the short "coming soon in this guide" body for a section not built yet.
  *   overviewHtml(section, cards)
  *                         a section Overview's topic cards (design/aetherium-guide-overviews, 20 Oct 2026), one style for
@@ -52,11 +55,19 @@ export const GUIDE_SECTIONS = Object.freeze([
 
 export const GUIDE_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
 
+const EMBLEMS = '/astrix-app/pages/aetherium/images/class-emblems/';
+
 const sectionOf = id => GUIDE_SECTIONS.find(item => item.id === id) ?? GUIDE_SECTIONS[0];
 
 export const guideHref = id => sectionOf(id).href;
 
 export const classHref = className => `${GUIDE_ROOT}classes/${String(className).toLowerCase()}/`;
+
+/** The class emblems as buttons in a row (they wrap on a phone). The current class is lit gold with a cyan glow. */
+export function classPickerHtml(current = null) {
+  return `<ul class="ae-gd-picker" data-class-picker>${GUIDE_CLASSES.map(name => `<li><a class="ae-gd-btn ae-gd-pick" href="${esc(classHref(name))}" data-class="${esc(name)}"${name === current ? ' aria-current="page"' : ''}>
+        <img src="${EMBLEMS}${name.toLowerCase()}.png" alt="" width="128" height="128" loading="lazy" decoding="async"><span>${esc(name)}</span></a></li>`).join('')}</ul>`;
+}
 
 /** An address as the side menu compares it: path only, no index.html, always a trailing slash. */
 const pathKey = href => {
@@ -128,12 +139,12 @@ function sideHtml(item, crumbs) {
     </nav>`;
 }
 
-export function renderGuideShell({ section = 'home', title, crumbs = [], lede = null, kicker = null, actions = null } = {}) {
+export function renderGuideShell({ section = 'home', title, crumbs = [], lede = null, kicker = null, actions = null, hero = null } = {}) {
   const stage = $('#aeStage');
   const item = sectionOf(section);
   const isHome = item.id === 'home' && !crumbs.length;
   stage.innerHTML = `<section class="ae-gd${isHome ? ' is-home' : ' is-sub'}" data-guide-shell="${esc(item.id)}" aria-labelledby="aeScreenTitle">
-      ${heroHtml(item, { title, lede, kicker, actions })}
+      ${hero ?? heroHtml(item, { title, lede, kicker, actions })}
       <div class="ae-gd-frame">
         ${isHome ? '' : sideHtml(item, crumbs)}
         <div class="ae-gd-body" id="aeGuideBody"></div>
