@@ -2425,9 +2425,10 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
    Section Overview cards (design/aetherium-guide-overviews, 20 Oct 2026): one card style for the Overview of every Guide
    section (overviewHtml in guide-shell.mjs). A clean panel with an ivory hairline and no notch; the whole card is the link,
    with a gold edge and a soft cyan glow on hover. Icon on the left (72px), on top on a phone. The first card is "start here":
-   it runs across both columns with a 96px icon. Card titles use the title face at the card size (28px, 24px on a phone).
+   it runs across both columns with a 96px icon. Titles and blurbs take the type scale tokens: --ae-gd-fs-card in the title face,
+   --ae-gd-fs-body for the blurb.
    ========================================================================================================================== */
-.ae-gd-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0 0 8px;padding:0;list-style:none}
+.ae-gd-ocards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0 0 8px;padding:0;list-style:none}
 .ae-gd-ocard{display:flex;min-width:0}
 .ae-gd-ocard.is-start{grid-column:1/-1}
 .ae-gd .ae-gd-ocard-link{display:flex;align-items:center;gap:20px;width:100%;min-height:112px;box-sizing:border-box;padding:20px 24px;
@@ -2441,14 +2442,12 @@ body.aetherium-page[data-ae-page="guide"] .ae-footer a:hover{color:var(--ae-gd-g
 .ae-gd-ocard-icon.is-art img{display:block;width:100%;height:100%;object-fit:contain}
 .ae-gd-ocard-icon .ae-gtile{width:100%;height:100%}
 .ae-gd-ocard-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
-body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-ocard-title{font:400 28px/1.15 var(--ae-gd-font-title);font-synthesis:none;letter-spacing:normal;color:var(--ae-gd-ink);
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-ocard-title{font:400 var(--ae-gd-fs-card)/1.15 var(--ae-gd-font-title);font-synthesis:none;letter-spacing:normal;color:var(--ae-gd-ink);
   overflow-wrap:anywhere;transition:color .2s ease}
 .ae-gd .ae-gd-ocard-link:is(:hover,:focus-visible) .ae-gd-ocard-title{color:var(--ae-gd-gold)}
-.ae-gd .ae-gd-ocard-blurb{font-size:17px;line-height:1.5;color:var(--ae-gd-ink-soft)}
+.ae-gd .ae-gd-ocard-blurb{font-size:var(--ae-gd-fs-body);line-height:1.5;color:var(--ae-gd-ink-soft)}
 @media (max-width:760px){
-  .ae-gd-overview{grid-template-columns:minmax(0,1fr);gap:14px}
+  .ae-gd-ocards{grid-template-columns:minmax(0,1fr);gap:14px}
   .ae-gd .ae-gd-ocard-link,.ae-gd .ae-gd-ocard.is-start .ae-gd-ocard-link{flex-direction:column;align-items:flex-start;gap:14px;min-height:0;padding:18px 18px 20px}
-  body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-ocard-title{font-size:24px}
-  .ae-gd .ae-gd-ocard-blurb{font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){.ae-gd .ae-gd-ocard-link,.ae-gd .ae-gd-ocard-title{transition:none}}

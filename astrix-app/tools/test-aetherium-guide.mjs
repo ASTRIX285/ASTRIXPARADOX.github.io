@@ -524,6 +524,10 @@ for(const [width,scale] of [[1600,{h1:64,section:40,card:28}],[390,{h1:42,sectio
       for(const el of found.titleFace)assert.ok(el.size>=24,`${path}: the title face only at 24px and up ("${el.text}" ${el.size}px)`);
       if(path==='/hub/aetherium/guide/'&&width===390)assert.equal(await page.$eval('.ae-gd-tile-icon',img=>img.getBoundingClientRect().width),96,'Tile icons 96px on a phone');
       await context.close();
+    }
+  });
+}
+
 // Section Overviews (design/aetherium-guide-overviews, 20 Oct 2026): one card style on every section's Overview, the whole
 // card a link, the first card across both columns with a 96px icon, the rest 72px, icon on the left (on top on a phone), an
 // ivory hairline and no notch, gold edge and cyan glow on hover. Icons are our PNGs or real CDN game icons, never drawn SVG.

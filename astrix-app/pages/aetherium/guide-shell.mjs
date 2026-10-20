@@ -221,7 +221,7 @@ function cardIconHtml(icon, size) {
 /** A section Overview: one card per topic, the whole card a link, the first card "start here" across two columns. */
 export function overviewHtml(section, cards) {
   const icons = TOPIC_ICONS[section] ?? {};
-  return `<ul class="ae-gd-overview" data-guide-overview="${esc(section)}">${cards.map((card, index) => {
+  return `<ul class="ae-gd-ocards" data-guide-overview="${esc(section)}">${cards.map((card, index) => {
     const icon = cardIconHtml(icons[card.id], index === 0 ? 96 : 72);
     return `<li class="ae-gd-ocard${index === 0 ? ' is-start' : ''}${icon ? '' : ' is-plain'}" data-guide-topic="${esc(card.id)}">
         <a class="ae-gd-ocard-link" href="${esc(card.href)}">${icon}<span class="ae-gd-ocard-copy"><span class="ae-gd-ocard-title">${esc(card.label)}</span>${card.blurb ? `<span class="ae-gd-ocard-blurb">${esc(card.blurb)}</span>` : ''}</span></a>
