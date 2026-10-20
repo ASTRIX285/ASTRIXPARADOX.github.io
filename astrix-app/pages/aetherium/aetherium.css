@@ -2546,7 +2546,7 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-ocard-title{font:400 var
    ========================================================================================================================== */
 .ae-gc-block ul,.ae-gc-block ol{margin:0;padding:0;list-style:none}
 .ae-gc-block p{margin:0}
-:where(.ae-gc-tip,.ae-gc-goal,.ae-gc-prof,.ae-gc-mat,.ae-gc-key,.ae-gc-rung,.ae-gc-quality li,.ae-gc-picks li,.ae-gc-bar-seg,.ae-gc-bar-open){
+.ae-gc-block :where(.ae-gc-tip,.ae-gc-goal,.ae-gc-prof,.ae-gc-mat,.ae-gc-key,.ae-gc-rung,.ae-gc-quality li,.ae-gc-picks li,.ae-gc-bar-seg,.ae-gc-bar-open){
   box-sizing:border-box;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-ivory);border-radius:10px}
 .ae-gc-lede,.ae-gc-tip p,.ae-gc-numbered p,.ae-gc-picks p,.ae-gc-bar-text,.ae-gc-goal-names,.ae-gc-refines,.ae-gc-use{
   max-width:var(--ae-gd-measure);font-size:var(--ae-gd-fs-body);line-height:var(--ae-gd-lh-body);color:var(--ae-gd-ink-soft);overflow-wrap:anywhere}
