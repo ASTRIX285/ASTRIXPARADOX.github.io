@@ -52,9 +52,22 @@ const SECTION_HEROES = Object.freeze({
   world: sectionHero('world', 'Green cliffs and purple trees beside a white spire, with floating islands over a calm sea', '66% 50%'),
   guides: sectionHero('guides', 'A lone rock pillar chained to a smaller rock above a golden sea of cloud', '0% 60%')
 });
+const PAGE_PHOTOS = '/astrix-app/pages/aetherium/images/page-heroes/';
+/* A page's own photo (design/aetherium-page-photos-v1, 21 Oct 2026), same shape and focus rule as a section's. */
+const pageHero = (name, alt, focus) => Object.freeze({ src: `${PAGE_PHOTOS}${name}.jpg`, alt, width: 2400, height: 923, focus });
 /* A page with its own photo keeps it over its section's. */
 const PAGE_HEROES = Object.freeze({
-  [`${GUIDE_ROOT}general/about/`]: Object.freeze({ src: `${PHOTOS}atreia-vista-01.jpg`, alt: 'A Daeva on a grassy hilltop looking out over cliffside ruins, a spiked dark structure and the sea', width: 2560, height: 1440 })
+  [`${GUIDE_ROOT}general/about/`]: Object.freeze({ src: `${PHOTOS}atreia-vista-01.jpg`, alt: 'A Daeva on a grassy hilltop looking out over cliffside ruins, a spiked dark structure and the sea', width: 2560, height: 1440 }),
+  [`${GUIDE_ROOT}general/loadouts/`]: pageHero('loadouts', 'A Daeva in silver armour holding a bow', '70% 20%'),
+  [`${GUIDE_ROOT}equipment/slots/`]: pageHero('slots', 'A Daeva standing front on in a full set of silver armour', '71% 15%'),
+  [`${GUIDE_ROOT}equipment/titles/`]: pageHero('titles', 'A huge gold and black spire with red eyes under a ringed sky', '45% 30%'),
+  [`${GUIDE_ROOT}equipment/where-to-get/`]: pageHero('where-to-get', 'A floating island of rock beside cliffs topped with red mushroom trees', '60% 40%'),
+  [`${GUIDE_ROOT}equipment/manastones/`]: pageHero('manastones', 'Glowing red pods across a scorched orange plain', '50% 50%'),
+  [`${GUIDE_ROOT}equipment/arcana/`]: pageHero('arcana', 'Five Arcana cards laid out on a dark table', '68% 30%'),
+  [`${GUIDE_ROOT}equipment/pets-wings/`]: pageHero('pets-wings', 'A Daeva with huge white feathered wings spread wide', '42% 20%'),
+  [`${GUIDE_ROOT}path/`]: pageHero('path', 'A view from a spiked wall over cliffs, a floating island and the sea', '50% 40%'),
+  [`${GUIDE_ROOT}dungeons/`]: pageHero('dungeons', 'An island seen from above with a giant spiked spine reaching down to it', '60% 50%'),
+  [`${GUIDE_ROOT}dungeons/daily-dungeon/`]: pageHero('daily-dungeon', 'A blue and red throne inside a dark Balaur research base', '69% 30%')
 });
 
 export const GUIDE_SECTIONS = Object.freeze([
