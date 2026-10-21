@@ -713,7 +713,7 @@ await check('tool backdrops: a fixed, darkened, decorative photo behind the Asce
       assert.equal(look.inset,'0px 0px',`${path}: the size of the screen`);
       assert.notEqual(look.attach,'fixed',`${path}: never a fixed attachment`);
       assert.ok(look.image.includes(`/page-backgrounds/${name}.jpg`),`${path}: the ${name} photo`);
-      assert.match(look.image,/rgba\(7, 11, 20, 0\.85\)|color\(srgb [\d. ]+\/ 0\.85\)/,`${path}: the ground at 85% over the photo`);
+      assert.match(look.image,/rgba\(7, 11, 20, 0\.65\)|color\(srgb [\d. ]+\/ 0\.65\)/,`${path}: the ground at 65% over the photo`);
       assert.equal(look.bodyBg,'rgba(0, 0, 0, 0)',`${path}: no solid ground over the layer`);
       assert.equal(look.glows,2,`${path}: the two page glows stay`);
       assert.equal(look.panel,look.solid,`${path}: panels solid over the photo`);

@@ -83,14 +83,14 @@ body.aetherium-page[data-faction="asmodian"]{--ae-accent:var(--ae-asmodian);--ae
 @media (prefers-reduced-transparency:reduce){:root{--ae-panel:var(--ae-panel-solid)}}
 
 /* Tool page backdrop (design/aetherium-page-photos-v1, 21 Oct 2026): one of Miguel's in-game photos on a fixed layer the size of
-   the screen, behind everything, under the ground colour at 85% so it is a mood, not a picture. The page names its photo in
+   the screen, behind everything, under the ground colour at 65% so it is a mood, not a picture. The page names its photo in
    --ae-backdrop on the body. A fixed pseudo element, never a fixed background attachment (that breaks on iOS). Decorative only:
    a pseudo element is never in the accessibility tree. The body keeps its two glows but drops its solid ground so the layer shows,
    and panels turn solid so their contrast stays the same over the photo. */
 body.aetherium-page.ae-backdrop{--ae-panel:var(--ae-panel-solid);background-color:transparent}
 body.aetherium-page.ae-backdrop::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
-    linear-gradient(color-mix(in srgb,var(--ae-page) 85%,transparent),color-mix(in srgb,var(--ae-page) 85%,transparent)),
+    linear-gradient(color-mix(in srgb,var(--ae-page) 65%,transparent),color-mix(in srgb,var(--ae-page) 65%,transparent)),
     var(--ae-backdrop,none) center/cover no-repeat,
     var(--ae-page)}
 /* Less transparency or more contrast: no photo, the plain ground. */
