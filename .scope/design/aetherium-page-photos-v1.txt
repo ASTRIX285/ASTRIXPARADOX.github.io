@@ -1,4 +1,3 @@
-.scope/design/aetherium-page-photos-v1.txt
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/aetherium.css
 astrix-app/pages/aetherium/guide-shell.mjs

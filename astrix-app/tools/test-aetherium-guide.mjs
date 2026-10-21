@@ -705,7 +705,7 @@ await check('tool backdrops: a fixed, darkened, decorative photo behind the Asce
     try{
       assert.deepEqual(errors,[],`${path}: no page errors`);
       const look=await page.evaluate(()=>{const body=document.body,layer=getComputedStyle(body,'::before');
-        return {position:layer.position,zIndex:layer.zIndex,inset:[layer.top,layer.left].join(' '),image:layer.backgroundImage,bodyBg:getComputedStyle(body).backgroundImage,attach:layer.backgroundAttachment,
+        return {position:layer.position,zIndex:layer.zIndex,inset:[layer.top,layer.left].join(' '),image:layer.backgroundImage,bodyBg:getComputedStyle(body).backgroundColor,glows:(getComputedStyle(body).backgroundImage.match(/radial-gradient/g)||[]).length,attach:layer.backgroundAttachment,
           panel:getComputedStyle(body).getPropertyValue('--ae-panel').trim(),solid:getComputedStyle(body).getPropertyValue('--ae-panel-solid').trim(),wide:document.documentElement.scrollWidth>innerWidth,
           priority:document.querySelectorAll('[fetchpriority="high"][href*="page-backgrounds"],[fetchpriority="high"][src*="page-backgrounds"]').length};});
       assert.equal(look.position,'fixed',`${path}: a fixed layer`);
@@ -714,7 +714,8 @@ await check('tool backdrops: a fixed, darkened, decorative photo behind the Asce
       assert.notEqual(look.attach,'fixed',`${path}: never a fixed attachment`);
       assert.ok(look.image.includes(`/page-backgrounds/${name}.jpg`),`${path}: the ${name} photo`);
       assert.match(look.image,/rgba\(7, 11, 20, 0\.85\)|color\(srgb [\d. ]+\/ 0\.85\)/,`${path}: the ground at 85% over the photo`);
-      assert.equal(look.bodyBg,'none',`${path}: nothing painted over the layer`);
+      assert.equal(look.bodyBg,'rgba(0, 0, 0, 0)',`${path}: no solid ground over the layer`);
+      assert.equal(look.glows,2,`${path}: the two page glows stay`);
       assert.equal(look.panel,look.solid,`${path}: panels solid over the photo`);
       assert.ok(!look.wide,`${path} at ${width}: no sideways scroll`);
       assert.equal(look.priority,0,`${path}: the photo never jumps the queue`);
