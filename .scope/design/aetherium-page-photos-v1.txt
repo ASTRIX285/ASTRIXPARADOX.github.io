@@ -2,6 +2,7 @@ astrix-app/module-versions.json
 astrix-app/pages/aetherium/aetherium.css
 astrix-app/pages/aetherium/guide-shell.mjs
 astrix-app/tools/test-aetherium-guide.mjs
+astrix-app/tools/test-aetherium-pages.mjs
 hub/aetherium/ascent/daevanion/index.html
 hub/aetherium/ascent/index.html
 hub/aetherium/ascent/macro/index.html
