@@ -136,7 +136,7 @@ await check('shell contract: the photo band, the side menu with this page lit, n
   for(const name of ['GUIDE_CLASSES','GUIDE_ROOT','GUIDE_SECTIONS','TOPIC_ICONS','classHref','classPickerHtml','comingSoonHtml','guideHref','overviewHtml','renderGuideShell','startGuidePage'])assert.ok(api.exports.includes(name),`guide-shell exports ${name}`);
   assert.deepEqual(api.classes,api.advisor,'GUIDE_CLASSES matches the advisor class list');
   assert.deepEqual(api.sections,SECTIONS,'Eight sections in order, each with its page');
-  assert.deepEqual(api.heroes,['golden-sea-01.jpg',...Array(7).fill('atreia-vista-01.jpg')],'Home has the golden sea, every section the vista');
+  assert.deepEqual(api.heroes,['golden-sea-01.jpg',...SECTIONS.slice(1).map(([id])=>`${id}.jpg`)],'Home has the golden sea, every section its own photo');
   assert.equal(api.href,'/hub/aetherium/guide/world/');
   assert.equal(api.cls,'/hub/aetherium/guide/classes/spiritmaster/');
   await context.close();
@@ -144,7 +144,15 @@ await check('shell contract: the photo band, the side menu with this page lit, n
     const {page,context,errors}=await open(href);
     assert.deepEqual(errors,[],`${href}: no page errors`);
     assert.equal(await plain(page,'.ae-gd-kicker'),label,`${href}: section kicker`);
-    assert.equal(await page.getAttribute('.ae-gd-hero-img','src'),'/astrix-app/pages/aetherium/images/photos/atreia-vista-01.jpg');
+    const photo=await page.$eval('.ae-gd-hero-img',img=>{const band=img.closest('.ae-gd-hero').getBoundingClientRect(),box=img.getBoundingClientRect();
+      return {src:img.getAttribute('src'),alt:img.alt,w:img.getAttribute('width'),h:img.getAttribute('height'),loading:img.getAttribute('loading'),priority:img.getAttribute('fetchpriority'),fit:getComputedStyle(img).objectFit,
+        fills:Math.abs(box.width-band.width)<=1&&Math.abs(box.height-band.height)<=1,shade:getComputedStyle(img.closest('.ae-gd-hero'),'::before').backgroundImage,fade:getComputedStyle(img.closest('.ae-gd-hero'),'::after').backgroundImage};});
+    assert.equal(photo.src,`/astrix-app/pages/aetherium/images/section-heroes/${id}.jpg`,`${href}: the ${label} photo`);
+    assert.ok(photo.alt.length>10&&!/[–—]/.test(photo.alt),`${href}: plain alt text`);
+    assert.deepEqual([photo.w,photo.h,photo.loading,photo.priority,photo.fit],['2400','923','eager','high','cover'],`${href}: sized, eager, high priority, cover`);
+    assert.ok(photo.fills,`${href}: the photo fills the band`);
+    assert.match(photo.shade,/linear-gradient/,`${href}: the shade behind the title`);
+    assert.match(photo.fade,/linear-gradient/,`${href}: the fade into the page`);
     assert.equal(await page.locator('.ae-gd-crumbs,.ae-gd-nav,.ae-gw-bar,.ae-gg-sub,.ae-gx-topicnav').count(),0,`${href}: one menu only`);
     assert.equal(await page.getAttribute('.ae-gd-side-home','href'),'/hub/aetherium/guide/','Guide home tops the side menu');
     const lit=await page.$$eval('.ae-gd-side a[aria-current="page"]',links=>links.map(a=>({href:a.getAttribute('href'),color:getComputedStyle(a).color,edge:getComputedStyle(a).borderLeftColor})));
@@ -170,6 +178,11 @@ await check('shell contract: the photo band, the side menu with this page lit, n
     assert.equal(lit.length,1,`${path}: exactly one item has aria-current="page" (${lit.map(link=>link.href)})`);
     assert.equal(new URL(lit[0].href,base).pathname,path,`${path}: the lit item is this page`);
     assert.deepEqual(side.filter(link=>link.color===GOLD).map(link=>link.href),[lit[0].href],`${path}: only the lit item is gold`);
+    // Every page wears its section's photo; About AION 2 keeps its own vista, a class page its class figure.
+    const band=await page.evaluate(()=>({section:document.querySelector('[data-guide-shell]').dataset.guideShell,src:document.querySelector('.ae-gd-hero-img')?.getAttribute('src')??null,figure:!!document.querySelector('.ae-gd-hero.is-class')}));
+    if(path==='/hub/aetherium/guide/general/about/')assert.equal(band.src,'/astrix-app/pages/aetherium/images/photos/atreia-vista-01.jpg',`${path}: keeps the vista`);
+    else if(band.figure)assert.equal(band.src,null,`${path}: the class figure, no section photo`);
+    else assert.equal(band.src,`/astrix-app/pages/aetherium/images/section-heroes/${band.section}.jpg`,`${path}: the ${band.section} photo`);
     if(path==='/hub/aetherium/guide/general/about/'){
       await page.hover('.ae-gd-side a[href$="/general/market/"]');
       assert.notEqual(await page.$eval('.ae-gd-side a[href$="/general/market/"]',a=>getComputedStyle(a).color),GOLD,'Hover never lights an item gold');
