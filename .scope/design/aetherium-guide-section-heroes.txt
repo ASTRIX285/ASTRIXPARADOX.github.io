@@ -1,4 +1,3 @@
-.scope/design/aetherium-guide-section-heroes.txt
 astrix-app/module-versions.json
 astrix-app/pages/aetherium/guide-shell.mjs
 astrix-app/tools/test-aetherium-guide.mjs
