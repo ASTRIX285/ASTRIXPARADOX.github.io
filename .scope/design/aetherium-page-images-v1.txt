@@ -1,0 +1,2 @@
+astrix-app/pages/aetherium/images/page-heroes/**
+astrix-app/pages/aetherium/images/page-backgrounds/**
