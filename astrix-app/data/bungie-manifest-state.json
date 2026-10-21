@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
-  "manifestVersion": "244213.26.06.29.2000-1-bnet.65864",
-  "previousManifestVersion": "244213.26.06.29.2000-1-bnet.65583",
-  "refreshedAt": "2026-09-02T08:51:47.921927Z",
+  "manifestVersion": "245114.26.10.13.2000-1-bnet.66137",
+  "previousManifestVersion": "244213.26.06.29.2000-1-bnet.65864",
+  "refreshedAt": "2026-10-21T09:27:11.233323Z",
   "source": "Bungie GetDestinyManifest",
   "generatedTargets": [
     "astrix-app/data/component-icons.json",
@@ -10,12 +10,12 @@
     "astrix-app/pages/guardian-workspace-v2/guardian-loadout-definitions.mjs"
   ],
   "validation": {
-    "componentIconsVersion": "244213.26.06.29.2000-1-bnet.65864",
+    "componentIconsVersion": "245114.26.10.13.2000-1-bnet.66137",
     "componentIconCount": 584,
-    "betaCacheVersion": "244213.26.06.29.2000-1-bnet.65864",
+    "betaCacheVersion": "245114.26.10.13.2000-1-bnet.66137",
     "betaResolvedInventoryCount": 949,
     "betaUnresolvedInventoryCount": 0,
-    "loadoutDefinitionsVersion": "244213.26.06.29.2000-1-bnet.65864"
+    "loadoutDefinitionsVersion": "245114.26.10.13.2000-1-bnet.66137"
   },
   "curatedDataModified": false
 }
