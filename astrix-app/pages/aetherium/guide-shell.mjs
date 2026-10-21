@@ -5,7 +5,7 @@
  *
  * Contract (keep it stable, the sections build on it):
  *   GUIDE_SECTIONS        the eight sections in nav order: { id, label, href, blurb, topics, pages, hero, built }.
- *                         pages maps a topic to the page that covers it; hero is the photo band { src, alt, width, height }.
+ *                         pages maps a topic to the page that covers it; hero is the photo band { src, alt, width, height, focus }.
  *                         A section that is not written yet keeps built false and its "coming soon" page.
  *   GUIDE_CLASSES         the eight classes in the game's order (the same list as AION2_CLASSES in ascent-advisor.mjs,
  *                         kept here so the light pages need not load the advisor; the Guide test checks they match).
@@ -39,18 +39,33 @@ export const GUIDE_ROOT = '/hub/aetherium/guide/';
 
 const PHOTOS = '/astrix-app/pages/aetherium/images/photos/';
 const HOME_HERO = Object.freeze({ src: `${PHOTOS}golden-sea-01.jpg`, alt: 'A floating rock chained to a cliff above a golden sea, with a huge planet glowing through the clouds', width: 2560, height: 1440 });
-/* Every section uses the vista for now; each gets its own photo later. */
-const VISTA_HERO = Object.freeze({ src: `${PHOTOS}atreia-vista-01.jpg`, alt: 'A Daeva on a grassy hilltop looking out over cliffside ruins, a spiked dark structure and the sea', width: 2560, height: 1440 });
+const SECTION_PHOTOS = '/astrix-app/pages/aetherium/images/section-heroes/';
+/* Each section's own photo (design/aetherium-guide-section-heroes, 21 Oct 2026). focus is the object-position that keeps the
+   subject in view when the band crops the photo, on a phone most of all. */
+const sectionHero = (name, alt, focus) => Object.freeze({ src: `${SECTION_PHOTOS}${name}.jpg`, alt, width: 2400, height: 923, focus });
+const SECTION_HEROES = Object.freeze({
+  general: sectionHero('general', 'A Daeva on a grassy hilltop above cliffside ruins, with huge dark spires and the sea beyond', '50% 15%'),
+  character: sectionHero('character', 'A glowing blue orb wrapped in stone and gold rings inside a carved hall', '50% 0%'),
+  skills: sectionHero('skills', 'A pale moon and a shimmering ring of light rising over a rocky ledge at night', '72% 0%'),
+  equipment: sectionHero('equipment', 'A dark spiked fortress against golden clouds, with rocks swirling around its towers', '55% 0%'),
+  crafting: sectionHero('crafting', 'A great twisted tree arching over a grassy cliff, with a white spire and purple blossom below', '40% 30%'),
+  world: sectionHero('world', 'Green cliffs and purple trees beside a white spire, with floating islands over a calm sea', '66% 50%'),
+  guides: sectionHero('guides', 'A lone rock pillar chained to a smaller rock above a golden sea of cloud', '0% 60%')
+});
+/* A page with its own photo keeps it over its section's. */
+const PAGE_HEROES = Object.freeze({
+  [`${GUIDE_ROOT}general/about/`]: Object.freeze({ src: `${PHOTOS}atreia-vista-01.jpg`, alt: 'A Daeva on a grassy hilltop looking out over cliffside ruins, a spiked dark structure and the sea', width: 2560, height: 1440 })
+});
 
 export const GUIDE_SECTIONS = Object.freeze([
   { id: 'home', label: 'Home', href: GUIDE_ROOT, blurb: 'Start here: what the Guide covers and where to go next.', topics: [], pages: {}, hero: HOME_HERO, built: true },
-  { id: 'general', label: 'General', href: `${GUIDE_ROOT}general/`, blurb: 'The game, the two factions, Season 1, reset times, Membership and the Market, controls and the FAQ.', topics: ['About AION 2', 'Factions', 'Season 1', 'Reset times', 'Membership and Market', 'Controls', 'FAQ'], pages: { 'About AION 2': `${GUIDE_ROOT}general/about/`, Factions: `${GUIDE_ROOT}general/about/`, 'Season 1': `${GUIDE_ROOT}general/about/`, 'Reset times': `${GUIDE_ROOT}general/resets/`, 'Membership and Market': `${GUIDE_ROOT}general/market/`, Controls: `${GUIDE_ROOT}general/controls/`, FAQ: `${GUIDE_ROOT}general/faq/` }, hero: VISTA_HERO, built: true },
-  { id: 'character', label: 'Character', href: `${GUIDE_ROOT}character/`, blurb: 'The eight classes and their roles, stats, Daevanion boards, stigmas and builds.', topics: ['Classes', 'Stats', 'Daevanion', 'Stigmas', 'Builds'], pages: { Classes: `${GUIDE_ROOT}classes/` }, hero: VISTA_HERO, built: true },
-  { id: 'skills', label: 'Skills', href: `${GUIDE_ROOT}skills/`, blurb: 'Every class skill, Mastery, Specialty picks and the skill bar.', topics: ['Skills by class', 'Mastery', 'Specialty picks', 'Skill bar and macro'], pages: { 'Skills by class': `${GUIDE_ROOT}classes/`, Mastery: `${GUIDE_ROOT}skills/`, 'Specialty picks': `${GUIDE_ROOT}skills/`, 'Skill bar and macro': `${GUIDE_ROOT}general/controls/` }, hero: VISTA_HERO, built: true },
-  { id: 'equipment', label: 'Equipment', href: `${GUIDE_ROOT}equipment/`, blurb: 'Gear slots and grades, Enhancement, Manastones, Theostones, Arcana, pets, wings and titles.', topics: ['Slots and grades', 'Enhancement', 'Manastones', 'Theostones', 'Arcana', 'Pets and wings', 'Titles'], pages: { 'Slots and grades': `${GUIDE_ROOT}equipment/slots/`, Enhancement: `${GUIDE_ROOT}equipment/enhancement/`, Manastones: `${GUIDE_ROOT}equipment/manastones/`, Theostones: `${GUIDE_ROOT}equipment/theostones/`, Arcana: `${GUIDE_ROOT}equipment/arcana/`, 'Pets and wings': `${GUIDE_ROOT}equipment/pets-wings/`, Titles: `${GUIDE_ROOT}equipment/titles/` }, hero: VISTA_HERO, built: true },
-  { id: 'crafting', label: 'Crafting', href: `${GUIDE_ROOT}crafting/`, blurb: 'The five professions, gathering and the crafted gear ladder.', topics: ['Professions', 'Gathering', 'Crafted gear'], pages: { Professions: `${GUIDE_ROOT}crafting/professions/`, Gathering: `${GUIDE_ROOT}crafting/gathering/`, 'Crafted gear': `${GUIDE_ROOT}crafting/crafted-gear/` }, hero: VISTA_HERO, built: true },
-  { id: 'world', label: 'World', href: `${GUIDE_ROOT}world/`, blurb: 'Zones, Sealed Dungeons and Strongholds, the Abyss and events.', topics: ['Zones', 'Sealed Dungeons and Strongholds', 'The Abyss', 'Events'], pages: { Zones: `${GUIDE_ROOT}world/#aeWorld-zone`, 'Sealed Dungeons and Strongholds': `${GUIDE_ROOT}dungeons/sealed-dungeons/`, 'The Abyss': `${GUIDE_ROOT}world/#abyss`, Events: `${GUIDE_ROOT}world/#aeWorld-event` }, hero: VISTA_HERO, built: true },
-  { id: 'guides', label: 'Guides', href: `${GUIDE_ROOT}guides/`, blurb: 'Your path by level, new player help, dungeons, the Lv 45 weekly loop and the endgame.', topics: ['Your path by level', 'New player help', 'Dungeons', 'Lv 45 weekly loop', 'Endgame'], pages: { 'Your path by level': `${GUIDE_ROOT}path/`, Dungeons: `${GUIDE_ROOT}dungeons/`, 'Lv 45 weekly loop': `${GUIDE_ROOT}weekly/` }, hero: VISTA_HERO, built: true }
+  { id: 'general', label: 'General', href: `${GUIDE_ROOT}general/`, blurb: 'The game, the two factions, Season 1, reset times, Membership and the Market, controls and the FAQ.', topics: ['About AION 2', 'Factions', 'Season 1', 'Reset times', 'Membership and Market', 'Controls', 'FAQ'], pages: { 'About AION 2': `${GUIDE_ROOT}general/about/`, Factions: `${GUIDE_ROOT}general/about/`, 'Season 1': `${GUIDE_ROOT}general/about/`, 'Reset times': `${GUIDE_ROOT}general/resets/`, 'Membership and Market': `${GUIDE_ROOT}general/market/`, Controls: `${GUIDE_ROOT}general/controls/`, FAQ: `${GUIDE_ROOT}general/faq/` }, hero: SECTION_HEROES.general, built: true },
+  { id: 'character', label: 'Character', href: `${GUIDE_ROOT}character/`, blurb: 'The eight classes and their roles, stats, Daevanion boards, stigmas and builds.', topics: ['Classes', 'Stats', 'Daevanion', 'Stigmas', 'Builds'], pages: { Classes: `${GUIDE_ROOT}classes/` }, hero: SECTION_HEROES.character, built: true },
+  { id: 'skills', label: 'Skills', href: `${GUIDE_ROOT}skills/`, blurb: 'Every class skill, Mastery, Specialty picks and the skill bar.', topics: ['Skills by class', 'Mastery', 'Specialty picks', 'Skill bar and macro'], pages: { 'Skills by class': `${GUIDE_ROOT}classes/`, Mastery: `${GUIDE_ROOT}skills/`, 'Specialty picks': `${GUIDE_ROOT}skills/`, 'Skill bar and macro': `${GUIDE_ROOT}general/controls/` }, hero: SECTION_HEROES.skills, built: true },
+  { id: 'equipment', label: 'Equipment', href: `${GUIDE_ROOT}equipment/`, blurb: 'Gear slots and grades, Enhancement, Manastones, Theostones, Arcana, pets, wings and titles.', topics: ['Slots and grades', 'Enhancement', 'Manastones', 'Theostones', 'Arcana', 'Pets and wings', 'Titles'], pages: { 'Slots and grades': `${GUIDE_ROOT}equipment/slots/`, Enhancement: `${GUIDE_ROOT}equipment/enhancement/`, Manastones: `${GUIDE_ROOT}equipment/manastones/`, Theostones: `${GUIDE_ROOT}equipment/theostones/`, Arcana: `${GUIDE_ROOT}equipment/arcana/`, 'Pets and wings': `${GUIDE_ROOT}equipment/pets-wings/`, Titles: `${GUIDE_ROOT}equipment/titles/` }, hero: SECTION_HEROES.equipment, built: true },
+  { id: 'crafting', label: 'Crafting', href: `${GUIDE_ROOT}crafting/`, blurb: 'The five professions, gathering and the crafted gear ladder.', topics: ['Professions', 'Gathering', 'Crafted gear'], pages: { Professions: `${GUIDE_ROOT}crafting/professions/`, Gathering: `${GUIDE_ROOT}crafting/gathering/`, 'Crafted gear': `${GUIDE_ROOT}crafting/crafted-gear/` }, hero: SECTION_HEROES.crafting, built: true },
+  { id: 'world', label: 'World', href: `${GUIDE_ROOT}world/`, blurb: 'Zones, Sealed Dungeons and Strongholds, the Abyss and events.', topics: ['Zones', 'Sealed Dungeons and Strongholds', 'The Abyss', 'Events'], pages: { Zones: `${GUIDE_ROOT}world/#aeWorld-zone`, 'Sealed Dungeons and Strongholds': `${GUIDE_ROOT}dungeons/sealed-dungeons/`, 'The Abyss': `${GUIDE_ROOT}world/#abyss`, Events: `${GUIDE_ROOT}world/#aeWorld-event` }, hero: SECTION_HEROES.world, built: true },
+  { id: 'guides', label: 'Guides', href: `${GUIDE_ROOT}guides/`, blurb: 'Your path by level, new player help, dungeons, the Lv 45 weekly loop and the endgame.', topics: ['Your path by level', 'New player help', 'Dungeons', 'Lv 45 weekly loop', 'Endgame'], pages: { 'Your path by level': `${GUIDE_ROOT}path/`, Dungeons: `${GUIDE_ROOT}dungeons/`, 'Lv 45 weekly loop': `${GUIDE_ROOT}weekly/` }, hero: SECTION_HEROES.guides, built: true }
 ]);
 
 export const GUIDE_CLASSES = Object.freeze(['Gladiator', 'Templar', 'Assassin', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Cleric', 'Chanter']);
@@ -79,9 +94,9 @@ const herePath = () => pathKey(location.pathname);
 
 /** The photo band: the photo, the kicker, the page title and the lede. The home adds its buttons. */
 function heroHtml(item, { title, lede, kicker, actions }) {
-  const hero = item.hero;
+  const hero = PAGE_HEROES[herePath()] ?? item.hero;
   return `<header class="ae-gd-hero${item.id === 'home' ? ' is-home' : ''}">
-      <img class="ae-gd-hero-img" src="${esc(hero.src)}" alt="${esc(hero.alt)}" width="${hero.width}" height="${hero.height}" loading="eager" fetchpriority="high" decoding="async">
+      <img class="ae-gd-hero-img" src="${esc(hero.src)}" alt="${esc(hero.alt)}" width="${hero.width}" height="${hero.height}"${hero.focus ? ` style="object-position:${esc(hero.focus)}"` : ''} loading="eager" fetchpriority="high" decoding="async">
       <div class="ae-gd-hero-copy">
         <p class="ae-gd-kicker">${esc(kicker ?? item.label)}</p>
         <h1 class="ae-gd-title" id="aeScreenTitle">${esc(title)}</h1>
