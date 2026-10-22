@@ -50,6 +50,11 @@ const rosterWith=entry=>JSON.stringify({rosters:{[`eu:${entry.serverId}`]:{regio
 const meta={region:'eu',fetchedAt:new Date().toISOString(),cache:'miss'};
 const PIXEL=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=','base64');
 
+// The ten Guide pages with their own photo (design/aetherium-page-photos-v1, 21 Oct 2026): path to the file name in page-heroes.
+const PAGE_PHOTOS={'/hub/aetherium/guide/general/loadouts/':'loadouts','/hub/aetherium/guide/equipment/slots/':'slots','/hub/aetherium/guide/equipment/titles/':'titles','/hub/aetherium/guide/equipment/where-to-get/':'where-to-get','/hub/aetherium/guide/equipment/manastones/':'manastones','/hub/aetherium/guide/equipment/arcana/':'arcana','/hub/aetherium/guide/equipment/pets-wings/':'pets-wings','/hub/aetherium/guide/path/':'path','/hub/aetherium/guide/dungeons/':'dungeons','/hub/aetherium/guide/dungeons/daily-dungeon/':'daily-dungeon'};
+// The tool pages and the photo behind each (same PR).
+const BACKDROPS={'/hub/aetherium/ascent/':'ascent-mastery','/hub/aetherium/ascent/mastery/':'ascent-mastery','/hub/aetherium/ascent/skill-bar/':'ascent-skill-bar','/hub/aetherium/ascent/stigma/':'ascent-stigma','/hub/aetherium/ascent/daevanion/':'ascent-daevanion','/hub/aetherium/ascent/macro/':'ascent-macro','/hub/aetherium/ascent/stats/':'ascent-stats','/hub/aetherium/':'daeva-card','/hub/aetherium/gear/':'gear-ledger','/hub/aetherium/gear/equipment/':'gear-ledger','/hub/aetherium/gear/titles/':'gear-ledger'};
+
 const CLASSES=['Gladiator','Templar','Assassin','Ranger','Sorcerer','Spiritmaster','Cleric','Chanter'];
 const SECTIONS=[['home','Home','/hub/aetherium/guide/'],['general','General','/hub/aetherium/guide/general/'],['character','Character','/hub/aetherium/guide/character/'],['skills','Skills','/hub/aetherium/guide/skills/'],['equipment','Equipment','/hub/aetherium/guide/equipment/'],['crafting','Crafting','/hub/aetherium/guide/crafting/'],['world','World','/hub/aetherium/guide/world/'],['guides','Guides','/hub/aetherium/guide/guides/']];
 // Sections still coming soon: phases 3 to 5 built Equipment, Crafting, General, Skills and World; the Guides Overview
@@ -178,10 +183,11 @@ await check('shell contract: the photo band, the side menu with this page lit, n
     assert.equal(lit.length,1,`${path}: exactly one item has aria-current="page" (${lit.map(link=>link.href)})`);
     assert.equal(new URL(lit[0].href,base).pathname,path,`${path}: the lit item is this page`);
     assert.deepEqual(side.filter(link=>link.color===GOLD).map(link=>link.href),[lit[0].href],`${path}: only the lit item is gold`);
-    // Every page wears its section's photo; About AION 2 keeps its own vista, a class page its class figure.
+    // Every page wears its section's photo; About AION 2 keeps its own vista, the ten pages in PAGE_PHOTOS their own photo, a class page its class figure.
     const band=await page.evaluate(()=>({section:document.querySelector('[data-guide-shell]').dataset.guideShell,src:document.querySelector('.ae-gd-hero-img')?.getAttribute('src')??null,figure:!!document.querySelector('.ae-gd-hero.is-class')}));
     if(path==='/hub/aetherium/guide/general/about/')assert.equal(band.src,'/astrix-app/pages/aetherium/images/photos/atreia-vista-01.jpg',`${path}: keeps the vista`);
     else if(band.figure)assert.equal(band.src,null,`${path}: the class figure, no section photo`);
+    else if(PAGE_PHOTOS[path])assert.equal(band.src,`/astrix-app/pages/aetherium/images/page-heroes/${PAGE_PHOTOS[path]}.jpg`,`${path}: its own photo`);
     else assert.equal(band.src,`/astrix-app/pages/aetherium/images/section-heroes/${band.section}.jpg`,`${path}: the ${band.section} photo`);
     if(path==='/hub/aetherium/guide/general/about/'){
       await page.hover('.ae-gd-side a[href$="/general/market/"]');
@@ -673,6 +679,51 @@ for(const width of [1600,390]){
     }
   });
 }
+
+await check('page photos: ten Guide pages wear their own photo, sized, focused and shaded, at 1440 and 390',async()=>{
+  for(const [path,name] of Object.entries(PAGE_PHOTOS))for(const width of [1440,390]){
+    const {page,context,errors}=await open(path,{viewport:{width,height:width===390?844:900}});
+    try{
+      assert.deepEqual(errors,[],`${path}: no page errors`);
+      const photo=await page.$eval('.ae-gd-hero-img',img=>{const band=img.closest('.ae-gd-hero').getBoundingClientRect(),box=img.getBoundingClientRect();
+        return {src:img.getAttribute('src'),alt:img.alt,w:img.getAttribute('width'),h:img.getAttribute('height'),fit:getComputedStyle(img).objectFit,pos:getComputedStyle(img).objectPosition,loaded:img.complete&&img.naturalWidth===2400,
+          fills:Math.abs(box.width-band.width)<=1&&Math.abs(box.height-band.height)<=1,shade:getComputedStyle(img.closest('.ae-gd-hero'),'::before').backgroundImage,fade:getComputedStyle(img.closest('.ae-gd-hero'),'::after').backgroundImage};});
+      assert.equal(photo.src,`/astrix-app/pages/aetherium/images/page-heroes/${name}.jpg`,`${path}: its own photo`);
+      assert.ok(photo.alt.length>10&&!/[–—-]/.test(photo.alt),`${path}: plain alt text, no dashes`);
+      assert.deepEqual([photo.w,photo.h,photo.fit],['2400','923','cover'],`${path}: sized 2400 by 923, cover`);
+      assert.notEqual(photo.pos,'50% 45%',`${path}: its own focus`);
+      assert.ok(photo.fills,`${path} at ${width}: the photo fills the band`);
+      assert.match(photo.shade,/linear-gradient/,`${path}: the shade behind the title`);
+      assert.match(photo.fade,/linear-gradient/,`${path}: the fade into the page`);
+    }finally{await context.close();}
+  }
+});
+
+await check('tool backdrops: a fixed, darkened, decorative photo behind the Ascent Plan, Daeva Card and Gear Ledger',async()=>{
+  for(const [path,name] of Object.entries(BACKDROPS))for(const width of [1440,390]){
+    const {page,context,errors}=await open(path,{viewport:{width,height:width===390?844:900}});
+    try{
+      assert.deepEqual(errors,[],`${path}: no page errors`);
+      const look=await page.evaluate(()=>{const body=document.body,layer=getComputedStyle(body,'::before');
+        return {position:layer.position,zIndex:layer.zIndex,inset:[layer.top,layer.left].join(' '),image:layer.backgroundImage,bodyBg:getComputedStyle(body).backgroundColor,glows:(getComputedStyle(body).backgroundImage.match(/radial-gradient/g)||[]).length,attach:layer.backgroundAttachment,
+          panel:getComputedStyle(body).getPropertyValue('--ae-panel').trim(),solid:getComputedStyle(body).getPropertyValue('--ae-panel-solid').trim(),wide:document.documentElement.scrollWidth>innerWidth,
+          priority:document.querySelectorAll('[fetchpriority="high"][href*="page-backgrounds"],[fetchpriority="high"][src*="page-backgrounds"]').length};});
+      assert.equal(look.position,'fixed',`${path}: a fixed layer`);
+      assert.equal(look.zIndex,'-1',`${path}: behind the content`);
+      assert.equal(look.inset,'0px 0px',`${path}: the size of the screen`);
+      assert.notEqual(look.attach,'fixed',`${path}: never a fixed attachment`);
+      assert.ok(look.image.includes(`/page-backgrounds/${name}.jpg`),`${path}: the ${name} photo`);
+      assert.match(look.image,/rgba\(7, 11, 20, 0\.65\)|color\(srgb [\d. ]+\/ 0\.65\)/,`${path}: the ground at 65% over the photo`);
+      assert.equal(look.bodyBg,'rgba(0, 0, 0, 0)',`${path}: no solid ground over the layer`);
+      assert.equal(look.glows,2,`${path}: the two page glows stay`);
+      assert.equal(look.panel,look.solid,`${path}: panels solid over the photo`);
+      assert.ok(!look.wide,`${path} at ${width}: no sideways scroll`);
+      assert.equal(look.priority,0,`${path}: the photo never jumps the queue`);
+      await page.emulateMedia({contrast:'more'});
+      assert.ok(!(await page.evaluate(()=>getComputedStyle(document.body,'::before').backgroundImage)).includes('page-backgrounds'),`${path}: no photo with more contrast`);
+    }finally{await context.close();}
+  }
+});
 
 await check('never the real Worker or NCSOFT',async()=>{assert.deepEqual(realCalls,[]);});
 

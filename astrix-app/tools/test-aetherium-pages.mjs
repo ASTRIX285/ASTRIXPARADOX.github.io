@@ -1332,7 +1332,9 @@ await check('crisp tokens: muted text at least 4.5:1 and the hairline at least 1
   const panel=await lookOf(page,'.ae-panel');
   assert.equal(panel.border,'1px','Hairline border on the panel');
   assert.ok((panel.shadow.match(/rgba\(/g)||[]).length>=3,`Top highlight plus a two-layer shadow (${panel.shadow})`);
-  assert.match(panel.bg,/rgba\(.*0\.\d+\)$/,'The panel is see-through');
+  // The Daeva Card has its photo backdrop (design/aetherium-page-photos-v1), so its panels are solid over it; the see-through token stays.
+  assert.ok(await page.$eval('body',el=>el.classList.contains('ae-backdrop')),'The Daeva Card has its photo backdrop');
+  assert.doesNotMatch(panel.bg,/rgba\(.*0\.\d+\)$/,'The panel is solid over the photo');
   // Reduced transparency (Chromium emulation through CDP): the panel turns solid.
   const cdp=await context.newCDPSession(page);
   await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-transparency',value:'reduce'}]});
