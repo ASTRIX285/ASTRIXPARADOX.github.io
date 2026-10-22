@@ -2876,3 +2876,97 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-wg-slot-name{ma
   .ae-wg-path.is-row .ae-wg-node{padding-bottom:0}
 }
 @media (max-width:560px){.ae-wg-goals{grid-template-columns:minmax(0,1fr)}}
+
+/* Guide > Equipment > Arcana (design/aetherium-arcana-page, 22 Oct 2026): the page shows the game's own art. Five card
+   medallions, the grade climb on real card backs, the set lines with their art and card pips, the drops with each dungeon's
+   three cards and one stage track, then Extract and Transmute as pictures. No boxes: space, headings and the art. */
+.ae-arc-block{margin-top:var(--ae-gd-space-h2)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-sub{max-width:780px;margin:0 0 36px;font-size:19px;line-height:1.6;color:var(--ae-gd-muted)}
+.ae-arc-stats{display:flex;flex-wrap:wrap;gap:20px 48px;margin:0;padding:0;list-style:none}
+.ae-arc-stats li{display:grid;gap:6px}
+.ae-arc-stats b{font:400 56px/1 var(--ae-gd-font-title);color:var(--ae-gd-gold)}
+.ae-arc-stats span{font:600 13px/1.3 var(--ae-gd-display);letter-spacing:.18em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-arc-block img{display:block;max-width:100%;height:auto}
+/* The five cards */
+.ae-arc-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:24px;margin:0;padding:0;list-style:none}
+.ae-arc-card{display:flex;flex-direction:column;align-items:center;text-align:center}
+.ae-arc-disc{position:relative;width:min(220px,100%);aspect-ratio:1;margin-bottom:18px}
+.ae-arc-disc::before{content:"";position:absolute;inset:-14%;border-radius:50%;background:radial-gradient(circle,var(--ae-gd-gold-glow),var(--ae-gd-clear) 65%)}
+.ae-arc-disc img{position:relative;width:100%;filter:drop-shadow(0 12px 24px rgba(0,0,0,.7))}
+.ae-arc-card.is-both .ae-arc-disc::after{content:"";position:absolute;inset:-4%;border-radius:50%;border:1.5px solid var(--ae-gd-gold);box-shadow:0 0 22px var(--ae-gd-gold-glow)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-card h3{margin:0 0 8px}
+.ae-arc-kind{font:600 13px/1 var(--ae-gd-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ae-gd-gold);border:1px solid var(--ae-gd-gold-line);padding:6px 10px;white-space:nowrap}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-from{margin:12px 0 0;font-size:16px;line-height:1.45;color:var(--ae-gd-muted)}
+/* The grade climb: each card a little bigger, framed and lit in its grade colour */
+.ae-arc-climb{display:flex;align-items:flex-end;gap:4%;max-width:980px;margin:0;padding:0;list-style:none}
+.ae-arc-grade{--ae-g:var(--ae-grade-common);flex:calc(17 + var(--ae-arc-step) * 2.6) 1 0;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.ae-arc-grade[data-grade="rare"],.ae-arc-up[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}
+.ae-arc-grade[data-grade="epic"],.ae-arc-up[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
+.ae-arc-grade[data-grade="unique"],.ae-arc-up[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-arc-frame{position:relative;display:block;width:100%;border-radius:8px;overflow:hidden;box-shadow:0 0 34px color-mix(in srgb,var(--ae-g) 35%,transparent)}
+.ae-arc-frame::after{content:"";position:absolute;inset:0;border-radius:8px;border:2px solid var(--ae-g);box-shadow:inset 0 0 26px color-mix(in srgb,var(--ae-g) 45%,transparent)}
+.ae-arc-num{margin-top:18px;font:400 56px/1 var(--ae-gd-font-title);color:var(--ae-g)}
+.ae-arc-unit{margin-top:6px;font:600 14px/1 var(--ae-gd-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-arc-gname{margin-top:8px;font:600 15px/1 var(--ae-gd-display);letter-spacing:.24em;text-transform:uppercase;color:var(--ae-g)}
+/* Build a set */
+.ae-arc-sets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin:0;padding:0;list-style:none}
+.ae-arc-set-art{position:relative;display:flex;align-items:flex-end;height:170px;padding:0 26px 26px;border-radius:6px;overflow:hidden;
+  background:linear-gradient(90deg,var(--ae-gd-deep) 0%,var(--ae-gd-deep) 38%,color-mix(in srgb,var(--ae-gd-deep) 35%,transparent) 70%,var(--ae-gd-clear)),var(--ae-arc-art) right center/auto 100% no-repeat,var(--ae-gd-deep)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-set-art h3{position:relative;margin:0;font-size:36px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-tier{display:flex;align-items:center;gap:24px;max-width:none;margin:0;padding:20px 4px;border-bottom:1px solid var(--ae-gd-line-soft);font-size:18px;line-height:1.5;color:var(--ae-gd-ink-soft)}
+.ae-arc-tier b{color:var(--ae-gd-gold);font-weight:600}
+.ae-arc-pips{display:flex;flex:none;gap:8px}
+.ae-arc-pip{display:block;width:40px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px var(--ae-gd-gold-line);opacity:.2}
+.ae-arc-pip.is-on{opacity:1}
+/* Where they drop */
+.ae-arc-drops{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:40px;align-items:start}
+.ae-arc-art{position:relative;margin:0;border-radius:6px;overflow:hidden}
+.ae-arc-art img{width:100%;height:420px;object-fit:cover}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-arc-art figcaption{position:absolute;left:0;right:0;bottom:0;padding:70px 24px 20px;font:400 32px/1.1 var(--ae-gd-font-title);color:var(--ae-gd-ink);background:linear-gradient(0deg,color-mix(in srgb,var(--ae-gd-deep) 95%,transparent),var(--ae-gd-clear))}
+.ae-arc-places{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin:0;padding:0;list-style:none}
+.ae-arc-trio{display:flex;gap:10px;margin:6px 0 0}
+.ae-arc-trio img{width:min(88px,30%);filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+.ae-arc-stages{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:40px 0 0;padding:0;list-style:none}
+.ae-arc-stages::before{content:"";position:absolute;left:22px;right:22px;top:21px;height:2px;background:linear-gradient(90deg,var(--ae-gd-gold-line),var(--ae-gd-gold))}
+.ae-arc-stage{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding-right:14px}
+.ae-arc-stage-n{display:grid;place-items:center;width:44px;height:44px;box-sizing:border-box;border-radius:50%;background:var(--ae-gd-ground);border:2px solid var(--ae-gd-gold);font:400 20px/1 var(--ae-gd-font-title);color:var(--ae-gd-gold)}
+.ae-arc-stage.is-top .ae-arc-stage-n{background:var(--ae-gd-gold-fill);color:var(--ae-gd-gold-ink);box-shadow:0 0 20px var(--ae-gd-gold-glow)}
+.ae-arc-stage b{margin-top:6px;font:600 18px/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-arc-up{--ae-g:var(--ae-grade-common);font:600 13px/1.3 var(--ae-gd-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ae-g);border:1px solid currentColor;padding:4px 8px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-note{max-width:none;margin:32px 0 0;padding-left:16px;border-left:2px solid var(--ae-gd-gold);font-size:17px;line-height:1.6;color:var(--ae-gd-ink-soft)}
+/* Extract and Transmute */
+.ae-arc-loop{display:grid;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr) 80px minmax(0,1fr);align-items:center;margin:0;padding:0;list-style:none;text-align:center}
+.ae-arc-loop>li:not(.ae-arc-arrow){display:flex;flex-direction:column;align-items:center}
+.ae-arc-loop>li>img{width:auto;max-width:100%;height:320px;object-fit:contain;filter:drop-shadow(0 16px 30px rgba(0,0,0,.7))}
+.ae-arc-loop>li.is-glow>img{filter:drop-shadow(0 0 30px var(--ae-gd-gold-glow)) drop-shadow(0 16px 30px rgba(0,0,0,.7))}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-loop h3{margin:22px 0 8px;color:var(--ae-gd-ink)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-loop p{max-width:300px;margin:0;font-size:16px;line-height:1.5;color:var(--ae-gd-muted)}
+.ae-arc-arrow{position:relative;height:2px;background:linear-gradient(90deg,var(--ae-gd-clear),var(--ae-gd-gold))}
+.ae-arc-arrow::after{content:"";position:absolute;right:-1px;top:-5px;width:10px;height:10px;border-top:2px solid var(--ae-gd-gold);border-right:2px solid var(--ae-gd-gold);transform:rotate(45deg)}
+.ae-arc-cost{display:inline-flex;align-items:center;gap:10px;margin-top:14px;font:600 16px/1 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-arc-cost img{width:48px;height:48px;border-radius:4px}
+@media (max-width:760px){
+  .ae-arc-stats b,.ae-arc-num{font-size:40px}
+  body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-sub{font-size:17px;margin-bottom:28px}
+  .ae-arc-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 12px}
+  .ae-arc-disc{width:min(150px,100%)}
+  .ae-arc-climb{gap:10px}
+  .ae-arc-num{font-size:28px}.ae-arc-unit{font-size:10px}.ae-arc-gname{font-size:11px;letter-spacing:.1em}
+  .ae-arc-sets,.ae-arc-drops,.ae-arc-places{grid-template-columns:minmax(0,1fr)}
+  .ae-arc-set-art{height:130px}
+  body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-set-art h3{font-size:28px}
+  body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-tier{gap:16px;font-size:16px}
+  .ae-arc-pip{width:30px}
+  .ae-arc-art img{height:240px}
+  .ae-arc-stages{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:28px}
+  .ae-arc-stages::before{display:none}
+  .ae-arc-loop{grid-template-columns:minmax(0,1fr);row-gap:8px}
+  .ae-arc-arrow{width:2px;height:40px;margin:0 auto;background:linear-gradient(180deg,var(--ae-gd-clear),var(--ae-gd-gold))}
+  .ae-arc-arrow::after{right:-5px;top:auto;bottom:-1px;transform:rotate(135deg)}
+  .ae-arc-loop>li>img{height:220px}
+}
+/* A long Arcana heading wraps its words, never its diamond. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-arc-block>.ae-gx-h2{flex-wrap:nowrap;align-items:baseline}
+/* The Arcana page runs wider so the art reads at full size; the photo band's title lines up with it. */
+body.aetherium-page[data-guide-page="arcana"] :is(.ae-gd-frame,.ae-gd-hero-copy){max-width:1520px}
+body.aetherium-page[data-guide-page="arcana"] .ae-arc-cards{gap:20px}

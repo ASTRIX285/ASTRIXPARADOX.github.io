@@ -725,6 +725,58 @@ await check('tool backdrops: a fixed, darkened, decorative photo behind the Asce
   }
 });
 
+// Arcana (design/aetherium-arcana-page, 22 Oct 2026): the game's own art, no table and no boxes, every number from the data.
+await check('Arcana: five card medallions, the grade climb on card backs, set art with pips, one stage track, Extract and Transmute pictures',async()=>{
+  const arcana=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/gear-sources.json'),'utf8')).records.find(record=>record.id==='arcana-grades');
+  for(const width of [1440,390]){
+    const {page,context,errors}=await open('/hub/aetherium/guide/equipment/arcana/',{live:false,viewport:{width,height:width===390?844:900}});
+    try{
+      await page.waitForSelector('.ae-arc-cards');
+      for(let y=0;y<9000;y+=700){await page.evaluate(value=>scrollTo(0,value),y);await page.waitForTimeout(40);}
+      await page.waitForFunction(()=>[...document.querySelectorAll('.ae-arc-block img')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:10000});
+      assert.deepEqual(errors,[],'No page errors');
+      const look=await page.evaluate(()=>{
+        const box=node=>node.getBoundingClientRect();
+        const cards=[...document.querySelectorAll('.ae-arc-card')];
+        const discs=cards.map(card=>box(card.querySelector('.ae-arc-disc img')));
+        const frames=[...document.querySelectorAll('.ae-arc-grade .ae-arc-frame')];
+        const colours=[...document.querySelectorAll('.ae-arc-grade .ae-arc-num')].map(node=>getComputedStyle(node).color);
+        const text=document.querySelector('.ae-gd-body').innerText;
+        return {cards:cards.map(card=>card.dataset.arcanaSlot),both:cards.filter(card=>card.classList.contains('is-both')).map(card=>card.dataset.arcanaSlot),
+          disc:Math.round(discs[0].width),rowTop:new Set(discs.slice(0,2).map(rect=>Math.round(rect.top))).size,
+          frames:frames.map(frame=>Math.round(box(frame).width)),colours,nums:[...document.querySelectorAll('.ae-arc-num')].map(node=>node.textContent),
+          tables:document.querySelectorAll('.ae-gd-body table').length,svgs:document.querySelectorAll('.ae-gd-body svg').length,
+          pipsOn:[...document.querySelectorAll('.ae-arc-pips')].map(pips=>pips.querySelectorAll('.ae-arc-pip.is-on').length),
+          setArt:[...document.querySelectorAll('.ae-arc-set-art')].map(node=>getComputedStyle(node).backgroundImage.includes('/images/arcana/')),
+          stages:document.querySelectorAll('.ae-arc-stage').length,top:document.querySelector('.ae-arc-stage.is-top .ae-arc-up')?.textContent,
+          loop:[...document.querySelectorAll('.ae-arc-loop h3')].map(node=>node.textContent),cost:document.querySelector('.ae-arc-cost')?.textContent.trim(),
+          h2:[...document.querySelectorAll('.ae-arc-block>.ae-gx-h2')].map(node=>Math.round(parseFloat(getComputedStyle(node).fontSize))),
+          wide:document.documentElement.scrollWidth>innerWidth,dash:/[–—]/.test(text),broken:/undefined|NaN|\[object|not in the record/.test(text)};
+      });
+      assert.deepEqual(look.cards,arcana.slots.map(slot=>slot.id),'Five cards, in the data order');
+      assert.deepEqual(look.both,arcana.slots.filter(slot=>slot.from.length>1).map(slot=>slot.id),'The card from both dungeons is ringed');
+      assert.ok(look.disc>=(width===390?120:180),`The medallions are big (${look.disc}px)`);
+      assert.equal(look.rowTop,1,'The medallions sit on one line');
+      assert.ok(look.frames.every((w,n)=>n===0||w>=look.frames[n-1]),`Each grade card is at least as big as the one before (${look.frames})`);
+      assert.equal(new Set(look.colours).size,arcana.grades.length,'Each grade number in its own grade colour');
+      assert.deepEqual(look.nums,arcana.grades.map(entry=>`+${entry.itemLevel}`),'Item levels from the data');
+      assert.equal(look.tables,0,'No table');
+      assert.equal(look.svgs,0,'No drawn icons');
+      assert.deepEqual(look.pipsOn,arcana.lines.flatMap(()=>[2,4]),'Pips show 2 and 4 cards for each line');
+      assert.ok(look.setArt.length===arcana.lines.length&&look.setArt.every(Boolean),'Each line has its art');
+      assert.equal(look.stages,4,'One stage track');
+      assert.match(look.top,/guaranteed/i,'The top stage says what it guarantees');
+      assert.deepEqual(look.loop,['Extract','Mysterious Crystal','Transmute']);
+      assert.match(look.cost,/^5 crystals$/);
+      assert.ok(look.h2.every(size=>size===look.h2[0])&&look.h2[0]>=(width===390?28:38),`Section headings on the Guide scale (${look.h2})`);
+      assert.ok(!look.wide,`No sideways scroll at ${width}`);
+      assert.ok(!look.dash,'No en or em dash');
+      assert.ok(!look.broken,'No broken or placeholder text');
+      if(process.env.AE_SHOTS)await page.screenshot({path:`${process.env.AE_SHOTS}/arcana-${width}.png`,fullPage:true});
+    }finally{await context.close();}
+  }
+});
+
 await check('never the real Worker or NCSOFT',async()=>{assert.deepEqual(realCalls,[]);});
 
 await browser.close();

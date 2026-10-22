@@ -860,6 +860,32 @@
           "reliability": "medium"
         }
       ]
+    },
+    {
+      "id": "arcana-window",
+      "label": "The Arcana window: Extract and Transmute",
+      "status": "confirmed",
+      "extract": {
+        "text": "Extract takes the cards you will not use. Each one fills the Mysterious Crystal towards 100%.",
+        "item": "Mysterious Crystal (Bound)"
+      },
+      "transmute": {
+        "text": "Transmute reworks a card's additional effects. Its grade and main effect stay locked.",
+        "cost": {
+          "count": 5,
+          "item": "Mysterious Crystal (Bound)"
+        }
+      },
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-21",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Arcana window, Extract and Transmute tabs",
+          "note": "Extract fills a Mysterious Crystal (Bound) from 0%. Transmute shows Grade and Main Effect locked, Additional Effect open, and a cost of 5 Mysterious Crystals."
+        }
+      ]
     }
   ]
 }
