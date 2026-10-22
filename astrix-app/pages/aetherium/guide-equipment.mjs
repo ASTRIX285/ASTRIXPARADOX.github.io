@@ -439,7 +439,7 @@ function offerNode(kind, label, offer, dungeons) {
 }
 
 /** A slot as a gear path: what is worn, Best now, Next goal, End goal, joined by a thin gold line. */
-function slotPathHtml(entry, dungeons) {
+function slotPathHtml(entry, dungeons, sharedLookFor = '') {
   const current = entry.worn
     ? nodeHtml('current', 'Current', { icon: entry.worn.icon, grade: entry.worn.gradeId, enchant: entry.worn.enchant, name: entry.worn.name, itemLevel: entry.worn.level })
     : nodeHtml('current', 'Current', { name: 'Nothing worn' });
@@ -453,7 +453,8 @@ function slotPathHtml(entry, dungeons) {
   const note = !entry.best && !entry.goal ? '<p class="ae-wg-slot-note">No listed drop is open to you yet.</p>' : '';
   const hold = entry.hold ? `<p class="ae-wg-slot-note">${esc(entry.hold.text)}</p>` : '';
   const stray = entry.stray ? `<p class="ae-gx-stray" data-stray><b>Strays from the plan:</b> ${esc(entry.stray.text)}</p>` : '';
-  const lookFor = entry.lookFor.length && entry.status === 'offers' ? `<p class="ae-wg-slot-note">On the next piece, look for: ${esc(entry.lookFor.join(', '))}.</p>` : '';
+  // The look-for list shows on the card only when it differs from the one line under the heading.
+  const lookFor = entry.lookFor.length && entry.lookFor.join(', ') !== sharedLookFor ? `<p class="ae-wg-slot-note" data-look-for>On the next piece, look for: ${esc(entry.lookFor.join(', '))}.</p>` : '';
   return `<li class="ae-wg-slot" id="slot-${esc(entry.slotPos)}" data-slot="${esc(entry.slot)}" data-where-status="${esc(entry.status)}">
       <h4 class="ae-wg-slot-name">${esc(slotLabel(entry.slot))}</h4>
       <ol class="ae-wg-path">${current}${path}</ol>
@@ -484,9 +485,14 @@ function otherSlotsHtml(others) {
 export function whereToGetHtml(plan, { dungeons = new Map() } = {}) {
   const upgrades = plan.slots.filter(entry => entry.status === 'offers');
   const others = plan.slots.filter(entry => entry.status !== 'offers');
+  // The look-for list most slots share, said once under the heading.
+  const counts = new Map();
+  for (const entry of upgrades) if (entry.lookFor.length) counts.set(entry.lookFor.join(', '), (counts.get(entry.lookFor.join(', ')) ?? 0) + 1);
+  const shared = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
   return `<div class="ae-gx-where" id="aeWhere">
       <h2 class="ae-gx-h2" id="aeWhereUp">Slots to upgrade (${upgrades.length})</h2>
-      <ol class="ae-wg-slots" aria-labelledby="aeWhereUp">${upgrades.map(entry => slotPathHtml(entry, dungeons)).join('')}</ol>
+      ${shared ? `<p class="ae-wg-lede" data-look-for-all>On the next piece, look for: ${esc(shared)}.</p>` : ''}
+      <ol class="ae-wg-slots" aria-labelledby="aeWhereUp">${upgrades.map(entry => slotPathHtml(entry, dungeons, shared)).join('')}</ol>
       ${others.length ? `<h2 class="ae-gx-h2" id="aeWhereRest">Other slots</h2><ol class="ae-wg-slots is-rest" aria-labelledby="aeWhereRest">${otherSlotsHtml(others)}</ol>` : ''}
     </div>`;
 }

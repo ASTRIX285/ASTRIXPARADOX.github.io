@@ -231,7 +231,11 @@ for(const width of [1440,390]){
       assert.match(await page.textContent('[data-slot="Helmet"] [data-node="best"]'),/Draupnir/,'Flagged, never blocked');
       assert.match(await page.textContent('#aeWhereRest + ol .ae-wg-slot:has([data-slot="Amulet"])'),/No drop location listed\./);
       assert.equal((await page.textContent('#aeWhereHolder')).split('No drop location listed.').length-1,1,'Each reason said once');
-      assert.equal(await page.locator('#aeWhereUp + ol > li').first().getAttribute('data-slot'),'MainHand','The weapon first');
+      assert.equal(await page.locator('#aeWhereUp ~ ol.ae-wg-slots > li').first().getAttribute('data-slot'),'MainHand','The weapon first');
+      assert.equal(await page.locator('[data-look-for-all]').count(),1,'The shared look-for line once, under the heading');
+      assert.match(await page.textContent('[data-look-for-all]'),/^On the next piece, look for: .+\.$/);
+      assert.equal(await page.$eval('[data-look-for-all]',node=>node.previousElementSibling?.id),'aeWhereUp','Right under Slots to upgrade');
+      assert.equal(await page.locator('.ae-wg-slot [data-look-for]').count(),0,'Not repeated on the cards when every slot shares it');
       // The path runs across on a wide screen, top to bottom on a phone, with the gold line between the stops.
       const boxes=await weapon.locator('.ae-wg-node').evaluateAll(nodes=>nodes.map(node=>{const box=node.getBoundingClientRect();return {x:Math.round(box.left),y:Math.round(box.top),bottom:Math.round(box.bottom)};}));
       if(width===390){
