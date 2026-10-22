@@ -218,24 +218,105 @@ async function renderTheostones() {
     ${sectionHtml('aeTheoWhere', 'Where they come from', rewardList(rewardSources(sources, ['Theostone'])))}`);
 }
 
+/* Arcana art cut from Miguel's own screens of the Arcana window (design/aetherium-arcana-page, 22 Oct 2026). */
+const ARCANA_ART = '/astrix-app/pages/aetherium/images/arcana/';
+const arcArt = (file, alt, width, height, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${ARCANA_ART}${file}" alt="${esc(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
+const medallion = (id, alt = '') => arcArt(`${id}.webp`, alt, 260, 260, 'ae-arc-med-img');
+const cardBack = (alt = '') => arcArt('card-back.jpg', alt, 273, 410);
+const unique = (alt = '') => arcArt('chalice-of-vigor.jpg', alt, 280, 418);
+const gradeId = grade => grade.toLowerCase();
+const top = list => list[list.length - 1];
+const pips = (on, alt) => `<span class="ae-arc-pips" role="img" aria-label="${esc(alt)}">${[0, 1, 2, 3].map(n => `<span class="ae-arc-pip${n < on ? ' is-on' : ''}" aria-hidden="true">${cardBack()}</span>`).join('')}</span>`;
+
+/** Arcana as the game shows it: the five card medallions, the grade climb on real card backs, the two set lines with their
+ *  art, where they drop with each dungeon's three cards and the stage track, then Extract and Transmute as pictures. */
+export function arcanaHtml(record, index, arcWindow = null) {
+  const slotName = id => record.slots.find(slot => slot.id === id)?.name ?? id;
+  const where = id => index.byId.get(id)?.name ?? id;
+  const both = slot => slot.from.length > 1;
+  const cards = record.slots.map(slot => `<li class="ae-arc-card${both(slot) ? ' is-both' : ''}" data-arcana-slot="${esc(slot.id)}">
+      <span class="ae-arc-disc">${medallion(slot.id, `${slot.name} card symbol`)}</span>
+      <h3>${esc(slot.name)}</h3>
+      <span class="ae-arc-kind">${esc(slot.skills)}</span>
+      <p class="ae-arc-from">${both(slot) ? `Both dungeons. ${esc(slot.note ?? '')}` : esc(slot.from.map(where).join(', '))}</p>
+    </li>`).join('');
+  const last = record.grades.length - 1;
+  const climb = record.grades.map((entry, n) => `<li class="ae-arc-grade" data-grade="${esc(gradeId(entry.grade))}" style="--ae-arc-step:${n}">
+      <span class="ae-arc-frame">${n === last ? unique(`A ${entry.grade} card, Chalice of Vigor`) : cardBack(`A ${entry.grade} card`)}</span>
+      <b class="ae-arc-num">+${esc(entry.itemLevel)}</b><span class="ae-arc-unit">item level</span>
+      <span class="ae-arc-gname">${esc(entry.grade)}</span>
+    </li>`).join('');
+  const lines = record.lines.map(line => `<li class="ae-arc-set" data-arcana-line="${esc(line.id)}">
+      <div class="ae-arc-set-art" style="--ae-arc-art:url('${ARCANA_ART}${esc(line.id)}.jpg')"><h3>${esc(line.name)}</h3></div>
+      <p class="ae-arc-tier">${pips(2, `2 of 4 ${line.name} cards`)}<span><b>2 cards</b> ${esc(line.set2)}</span></p>
+      <p class="ae-arc-tier">${pips(4, `4 of 4 ${line.name} cards`)}<span><b>4 cards</b> ${esc(line.set4)}</span></p>
+    </li>`).join('');
+  const dungeons = index.transcendence;
+  const places = dungeons.map(dungeon => `<li class="ae-arc-place" data-transcendence="${esc(dungeon.id)}">
+      <h3>${esc(dungeon.name)}</h3>
+      <span class="ae-arc-trio">${dungeon.arcana.map(id => medallion(id, slotName(id))).join('')}</span>
+      <p class="ae-arc-from">${esc(dungeon.arcana.map(slotName).join(', '))}</p>
+    </li>`).join('');
+  /* The stages are the same in both dungeons; draw them once, from the first, and say so only if they ever differ. */
+  const same = dungeons.every(dungeon => JSON.stringify(dungeon.stages) === JSON.stringify(dungeons[0]?.stages));
+  const stageList = (dungeons[0]?.stages ?? []).map(stage => `<li class="ae-arc-stage${stage.guaranteed ? ' is-top' : ''}">
+      <span class="ae-arc-stage-n">${esc(stage.stage)}</span>
+      <b>Item level ${esc(number(stage.entryItemLevel))}+</b>
+      <span class="ae-arc-up" data-grade="${esc(gradeId(top(stage.arcanaGrades)))}">${stage.guaranteed ? esc(stage.guaranteed.replace(/ Arcana$/, '')) + ' guaranteed' : `Up to ${esc(top(stage.arcanaGrades))}`}</span>
+    </li>`).join('');
+  const weekly = index.cycles.get('transcendence-weekly');
+  const loop = arcWindow ? `<section class="ae-gx-block ae-arc-block" id="aeArcLoop" aria-labelledby="aeArcLoopTitle">
+      <h2 class="ae-gx-h2" id="aeArcLoopTitle">Spare cards become crystals</h2>
+      <p class="ae-arc-sub">Nothing you pull is wasted. Cards you do not need become the crystal that reworks the ones you keep.</p>
+      <ol class="ae-arc-loop">
+        <li>${cardBack('A spare Arcana card')}<h3>Extract</h3><p>${esc(arcWindow.extract.text)}</p></li>
+        <li class="ae-arc-arrow" aria-hidden="true"></li>
+        <li>${arcArt('mysterious-crystal.webp', arcWindow.extract.item, 484, 533)}<h3>${esc(arcWindow.extract.item.replace(/ \(Bound\)$/, ''))}</h3><p>It is Bound to you, so it cannot be traded.</p></li>
+        <li class="ae-arc-arrow" aria-hidden="true"></li>
+        <li class="is-glow">${unique('Chalice of Vigor, a Unique card')}<h3>Transmute</h3><p>${esc(arcWindow.transmute.text)}</p>
+          <span class="ae-arc-cost">${arcArt('mysterious-crystal-icon.jpg', '', 128, 128)}${esc(arcWindow.transmute.cost.count)} crystals</span></li>
+      </ol>
+    </section>` : factsHtml([{ id: 'transmute', text: record.transmute.text, status: record.transmute.status }]);
+  return `<ul class="ae-arc-stats" aria-label="Arcana at a glance">
+      <li><b>${esc(record.slots.length)}</b><span>Card slots</span></li>
+      <li><b>+${esc(record.grades[last].itemLevel)}</b><span>Item level at ${esc(record.grades[last].grade)}</span></li>
+      <li><b>${esc(record.lines.length)}</b><span>Set lines</span></li>
+    </ul>
+    <section class="ae-gx-block ae-arc-block" id="aeArcSlots" aria-labelledby="aeArcSlotsTitle">
+      <h2 class="ae-gx-h2" id="aeArcSlotsTitle">The five cards</h2>
+      <p class="ae-arc-sub">One of each goes in your five slots. The symbol on the card back tells you which slot it fills.</p>
+      <ul class="ae-arc-cards">${cards}</ul>
+    </section>
+    <section class="ae-gx-block ae-arc-block" id="aeArcGrades" aria-labelledby="aeArcGradesTitle">
+      <h2 class="ae-gx-h2" id="aeArcGradesTitle">Grade sets the item level</h2>
+      <p class="ae-arc-sub">The frame colour is the grade. A ${esc(record.grades[last].grade)} card adds ${esc(record.grades[last].itemLevel / record.grades[0].itemLevel)} times what a ${esc(record.grades[0].grade)} one does.</p>
+      <ol class="ae-arc-climb">${climb}</ol>
+    </section>
+    <section class="ae-gx-block ae-arc-block" id="aeArcLines" aria-labelledby="aeArcLinesTitle">
+      <h2 class="ae-gx-h2" id="aeArcLinesTitle">Build a set</h2>
+      <p class="ae-arc-sub">Every card belongs to one of two lines. Two or four cards from the same line add its bonus.</p>
+      <ul class="ae-arc-sets">${lines}</ul>
+    </section>
+    <section class="ae-gx-block ae-arc-block" id="aeArcWhere" aria-labelledby="aeArcWhereTitle">
+      <h2 class="ae-gx-h2" id="aeArcWhereTitle">Where they drop</h2>
+      <p class="ae-arc-sub">Both Transcendence dungeons drop Arcana. Each one has its own three cards.</p>
+      <div class="ae-arc-drops">
+        <figure class="ae-arc-art">${arcArt('transcendence.jpg', 'A Transcendence boss in heavy armour', 307, 224)}<figcaption>Transcendence</figcaption></figure>
+        <div>
+          <ul class="ae-arc-places">${places}</ul>
+          ${same ? `<ol class="ae-arc-stages" aria-label="Stages, the same in both dungeons">${stageList}</ol>` : ''}
+          <p class="ae-arc-note">${esc(dungeons[0]?.stagesNote ?? '')} ${esc(weekly?.text ?? '')}</p>
+        </div>
+      </div>
+    </section>
+    ${loop}`;
+}
+
 async function renderArcana() {
   const body = shell('equipment', 'arcana');
-  const sources = await loadSources();
+  const [sources, text] = await Promise.all([loadSources(), loadGuideText()]);
   const index = indexGearSources(sources);
-  const record = index.byId.get('arcana-grades');
-  const name = id => index.byId.get(id)?.name ?? id;
-  const slotRows = record.slots.map(slot => `<tr data-arcana-slot="${esc(slot.id)}"><th scope="row">${esc(slot.name)}</th><td>${esc(slot.skills)}</td><td>${esc(slot.from.map(name).join(', '))}${slot.note ? ` <small>${esc(slot.note)}</small>` : ''}</td></tr>`).join('');
-  const gradeRows = record.grades.map(entry => `<li><span class="ae-grade-name" data-grade="${esc(entry.grade.toLowerCase())}">${esc(entry.grade)}</span><b>+${esc(entry.itemLevel)} item level</b></li>`).join('');
-  const lines = record.lines.map(line => `<li class="ae-gx-card"><strong>${esc(line.name)}</strong><span>2 pieces: ${esc(line.set2)}</span><span>4 pieces: ${esc(line.set4)}</span></li>`).join('');
-  const dungeons = index.transcendence.map(dungeon => `<li class="ae-gx-card" data-transcendence="${esc(dungeon.id)}"><strong>${esc(dungeon.name)}</strong><span>${esc(dungeon.arcana.map(id => record.slots.find(slot => slot.id === id)?.name ?? id).join(', '))} Arcana</span>
-      <ol class="ae-gx-stages">${dungeon.stages.map(stage => `<li><b>Stage ${esc(stage.stage)}</b><span>item level ${esc(number(stage.entryItemLevel))}+</span><span>${esc(stage.arcanaGrades[0])} to ${esc(stage.arcanaGrades[stage.arcanaGrades.length - 1])}${stage.guaranteed ? `, ${esc(stage.guaranteed.toLowerCase())} guaranteed` : ''}</span></li>`).join('')}</ol>
-      <span>${esc(dungeon.stagesNote)}</span></li>`).join('');
-  const weekly = index.cycles.get('transcendence-weekly');
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aeArcSlots', 'The five Arcana slots', `<div class="ae-gx-tablewrap"><table class="ae-gx-table"><thead><tr><th scope="col">Slot</th><th scope="col">Skills</th><th scope="col">Drops in</th></tr></thead><tbody>${slotRows}</tbody></table></div>`, statusTag(record.status))}
-    ${sectionHtml('aeArcGrades', 'Item level by grade', `<ul class="ae-gx-grades">${gradeRows}</ul>`)}
-    ${sectionHtml('aeArcLines', 'Lines and set effects', `<p>Every Arcana belongs to one of two lines. Two or four of the same line add a set effect.</p><ul class="ae-gx-cards">${lines}</ul>`)}
-    ${sectionHtml('aeArcWhere', 'Where they drop: Transcendence', `<ul class="ae-gx-cards">${dungeons}</ul><p>${esc(weekly.text)} ${statusTag(weekly.status)}</p>${factsHtml([{ id: 'transmute', text: record.transmute.text, status: record.transmute.status }])}`)}`);
+  body.insertAdjacentHTML('beforeend', arcanaHtml(index.byId.get('arcana-grades'), index, byId(text)['arcana-window'] ?? null));
 }
 
 async function renderPetsWings() {
