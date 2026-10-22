@@ -2765,3 +2765,114 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gc-rung[data-grade] .ae-gc-
   .ae-gc-link{padding-left:20px}
 }
 @media (max-width:560px){.ae-gc-keys{grid-template-columns:minmax(0,1fr)}}
+
+/* ==========================================================================================================================
+   The Guide's Where to get it page (design/aetherium-guide-equipment-v1, 22 Oct 2026), drawn by guide-equipment.mjs: the end
+   goal on its Unique edge, the climb as a vertical ladder joined by a thin gold line (top step first), and for a linked Daeva
+   each slot as a gear path (Current, Best now, Next goal, End goal) joined the same way, top to bottom on a phone. The boxes
+   take the Overview card base: the Guide panel, an ivory hairline and 10px corners. Sizes are the type scale tokens.
+   ========================================================================================================================== */
+.ae-wg{display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;min-width:0}
+.ae-wg ul,.ae-wg ol{margin:0;padding:0;list-style:none}
+.ae-wg p{margin:0}
+.ae-wg :where(.ae-wg-goal,.ae-wg-run,.ae-wg-slot){box-sizing:border-box;background:var(--ae-gd-panel);border:1px solid var(--ae-gd-ivory);border-radius:10px}
+.ae-wg :where(.ae-wg-goal,.ae-wg-drop,.ae-wg-level){--ae-g:var(--ae-gd-line-strong)}
+.ae-wg [data-grade="rare"]{--ae-g:var(--ae-grade-rare)}
+.ae-wg [data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
+.ae-wg [data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-wg [data-grade="heroic"]{--ae-g:var(--ae-grade-heroic)}
+.ae-wg [data-grade="mythic"]{--ae-g:var(--ae-grade-mythic)}
+.ae-wg-lede{max-width:var(--ae-gd-measure);font-size:var(--ae-gd-fs-body);line-height:var(--ae-gd-lh-body);color:var(--ae-gd-ink-soft)}
+.ae-wg a:not(.ae-gd-btn){color:var(--ae-gd-link);text-underline-offset:3px}
+.ae-wg a:not(.ae-gd-btn):hover{color:var(--ae-gd-gold)}
+.ae-wg .ae-gx-who{margin:0;padding:.625rem .875rem;font:600 var(--ae-gd-fs-sub)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)!important;background:var(--ae-gd-panel);border-left:3px solid var(--ae-gd-gold)}
+.ae-wg .ae-gx-block{margin:0}
+
+/* Your end goal: one card per slot group on the Unique edge, the real icon at 72px when the Daeva wears the piece. */
+.ae-wg-goals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px!important}
+.ae-wg-goal{display:grid;align-content:start;justify-items:start;gap:6px;min-width:0;padding:18px 20px;border-left:3px solid var(--ae-g)!important;box-shadow:0 0 22px color-mix(in srgb,var(--ae-g) 14%,transparent)}
+.ae-wg-goal .ae-gtile{width:72px;height:72px;margin-bottom:6px}
+.ae-wg-goal-name{font:600 var(--ae-gd-fs-sub)/1.3 var(--ae-gd-display);color:var(--ae-g);overflow-wrap:anywhere}
+.ae-wg-goal-meta{font:400 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-wg-goal-slot{margin-top:4px;padding-top:8px;width:100%;border-top:1px solid var(--ae-gd-line);font:700 var(--ae-gd-fs-small)/1.2 var(--ae-gd-display);letter-spacing:.06em;text-transform:uppercase;color:var(--ae-gd-muted)}
+
+/* The climb: the top step first, a thin gold line down the step numbers. */
+.ae-wg-ladder{position:relative;display:grid;gap:28px;margin:20px 0 0!important;padding-left:60px!important}
+.ae-wg-ladder::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:1.5px;background:var(--ae-gd-gold-line)}
+.ae-wg-step{position:relative;display:grid;gap:14px;min-width:0}
+.ae-wg-step-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;min-height:40px}
+.ae-wg-step-n{position:absolute;left:-60px;top:0;display:flex;align-items:center;justify-content:center;width:40px;height:40px;box-sizing:border-box;border-radius:50%;
+  border:1.5px solid var(--ae-gd-gold);background:var(--ae-gd-ground);color:var(--ae-gd-gold);font:700 var(--ae-gd-fs-sub)/1 var(--ae-gd-display)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-wg-step-title{margin:0}
+.ae-wg-step-gate{font:600 var(--ae-gd-fs-small)/1.3 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-wg-step-gate.is-need,.ae-wg-gate.is-need{color:var(--ae-gd-gold)}
+.ae-wg-flag{display:inline-flex;align-items:center;min-height:28px;box-sizing:border-box;padding:0 12px;border-radius:999px;border:1px solid var(--ae-gd-gold);
+  font:700 var(--ae-gd-fs-small)/1 var(--ae-gd-display);color:var(--ae-gd-gold);white-space:nowrap}
+.ae-wg-flag.is-here{background:var(--ae-gd-gold-fill);border-color:var(--ae-gd-gold-edge);color:var(--ae-gd-gold-ink);box-shadow:0 0 14px var(--ae-gd-gold-glow)}
+.ae-wg-step[data-here] .ae-wg-step-n{background:var(--ae-gd-gold-fill);border-color:var(--ae-gd-gold-edge);color:var(--ae-gd-gold-ink);box-shadow:0 0 14px var(--ae-gd-gold-glow)}
+.ae-wg-step[data-locked] :is(.ae-wg-step-title,.ae-wg-runs){opacity:.55}
+.ae-wg-runs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px}
+.ae-wg-run{display:grid;align-content:start;gap:12px;min-width:0;padding:18px 20px}
+.ae-wg-run[data-next]{border-color:var(--ae-gd-gold);box-shadow:0 0 0 1px var(--ae-gd-gold),0 0 24px var(--ae-gd-gold-glow)}
+.ae-wg-run-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-wg-run-name{margin:0;color:var(--ae-gd-ink)}
+.ae-wg-run-text{font-size:16px;line-height:1.5;color:var(--ae-gd-ink-soft)}
+.ae-wg-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px}
+.ae-wg-mode{display:grid;align-content:start;gap:8px;min-width:0;padding-top:10px;border-top:1px solid var(--ae-gd-line)}
+.ae-wg-mode-name{margin:0;font:700 12px/1.2 var(--ae-gd-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-wg-drops{display:grid;gap:6px}
+.ae-wg-drop{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:36px;padding:6px 10px;box-sizing:border-box;border-left:2px solid var(--ae-g);background:var(--ae-gd-deep);
+  font:600 15px/1.3 var(--ae-gd-display);color:var(--ae-g);overflow-wrap:anywhere}
+.ae-wg-drop .ae-gtile{width:48px;height:48px}
+.ae-wg-set{padding:2px 8px;border-radius:999px;border:1px solid var(--ae-gd-gold-line);font:700 12px/1.2 var(--ae-gd-display);letter-spacing:.04em;color:var(--ae-gd-gold)}
+.ae-wg-gate{font:400 var(--ae-gd-fs-small)/1.4 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-wg-run-link .ae-gd-btn{min-height:40px!important;padding:8px 16px!important;font-size:14px!important}
+.ae-wg-notes{display:grid;gap:8px;max-width:var(--ae-gd-measure);margin-top:20px!important}
+.ae-wg-notes li{padding:8px 14px;border-left:2px solid var(--ae-gd-line-strong);font:400 15px/1.5 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+
+/* Slots to upgrade: each slot a gear path, the stops joined by a thin gold line. */
+.ae-wg-slots{display:grid;gap:16px}
+.ae-wg-slot{display:grid;gap:12px;min-width:0;padding:18px 22px;scroll-margin-top:16px}
+.ae-wg-slot:target{border-color:var(--ae-gd-gold);box-shadow:0 0 0 1px var(--ae-gd-gold)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-wg-slot-name{margin:0}
+.ae-wg-path{--ae-wg-gap:16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--ae-wg-gap)}
+.ae-wg-node{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;text-align:center}
+.ae-wg-node:not(:last-child)::after{content:"";position:absolute;top:60px;left:calc(50% + 40px);width:calc(100% + var(--ae-wg-gap) - 80px);height:1.5px;background:var(--ae-gd-gold)}
+.ae-wg-node-label{height:20px;font:700 12px/20px var(--ae-gd-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-wg-node .ae-gtile{width:64px;height:64px}
+.ae-wg-level{display:flex;flex-direction:column;align-items:center;justify-content:center;width:64px;height:64px;box-sizing:border-box;border:2px solid var(--ae-g);border-radius:4px;background:var(--ae-gd-deep)}
+.ae-wg-level b{font:700 22px/1 var(--ae-gd-display);color:var(--ae-g)}
+.ae-wg-level small{margin-top:3px;font:400 10px/1 var(--ae-gd-display);color:var(--ae-gd-muted)}
+.ae-wg-node-copy{display:grid;gap:3px;min-width:0;font:400 var(--ae-gd-fs-small)/1.4 var(--ae-gd-display);color:var(--ae-gd-ink-soft);overflow-wrap:anywhere}
+.ae-wg-node-name{font:600 15px/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)}
+.ae-wg-enter{display:block;margin-top:2px;font-style:normal;font-weight:700}
+.ae-wg-enter[data-enter="yes"]{color:var(--ae-gd-gold)}
+.ae-wg-enter[data-enter="no"]{color:var(--ae-gd-muted)}
+.ae-wg-node[data-open="yes"] :is(.ae-gtile,.ae-wg-level){border-color:var(--ae-gd-gold);box-shadow:0 0 0 1px var(--ae-gd-gold),0 0 16px var(--ae-gd-gold-glow)}
+.ae-wg-node[data-open="no"] :is(.ae-gtile,.ae-wg-level,.ae-wg-node-name,.ae-wg-node-label){opacity:.5}
+.ae-wg-path.is-row{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.ae-wg-path.is-row .ae-wg-node::after{content:none}
+.ae-wg-path.is-row .ae-wg-node{scroll-margin-top:16px}
+.ae-wg-path.is-row .ae-wg-node:target .ae-gtile{box-shadow:0 0 0 2px var(--ae-gd-gold)}
+.ae-wg-slot-note{max-width:var(--ae-gd-measure);font:400 15px/1.5 var(--ae-gd-display);color:var(--ae-gd-ink-soft)}
+.ae-wg-slot .ae-gx-stray{max-width:var(--ae-gd-measure)}
+.ae-wg-find p:not(.ae-gx-cta){max-width:var(--ae-gd-measure);color:var(--ae-gd-ink-soft)}
+
+@media (max-width:1180px){.ae-wg-goals{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+  .ae-wg-goal,.ae-wg-run,.ae-wg-slot{padding:16px}
+  .ae-wg-ladder{gap:24px;padding-left:48px!important}
+  .ae-wg-ladder::before{left:15px}
+  .ae-wg-step-n{left:-48px;width:32px;height:32px;font-size:15px}
+  /* On a phone the path runs top to bottom: the frame on the left, the words beside it, the gold line down the frames. */
+  .ae-wg-path{grid-template-columns:minmax(0,1fr);gap:0}
+  .ae-wg-node{display:grid;grid-template-columns:64px minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:14px;row-gap:2px;align-items:start;padding-bottom:20px;text-align:left}
+  .ae-wg-node:last-child{padding-bottom:0}
+  .ae-wg-node>:is(.ae-gtile,.ae-wg-level){grid-column:1;grid-row:1/3}
+  .ae-wg-node-label{grid-column:2;grid-row:1;height:auto;line-height:1.4}
+  .ae-wg-node-copy{grid-column:2;grid-row:2}
+  .ae-wg-node:not(:last-child)::after{top:72px;bottom:6px;left:31px;width:1.5px;height:auto}
+  .ae-wg-path.is-row{grid-template-columns:minmax(0,1fr);gap:12px}
+  .ae-wg-path.is-row .ae-wg-node{padding-bottom:0}
+}
+@media (max-width:560px){.ae-wg-goals{grid-template-columns:minmax(0,1fr)}}
