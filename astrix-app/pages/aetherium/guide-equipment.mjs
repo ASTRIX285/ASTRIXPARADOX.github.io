@@ -270,82 +270,255 @@ const renderCraftedGear = craftingPage('crafted-gear', craftedGearHtml);
 
 /* ----- Where to get it ----- */
 
-const gateText = gate => [Number.isFinite(gate?.level) ? `Lv ${gate.level}` : null, Number.isFinite(gate?.itemLevel) ? `item level ${number(gate.itemLevel)}+` : null].filter(Boolean).join(', ');
-const cycleChip = cycle => (cycle ? `<span class="ae-gx-cycle" data-cycle="${esc(cycle.id)}" title="${esc(cycle.text)}">${esc(cycle.label)}${cycle.reset ? `, resets ${esc(cycle.reset.day)} ${esc(cycle.reset.timeUtc)} UTC` : ''}</span>` : '');
+/*
+ * Built around the goal: the end gear first (the top Expedition drops), then the climb to it (the Expeditions by the item
+ * level they drop, top step first), then, for a linked Daeva, each slot's own path from what they wear to the end goal.
+ * Every name, level and gate comes from gear-sources.json, every one line description from dungeons.json. Item icons show
+ * only when they are real: a piece the linked Daeva wears. No placeholder frames and no drawn icons.
+ */
+const DUNGEON_PAGES = `${GUIDE_ROOT}dungeons/`;
+const loadDungeons = () => getJson(`${ADVISOR}dungeons.json`);
+/** The end goal in the order a player reads their gear: weapon, armour, accessories, then the guard. */
+const GOAL_ORDER = ['weapon', 'armour', 'accessory', 'guard'];
+/** Armour and accessory drops come as a series that fills several slots: those get the Set tag. */
+const SET_GROUPS = new Set(['armour', 'accessory']);
+const firstSentence = text => String(text ?? '').match(/^.*?[.!?](?=\s|$)/)?.[0] ?? String(text ?? '');
+const gateText = (level, itemLevel) => [Number.isFinite(level) ? `Lv ${level}` : null, Number.isFinite(itemLevel) ? `item level ${number(itemLevel)}+` : null].filter(Boolean).join(', ');
+const needText = (itemLevel, levelShort = null) => `Need ${[Number.isFinite(levelShort) ? `Lv ${levelShort}` : null, Number.isFinite(itemLevel) ? `item level ${number(itemLevel)}` : null].filter(Boolean).join(', ')}`;
+const dungeonLink = (id, name, dungeons) => (dungeons.has(id) ? `<a href="${esc(`${DUNGEON_PAGES}${id}/`)}" data-dungeon-link="${esc(id)}">${esc(name)}</a>` : esc(name));
 
-function offerHtml(offer, kind) {
-  if (!offer) return '';
-  const label = { best: 'Best now', goal: 'Next goal' }[kind] ?? 'Also';
-  const gap = offer.gap && (offer.gap.level || offer.gap.itemLevel) ? `<span class="ae-gx-gap">${[offer.gap.level ? `${offer.gap.level} more levels` : null, Number.isFinite(offer.gap.itemLevel) && offer.gap.itemLevel > 0 ? `${number(offer.gap.itemLevel)} more item level` : null].filter(Boolean).join(' and ')} to enter</span>` : '';
-  const open = offer.open === true ? '<span class="ae-gx-open" data-open="yes">You can enter</span>' : offer.open === null ? '<span class="ae-gx-open" data-open="unknown">Item level not read</span>' : '<span class="ae-gx-open" data-open="no">Locked</span>';
-  return `<li class="ae-gx-offer" data-offer="${esc(kind)}" data-source="${esc(offer.sourceId)}">
-      <span class="ae-gx-offer-kind">${esc(label)}</span>
-      <strong class="ae-gx-highlight">${esc(offer.highlight)}</strong>
-      <span class="ae-gx-offer-meta">${offer.item ? `${esc(offer.item)}${Number.isFinite(offer.itemLevel) ? `, item level ${esc(offer.itemLevel)}` : ''}. ` : ''}${gateText(offer.gate) ? `Entry ${esc(gateText(offer.gate))}. ` : ''}${open} ${gap}</span>
-      ${offer.text ? `<span class="ae-gx-offer-meta">${esc(offer.text)}</span>` : ''}
-      ${offer.claimsNeeded?.pending ? `<span class="ae-gx-offer-meta">${esc(offer.claimsNeeded.reason)} ${statusTag('pending')}</span>` : ''}
-      <span class="ae-gx-offer-meta">${cycleChip(offer.cycle)} ${statusTag(offer.status)}</span>
-    </li>`;
+/** The worn piece's real game icon when the Daeva wears a piece of this drop ("Enraged Kromede Weapon series"), else null. */
+function wornIcon(model, groupId, lootName, sources) {
+  if (!model) return null;
+  const stem = String(lootName ?? '').replace(/\s+(?:Weapon|Armour|Accessory)\s+series$/i, '').trim().toLowerCase();
+  if (!stem) return null;
+  const hit = model.gear.find(slot => {
+    const name = String(slot.name ?? '').toLowerCase();
+    return !slot.empty && slot.icon && slotGroupOf(slot.slot, sources)?.id === groupId && name.startsWith(stem) && (name.length === stem.length || /[^a-z0-9]/.test(name[stem.length]));
+  });
+  return hit?.icon ?? null;
 }
 
-function slotRowHtml(entry) {
-  const gradeId = entry.worn?.gradeId ?? null;
-  const tile = gradeTile({ icon: entry.worn?.icon ?? null, grade: gradeId, enchant: entry.worn?.enchant ?? null, size: 56, alt: entry.worn?.name ?? '' });
-  const worn = entry.worn
-    ? `<span class="ae-gx-worn"><b>${esc(entry.worn.name)}</b> <span class="ae-grade-name"${gradeId ? ` data-grade="${esc(gradeId)}"` : ''}>${esc(entry.worn.grade)}</span>${Number.isFinite(entry.worn.level) ? `, item level ${esc(entry.worn.level)}` : ''}</span>`
-    : '<span class="ae-gx-worn">Nothing worn here.</span>';
-  let inner;
-  if (entry.status === 'pending') inner = `<p class="ae-gx-pending">${esc(entry.pending.reason)} ${statusTag('pending')}</p>`;
-  else if (entry.status === 'top') inner = '<p class="ae-gx-top">Nothing we know drops a better piece for this slot.</p>';
-  else {
-    const rest = entry.offers.filter(offer => offer !== entry.best && offer !== entry.goal);
-    inner = `<ul class="ae-gx-offers">${offerHtml(entry.best, 'best')}${offerHtml(entry.goal, 'goal')}</ul>
-      ${rest.length ? `<details class="ae-gx-more"><summary>${rest.length} more place${rest.length === 1 ? '' : 's'}</summary><ul class="ae-gx-offers">${rest.map(offer => offerHtml(offer, 'also')).join('')}</ul></details>` : ''}
-      ${!entry.best && !entry.goal ? '<p class="ae-gx-top">No listed drop is open to you yet.</p>' : ''}`;
+/** The Expeditions as steps by the item level their Conquest drops, lowest first: { step, itemLevel, level, gate, runs }. */
+export function climbSteps(sources) {
+  const index = indexGearSources(sources);
+  const byLevel = new Map();
+  for (const source of index.expeditions) {
+    const conquest = source.difficulties.find(entry => entry.id === 'conquest');
+    const loot = Array.isArray(conquest?.loot) ? conquest.loot.filter(item => item.group && Number.isFinite(item.itemLevel)) : [];
+    if (!loot.length) continue;
+    const itemLevel = Math.max(...loot.map(item => item.itemLevel));
+    if (!byLevel.has(itemLevel)) byLevel.set(itemLevel, []);
+    byLevel.get(itemLevel).push({ source, conquest, exploration: source.difficulties.find(entry => entry.id === 'exploration') ?? null, loot });
   }
-  const hold = entry.hold ? `<p class="ae-gx-hold">${esc(entry.hold.text)}</p>` : '';
-  const stray = entry.stray ? `<p class="ae-gx-stray" data-stray><b>Strays from the plan:</b> ${esc(entry.stray.text)}</p>` : '';
-  const lookFor = entry.lookFor.length && entry.status === 'offers' ? `<p class="ae-gx-lookfor">On the next piece, look for: ${esc(entry.lookFor.join(', '))}.</p>` : '';
-  const groupTag = entry.group && entry.group.status !== 'confirmed' ? ` ${statusTag(entry.group.status)}` : '';
-  return `<li class="ae-gx-slot" id="slot-${esc(entry.slotPos)}" data-slot="${esc(entry.slot)}" data-where-status="${esc(entry.status)}">
-      <div class="ae-gx-slot-head">${tile}<span class="ae-gx-slot-copy"><strong>${esc(slotLabel(entry.slot))}</strong>${worn}${entry.group ? `<span class="ae-gx-group">${esc(entry.group.name)} drops${groupTag}</span>` : ''}</span></div>
-      ${hold}${stray}${inner}${lookFor}
+  return [...byLevel.keys()].sort((a, b) => a - b).map((itemLevel, at) => {
+    const runs = byLevel.get(itemLevel);
+    const gates = runs.map(run => run.conquest.entryItemLevel).filter(Number.isFinite);
+    const levels = runs.map(run => run.conquest.level).filter(Number.isFinite);
+    return { step: at + 1, itemLevel, level: levels.length ? Math.min(...levels) : null, gate: gates.length ? Math.min(...gates) : null, runs };
+  });
+}
+
+/** Where a linked Daeva stands on the climb: the step they are on, which runs are open, and the next run to go for. */
+function climbState(steps, plan) {
+  const itemLevel = plan?.itemLevelKnown ? plan.itemLevel : null;
+  if (itemLevel === null) return null;
+  const level = plan.level;
+  const levelOk = need => !Number.isFinite(need) || !Number.isFinite(level) || level >= need;
+  const reached = (need, gate) => levelOk(need) && Number.isFinite(gate) && itemLevel >= gate;
+  const here = [...steps].reverse().find(step => reached(step.level, step.gate))?.step ?? null;
+  // The next run: the open Expedition that is the best place now for the most slots, the higher drops first.
+  const tally = new Map();
+  for (const entry of plan.upgrades) {
+    const best = entry.best;
+    if (best?.kind !== 'expedition') continue;
+    const row = tally.get(best.sourceId) ?? { id: best.sourceId, count: 0, itemLevel: best.itemLevel ?? 0 };
+    row.count += 1;
+    tally.set(best.sourceId, row);
+  }
+  const next = [...tally.values()].sort((a, b) => b.itemLevel - a.itemLevel || b.count - a.count)[0]?.id ?? null;
+  return { itemLevel, level, here, next, open: run => reached(run.conquest.level, run.conquest.entryItemLevel), reached };
+}
+
+/** Your end goal: the top step's drops, one card per slot group, on the Unique edge. */
+function endGoalHtml(steps, sources, model) {
+  const top = steps[steps.length - 1];
+  if (!top) return '';
+  const groups = new Map((indexGearSources(sources).byId.get('slot-groups')?.groups ?? []).map(group => [group.id, group]));
+  const drops = top.runs.flatMap(run => run.loot.map(item => ({ item, run })))
+    .filter(({ item }) => GOAL_ORDER.includes(item.group))
+    .sort((a, b) => GOAL_ORDER.indexOf(a.item.group) - GOAL_ORDER.indexOf(b.item.group));
+  const card = ({ item, run }) => {
+    const icon = wornIcon(model, item.group, item.name, sources);
+    return `<li class="ae-wg-goal" data-grade="unique" data-goal="${esc(item.group)}" data-source="${esc(run.source.id)}">
+        ${icon ? gradeTile({ icon, grade: 'unique', size: 72, alt: '' }) : ''}
+        <span class="ae-wg-goal-name">${esc(item.name)}</span>
+        <span class="ae-wg-goal-meta">Item level ${esc(item.itemLevel)}</span>
+        <span class="ae-wg-goal-slot">${esc(groups.get(item.group)?.name ?? item.group)}</span>
+      </li>`;
+  };
+  return sectionHtml('aeWhereGoal', 'Your end goal', `<p class="ae-wg-lede">The best gear Expeditions drop in Season 1.</p><ul class="ae-wg-goals">${drops.map(card).join('')}</ul>`);
+}
+
+/** One Expedition on the climb: its card with Exploration and Conquest side by side, and its drops. */
+function runHtml(run, { state, dungeons, sources, model }) {
+  const { source, conquest, exploration } = run;
+  const locked = state ? !state.open(run) : false;
+  const isNext = state?.next === source.id;
+  const short = locked && Number.isFinite(conquest.level) && Number.isFinite(state.level) && state.level < conquest.level ? conquest.level : null;
+  const conquestGate = locked ? needText(conquest.entryItemLevel, short) : gateText(conquest.level, conquest.entryItemLevel);
+  const sameGate = exploration && exploration.level === conquest.level && exploration.entryItemLevel === conquest.entryItemLevel;
+  const drops = run.loot.map(item => {
+    const icon = wornIcon(model, item.group, item.name, sources);
+    return `<li class="ae-wg-drop" data-grade="unique" data-drop="${esc(source.id)}:${esc(item.group)}">${icon ? gradeTile({ icon, grade: 'unique', size: 48, alt: '' }) : ''}<span>${esc(item.name)}</span>${SET_GROUPS.has(item.group) ? '<b class="ae-wg-set" data-set>Set</b>' : ''}</li>`;
+  }).join('');
+  const gateLine = (which, text) => `<p class="ae-wg-gate${locked && which !== 'exploration' ? ' is-need' : ''}" data-gate="${esc(which)}">${esc(text)}</p>`;
+  const conquestCol = `<div class="ae-wg-mode" data-mode="conquest"><h5 class="ae-wg-mode-name">Conquest</h5><ul class="ae-wg-drops">${drops}</ul>${sameGate ? '' : gateLine('conquest', conquestGate)}</div>`;
+  const exploreCol = exploration && !sameGate ? `<div class="ae-wg-mode" data-mode="exploration"><h5 class="ae-wg-mode-name">Exploration</h5>${gateLine('exploration', gateText(exploration.level, exploration.entryItemLevel))}</div>` : '';
+  const record = dungeons.get(source.id);
+  return `<li class="ae-wg-run" data-run="${esc(source.id)}"${state ? ` data-open="${locked ? 'no' : 'yes'}"` : ''}${isNext ? ' data-next' : ''}>
+      <div class="ae-wg-run-head"><h4 class="ae-wg-run-name">${dungeonLink(source.id, source.name, dungeons)}</h4>${isNext ? '<span class="ae-wg-flag is-next" data-next-run>Run this next</span>' : ''}</div>
+      ${record?.summary ? `<p class="ae-wg-run-text">${esc(firstSentence(record.summary))}</p>` : ''}
+      <div class="ae-wg-modes">${exploreCol}${conquestCol}</div>
+      ${sameGate ? gateLine('both', `Exploration and Conquest: ${locked ? conquestGate.replace(/^Need/, 'need') : conquestGate}`) : ''}
+      ${dungeons.has(source.id) ? `<p class="ae-wg-run-link"><a class="ae-gd-btn" href="${esc(`${DUNGEON_PAGES}${source.id}/`)}" data-run-guide>${esc(source.name)} guide</a></p>` : ''}
     </li>`;
 }
 
-/** The Where to get it panel for a plan (gearSourcePlan). The Gear page's Enhance tab links here, one slot at a time. */
-export function whereToGetHtml(plan, { model }) {
-  const head = `<p class="ae-gx-who" data-where-who>${esc(model.profile.name)}, ${esc(model.profile.class)} Lv ${esc(plan.level ?? '-')}, item level ${plan.itemLevelKnown ? esc(number(plan.itemLevel)) : `not sent ${statusTag('pending')}`}.</p>`;
+/** The climb: the steps as a vertical ladder, the top step first, joined by a thin gold line. */
+function climbHtml(steps, { plan, dungeons, sources, model }) {
+  const state = climbState(steps, plan);
+  const index = indexGearSources(sources);
+  const cycle = index.cycles.get('odyle-energy');
+  const reset = index.cycles.get('weekly-reset');
+  const cube = index.byId.get('conquest-cube');
+  const lootNote = steps[0]?.runs[0]?.conquest.lootNote ?? null;
+  const step = entry => {
+    const here = state?.here === entry.step;
+    const locked = state ? !state.reached(entry.level, entry.gate) : false;
+    const short = locked && Number.isFinite(entry.level) && Number.isFinite(state.level) && state.level < entry.level ? entry.level : null;
+    const gate = locked ? needText(entry.gate, short) : `Entry ${gateText(entry.level, entry.gate)}`;
+    return `<li class="ae-wg-step" data-step="${esc(entry.step)}"${here ? ' data-here' : ''}${locked ? ' data-locked' : ''}>
+        <div class="ae-wg-step-head">
+          <span class="ae-wg-step-n" aria-hidden="true">${esc(entry.step)}</span>
+          <h3 class="ae-wg-step-title">Step ${esc(entry.step)}: item level ${esc(entry.itemLevel)}</h3>
+          <p class="ae-wg-step-gate${locked ? ' is-need' : ''}">${esc(gate)}</p>
+          ${here ? '<span class="ae-wg-flag is-here" data-you-are-here>You are here</span>' : ''}
+        </div>
+        <ul class="ae-wg-runs">${entry.runs.map(run => runHtml(run, { state, dungeons, sources, model })).join('')}</ul>
+      </li>`;
+  };
+  const notes = [cube?.text, cycle ? firstSentence(cycle.text) : null, reset?.text].filter(Boolean);
+  return sectionHtml('aeWhereClimb', 'The climb', `${lootNote ? `<p class="ae-wg-lede">Every drop here is Unique. ${esc(lootNote)}</p>` : ''}
+      <ol class="ae-wg-ladder">${[...steps].reverse().map(step).join('')}</ol>
+      ${notes.length ? `<ul class="ae-wg-notes">${notes.map(text => `<li>${esc(text)}</li>`).join('')}</ul>` : ''}`);
+}
+
+/** One stop on a slot's path: the label, the real icon (worn piece) or the item level in its grade frame, and the words. */
+function nodeHtml(kind, label, { icon = null, grade = null, enchant = null, name, itemLevel = null, where = '', state = '' }) {
+  const art = icon
+    ? gradeTile({ icon, grade, enchant, size: 64, alt: '' })
+    : Number.isFinite(itemLevel) ? `<span class="ae-wg-level"${grade ? ` data-grade="${esc(grade)}"` : ''}><b>${esc(itemLevel)}</b><small>item level</small></span>` : '';
+  return `<li class="ae-wg-node" data-node="${esc(kind)}"${state ? ` data-open="${esc(state)}"` : ''}>
+      <span class="ae-wg-node-label">${esc(label)}</span>
+      ${art}
+      <span class="ae-wg-node-copy"><b class="ae-wg-node-name">${esc(name)}</b>${icon && Number.isFinite(itemLevel) ? `<span>Item level ${esc(itemLevel)}</span>` : ''}${where ? `<span>${where}</span>` : ''}</span>
+    </li>`;
+}
+
+function offerNode(kind, label, offer, dungeons) {
+  if (!offer) return '';
+  const grade = offer.grade ? String(offer.grade).toLowerCase() : null;
+  const where = `${dungeonLink(offer.sourceId, offer.source, dungeons)}${offer.difficulty ? `, ${esc(offer.difficulty)}` : ''}`;
+  const short = offer.gap?.level ? offer.gate.level : null;
+  const flag = offer.open === true
+    ? '<em class="ae-wg-enter" data-enter="yes">You can enter</em>'
+    : offer.open === false ? `<em class="ae-wg-enter" data-enter="no">${esc(needText(offer.gate.itemLevel, short))}</em>`
+      : Number.isFinite(offer.gate?.itemLevel) ? `<em class="ae-wg-enter" data-enter="unknown">Entry ${esc(gateText(null, offer.gate.itemLevel))}</em>` : '';
+  return nodeHtml(kind, label, { grade, name: offer.item ?? offer.reward, itemLevel: offer.itemLevel, where: `${where}${flag}`, state: offer.open === true ? 'yes' : offer.open === false ? 'no' : '' });
+}
+
+/** A slot as a gear path: what is worn, Best now, Next goal, End goal, joined by a thin gold line. */
+function slotPathHtml(entry, dungeons, sharedLookFor = '') {
+  const current = entry.worn
+    ? nodeHtml('current', 'Current', { icon: entry.worn.icon, grade: entry.worn.gradeId, enchant: entry.worn.enchant, name: entry.worn.name, itemLevel: entry.worn.level })
+    : nodeHtml('current', 'Current', { name: 'Nothing worn' });
+  const top = entry.offers.filter(offer => offer.kind === 'expedition').sort((a, b) => (b.itemLevel ?? 0) - (a.itemLevel ?? 0))[0] ?? null;
+  const goalIsTop = Boolean(entry.goal) && entry.goal === top;
+  const path = [
+    offerNode('best', 'Best now', entry.best, dungeons),
+    entry.goal ? offerNode(goalIsTop ? 'end' : 'goal', goalIsTop ? 'End goal' : 'Next goal', entry.goal, dungeons) : '',
+    top && top !== entry.best && top !== entry.goal ? offerNode('end', 'End goal', top, dungeons) : ''
+  ].join('');
+  const note = !entry.best && !entry.goal ? '<p class="ae-wg-slot-note">No listed drop is open to you yet.</p>' : '';
+  const hold = entry.hold ? `<p class="ae-wg-slot-note">${esc(entry.hold.text)}</p>` : '';
+  const stray = entry.stray ? `<p class="ae-gx-stray" data-stray><b>Strays from the plan:</b> ${esc(entry.stray.text)}</p>` : '';
+  // The look-for list shows on the card only when it differs from the one line under the heading.
+  const lookFor = entry.lookFor.length && entry.lookFor.join(', ') !== sharedLookFor ? `<p class="ae-wg-slot-note" data-look-for>On the next piece, look for: ${esc(entry.lookFor.join(', '))}.</p>` : '';
+  return `<li class="ae-wg-slot" id="slot-${esc(entry.slotPos)}" data-slot="${esc(entry.slot)}" data-where-status="${esc(entry.status)}">
+      <h4 class="ae-wg-slot-name">${esc(slotLabel(entry.slot))}</h4>
+      <ol class="ae-wg-path">${current}${path}</ol>
+      ${hold}${stray}${note}${lookFor}
+    </li>`;
+}
+
+/** Slots with nothing to go for, grouped by the reason so each reason is said once: the worn pieces in a row, then the reason. */
+function otherSlotsHtml(others) {
+  const groups = new Map();
+  for (const entry of others) {
+    const reason = entry.status === 'pending' ? entry.pending.reason : 'Nothing we know drops a better piece for this slot.';
+    if (!groups.has(reason)) groups.set(reason, []);
+    groups.get(reason).push(entry);
+  }
+  return [...groups.entries()].map(([reason, entries]) => `<li class="ae-wg-slot is-group">
+      <ol class="ae-wg-path is-row">${entries.map(entry => `<li class="ae-wg-node" id="slot-${esc(entry.slotPos)}" data-slot="${esc(entry.slot)}" data-where-status="${esc(entry.status)}">
+          <span class="ae-wg-node-label">${esc(slotLabel(entry.slot))}</span>
+          ${entry.worn ? gradeTile({ icon: entry.worn.icon, grade: entry.worn.gradeId, enchant: entry.worn.enchant, size: 64, alt: '' }) : ''}
+          <span class="ae-wg-node-copy"><b class="ae-wg-node-name">${esc(entry.worn?.name ?? 'Nothing worn')}</b></span>
+        </li>`).join('')}</ol>
+      <p class="ae-wg-slot-note">${esc(reason)}</p>
+      ${entries.filter(entry => entry.stray).map(entry => `<p class="ae-gx-stray" data-stray><b>${esc(slotLabel(entry.slot))} strays from the plan:</b> ${esc(entry.stray.text)}</p>`).join('')}
+    </li>`).join('');
+}
+
+/** The linked Daeva's slots: every slot to upgrade as a path, then the slots with nothing to go for. */
+export function whereToGetHtml(plan, { dungeons = new Map() } = {}) {
   const upgrades = plan.slots.filter(entry => entry.status === 'offers');
   const others = plan.slots.filter(entry => entry.status !== 'offers');
-  const reset = plan.weeklyReset ? `<p class="ae-gx-reset">Weekly reset: ${esc(plan.weeklyReset.day)} ${esc(plan.weeklyReset.timeUtc)} UTC. ${esc(plan.weeklyReset.text.split('. ').slice(1).join('. '))} ${statusTag(plan.weeklyReset.status)}</p>` : '';
-  const side = plan.sideMissions ? `<p class="ae-gx-side" data-side-missions>Side missions: ${esc(plan.sideMissions.reason)} ${statusTag('pending')}</p>` : '';
+  // The look-for list most slots share, said once under the heading.
+  const counts = new Map();
+  for (const entry of upgrades) if (entry.lookFor.length) counts.set(entry.lookFor.join(', '), (counts.get(entry.lookFor.join(', ')) ?? 0) + 1);
+  const shared = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
   return `<div class="ae-gx-where" id="aeWhere">
-      ${head}
-      <p>Each slot below shows the best place to get a better piece that you can enter now, and the next goal. Expeditions cost Odyle Energy only when you claim the reward.</p>
-      ${reset}${side}
       <h2 class="ae-gx-h2" id="aeWhereUp">Slots to upgrade (${upgrades.length})</h2>
-      <ol class="ae-gx-slots" aria-labelledby="aeWhereUp">${upgrades.map(entry => slotRowHtml(entry)).join('')}</ol>
-      ${others.length ? `<h2 class="ae-gx-h2" id="aeWhereRest">Other slots</h2><ol class="ae-gx-slots" aria-labelledby="aeWhereRest">${others.map(entry => slotRowHtml(entry)).join('')}</ol>` : ''}
+      ${shared ? `<p class="ae-wg-lede" data-look-for-all>On the next piece, look for: ${esc(shared)}.</p>` : ''}
+      <ol class="ae-wg-slots" aria-labelledby="aeWhereUp">${upgrades.map(entry => slotPathHtml(entry, dungeons, shared)).join('')}</ol>
+      ${others.length ? `<h2 class="ae-gx-h2" id="aeWhereRest">Other slots</h2><ol class="ae-wg-slots is-rest" aria-labelledby="aeWhereRest">${otherSlotsHtml(others)}</ol>` : ''}
     </div>`;
 }
+
+const whoHtml = (plan, model) => `<p class="ae-gx-who" data-where-who>${esc(model.profile.name)}, ${esc(model.profile.class)} Lv ${esc(plan.level ?? '-')}${plan.itemLevelKnown ? `, item level ${esc(number(plan.itemLevel))}` : ''}.</p>`;
 
 async function renderWhereToGet(linked) {
   const body = shell('equipment', 'where-to-get');
   const ref = refFromUrl() ?? linked?.ref ?? null;
-  const sources = await loadSources();
+  const [sources, dungeonData] = await Promise.all([loadSources(), loadDungeons().catch(() => null)]);
+  const dungeons = new Map((dungeonData?.records ?? []).map(record => [record.id, record]));
+  const steps = climbSteps(sources);
+  body.insertAdjacentHTML('beforeend', '<div class="ae-wg" id="aeWhereHolder"></div>');
+  const holder = $('#aeWhereHolder');
+  const plain = `${endGoalHtml(steps, sources, null)}${climbHtml(steps, { plan: null, dungeons, sources, model: null })}`;
   if (!ref) {
-    body.insertAdjacentHTML('beforeend', `<section class="ae-gx-block ae-gx-find" id="aeWhereFind"><h2 class="ae-gx-h2">Find your Daeva first</h2><p>Link a Daeva and this page lists, for each slot you wear, the content that drops a better piece, the entry gate and the reward cycle.</p><p class="ae-gx-cta"><a class="ae-btn" href="/hub/aetherium/#aeSearch">Find your Daeva</a></p></section>
-      ${sectionHtml('aeWhereAll', 'Where gear drops', dropTableHtml(sources))}`);
+    holder.innerHTML = `${plain}<section class="ae-gx-block ae-wg-find" id="aeWhereFind" aria-labelledby="aeWhereFindTitle"><h2 class="ae-gx-h2" id="aeWhereFindTitle">Your own path</h2><p>Link a Daeva and each slot you wear shows its path from what you have now to the end goal.</p><p class="ae-gx-cta"><a class="ae-gd-btn is-gold" href="/hub/aetherium/#aeSearch" data-find-daeva>Find your Daeva</a></p></section>`;
     return;
   }
-  body.insertAdjacentHTML('beforeend', '<div id="aeWhereHolder"><p class="ae-muted">Reading your Daeva.</p></div>');
+  holder.innerHTML = `${plain}<p class="ae-muted" id="aeWhereReading">Reading your Daeva.</p>`;
   let loaded;
   try {
     loaded = await loadCharacter(ref);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    $('#aeWhereHolder').innerHTML = `<p class="ae-gx-pending">${esc(explain(error))}</p>${dropTableHtml(sources)}`;
+    $('#aeWhereReading')?.remove();
     showNotice(explain(error), 'warn', { retry: () => location.reload() });
     return;
   }
@@ -356,10 +529,13 @@ async function renderWhereToGet(linked) {
   const gradeIndex = indexGrades(grades);
   const draw = () => {
     const plan = gearSourcePlan(model, { data: sources, grades: gradeIndex, progression, build });
-    $('#aeWhereHolder').innerHTML = whereToGetHtml(plan, { model });
+    holder.innerHTML = `${whoHtml(plan, model)}${endGoalHtml(steps, sources, model)}${climbHtml(steps, { plan, dungeons, sources, model })}${whereToGetHtml(plan, { dungeons })}`;
+    // A #slot-N link lands on its slot, again after a redraw moves it.
+    if (location.hash) document.querySelector(location.hash)?.scrollIntoView({ block: 'start' });
   };
   draw();
-  if (location.hash) document.querySelector(location.hash)?.scrollIntoView({ block: 'start' });
+  // The shell settles the page (side menu, topic list) once this render is done: land the #slot-N link again then.
+  if (location.hash) document.addEventListener('forge:portal-ready', () => document.querySelector(location.hash)?.scrollIntoView({ block: 'start' }), { once: true });
   // Item levels come with each item's detail: the kept ones are free, the rest load in the usual budget, then the panel redraws.
   const wanted = model.gear.filter(slot => !slot.empty && slotGroupOf(slot.slot, sources) && !['belt', 'arcana'].includes(slotGroupOf(slot.slot, sources).id));
   let changed = false;

@@ -3,10 +3,12 @@
 // local static server with the armory Worker mocked (never NCSOFT, never the real Worker):
 //   - all 13 pages draw in the Guide shell with their section lit, every topic page has the topic pills with its own lit,
 //     facts carry status tags, no horizontal page scroll at 390 and 1600, nothing overlaps the viewport, no console errors;
-//   - the static pages make no Worker call; the Equipment home and Where to get it (no Daeva) show the Expedition drop table;
-//   - Where to get it for the Lv 45 fixture: one row per slot with the worn item's game icon, the best place now in gold,
-//     the next goal and its gate (Fire Temple, Conquest: Unique weapon, entry item level 2,100), side missions pending,
-//     the amulet pending, a stray flagged and never blocked, item levels read from the item details;
+//   - the static pages make no Worker call; the Equipment home shows the Expedition drop table;
+//   - Where to get it (design/aetherium-guide-equipment-v1, 22 Oct 2026): the end goal (weapon, armour, accessory, guard at
+//     item level 86), the climb as a ladder top step first with a thin gold line and every drop the old table held, no table;
+//     for the Lv 45 fixture: step 1 is You are here, steps 2 and 3 dimmed with their gate, one next run on a gold edge, each
+//     slot a gear path (Current, Best now, Next goal, End goal) across on a wide screen and top to bottom on a phone, no
+//     Odyle pill, no side mission line, no gate twice in a card, the stray flagged and never blocked;
 //   - Enhancement links to the Gear page's Enhance tab, and the Enhance tab links back to Where to get it for the slot.
 // AE_SHOTS=<dir outside the repo> also saves screenshots at 390 and 1600.
 import assert from 'node:assert/strict';
@@ -141,45 +143,116 @@ await check('Equipment home: the Expedition drop table (6 dungeons, 2 gear group
   }finally{await context.close();}
 });
 
-await check('Where to get it with no Daeva: Find your Daeva first and the drop table, no Worker call',async()=>{
-  const {page,context,calls}=await open('/hub/aetherium/guide/equipment/where-to-get/',{live:true});
-  try{
-    assert.ok(await page.isVisible('#aeWhereFind'));
-    assert.equal(await page.locator('#aeDropTable tbody tr').count(),12);
-    assert.deepEqual(calls,[]);
-  }finally{await context.close();}
-});
+for(const width of [1440,390]){
+  await check(`Where to get it with no Daeva at ${width}: end goal, the climb top step first, no drop table, gold Find your Daeva, no Worker call`,async()=>{
+    const {page,context,calls,errors}=await open('/hub/aetherium/guide/equipment/where-to-get/',{live:true,viewport:{width,height:width===390?844:1000}});
+    try{
+      await page.waitForSelector('#aeWhereClimb');
+      assert.equal(await page.locator('#aeDropTable').count(),0,'The old drop table is gone');
+      assert.equal(await page.locator('.ae-gx-star,.ae-gx-note').count(),0,'And its footnote');
+      assert.match(await page.textContent('#aeWhereGoal'),/The best gear Expeditions drop in Season 1\./);
+      assert.deepEqual(await page.$$eval('[data-goal]',nodes=>nodes.map(node=>node.dataset.goal)),['weapon','armour','accessory','guard'],'End goal: weapon, armour, accessory, guard');
+      assert.deepEqual(await page.$$eval('[data-goal] .ae-wg-goal-meta',nodes=>nodes.map(node=>node.textContent)),['Item level 86','Item level 86','Item level 86','Item level 86']);
+      assert.equal(await page.$eval('[data-goal="weapon"] .ae-wg-goal-name',node=>node.textContent),'Enraged Kromede Weapon series');
+      assert.equal(await page.$eval('[data-goal="weapon"]',node=>getComputedStyle(node).borderLeftColor),await page.$eval('[data-goal="weapon"] .ae-wg-goal-name',node=>getComputedStyle(node).color),'The Unique edge and name share the grade colour');
+      assert.deepEqual(await page.$$eval('.ae-wg-step',nodes=>nodes.map(node=>node.dataset.step)),['3','2','1'],'The highest step first');
+      assert.deepEqual(await page.$$eval('.ae-wg-step-title',nodes=>nodes.map(node=>node.textContent)),['Step 3: item level 86','Step 2: item level 70','Step 1: item level 54']);
+      assert.deepEqual(await page.$$eval('.ae-wg-step-gate',nodes=>nodes.map(node=>node.textContent)),['Entry Lv 45, item level 2,100+','Entry Lv 45, item level 1,400+','Entry Lv 45, item level 700+']);
+      assert.equal(await page.locator('.ae-wg-run').count(),6,'Six Expeditions');
+      assert.equal(await page.locator('[data-drop]').count(),12,'Every drop the table had');
+      assert.equal(await page.locator('[data-set]').count(),6,'Armour and accessory series carry the Set tag');
+      assert.match(await page.textContent('[data-run="krao-cave"] [data-gate="exploration"]'),/^Lv 20, item level 200\+$/);
+      assert.match(await page.textContent('[data-run="krao-cave"] [data-gate="conquest"]'),/^Lv 45, item level 700\+$/);
+      assert.equal(await page.textContent('[data-run="draupnir"] [data-gate="both"]'),'Exploration and Conquest: Lv 45, item level 700+','One gate line when both match');
+      assert.match(await page.textContent('[data-run="fire-temple"] .ae-wg-run-text'),/^A lava temple full of Burn\.$/,'One line from the dungeon page');
+      assert.equal(await page.getAttribute('[data-run="fire-temple"] [data-run-guide]','href'),'/hub/aetherium/guide/dungeons/fire-temple/');
+      assert.equal(await page.locator('[data-here],[data-locked],[data-next]').count(),0,'No Daeva: the ladder is plain');
+      const line=await page.$eval('.ae-wg-ladder',node=>{const after=getComputedStyle(node,'::before');return {width:parseFloat(after.width),colour:after.backgroundColor};});
+      assert.ok(line.width>0&&line.width<=2,'A thin line');
+      assert.match(line.colour,/^rgba\(226, 181, 79/,'Gold');
+      const button=await page.$eval('[data-find-daeva]',node=>getComputedStyle(node).backgroundColor);
+      assert.equal(button,'rgb(233, 194, 79)','The one main action is the solid gold button');
+      assert.equal(await page.locator('.ae-gd-btn.is-gold').count(),1);
+      const text=await page.textContent('#aeWhereHolder');
+      assert.match(text,/Wednesday at 07:00 UTC/);
+      assert.ok(!/No side mission|Odyle Energy\b.*Odyle Energy/s.test(text),'No side mission line, the Odyle line once');
+      assert.equal(await page.locator('#aeWhereHolder img').count(),0,'No drawn or stand in icons without a Daeva');
+      const {scroll,wide}=await noSideScroll(page);
+      assert.ok(scroll<=0,`No horizontal scroll (${scroll}px)`);assert.deepEqual(wide,[]);
+      assert.deepEqual(calls,[]);
+      assert.deepEqual(errors,[]);
+      await shot(page,`where-to-get-plain-${width}`);
+    }finally{await context.close();}
+  });
+}
 
-for(const width of [1600,390]){
-  await check(`Where to get it for the Lv 45 Daeva at ${width}: best now, next goal, gates, cycles, pending, stray, game icons`,async()=>{
+for(const width of [1440,390]){
+  await check(`Where to get it for the Lv 45 Daeva at ${width}: you are here, locked steps, the next run, gear paths`,async()=>{
     const {page,context,calls,errors}=await open(`/hub/aetherium/guide/equipment/where-to-get/?${refQuery}`,{live:true,viewport:{width,height:width===390?844:1000}});
     try{
       await page.waitForSelector('#aeWhere');
-      await page.waitForFunction(()=>/item level 45/.test(document.querySelector('[data-slot="MainHand"]')?.textContent??''),null,{timeout:10000});
+      await page.waitForFunction(()=>/Item level 45/.test(document.querySelector('[data-slot="MainHand"] [data-node="current"]')?.textContent??''),null,{timeout:10000});
       assert.equal(calls[0],'/aion2/character','One character call first');
       assert.ok(calls.filter(path=>path==='/aion2/item').length<=19,'Item details within the budget');
       assert.match(await page.textContent('[data-where-who]'),/TESTDAEVA, Gladiator Lv 45, item level 849/);
+      // The climb: step 1 is here, steps 2 and 3 are dimmed with their gate, one Expedition has the gold edge.
+      assert.match(await page.textContent('.ae-wg-step[data-step="1"]'),/You are here/);
+      assert.equal(await page.textContent('.ae-wg-step[data-step="2"] .ae-wg-step-gate'),'Need item level 1,400');
+      assert.equal(await page.textContent('.ae-wg-step[data-step="3"] .ae-wg-step-gate'),'Need item level 2,100');
+      assert.equal(await page.$eval('.ae-wg-step[data-step="3"] .ae-wg-runs',node=>getComputedStyle(node).opacity),'0.55','Locked steps are dimmed');
+      assert.equal(await page.$eval('.ae-wg-step[data-step="1"] .ae-wg-runs',node=>getComputedStyle(node).opacity),'1');
+      assert.equal(await page.locator('.ae-wg-run[data-next]').count(),1,'One next run');
+      const next=await page.$eval('.ae-wg-run[data-next]',node=>({step:node.closest('.ae-wg-step').dataset.step,border:getComputedStyle(node).borderTopColor}));
+      assert.equal(next.step,'1');
+      assert.equal(next.border,'rgb(226, 181, 79)','The next run has a gold edge');
+      // The weapon path: Current, Best now, Next goal, End goal.
       const weapon=page.locator('[data-slot="MainHand"]');
-      assert.match(await weapon.locator('[data-offer="best"] .ae-gx-highlight').textContent(),/^Krao Cave, Conquest: Unique weapon, entry item level 700$/);
-      assert.match(await weapon.textContent(),/Fire Temple, Conquest: Unique weapon, entry item level 2,100/);
-      const glovesRow=page.locator('[data-slot="Gloves"]');
-      assert.equal(await glovesRow.locator('[data-offer="best"] .ae-gx-highlight').textContent(),'Draupnir, Conquest: Unique gloves, entry item level 700');
-      assert.match(await glovesRow.locator('[data-offer="goal"]').textContent(),/Vakron Sky Island.*551 more item level to enter/s);
-      assert.match(await page.locator('[data-slot="Helmet"] [data-stray]').textContent(),/Epic helm is at \+4.*stones spent on it are lost/s,'The stray is flagged');
-      assert.equal(await page.locator('[data-slot="Helmet"] [data-offer="best"] .ae-gx-highlight').textContent(),'Draupnir, Conquest: Unique helm, entry item level 700','Flagged, never blocked');
-      assert.equal(await glovesRow.locator('[data-stray]').count(),0,'A Unique piece is no stray');
-      assert.ok(await glovesRow.locator('[data-cycle="odyle-energy"]').first().isVisible(),'The reward cycle');
-      assert.match(await page.textContent('[data-slot="Amulet"]'),/No drop location listed\./);
-      assert.match(await page.textContent('[data-side-missions]'),/No side mission listed for this piece./);
-      assert.match(await page.textContent('#aeWhere'),/Wednesday 07:00 UTC/);
-      const icon=await weapon.locator('.ae-gtile img').getAttribute('src');
+      assert.deepEqual(await weapon.locator('.ae-wg-node').evaluateAll(nodes=>nodes.map(node=>node.dataset.node)),['current','best','goal','end']);
+      assert.deepEqual(await weapon.locator('.ae-wg-node-label').allTextContents(),['Current','Best now','Next goal','End goal']);
+      assert.match(await weapon.locator('[data-node="best"]').textContent(),/Rupture Weapon series.*Krao Cave, Conquest.*You can enter/s);
+      assert.match(await weapon.locator('[data-node="goal"]').textContent(),/Aulamus Weapon series.*Urugugu Canyon, Conquest.*Need item level 1,600/s);
+      assert.match(await weapon.locator('[data-node="end"]').textContent(),/Enraged Kromede Weapon series.*Fire Temple, Conquest.*Need item level 2,100/s);
+      assert.equal(await weapon.locator('[data-node="end"] [data-dungeon-link]').getAttribute('href'),'/hub/aetherium/guide/dungeons/fire-temple/');
+      const icon=await weapon.locator('[data-node="current"] .ae-gtile img').getAttribute('src');
       assert.match(icon,/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\//,'The worn item\'s game icon');
-      const gold=await page.$eval('[data-slot="MainHand"] [data-offer="best"] .ae-gx-highlight',node=>getComputedStyle(node).color);
-      const plain=await page.$eval('[data-slot="MainHand"] [data-offer="goal"] .ae-gx-highlight',node=>getComputedStyle(node).color);
-      assert.notEqual(gold,plain,'The reward to go for is highlighted');
-      assert.equal(await page.locator('#aeWhereUp + ol > li').first().getAttribute('data-slot'),'MainHand','The weapon first');
+      assert.equal(await weapon.locator('[data-node="best"] .ae-wg-level').evaluate(node=>getComputedStyle(node).borderTopColor),'rgb(226, 181, 79)','The step you can enter has a gold edge');
+      assert.equal(await weapon.locator('[data-node="end"] .ae-wg-level').evaluate(node=>getComputedStyle(node).opacity),'0.5','Locked steps are dimmed');
+      const gloves=page.locator('[data-slot="Gloves"]');
+      assert.match(await gloves.locator('[data-node="best"]').textContent(),/Draupnir, Conquest.*You can enter/s);
+      assert.match(await gloves.locator('[data-node="goal"]').textContent(),/Vakron Sky Island, Conquest.*Need item level 1,400/s);
+      // Gone from every card: the Odyle Energy pill, the side mission line, a gate said twice.
+      assert.equal(await page.locator('[data-cycle],[data-side-missions]').count(),0);
+      assert.ok(!/No side mission listed/.test(await page.textContent('#aeWhereHolder')));
+      for(const text of await page.locator('.ae-wg-slot,.ae-wg-run').allTextContents()){
+        const gates=text.match(/item level [\d,]+/g)??[];
+        assert.equal(new Set(gates).size,gates.length,`No gate twice in a card: ${gates.join(' | ')}`);
+      }
+      assert.match(await page.locator('[data-slot="Helmet"] [data-stray]').textContent(),/Epic helm is at \+4.*stones spent on it are lost/s,'The stray is flagged');
+      assert.match(await page.textContent('[data-slot="Helmet"] [data-node="best"]'),/Draupnir/,'Flagged, never blocked');
+      assert.match(await page.textContent('#aeWhereRest + ol .ae-wg-slot:has([data-slot="Amulet"])'),/No drop location listed\./);
+      assert.equal((await page.textContent('#aeWhereHolder')).split('No drop location listed.').length-1,1,'Each reason said once');
+      assert.equal(await page.locator('#aeWhereUp ~ ol.ae-wg-slots > li').first().getAttribute('data-slot'),'MainHand','The weapon first');
+      assert.equal(await page.locator('[data-look-for-all]').count(),1,'The shared look-for line once, under the heading');
+      assert.match(await page.textContent('[data-look-for-all]'),/^On the next piece, look for: .+\.$/);
+      assert.equal(await page.$eval('[data-look-for-all]',node=>node.previousElementSibling?.id),'aeWhereUp','Right under Slots to upgrade');
+      assert.equal(await page.locator('.ae-wg-slot [data-look-for]').count(),0,'Not repeated on the cards when every slot shares it');
+      // The path runs across on a wide screen, top to bottom on a phone, with the gold line between the stops.
+      const boxes=await weapon.locator('.ae-wg-node').evaluateAll(nodes=>nodes.map(node=>{const box=node.getBoundingClientRect();return {x:Math.round(box.left),y:Math.round(box.top),bottom:Math.round(box.bottom)};}));
+      if(width===390){
+        assert.ok(boxes.every((box,at)=>at===0||box.y>=boxes[at-1].bottom-1),'Top to bottom on a phone');
+        assert.ok(boxes.every(box=>box.x===boxes[0].x),'One column');
+      }else{
+        assert.ok(boxes.every(box=>box.y===boxes[0].y),'One row');
+        assert.ok(boxes.every((box,at)=>at===0||box.x>boxes[at-1].x),'Left to right');
+      }
+      const link=await weapon.locator('[data-node="current"]').evaluate(node=>{const after=getComputedStyle(node,'::after');return {colour:after.backgroundColor,thick:Math.min(parseFloat(after.width),parseFloat(after.height))};});
+      assert.equal(link.colour,'rgb(226, 181, 79)','A gold line joins the stops');
+      assert.ok(link.thick>0&&link.thick<=2,'A thin line');
       const {scroll,wide}=await noSideScroll(page);
       assert.ok(scroll<=0,`No horizontal scroll (${scroll}px)`);assert.deepEqual(wide,[]);
+      const text=await page.textContent('#aeStage');
+      assert.ok(!/[–—]/.test(text),'No en or em dash');
+      assert.ok(!/undefined|NaN|\[object/.test(text),'No broken values');
       assert.deepEqual(errors,[]);
       await shot(page,`where-to-get-daeva-${width}`);
     }finally{await context.close();}
