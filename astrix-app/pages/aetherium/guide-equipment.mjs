@@ -319,15 +319,73 @@ async function renderArcana() {
   body.insertAdjacentHTML('beforeend', arcanaHtml(index.byId.get('arcana-grades'), index, byId(text)['arcana-window'] ?? null));
 }
 
+/* Pets and wings art cut from Miguel's own Pets and Wings windows (design/aetherium-pets-wings-page, 22 Oct 2026). */
+const PW_ART = '/astrix-app/pages/aetherium/images/pets-wings/';
+const pwArt = (file, alt, width, height, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${PW_ART}${file}" alt="${esc(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
+const PET_SHOTS = 14;
+const WING_SHOTS = [['superior', 'Superior Daeva Wings'], ['lesser', 'Lesser Daeva Wings'], ['intermediate', 'Intermediate Daeva Wings'], ['aullaeu', 'Aullaeu Wings']];
+const shown = facts => (facts ?? []).filter(item => item.status !== 'pending');
+
+/** Pets and wings as the game shows them: a wall of real pet portraits, the souls climb, the four genera sized by how many
+ *  pets each holds, then the wing collection, one wing's two effects, and where wings come from. */
+export function petsWingsHtml(pets, wings) {
+  const facts = id => shown(pets.facts).find(item => item.id === id);
+  const wall = Array.from({ length: PET_SHOTS }, (_, n) => `<li>${pwArt(`pet-${String(n + 1).padStart(2, '0')}.jpg`, '', 135, 115)}</li>`).join('');
+  const souls = pets.souls?.levels ?? [];
+  const climb = souls.map((step, n) => `<li class="ae-pw-lv" style="--ae-pw-step:${n}">
+      <span class="ae-pw-lv-art">${pwArt('pet-01.jpg', `A pet at level ${step.level}`, 135, 115)}</span>
+      <b class="ae-pw-num">${esc(step.souls)}</b><span class="ae-pw-unit">souls in all</span><span class="ae-pw-lv-name">Level ${esc(step.level)}</span>
+    </li>`).join('');
+  const most = Math.max(...pets.genera.map(genus => genus.pets));
+  const genera = pets.genera.map(genus => `<li class="ae-pw-genus" data-genus="${esc(genus.name.toLowerCase())}">
+      <h3>${esc(genus.name)}</h3>
+      <span class="ae-pw-bar" style="--ae-pw-fill:${(genus.pets / most).toFixed(3)}"><b>${esc(genus.pets)}</b> pets</span>
+      <p>${esc(genus.perPet)}</p>
+    </li>`).join('');
+  const tips = ['source-tab', 'insight', 'growth-chest', 'special'].map(facts).filter(Boolean).map(item => `<li data-fact="${esc(item.id)}">${esc(item.text)}</li>`).join('');
+  const shared = facts('shared');
+  const ex = wings.example;
+  const wingRow = WING_SHOTS.map(([id, name]) => `<li>${pwArt(`wing-${id}.jpg`, name, 92, 92)}<span>${esc(name)}</span></li>`).join('');
+  const wingFacts = shown(wings.facts).filter(item => item.id !== 'collection').map(item => `<li data-fact="${esc(item.id)}">${esc(item.text)}</li>`).join('');
+  return `<ul class="ae-arc-stats" aria-label="Pets and wings at a glance">
+      <li><b>${esc(pets.collection?.total ?? '')}</b><span>Monster pets</span></li>
+      <li><b>${esc(pets.genera.length)}</b><span>Genera</span></li>
+      <li><b>${esc(souls.length)}</b><span>Pet levels</span></li>
+    </ul>
+    <section class="ae-gx-block ae-arc-block" id="aePets" aria-labelledby="aePetsTitle">
+      <h2 class="ae-gx-h2" id="aePetsTitle">Collect them all</h2>
+      <p class="ae-arc-sub">${esc(pets.lede)}${shared ? ` ${esc(shared.text)}` : ''}</p>
+      <ul class="ae-pw-wall" aria-label="Some of the pets you can collect">${wall}</ul>
+    </section>
+    ${souls.length ? `<section class="ae-gx-block ae-arc-block" id="aePetSouls" aria-labelledby="aePetSoulsTitle">
+      <h2 class="ae-gx-h2" id="aePetSoulsTitle">Souls raise a pet</h2>
+      <p class="ae-arc-sub">A monster pet comes from its souls. These are the totals for each level.</p>
+      <ol class="ae-pw-climb">${climb}</ol>
+    </section>` : ''}
+    <section class="ae-gx-block ae-arc-block" id="aePetGenera" aria-labelledby="aePetGeneraTitle">
+      <h2 class="ae-gx-h2" id="aePetGeneraTitle">Four genera</h2>
+      <p class="ae-arc-sub">${esc(pets.generaNote)}</p>
+      <ul class="ae-pw-genera">${genera}</ul>
+      ${tips ? `<ul class="ae-pw-tips">${tips}</ul>` : ''}
+    </section>
+    <section class="ae-gx-block ae-arc-block" id="aeWings" aria-labelledby="aeWingsTitle">
+      <h2 class="ae-gx-h2" id="aeWingsTitle">Wings</h2>
+      <p class="ae-arc-sub">${esc(wings.lede)}</p>
+      <ul class="ae-pw-wings">${wingRow}</ul>
+      ${ex ? `<div class="ae-pw-wing" data-wing-example>
+        ${pwArt('wing-superior-big.jpg', ex.name, 235, 199)}
+        <div><h3>${esc(ex.name)}</h3>
+          <div class="ae-pw-effects"><div><span class="ae-pw-eff-h">When worn</span><ul>${ex.equipped.map(line => `<li>${esc(line)}</li>`).join('')}</ul></div>
+          <div class="is-owned"><span class="ae-pw-eff-h">Just for owning it</span><ul>${ex.owned.map(line => `<li>${esc(line)}</li>`).join('')}</ul></div></div></div>
+      </div>` : ''}
+      ${wingFacts ? `<h3 class="ae-pw-h3">Where wings come from</h3><ul class="ae-pw-tips">${wingFacts}</ul>` : ''}
+    </section>`;
+}
+
 async function renderPetsWings() {
   const body = shell('equipment', 'pets-wings');
   const text = byId(await loadGuideText());
-  const pets = text.pets;
-  const genera = pets.genera.map(genus => `<tr><th scope="row">${esc(genus.name)}</th><td>${esc(genus.pets)}</td><td>${esc(genus.perPet)}</td></tr>`).join('');
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aePets', 'Pets', `<p>${esc(pets.lede)}</p>${factsHtml(pets.facts)}
-      <div class="ae-gx-tablewrap"><table class="ae-gx-table"><caption>${esc(pets.generaNote)} ${statusTag('reported')}</caption><thead><tr><th scope="col">Genus</th><th scope="col">Pets</th><th scope="col">Each at level 3</th></tr></thead><tbody>${genera}</tbody></table></div>`)}
-    ${sectionHtml('aeWings', 'Wings', `<p>${esc(text.wings.lede)}</p>${factsHtml(text.wings.facts)}`)}`);
+  body.insertAdjacentHTML('beforeend', petsWingsHtml(text.pets, text.wings));
 }
 
 async function renderTitles(linked) {

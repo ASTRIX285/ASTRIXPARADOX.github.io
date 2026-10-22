@@ -197,7 +197,29 @@
           "region": "global",
           "reliability": "medium"
         }
-      ]
+      ],
+      "souls": {
+        "levels": [
+          {
+            "level": 1,
+            "souls": 5
+          },
+          {
+            "level": 2,
+            "souls": 30
+          },
+          {
+            "level": 3,
+            "souls": 105
+          }
+        ],
+        "text": "Souls in all for each pet level, counted from none.",
+        "status": "reported"
+      },
+      "collection": {
+        "total": 200,
+        "status": "reported"
+      }
     },
     {
       "id": "wings",
@@ -277,8 +299,30 @@
           "retrievedOn": "2026-10-18",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-21",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Wings window",
+          "note": "Superior Daeva Wings: equipped effect Accuracy Bonus 25, HP 400, MP 200; owned effect Flight Power 1000, Defense Bonus 100, Front Attack Critical Hit Resist 40."
         }
-      ]
+      ],
+      "example": {
+        "name": "Superior Daeva Wings",
+        "equipped": [
+          "Accuracy Bonus +25",
+          "HP +400",
+          "MP +200"
+        ],
+        "owned": [
+          "Flight Power +1,000",
+          "Defence Bonus +100",
+          "Front Attack Critical Hit Resist +40"
+        ],
+        "status": "confirmed"
+      }
     },
     {
       "id": "titles",

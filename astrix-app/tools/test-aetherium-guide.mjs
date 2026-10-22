@@ -777,6 +777,41 @@ await check('Arcana: five card medallions, the grade climb on card backs, set ar
   }
 });
 
+// Pets and wings (design/aetherium-pets-wings-page, 22 Oct 2026): real portraits and wing art, no table, numbers from the data.
+await check('Pets and wings: a wall of pet portraits, the souls climb, genera sized by count, wing art and one wing\'s two effects',async()=>{
+  const guide=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/equipment-guide.json'),'utf8')).records;
+  const pets=guide.find(record=>record.id==='pets'),wings=guide.find(record=>record.id==='wings');
+  for(const width of [1440,390]){
+    const {page,context,errors}=await open('/hub/aetherium/guide/equipment/pets-wings/',{live:false,viewport:{width,height:width===390?844:900}});
+    try{
+      await page.waitForSelector('.ae-pw-wall');
+      for(let y=0;y<9000;y+=700){await page.evaluate(value=>scrollTo(0,value),y);await page.waitForTimeout(40);}
+      await page.waitForFunction(()=>[...document.querySelectorAll('.ae-arc-block img')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:10000});
+      assert.deepEqual(errors,[],'No page errors');
+      const look=await page.evaluate(()=>{
+        const text=document.querySelector('.ae-gd-body').innerText;
+        return {wall:document.querySelectorAll('.ae-pw-wall img').length,wallW:Math.round(document.querySelector('.ae-pw-wall img').getBoundingClientRect().width),
+          souls:[...document.querySelectorAll('.ae-pw-num')].map(node=>node.textContent),lvW:[...document.querySelectorAll('.ae-pw-lv-art')].map(node=>Math.round(node.getBoundingClientRect().width)),
+          bars:[...document.querySelectorAll('.ae-pw-bar')].map(node=>Math.round(parseFloat(getComputedStyle(node,'::before').width))),counts:[...document.querySelectorAll('.ae-pw-bar b')].map(node=>Number(node.textContent)),
+          wings:document.querySelectorAll('.ae-pw-wings img').length,owned:[...document.querySelectorAll('.ae-pw-effects .is-owned li')].map(node=>node.textContent),
+          tables:document.querySelectorAll('.ae-gd-body table').length,svgs:document.querySelectorAll('.ae-gd-body svg').length,
+          wide:document.documentElement.scrollWidth>innerWidth,dash:/[–—]/.test(text),broken:/undefined|NaN|\[object/.test(text),pending:text.includes('The weekly limit on morphing')};
+      });
+      assert.ok(look.wall>=12&&look.wallW>=(width===390?90:120),`A wall of pet portraits (${look.wall} at ${look.wallW}px)`);
+      assert.deepEqual(look.souls,pets.souls.levels.map(step=>String(step.souls)),'Souls from the data');
+      assert.ok(look.lvW.every((w,n)=>n===0||w>look.lvW[n-1]),`Each level bigger than the last (${look.lvW})`);
+      assert.deepEqual(look.counts,pets.genera.map(genus=>genus.pets),'Genus counts from the data');
+      const most=Math.max(...look.counts);assert.ok(look.bars[look.counts.indexOf(most)]===Math.max(...look.bars),'The biggest genus has the longest bar');
+      assert.ok(look.wings>=4,'Wing art');
+      assert.deepEqual(look.owned,wings.example.owned,'Owned effects from the data');
+      assert.equal(look.tables,0,'No table');assert.equal(look.svgs,0,'No drawn icons');
+      assert.ok(!look.pending,'A pending fact never shows');
+      assert.ok(!look.wide,`No sideways scroll at ${width}`);assert.ok(!look.dash,'No dash');assert.ok(!look.broken,'No broken text');
+      if(process.env.AE_SHOTS)await page.screenshot({path:`${process.env.AE_SHOTS}/pets-wings-${width}.png`,fullPage:true});
+    }finally{await context.close();}
+  }
+});
+
 await check('never the real Worker or NCSOFT',async()=>{assert.deepEqual(realCalls,[]);});
 
 await browser.close();
