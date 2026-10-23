@@ -42,7 +42,7 @@ const TOPICS = {
     { id: 'slots', label: 'Slots and grades', blurb: 'Every gear slot, the item grades and how far each one enhances.' },
     { id: 'enhancement', label: 'Enhancement', blurb: 'The five tabs of the Enhancement window and what to enhance, when.' },
     { id: 'manastones', label: 'Manastones', blurb: 'Manastones on weapons and armour, Soulstones on accessories.' },
-    { id: 'theostones', label: 'Theostones', blurb: 'One proc stone on the weapon you keep.' },
+    { id: 'theostones', label: 'Theostones', blurb: 'One proc stone each on your weapon and guard.' },
     { id: 'arcana', label: 'Arcana', blurb: 'Five card slots from Transcendence that raise item level and skill levels.' },
     { id: 'pets-wings', label: 'Pets and wings', blurb: 'Collections that give permanent stats, worn or not.' },
     { id: 'titles', label: 'Titles', blurb: 'Where titles come from and what they give.' },
@@ -195,27 +195,91 @@ function rewardSources(sources, names) {
 }
 const rewardList = rows => `<ul class="ae-gx-list">${rows.map(row => `<li><strong>${esc(row.name)}</strong><span>${esc(row.hits.join(', '))}</span> ${statusTag(row.status)}</li>`).join('')}</ul>`;
 
+/* Manastones and Theostones in the Arcana page's language (design/aetherium-stones-pages, 23 Oct 2026). Slot counts and the
+   Manastone icon come from the official character data; facts marked unknown and roles with no advice stay off the page. */
+const known = facts => (facts ?? []).filter(item => !['pending', 'unknown'].includes(item.status));
+const givenRoles = roles => Object.entries(roles ?? {}).filter(([, value]) => !pendingText(value) && !value?.pending);
+const keyFacts = facts => (facts.length ? `<ul class="ae-pw-tips">${facts.map(item => `<li data-fact="${esc(item.id)}">${esc(item.text)}</li>`).join('')}</ul>` : '');
+const whereRows = rows => `<ul class="ae-st-where">${rows.map(row => `<li><h3>${esc(row.name)}</h3><p class="ae-st-hits">${esc(row.hits.join(', '))}</p></li>`).join('')}</ul>`;
+
+export function manastonesHtml(record, where, alchemy) {
+  const slots = record.slots;
+  const top = slots?.byGrade?.[0];
+  const sockets = n => Array.from({ length: n }, () => `<span class="ae-st-socket"><img src="${esc(slots.icon)}" alt="" width="64" height="64" loading="lazy" decoding="async"></span>`).join('');
+  const grades = (slots?.byGrade ?? []).map(row => `<li class="ae-st-row" data-grade="${esc(row.grade.toLowerCase())}">
+      <div class="ae-st-row-head"><span class="ae-st-grade">${esc(row.grade)}</span><span class="ae-st-pieces">${esc(row.pieces)}</span></div>
+      <div class="ae-st-sockets" aria-label="${esc(row.manastones)} Manastone slots${row.theostone ? ` and ${row.theostone} Theostone slot` : ''}">${sockets(row.manastones)}${row.theostone ? `<span class="ae-st-theo">+${esc(row.theostone)} Theostone</span>` : ''}</div>
+      <b class="ae-st-count">${esc(row.manastones)}</b>
+    </li>`).join('');
+  const roles = givenRoles(record.roles).map(([role, value]) => `<li class="ae-st-role" data-role="${esc(role)}">
+      <h3>${esc(ROLE_NAMES[role] ?? role)}</h3>
+      <ol>${value.stones.map((stone, n) => `<li><span class="ae-st-rank">${n + 1}</span><span class="ae-st-stone">${esc(stone.name)}</span><span class="ae-st-top">top ${esc(stone.top)}</span></li>`).join('')}</ol>
+      ${value.note ? `<p class="ae-st-note">${esc(value.note)}</p>` : ''}
+    </li>`).join('');
+  return `${top ? `<ul class="ae-arc-stats" aria-label="Manastones at a glance">${slots.byGrade.map(row => `<li><b>${esc(row.manastones)}</b><span>Slots on ${esc(row.grade)}</span></li>`).join('')}</ul>` : ''}
+    ${slots ? `<section class="ae-gx-block ae-arc-block" id="aeManaSlots" aria-labelledby="aeManaSlotsTitle">
+      <h2 class="ae-gx-h2" id="aeManaSlotsTitle">Slots by grade</h2>
+      <p class="ae-arc-sub">The better the piece, the more stones it holds. ${esc(slots.none)}</p>
+      <ol class="ae-st-rows">${grades}</ol>
+    </section>` : ''}
+    <section class="ae-gx-block ae-arc-block" id="aeManaFacts" aria-labelledby="aeManaFactsTitle">
+      <h2 class="ae-gx-h2" id="aeManaFactsTitle">How engraving works</h2>
+      ${keyFacts(known(record.facts))}
+      <p class="ae-arc-note">${esc(record.accessories.text)}</p>
+    </section>
+    ${roles ? `<section class="ae-gx-block ae-arc-block" id="aeManaRoles" aria-labelledby="aeManaRolesTitle">
+      <h2 class="ae-gx-h2" id="aeManaRolesTitle">Best stones by role</h2>
+      <p class="ae-arc-sub">In this order. The number is the best roll the stat reaches.</p>
+      <ul class="ae-st-roles">${roles}</ul>
+    </section>` : ''}
+    <section class="ae-gx-block ae-arc-block" id="aeManaWhere" aria-labelledby="aeManaWhereTitle">
+      <h2 class="ae-gx-h2" id="aeManaWhereTitle">Where they come from</h2>
+      ${whereRows(where)}
+      ${alchemy ? `<p class="ae-arc-note">Alchemy makes them too: ${esc(alchemy.makes)}. <a href="${esc(topicHref('crafting', 'professions'))}">The five professions</a></p>` : ''}
+    </section>`;
+}
+
 async function renderManastones() {
   const body = shell('equipment', 'manastones');
   const [enhancement, sources, text] = await Promise.all([loadEnhancement(), loadSources(), loadGuideText()]);
-  const record = byId(enhancement).manastone;
   const alchemy = byId(text).professions.professions.find(item => item.id === 'alchemy');
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aeManaFacts', 'How engraving works', factsHtml(record.facts))}
-    ${sectionHtml('aeSoul', 'Soulstones on accessories', factsHtml([{ id: 'accessories', text: record.accessories.text, status: record.accessories.status }]))}
-    ${sectionHtml('aeManaRoles', 'Best stones by role', rolesHtml(record.roles, value => `<span>${esc(value.stones.map(stone => `${stone.name} (top ${stone.top})`).join(', '))}</span>${value.note ? `<span>${esc(value.note)}</span>` : ''}`))}
-    ${sectionHtml('aeManaWhere', 'Where they come from', `${rewardList(rewardSources(sources, ['Manastone', 'Soulstone']))}
-      <p>Alchemy makes them too: ${esc(alchemy.makes)}. ${statusTag(alchemy.status)} <a href="${esc(topicHref('crafting', 'professions'))}">The five professions</a></p>`)}`);
+  body.insertAdjacentHTML('beforeend', manastonesHtml(byId(enhancement).manastone, rewardSources(sources, ['Manastone', 'Soulstone']), alchemy));
+}
+
+export function theostonesHtml(record, where) {
+  const odds = record.combineOdds ?? [];
+  const chain = odds.length ? [odds[0].from, ...odds.map(step => step.to)] : [];
+  const combine = chain.map((grade, n) => `<li class="ae-st-gem" data-grade="${esc(grade.toLowerCase())}"><span>${esc(grade)}</span></li>${odds[n] ? `<li class="ae-st-odds" aria-label="${esc(odds[n].chance)}% chance"><b>${esc(odds[n].chance)}%</b></li>` : ''}`).join('');
+  const roles = givenRoles(record.roles).map(([role, value]) => `<li class="ae-st-role" data-role="${esc(role)}"><h3>${esc(ROLE_NAMES[role] ?? role)}</h3><p class="ae-st-note">${esc(value.text)}</p></li>`).join('');
+  const facts = known(record.facts).filter(item => item.id !== 'combine-chance');
+  return `<ul class="ae-arc-stats" aria-label="Theostones at a glance">
+      <li><b>1</b><span>Per slot</span></li>
+      ${odds.map(step => `<li><b>${esc(step.chance)}%</b><span>${esc(step.from)} to ${esc(step.to)}</span></li>`).join('')}
+    </ul>
+    ${combine ? `<section class="ae-gx-block ae-arc-block" id="aeTheoCombine" aria-labelledby="aeTheoCombineTitle">
+      <h2 class="ae-gx-h2" id="aeTheoCombineTitle">Combine raises the grade</h2>
+      <p class="ae-arc-sub">Each step up is a low chance, so most tries stay the same grade.</p>
+      <ol class="ae-st-combine">${combine}</ol>
+    </section>` : ''}
+    <section class="ae-gx-block ae-arc-block" id="aeTheoFacts" aria-labelledby="aeTheoFactsTitle">
+      <h2 class="ae-gx-h2" id="aeTheoFactsTitle">How Theostones work</h2>
+      ${record.slots ? `<p class="ae-arc-sub">${esc(record.slots.text)}</p>` : ''}
+      ${keyFacts(facts)}
+    </section>
+    ${roles ? `<section class="ae-gx-block ae-arc-block" id="aeTheoRoles" aria-labelledby="aeTheoRolesTitle">
+      <h2 class="ae-gx-h2" id="aeTheoRolesTitle">Which one for your role</h2>
+      <ul class="ae-st-roles">${roles}</ul>
+    </section>` : ''}
+    <section class="ae-gx-block ae-arc-block" id="aeTheoWhere" aria-labelledby="aeTheoWhereTitle">
+      <h2 class="ae-gx-h2" id="aeTheoWhereTitle">Where they come from</h2>
+      ${whereRows(where)}
+    </section>`;
 }
 
 async function renderTheostones() {
   const body = shell('equipment', 'theostones');
   const [enhancement, sources] = await Promise.all([loadEnhancement(), loadSources()]);
-  const record = byId(enhancement).theostone;
-  body.insertAdjacentHTML('beforeend', `
-    ${sectionHtml('aeTheoFacts', 'How Theostones work', factsHtml(record.facts))}
-    ${sectionHtml('aeTheoRoles', 'Which one for your role', rolesHtml(record.roles, value => `<span>${esc(value.text)}</span>`))}
-    ${sectionHtml('aeTheoWhere', 'Where they come from', rewardList(rewardSources(sources, ['Theostone'])))}`);
+  body.insertAdjacentHTML('beforeend', theostonesHtml(byId(enhancement).theostone, rewardSources(sources, ['Theostone'])));
 }
 
 /* Arcana art cut from Miguel's own screens of the Arcana window (design/aetherium-arcana-page, 22 Oct 2026). */
