@@ -812,6 +812,44 @@ await check('Pets and wings: a wall of pet portraits, the souls climb, genera si
   }
 });
 
+// Manastones and Theostones (design/aetherium-stones-pages, 23 Oct 2026): slot counts from the official data, no unknown facts.
+await check('Manastones and Theostones: sockets by grade, ranked stones, the Combine chain, no unknown facts or empty roles',async()=>{
+  const enh=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/enhancement.json'),'utf8')).records;
+  const mana=enh.find(record=>record.id==='manastone'),theo=enh.find(record=>record.id==='theostone');
+  for(const width of [1440,390]){
+    for(const [path,check] of [['manastones',async page=>{
+      const look=await page.evaluate(()=>({rows:[...document.querySelectorAll('.ae-st-row')].map(row=>row.querySelectorAll('.ae-st-socket').length),
+        icon:document.querySelector('.ae-st-socket img')?.getAttribute('src'),socket:Math.round(document.querySelector('.ae-st-socket').getBoundingClientRect().width),
+        roles:[...document.querySelectorAll('.ae-st-role')].map(node=>node.dataset.role),ranks:document.querySelectorAll('.ae-st-role:first-child .ae-st-rank').length}));
+      assert.deepEqual(look.rows,mana.slots.byGrade.map(row=>row.manastones),'One socket per Manastone slot, from the data');
+      assert.equal(look.icon,mana.slots.icon,'The game\'s own Manastone icon');
+      assert.ok(look.socket>=(width===390?50:70),`Sockets read at size (${look.socket}px)`);
+      assert.deepEqual(look.roles,Object.keys(mana.roles).filter(role=>!mana.roles[role].pending),'Only roles with advice');
+      assert.equal(look.ranks,mana.roles.tank.stones.length);
+    }],['theostones',async page=>{
+      const look=await page.evaluate(()=>({gems:[...document.querySelectorAll('.ae-st-gem')].map(node=>node.textContent.trim()),odds:[...document.querySelectorAll('.ae-st-odds b')].map(node=>node.textContent),
+        colours:new Set([...document.querySelectorAll('.ae-st-gem span')].map(node=>getComputedStyle(node).color)).size}));
+      assert.deepEqual(look.gems,['Rare','Epic','Unique']);
+      assert.deepEqual(look.odds,theo.combineOdds.map(step=>`${step.chance}%`),'Odds from the data');
+      assert.equal(look.colours,3,'Each grade in its own colour');
+    }]]){
+      const {page,context,errors}=await open(`/hub/aetherium/guide/equipment/${path}/`,{live:false,viewport:{width,height:width===390?844:900}});
+      try{
+        await page.waitForSelector('.ae-arc-block');
+        assert.deepEqual(errors,[],`${path}: no page errors`);
+        await check(page);
+        const text=await page.evaluate(()=>document.querySelector('.ae-gd-body').innerText);
+        const hidden=[...mana.facts,...theo.facts].filter(item=>item.status==='unknown').map(item=>item.text);
+        for(const line of hidden)assert.ok(!text.includes(line),`${path}: an unknown fact never shows (${line})`);
+        assert.ok(!/research record|not in the record|undefined|NaN|[–—]/.test(text),`${path}: no placeholder, broken text or dash`);
+        assert.equal(await page.evaluate(()=>document.querySelectorAll('.ae-gd-body table,.ae-gd-body svg').length),0,`${path}: no table or drawn icon`);
+        assert.ok(!(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)),`${path} at ${width}: no sideways scroll`);
+        if(process.env.AE_SHOTS)await page.screenshot({path:`${process.env.AE_SHOTS}/${path}-${width}.png`,fullPage:true});
+      }finally{await context.close();}
+    }
+  }
+});
+
 await check('never the real Worker or NCSOFT',async()=>{assert.deepEqual(realCalls,[]);});
 
 await browser.close();

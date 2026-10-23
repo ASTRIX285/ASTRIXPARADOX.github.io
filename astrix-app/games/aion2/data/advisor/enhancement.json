@@ -242,8 +242,8 @@
         }
       ],
       "accessories": {
-        "text": "Accessories take Soulstones. Which ones suit each role is not in the record yet.",
-        "status": "unknown"
+        "text": "Accessories take Soulstones, not Manastones.",
+        "status": "reported"
       },
       "roles": {
         "tank": {
@@ -252,26 +252,45 @@
           "stones": [
             {
               "name": "HP",
-              "ids": ["HPMax"],
-              "names": ["HP"],
+              "ids": [
+                "HPMax"
+              ],
+              "names": [
+                "HP"
+              ],
               "top": "160"
             },
             {
               "name": "Defence",
-              "ids": ["ArmorDefense"],
-              "names": ["Defense", "Defence"],
+              "ids": [
+                "ArmorDefense"
+              ],
+              "names": [
+                "Defense",
+                "Defence"
+              ],
               "top": "100"
             },
             {
               "name": "Block",
-              "ids": ["Block"],
-              "names": ["Block"],
+              "ids": [
+                "Block"
+              ],
+              "names": [
+                "Block"
+              ],
               "top": "20"
             },
             {
               "name": "Accuracy",
-              "ids": ["Accuracy", "WeaponAccuracy"],
-              "names": ["Accuracy", "Accuracy Bonus"],
+              "ids": [
+                "Accuracy",
+                "WeaponAccuracy"
+              ],
+              "names": [
+                "Accuracy",
+                "Accuracy Bonus"
+              ],
               "top": "15"
             }
           ]
@@ -283,25 +302,36 @@
             {
               "name": "Front or Back Damage Boost",
               "ids": [],
-              "names": ["Front Damage Boost", "Back Damage Boost"],
+              "names": [
+                "Front Damage Boost",
+                "Back Damage Boost"
+              ],
               "top": "100 (1%)"
             },
             {
               "name": "Weapon or Critical Damage Boost",
               "ids": [],
-              "names": ["Weapon Damage Boost", "Critical Damage Boost"],
+              "names": [
+                "Weapon Damage Boost",
+                "Critical Damage Boost"
+              ],
               "top": "100 (1%)"
             },
             {
               "name": "Damage Boost",
               "ids": [],
-              "names": ["Damage Boost"],
+              "names": [
+                "Damage Boost"
+              ],
               "top": "100 (1%)"
             },
             {
               "name": "Attack",
               "ids": [],
-              "names": ["Attack", "Attack Bonus"],
+              "names": [
+                "Attack",
+                "Attack Bonus"
+              ],
               "top": "10"
             }
           ]
@@ -350,8 +380,41 @@
           "retrievedOn": "2026-10-17",
           "region": "not-stated",
           "reliability": "medium"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
         }
-      ]
+      ],
+      "slots": {
+        "status": "confirmed",
+        "text": "Manastone slots on each piece, from the official character data.",
+        "byGrade": [
+          {
+            "grade": "Unique",
+            "manastones": 4,
+            "theostone": 1,
+            "pieces": "Weapon and guard"
+          },
+          {
+            "grade": "Epic",
+            "manastones": 3,
+            "theostone": 0,
+            "pieces": "Armour, cloak, necklace, earrings, rings"
+          },
+          {
+            "grade": "Rare",
+            "manastones": 2,
+            "theostone": 0,
+            "pieces": "Ring, bracelet"
+          }
+        ],
+        "none": "Belt and amulet take no stones.",
+        "icon": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Usable_Enchant_MagicStone_A_c_003.png"
+      }
     },
     {
       "id": "theostone",
@@ -365,7 +428,7 @@
         },
         {
           "id": "one-per-weapon",
-          "text": "One Theostone per weapon. Engraving a new one replaces the old one.",
+          "text": "One Theostone per slot. Engraving a new one replaces the old one.",
           "status": "reported"
         },
         {
@@ -426,8 +489,31 @@
           "publishedOn": "2026-10-07",
           "region": "global",
           "reliability": "medium"
+        },
+        {
+          "kind": "armory",
+          "region": "eu",
+          "endpoint": "/api/character/equipment/item",
+          "capturedOn": "2026-10-11",
+          "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
         }
-      ]
+      ],
+      "combineOdds": [
+        {
+          "from": "Rare",
+          "to": "Epic",
+          "chance": 11
+        },
+        {
+          "from": "Epic",
+          "to": "Unique",
+          "chance": 9
+        }
+      ],
+      "slots": {
+        "text": "The weapon and the guard each have one Theostone slot.",
+        "status": "confirmed"
+      }
     },
     {
       "id": "soul-binding",
@@ -477,7 +563,14 @@
       ],
       "codexSources": {
         "status": "reported",
-        "list": ["Expeditions", "Hidden Cubes", "Shugo Festival", "Season Shop", "Nightmare Shop", "Exchange Shop, a few a week for Dream Fragments"]
+        "list": [
+          "Expeditions",
+          "Hidden Cubes",
+          "Shugo Festival",
+          "Season Shop",
+          "Nightmare Shop",
+          "Exchange Shop, a few a week for Dream Fragments"
+        ]
       },
       "roles": {
         "tank": {
@@ -486,18 +579,31 @@
             "any": [
               {
                 "name": "Block",
-                "ids": ["Block"],
-                "names": ["Block"]
+                "ids": [
+                  "Block"
+                ],
+                "names": [
+                  "Block"
+                ]
               },
               {
                 "name": "HP",
-                "ids": ["HPMax"],
-                "names": ["HP"]
+                "ids": [
+                  "HPMax"
+                ],
+                "names": [
+                  "HP"
+                ]
               },
               {
                 "name": "Accuracy",
-                "ids": ["WeaponAccuracy", "Accuracy"],
-                "names": ["Accuracy"]
+                "ids": [
+                  "WeaponAccuracy",
+                  "Accuracy"
+                ],
+                "names": [
+                  "Accuracy"
+                ]
               }
             ]
           }
@@ -510,41 +616,59 @@
               {
                 "name": "Weapon Damage Boost",
                 "ids": [],
-                "names": ["Weapon Damage Boost"]
+                "names": [
+                  "Weapon Damage Boost"
+                ]
               },
               {
                 "name": "Combat Speed",
                 "ids": [],
-                "names": ["Combat Speed"]
+                "names": [
+                  "Combat Speed"
+                ]
               },
               {
                 "name": "Might",
-                "ids": ["STR"],
-                "names": ["Might"]
+                "ids": [
+                  "STR"
+                ],
+                "names": [
+                  "Might"
+                ]
               },
               {
                 "name": "Precision",
-                "ids": ["AGI"],
-                "names": ["Precision"]
+                "ids": [
+                  "AGI"
+                ],
+                "names": [
+                  "Precision"
+                ]
               },
               {
                 "name": "Damage Boost",
                 "ids": [],
-                "names": ["Damage Boost"]
+                "names": [
+                  "Damage Boost"
+                ]
               }
             ],
             "TORSO": [
               {
                 "name": "Damage Boost",
                 "ids": [],
-                "names": ["Damage Boost"]
+                "names": [
+                  "Damage Boost"
+                ]
               }
             ],
             "GLOVES": [
               {
                 "name": "Combat Speed",
                 "ids": [],
-                "names": ["Combat Speed"]
+                "names": [
+                  "Combat Speed"
+                ]
               }
             ]
           }
@@ -721,7 +845,10 @@
       ],
       "exceptions": [
         {
-          "slots": ["Belt", "Amulet"],
+          "slots": [
+            "Belt",
+            "Amulet"
+          ],
           "text": "Belt and amulet use their own enhance scrolls, not Enhance Stones, and go to +10 at every grade."
         }
       ],

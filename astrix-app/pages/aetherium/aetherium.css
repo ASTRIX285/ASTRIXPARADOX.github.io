@@ -2929,7 +2929,7 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-arc-art figcaption{position
 .ae-arc-stages{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:40px 0 0;padding:0;list-style:none}
 .ae-arc-stages::before{content:"";position:absolute;left:22px;right:22px;top:21px;height:2px;background:linear-gradient(90deg,var(--ae-gd-gold-line),var(--ae-gd-gold))}
 .ae-arc-stage{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding-right:14px}
-.ae-arc-stage-n{display:grid;place-items:center;width:44px;height:44px;box-sizing:border-box;border-radius:50%;background:var(--ae-gd-ground);border:2px solid var(--ae-gd-gold);font:400 20px/1 var(--ae-gd-font-title);color:var(--ae-gd-gold)}
+.ae-arc-stage-n{display:grid;place-items:center;width:44px;height:44px;box-sizing:border-box;border-radius:50%;background:var(--ae-gd-ground);border:2px solid var(--ae-gd-gold);font:600 18px/1 var(--ae-gd-display);color:var(--ae-gd-gold)}
 .ae-arc-stage.is-top .ae-arc-stage-n{background:var(--ae-gd-gold-fill);color:var(--ae-gd-gold-ink);box-shadow:0 0 20px var(--ae-gd-gold-glow)}
 .ae-arc-stage b{margin-top:6px;font:600 18px/1.3 var(--ae-gd-display);color:var(--ae-gd-ink)}
 .ae-arc-up{--ae-g:var(--ae-grade-common);font:600 13px/1.3 var(--ae-gd-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ae-g);border:1px solid currentColor;padding:4px 8px}
@@ -3012,4 +3012,49 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-pw-h3{margin:56
   .ae-pw-genera,.ae-pw-tips,.ae-pw-wing,.ae-pw-effects{grid-template-columns:minmax(0,1fr)}
   .ae-pw-wings{gap:12px}.ae-pw-wings li{width:calc(33% - 8px);font-size:12px}.ae-pw-wings img{width:100%;height:auto}
   .ae-pw-wing>img{max-width:220px}
+}
+
+/* Guide > Manastones and Theostones (design/aetherium-stones-pages, 23 Oct 2026): sockets with the game's Manastone icon, ranked
+   stones by role, the Combine chain with its odds. Same language as Arcana and Pets and wings. */
+body.aetherium-page:is([data-guide-page="manastones"],[data-guide-page="theostones"]) :is(.ae-gd-frame,.ae-gd-hero-copy){max-width:1520px}
+.ae-st-rows{display:grid;gap:18px;margin:0;padding:0;list-style:none}
+.ae-st-row{--ae-g:var(--ae-grade-rare);display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr) 80px;align-items:center;gap:28px;padding:22px 26px;border-left:3px solid var(--ae-g);background:linear-gradient(90deg,color-mix(in srgb,var(--ae-g) 12%,transparent),var(--ae-gd-clear) 70%)}
+.ae-st-row[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}.ae-st-row[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-st-row-head{display:grid;gap:6px}
+.ae-st-grade{font:400 32px/1 var(--ae-gd-font-title);color:var(--ae-g)}
+.ae-st-pieces{font-size:16px;color:var(--ae-gd-muted)}
+.ae-st-sockets{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.ae-st-socket{display:grid;place-items:center;width:76px;height:76px;border-radius:50%;background:radial-gradient(circle,var(--ae-gd-raised),var(--ae-gd-deep));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ae-g) 60%,transparent),0 0 18px color-mix(in srgb,var(--ae-g) 30%,transparent)}
+.ae-st-socket img{width:58px;height:58px}
+.ae-st-theo{font:600 14px/1 var(--ae-gd-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ae-gd-gold);border:1px solid var(--ae-gd-gold);padding:10px 14px;box-shadow:0 0 16px var(--ae-gd-gold-glow)}
+.ae-st-count{font:400 56px/1 var(--ae-gd-font-title);color:var(--ae-g);text-align:right}
+.ae-st-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;margin:0;padding:0;list-style:none}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-st-role h3{margin:0 0 18px}
+.ae-st-role ol{margin:0;padding:0;list-style:none}
+.ae-st-role ol li{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--ae-gd-line-soft)}
+.ae-st-rank{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--ae-gd-gold);font:600 18px/1 var(--ae-gd-display);color:var(--ae-gd-gold)}
+.ae-st-role ol li:first-child .ae-st-rank{background:var(--ae-gd-gold-fill);color:var(--ae-gd-gold-ink);box-shadow:0 0 18px var(--ae-gd-gold-glow)}
+.ae-st-stone{font-size:19px;color:var(--ae-gd-ink)}
+.ae-st-top{font:600 14px/1 var(--ae-gd-display);color:var(--ae-gd-muted);white-space:nowrap}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-st-note{margin:16px 0 0;padding-left:16px;border-left:2px solid var(--ae-gd-gold);font-size:17px;line-height:1.55;color:var(--ae-gd-ink-soft)}
+.ae-st-where{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 32px;margin:0;padding:0;list-style:none}
+.ae-st-where li{padding-top:16px;border-top:2px solid var(--ae-gd-gold-line)}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-st-where h3{margin:0 0 8px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-st-where p{margin:0;font-size:16px;color:var(--ae-gd-muted)}
+.ae-st-combine{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:0;padding:0;list-style:none}
+.ae-st-gem{--ae-g:var(--ae-grade-rare);display:grid;place-items:center;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--ae-g) 30%,var(--ae-gd-deep)),var(--ae-gd-deep) 70%);box-shadow:inset 0 0 0 2px var(--ae-g),0 0 40px color-mix(in srgb,var(--ae-g) 40%,transparent)}
+.ae-st-gem[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}.ae-st-gem[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-st-gem span{font:400 30px/1 var(--ae-gd-font-title);color:var(--ae-g)}
+.ae-st-odds{position:relative;display:grid;place-items:center;width:150px;height:2px;background:linear-gradient(90deg,var(--ae-gd-clear),var(--ae-gd-gold))}
+.ae-st-odds b{position:absolute;top:-52px;font:400 40px/1 var(--ae-gd-font-title);color:var(--ae-gd-gold)}
+@media (max-width:760px){
+  .ae-st-row{grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:18px}
+  .ae-st-sockets{grid-column:1/-1;order:3;gap:10px}
+  .ae-st-socket{width:56px;height:56px}.ae-st-socket img{width:42px;height:42px}
+  .ae-st-count{font-size:40px}.ae-st-grade{font-size:26px}
+  .ae-st-roles,.ae-st-where{grid-template-columns:minmax(0,1fr)}
+  .ae-st-combine{flex-direction:column}
+  .ae-st-gem{width:130px;height:130px}
+  .ae-st-odds{width:2px;height:80px;background:linear-gradient(180deg,var(--ae-gd-clear),var(--ae-gd-gold))}
+  .ae-st-odds b{top:auto;left:18px;font-size:30px}
 }
