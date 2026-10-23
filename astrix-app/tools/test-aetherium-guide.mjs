@@ -832,6 +832,19 @@ await check('Manastones and Theostones: sockets by grade, ranked stones, the Com
       assert.deepEqual(look.gems,['Rare','Epic','Unique']);
       assert.deepEqual(look.odds,theo.combineOdds.map(step=>`${step.chance}%`),'Odds from the data');
       assert.equal(look.colours,3,'Each grade in its own colour');
+      const effects=theo.catalogue.groups.flatMap(group=>group.effects);
+      const seen=async()=>page.evaluate(()=>[...document.querySelectorAll('.ae-th-card')].filter(card=>card.offsetParent).map(card=>card.dataset.grade));
+      const unique=await seen();
+      assert.equal(unique.length,effects.length,'One card per effect for the grade shown');
+      assert.ok(unique.every(grade=>grade==='unique'),'Unique shows first');
+      await page.click('[data-theo-grade="rare"]');
+      const rare=await seen();
+      assert.ok(rare.length===effects.length&&rare.every(grade=>grade==='rare'),'The Rare button shows the Rare stones');
+      assert.equal(await page.getAttribute('[data-theo-grade="rare"]','aria-pressed'),'true');
+      const stun=await page.$eval('.ae-th-card[data-grade="rare"][data-effect="stun"] .ae-th-big b',node=>node.textContent);
+      assert.equal(stun,`${effects.find(effect=>effect.id==='stun').duration.Rare}s`,'Numbers from the data');
+      const icon=await page.$eval('.ae-th-card[data-grade="rare"][data-effect="stun"] img',img=>img.getBoundingClientRect().width);
+      assert.ok(icon>=70,`The stone icon reads at size (${icon}px)`);
     }]]){
       const {page,context,errors}=await open(`/hub/aetherium/guide/equipment/${path}/`,{live:false,viewport:{width,height:width===390?844:900}});
       try{

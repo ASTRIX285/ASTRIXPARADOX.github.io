@@ -496,6 +496,14 @@
           "endpoint": "/api/character/equipment/item",
           "capturedOn": "2026-10-11",
           "fixture": "astrix-app/tools/fixtures/aion2/eu/lv45-items.json"
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-23",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Theostone tooltips, Rare, Epic and Unique",
+          "note": "51 tooltips: 17 effects at each of three grades. Engravable Item: Weapons. Cooldown 5s on crowd control, 1s on damage."
         }
       ],
       "combineOdds": [
@@ -513,6 +521,306 @@
       "slots": {
         "text": "The weapon and the guard each have one Theostone slot.",
         "status": "confirmed"
+      },
+      "catalogue": {
+        "status": "confirmed",
+        "engravable": "Weapons",
+        "rule": "Only one Theostone's effect applies when identical Theostones are engraved.",
+        "grades": [
+          "Rare",
+          "Epic",
+          "Unique"
+        ],
+        "groups": [
+          {
+            "id": "control",
+            "label": "Crowd control",
+            "text": "Lock an enemy down for a moment.",
+            "effects": [
+              {
+                "id": "blind",
+                "label": "Blind",
+                "chance": {
+                  "Rare": 3,
+                  "Epic": 3,
+                  "Unique": 3
+                },
+                "duration": {
+                  "Rare": 5,
+                  "Epic": 6,
+                  "Unique": 7
+                },
+                "cooldown": 5
+              },
+              {
+                "id": "seal",
+                "label": "Seal",
+                "chance": {
+                  "Rare": 3,
+                  "Epic": 3,
+                  "Unique": 3
+                },
+                "duration": {
+                  "Rare": 3,
+                  "Epic": 4,
+                  "Unique": 5
+                },
+                "cooldown": 5
+              },
+              {
+                "id": "root",
+                "label": "Root",
+                "chance": {
+                  "Rare": 2,
+                  "Epic": 2,
+                  "Unique": 2
+                },
+                "duration": {
+                  "Rare": 3,
+                  "Epic": 4,
+                  "Unique": 5
+                },
+                "cooldown": 5
+              },
+              {
+                "id": "stun",
+                "label": "Stun",
+                "chance": {
+                  "Rare": 3,
+                  "Epic": 3,
+                  "Unique": 3
+                },
+                "duration": {
+                  "Rare": 1,
+                  "Epic": 2,
+                  "Unique": 3
+                },
+                "cooldown": 5
+              },
+              {
+                "id": "paralyze",
+                "label": "Paralyze",
+                "chance": {
+                  "Rare": 2,
+                  "Epic": 2,
+                  "Unique": 2
+                },
+                "duration": {
+                  "Rare": 2,
+                  "Epic": 3,
+                  "Unique": 4
+                },
+                "cooldown": 5
+              },
+              {
+                "id": "move",
+                "label": "-50% Move Speed",
+                "chance": {
+                  "Rare": 3,
+                  "Epic": 3,
+                  "Unique": 3
+                },
+                "duration": {
+                  "Rare": 5,
+                  "Epic": 6,
+                  "Unique": 7
+                },
+                "cooldown": 5
+              },
+              {
+                "id": "combat",
+                "label": "-50% Combat Speed",
+                "chance": {
+                  "Rare": 3,
+                  "Epic": 3,
+                  "Unique": 3
+                },
+                "duration": {
+                  "Rare": 5,
+                  "Epic": 6,
+                  "Unique": 7
+                },
+                "cooldown": 5
+              }
+            ]
+          },
+          {
+            "id": "dot",
+            "label": "Damage over time",
+            "text": "A wound that keeps ticking.",
+            "effects": [
+              {
+                "id": "poison",
+                "label": "Poison",
+                "chance": {
+                  "Rare": 5,
+                  "Epic": 5,
+                  "Unique": 5
+                },
+                "damage": {
+                  "Rare": 300,
+                  "Epic": 450,
+                  "Unique": 600
+                },
+                "cooldown": 1,
+                "every": 2,
+                "lasts": 20
+              },
+              {
+                "id": "bleed",
+                "label": "Bleed",
+                "chance": {
+                  "Rare": 3,
+                  "Epic": 3,
+                  "Unique": 3
+                },
+                "damage": {
+                  "Rare": 400,
+                  "Epic": 600,
+                  "Unique": 800
+                },
+                "cooldown": 1,
+                "every": 2,
+                "lasts": 10
+              }
+            ]
+          },
+          {
+            "id": "single",
+            "label": "Single target",
+            "text": "One big hit on the target you strike.",
+            "effects": [
+              {
+                "id": "st-fire",
+                "label": "Fire",
+                "chance": {
+                  "Rare": 1,
+                  "Epic": 1,
+                  "Unique": 1
+                },
+                "damage": {
+                  "Rare": 5000,
+                  "Epic": 10000,
+                  "Unique": 15000
+                },
+                "cooldown": 1
+              },
+              {
+                "id": "st-water",
+                "label": "Water",
+                "chance": {
+                  "Rare": 2,
+                  "Epic": 2,
+                  "Unique": 2
+                },
+                "damage": {
+                  "Rare": 2500,
+                  "Epic": 5000,
+                  "Unique": 7500
+                },
+                "cooldown": 1
+              },
+              {
+                "id": "st-earth",
+                "label": "Earth",
+                "chance": {
+                  "Rare": 5,
+                  "Epic": 5,
+                  "Unique": 5
+                },
+                "damage": {
+                  "Rare": 1000,
+                  "Epic": 2000,
+                  "Unique": 3000
+                },
+                "cooldown": 1
+              },
+              {
+                "id": "st-wind",
+                "label": "Wind",
+                "chance": {
+                  "Rare": 10,
+                  "Epic": 10,
+                  "Unique": 10
+                },
+                "damage": {
+                  "Rare": 500,
+                  "Epic": 1000,
+                  "Unique": 1500
+                },
+                "cooldown": 1
+              }
+            ]
+          },
+          {
+            "id": "area",
+            "label": "Area",
+            "text": "A blast on up to 4 targets.",
+            "targets": 4,
+            "effects": [
+              {
+                "id": "aoe-fire",
+                "label": "Fire",
+                "chance": {
+                  "Rare": 2,
+                  "Epic": 2,
+                  "Unique": 2
+                },
+                "damage": {
+                  "Rare": 1250,
+                  "Epic": 2500,
+                  "Unique": 3750
+                },
+                "cooldown": 1
+              },
+              {
+                "id": "aoe-water",
+                "label": "Water",
+                "chance": {
+                  "Rare": 4,
+                  "Epic": 4,
+                  "Unique": 4
+                },
+                "damage": {
+                  "Rare": 625,
+                  "Epic": 1250,
+                  "Unique": 1875
+                },
+                "cooldown": 1
+              },
+              {
+                "id": "aoe-earth",
+                "label": "Earth",
+                "chance": {
+                  "Rare": 10,
+                  "Epic": 10,
+                  "Unique": 10
+                },
+                "damage": {
+                  "Rare": 250,
+                  "Epic": 500,
+                  "Unique": 750
+                },
+                "cooldown": 1
+              },
+              {
+                "id": "aoe-wind",
+                "label": "Wind",
+                "chance": {
+                  "Rare": 20,
+                  "Epic": 20,
+                  "Unique": 20
+                },
+                "damage": {
+                  "Rare": 125,
+                  "Epic": 250,
+                  "Unique": 375
+                },
+                "cooldown": 1
+              }
+            ]
+          }
+        ]
       }
     },
     {

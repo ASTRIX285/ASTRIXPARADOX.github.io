@@ -246,25 +246,63 @@ async function renderManastones() {
   body.insertAdjacentHTML('beforeend', manastonesHtml(byId(enhancement).manastone, rewardSources(sources, ['Manastone', 'Soulstone']), alchemy));
 }
 
+const THEO_ART = '/astrix-app/pages/aetherium/images/theostones/';
+const fmt = value => Number(value).toLocaleString('en-GB');
+/** One Theostone card for one grade: the game's icon, the effect, its size, its chance and, for damage, the average per hit. */
+function theoCard(effect, grade, group) {
+  const g = grade.toLowerCase();
+  const chance = effect.chance[grade];
+  const big = effect.duration ? `${effect.duration[grade]}s` : fmt(effect.damage[grade]);
+  const unit = effect.duration ? 'lasts' : effect.every ? `every ${effect.every}s for ${effect.lasts}s` : group.targets ? `damage to up to ${group.targets} targets` : 'damage';
+  const average = effect.damage && !effect.every ? Math.round(effect.damage[grade] * chance / 100) : null;
+  return `<li class="ae-th-card" data-grade="${esc(g)}" data-effect="${esc(effect.id)}">
+      <img src="${THEO_ART}${esc(g)}-${esc(effect.id)}.jpg" alt="" width="120" height="120" loading="lazy" decoding="async">
+      <div><h3>${esc(effect.label)}</h3>
+        <p class="ae-th-big"><b>${esc(big)}</b> <span>${esc(unit)}</span></p>
+        <p class="ae-th-chance">${esc(chance)}% chance on attack${average ? ` <em>${esc(fmt(average))} ${group.targets ? 'a target' : 'a hit'} on average</em>` : ''}</p></div>
+    </li>`;
+}
+
 export function theostonesHtml(record, where) {
   const odds = record.combineOdds ?? [];
+  const cat = record.catalogue;
+  const grades = cat?.grades ?? [];
+  const top = grades[grades.length - 1];
   const chain = odds.length ? [odds[0].from, ...odds.map(step => step.to)] : [];
   const combine = chain.map((grade, n) => `<li class="ae-st-gem" data-grade="${esc(grade.toLowerCase())}"><span>${esc(grade)}</span></li>${odds[n] ? `<li class="ae-st-odds" aria-label="${esc(odds[n].chance)}% chance"><b>${esc(odds[n].chance)}%</b></li>` : ''}`).join('');
   const roles = givenRoles(record.roles).map(([role, value]) => `<li class="ae-st-role" data-role="${esc(role)}"><h3>${esc(ROLE_NAMES[role] ?? role)}</h3><p class="ae-st-note">${esc(value.text)}</p></li>`).join('');
   const facts = known(record.facts).filter(item => item.id !== 'combine-chance');
+  const effects = (cat?.groups ?? []).flatMap(group => group.effects);
+  /* How much harder each grade hits than the one below, from the single target stones. */
+  const single = cat?.groups.find(group => group.id === 'single')?.effects[0];
+  const step = single ? grades.slice(1).map((grade, n) => single.damage[grade] / single.damage[grades[n]]) : [];
+  const stepText = n => (n === 2 ? 'double' : n === 1.5 ? 'half as much again' : `${n.toFixed(2)} times`);
+  const groups = (cat?.groups ?? []).map(group => {
+    const hits = group.effects.filter(effect => effect.damage && !effect.every);
+    const same = hits.length > 1 && grades.every(grade => new Set(hits.map(effect => Math.round(effect.damage[grade] * effect.chance[grade] / 100))).size === 1);
+    return `<section class="ae-gx-block ae-arc-block ae-th-group" id="aeTheo-${esc(group.id)}" aria-labelledby="aeTheo-${esc(group.id)}Title">
+      <h2 class="ae-gx-h2" id="aeTheo-${esc(group.id)}Title">${esc(group.label)}</h2>
+      <p class="ae-arc-sub">${esc(group.text)} Cooldown ${esc(group.effects[0].cooldown)}s.${same ? ' Every stone here averages the same damage, so pick rare big hits for a boss or small frequent ones for steady damage.' : ''}</p>
+      <ul class="ae-th-cards">${group.effects.map(effect => grades.map(grade => theoCard(effect, grade, group)).join('')).join('')}</ul>
+    </section>`;
+  }).join('');
   return `<ul class="ae-arc-stats" aria-label="Theostones at a glance">
+      ${cat ? `<li><b>${esc(effects.length)}</b><span>Effects</span></li><li><b>${esc(grades.length)}</b><span>Grades</span></li>` : ''}
       <li><b>1</b><span>Per slot</span></li>
-      ${odds.map(step => `<li><b>${esc(step.chance)}%</b><span>${esc(step.from)} to ${esc(step.to)}</span></li>`).join('')}
     </ul>
+    ${cat ? `<div class="ae-th-pick" role="group" aria-label="Grade">
+      ${grades.map(grade => `<button type="button" class="ae-btn" data-theo-grade="${esc(grade.toLowerCase())}" aria-pressed="${grade === top}">${esc(grade)}</button>`).join('')}
+    </div>` : ''}
+    <div class="ae-th" data-theo-show="${esc((top ?? '').toLowerCase())}">${groups}</div>
     ${combine ? `<section class="ae-gx-block ae-arc-block" id="aeTheoCombine" aria-labelledby="aeTheoCombineTitle">
       <h2 class="ae-gx-h2" id="aeTheoCombineTitle">Combine raises the grade</h2>
-      <p class="ae-arc-sub">Each step up is a low chance, so most tries stay the same grade.</p>
+      <p class="ae-arc-sub">Each step up is a low chance, so most tries stay the same grade.${step.length === 2 ? ` It pays: ${esc(grades[1])} hits ${esc(stepText(step[0]))} ${esc(grades[0])}, and ${esc(grades[2])} adds ${esc(stepText(step[1]))}. Crowd control lasts 1s longer each grade.` : ''}</p>
       <ol class="ae-st-combine">${combine}</ol>
     </section>` : ''}
     <section class="ae-gx-block ae-arc-block" id="aeTheoFacts" aria-labelledby="aeTheoFactsTitle">
       <h2 class="ae-gx-h2" id="aeTheoFactsTitle">How Theostones work</h2>
       ${record.slots ? `<p class="ae-arc-sub">${esc(record.slots.text)}</p>` : ''}
-      ${keyFacts(facts)}
+      ${keyFacts([...facts, ...(cat ? [{ id: 'identical', text: cat.rule }] : [])])}
     </section>
     ${roles ? `<section class="ae-gx-block ae-arc-block" id="aeTheoRoles" aria-labelledby="aeTheoRolesTitle">
       <h2 class="ae-gx-h2" id="aeTheoRolesTitle">Which one for your role</h2>
@@ -280,6 +318,13 @@ async function renderTheostones() {
   const body = shell('equipment', 'theostones');
   const [enhancement, sources] = await Promise.all([loadEnhancement(), loadSources()]);
   body.insertAdjacentHTML('beforeend', theostonesHtml(byId(enhancement).theostone, rewardSources(sources, ['Theostone'])));
+  const show = body.querySelector('.ae-th');
+  body.querySelector('.ae-th-pick')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-theo-grade]');
+    if (!button || !show) return;
+    show.dataset.theoShow = button.dataset.theoGrade;
+    for (const other of body.querySelectorAll('[data-theo-grade]')) other.setAttribute('aria-pressed', String(other === button));
+  });
 }
 
 /* Arcana art cut from Miguel's own screens of the Arcana window (design/aetherium-arcana-page, 22 Oct 2026). */
