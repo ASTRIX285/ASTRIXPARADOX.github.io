@@ -212,8 +212,8 @@ export function manastonesHtml(record, where, alchemy) {
       <b class="ae-st-count">${esc(row.manastones)}</b>
     </li>`).join('');
   const roles = givenRoles(record.roles).map(([role, value]) => `<li class="ae-st-role" data-role="${esc(role)}">
-      <h3>${esc(ROLE_NAMES[role] ?? role)}</h3>
-      <ol>${value.stones.map((stone, n) => `<li><span class="ae-st-rank">${n + 1}</span><span class="ae-st-stone">${esc(stone.name)}</span><span class="ae-st-top">top ${esc(stone.top)}</span></li>`).join('')}</ol>
+      <h3>${esc(ROLE_NAMES[role] ?? role)}<span class="ae-st-yours" data-mana-yours hidden>Your role</span></h3>
+      <ol>${value.stones.map((stone, n) => `<li class="ae-st-pick" data-stone="${esc(stone.id ?? '')}">${stone.id ? `<a class="ae-st-open" href="#mana-${esc(stone.id)}" data-mana-open="${esc(stone.id)}" aria-haspopup="dialog" aria-label="${esc(`${stone.name} Manastone, see the details`)}">` : '<span class="ae-st-open">'}<span class="ae-st-rank">${n + 1}</span><span class="ae-st-stone">${esc(stone.name)}</span><span class="ae-st-top">top ${esc(stone.top)}</span>${stone.id ? '</a>' : '</span>'}</li>`).join('')}</ol>
       ${value.note ? `<p class="ae-st-note">${esc(value.note)}</p>` : ''}
     </li>`).join('');
   return `${top ? `<ul class="ae-arc-stats" aria-label="Manastones at a glance">${slots.byGrade.map(row => `<li><b>${esc(row.manastones)}</b><span>Slots on ${esc(row.grade)}</span></li>`).join('')}</ul>` : ''}
@@ -229,7 +229,7 @@ export function manastonesHtml(record, where, alchemy) {
     </section>
     ${roles ? `<section class="ae-gx-block ae-arc-block" id="aeManaRoles" aria-labelledby="aeManaRolesTitle">
       <h2 class="ae-gx-h2" id="aeManaRolesTitle">Best stones by role</h2>
-      <p class="ae-arc-sub">In this order. The number is the best roll the stat reaches.</p>
+      <p class="ae-arc-sub">In this order. The number is the best roll the stat reaches. Tap a stone for its card.</p>
       <ul class="ae-st-roles">${roles}</ul>
     </section>` : ''}
     <section class="ae-gx-block ae-arc-block" id="aeManaWhere" aria-labelledby="aeManaWhereTitle">
@@ -239,11 +239,104 @@ export function manastonesHtml(record, where, alchemy) {
     </section>`;
 }
 
-async function renderManastones() {
+/** How well a Manastone suits a role, from the role order in the data: the first two are the pick, the next two come
+ *  after. Null when the data has no order for the role (healer and support today), so the card says nothing. */
+export function manaFit(record, role, stoneId) {
+  const rules = record.fit?.roles?.[role];
+  if (!rules) return null;
+  const level = rules.best.includes(stoneId) ? 'best' : rules.close.includes(stoneId) ? 'close' : 'other';
+  return { level, why: rules.why[level], label: FIT_LABEL[level] };
+}
+
+/** The detail card for one Manastone: its best roll, where each role ranks it, and, with a Daeva linked, whether it suits
+ *  the build that Daeva plays and why. */
+export function manaDetailHtml(record, stoneId, who = null) {
+  const ranked = givenRoles(record.roles).flatMap(([role, value]) => value.stones.map((stone, n) => ({ role, stone, n, of: value.stones.length, note: value.note })));
+  const hits = ranked.filter(row => row.stone.id === stoneId);
+  const stone = hits[0]?.stone;
+  if (!stone) return '';
+  const rolls = stone.names?.length > 1 ? `Rolls as ${stone.names.slice(0, -1).join(', ')} or ${stone.names[stone.names.length - 1]}. ` : '';
+  const ranks = hits.map(row => `<li data-role="${esc(row.role)}"><span>${esc(ROLE_NAMES[row.role] ?? row.role)}</span><b>${esc(row.n + 1)}</b><em>of ${esc(row.of)}</em></li>`).join('');
+  const slots = (record.slots?.byGrade ?? []).map(row => `${row.grade} ${row.manastones}`).join(', ');
+  const notes = [...new Set(hits.map(row => row.note).filter(Boolean))];
+  const fit = who?.role ? manaFit(record, who.role, stoneId) : null;
+  return `<div class="ae-th-detail ae-md-detail" data-grade="unique">
+      <header><img src="${esc(record.slots?.icon ?? '')}" alt="" width="96" height="96">
+        <div><p class="ae-th-kind">Manastone</p><h2 id="aeManaDetailTitle">${esc(stone.name)}</h2></div>
+        <button type="button" class="ae-btn ae-th-close" data-detail-close aria-label="Close">Close</button></header>
+      <p class="ae-th-what">${esc(rolls)}Best roll ${esc(stone.top)}.</p>
+      <ol class="ae-th-ladder ae-md-ranks" aria-label="Where each role ranks it">${ranks}</ol>
+      <ul class="ae-th-facts">${slots ? `<li><span>Slots per piece</span><b>${esc(slots)}</b></li>` : ''}<li><span>Engrave on</span><b>Weapons and armour</b></li></ul>
+      ${notes.map(note => `<p class="ae-th-rule">${esc(note)}</p>`).join('')}
+      ${verdictHtml(fit, who, 'stone')}
+    </div>`;
+}
+
+async function renderManastones(linked) {
   const body = shell('equipment', 'manastones');
   const [enhancement, sources, text] = await Promise.all([loadEnhancement(), loadSources(), loadGuideText()]);
   const alchemy = byId(text).professions.professions.find(item => item.id === 'alchemy');
-  body.insertAdjacentHTML('beforeend', manastonesHtml(byId(enhancement).manastone, rewardSources(sources, ['Manastone', 'Soulstone']), alchemy));
+  const record = byId(enhancement).manastone;
+  body.insertAdjacentHTML('beforeend', manastonesHtml(record, rewardSources(sources, ['Manastone', 'Soulstone']), alchemy));
+  const who = await daevaWho(linked);
+  /* With a Daeva linked, its role's list is marked and the stones that suit it carry the tag. */
+  if (who?.role && record.fit?.roles?.[who.role]) {
+    const column = body.querySelector(`.ae-st-role[data-role="${who.role}"]`);
+    if (column) { column.dataset.yours = 'true'; column.querySelector('[data-mana-yours]').hidden = false; }
+    for (const pick of body.querySelectorAll('.ae-st-role[data-yours] .ae-st-pick')) {
+      const fit = manaFit(record, who.role, pick.dataset.stone);
+      if (fit && fit.level !== 'other') pick.dataset.fit = fit.level;
+    }
+  }
+  detailDialog(body, {
+    id: 'aeManaDetail', title: 'aeManaDetailTitle', open: '[data-mana-open]', prefix: 'mana',
+    key: open => open.dataset.manaOpen,
+    render: open => manaDetailHtml(record, open.dataset.manaOpen, who),
+    deep: /^#mana-([a-z-]+)$/, find: match => `[data-mana-open="${match[1]}"]`
+  });
+}
+
+/* ----- The shared detail card (design/aetherium-theostone-cards, then Manastones and Arcana, 24 Oct 2026) ----- */
+
+const FIT_LABEL = { best: 'Suits your build', close: 'Close fit', other: 'Not the pick for your build' };
+
+/** The verdict box at the foot of every detail card. No Daeva: an offer to link one. A Daeva but no advice in the data for
+ *  its role: nothing at all, never a guess. */
+function verdictHtml(fit, who, thing) {
+  if (!who) return `<div class="ae-th-verdict"><p>Link your Daeva to see if this ${esc(thing)} suits the build you play.</p><a class="ae-gd-btn is-gold" href="/hub/aetherium/#aeSearch">Find your Daeva</a></div>`;
+  if (!fit) return '';
+  return `<div class="ae-th-verdict" data-fit="${esc(fit.level)}"><span class="ae-th-verdict-tag">${esc(fit.label)}</span>
+        <p><b>${esc(who.name)}</b>, ${esc(who.className)} ${esc(ROLE_NAMES[who.role] ?? who.role)}${who.buildLabel ? ` (${esc(who.buildLabel)})` : ''}</p><p>${esc(fit.why)}</p></div>`;
+}
+
+/**
+ * One dialog per page for its detail cards: opened from any item that matches `open`, closed with its button, Escape or a
+ * click outside, focus back on the item. Each card has its own address (#<prefix>-<key>), and a page opened at one opens
+ * that card.
+ */
+function detailDialog(body, { id, title, open: selector, prefix, key, render, deep, find }) {
+  body.insertAdjacentHTML('beforeend', `<dialog class="ae-th-dialog" id="${id}" aria-labelledby="${title}"></dialog>`);
+  const dialog = body.querySelector(`#${id}`);
+  let opener = null;
+  body.addEventListener('click', event => {
+    const open = event.target.closest(selector);
+    if (open) {
+      const html = render(open);
+      if (!html) return;
+      event.preventDefault();
+      opener = open;
+      dialog.innerHTML = html;
+      dialog.showModal();
+      history.replaceState(null, '', `${location.pathname}${location.search}#${prefix}-${key(open)}`);
+      dialog.querySelector('[data-detail-close]')?.focus();
+      return;
+    }
+    if (event.target.closest('[data-detail-close]') || event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener('close', () => { opener?.focus(); if (location.hash.startsWith(`#${prefix}-`)) history.replaceState(null, '', location.pathname + location.search); });
+  const match = deep.exec(location.hash);
+  if (match) body.querySelector(find(match))?.click();
+  return dialog;
 }
 
 const THEO_ART = '/astrix-app/pages/aetherium/images/theostones/';
@@ -273,7 +366,7 @@ export function theoFit(record, role, effectId, groupId) {
   if (!rules) return null;
   const level = rules.best.includes(effectId) ? 'best' : rules.close.includes(effectId) ? 'close' : 'other';
   const why = level === 'best' && role === 'dps' ? (groupId === 'area' ? rules.why.bestArea : rules.why.bestSingle) ?? rules.why.best : rules.why[level];
-  return { level, why, label: level === 'best' ? 'Suits your build' : level === 'close' ? 'Close fit' : 'Not the pick for your build' };
+  return { level, why, label: FIT_LABEL[level] };
 }
 
 /** The detail card for one Theostone: the stone at every grade, what it does, and, with a Daeva linked, whether it suits
@@ -288,18 +381,15 @@ export function theoDetailHtml(record, effectId, gradeId, who = null) {
   const what = effect.duration ? `Inflicts ${effect.label} for ${effect.duration[grade]}s` : effect.every ? `${fmt(effect.damage[grade])} ${effect.label} damage every ${effect.every}s for ${effect.lasts}s` : `${fmt(effect.damage[grade])} ${effect.label} damage${group.targets ? ` to up to ${group.targets} targets` : ' to one target'}`;
   const ladder = cat.grades.map(g => `<li data-grade="${esc(g.toLowerCase())}"${g === grade ? ' aria-current="true"' : ''}><span>${esc(g)}</span><b>${esc(size(g))}</b>${average(g) ? `<em>${esc(fmt(average(g)))} avg</em>` : ''}</li>`).join('');
   const fit = who?.role ? theoFit(record, who.role, effect.id, group.id) : null;
-  const build = who ? (fit ? `<div class="ae-th-verdict" data-fit="${esc(fit.level)}"><span class="ae-th-verdict-tag">${esc(fit.label)}</span>
-        <p><b>${esc(who.name)}</b>, ${esc(who.className)} ${esc(ROLE_NAMES[who.role] ?? who.role)}${who.buildLabel ? ` (${esc(who.buildLabel)})` : ''}</p><p>${esc(fit.why)}</p></div>` : '')
-    : `<div class="ae-th-verdict"><p>Link your Daeva to see if this stone suits the build you play.</p><a class="ae-gd-btn is-gold" href="/hub/aetherium/#aeSearch">Find your Daeva</a></div>`;
   return `<div class="ae-th-detail" data-grade="${esc(grade.toLowerCase())}">
       <header><img src="${THEO_ART}${esc(grade.toLowerCase())}-${esc(effect.id)}.jpg" alt="" width="120" height="120">
         <div><p class="ae-th-kind">${esc(grade)} Theostone, ${esc(group.label)}</p><h2 id="aeTheoDetailTitle">${esc(effect.label)}</h2></div>
-        <button type="button" class="ae-btn ae-th-close" data-theo-close aria-label="Close">Close</button></header>
+        <button type="button" class="ae-btn ae-th-close" data-detail-close aria-label="Close">Close</button></header>
       <p class="ae-th-what">${esc(what)}, ${esc(effect.chance[grade])}% chance on attack.</p>
       <ol class="ae-th-ladder" aria-label="At each grade">${ladder}</ol>
       <ul class="ae-th-facts"><li><span>Cooldown</span><b>${esc(effect.cooldown)}s</b></li><li><span>Engrave on</span><b>${esc(cat.engravable)}</b></li>${average(grade) ? `<li><span>Average</span><b>${esc(fmt(average(grade)))} ${group.targets ? 'a target' : 'a hit'}</b></li>` : ''}</ul>
       <p class="ae-th-rule">${esc(cat.rule)}</p>
-      ${build}
+      ${verdictHtml(fit, who, 'stone')}
     </div>`;
 }
 
@@ -354,9 +444,9 @@ export function theostonesHtml(record, where) {
     </section>`;
 }
 
-/** The linked Daeva as the Theostone cards judge it: name, class and the role it plays (the picked role, else the class's
+/** The linked Daeva as the detail cards judge it: name, class and the role it plays (the picked role, else the class's
  *  main build). From the saved roster entry and the class's build file, so it needs no call to the official site. */
-async function theoWho(linked) {
+async function daevaWho(linked) {
   const entry = linked?.entry;
   if (!entry?.className) return null;
   const builds = await loadBuilds(entry.className).catch(() => null);
@@ -370,7 +460,7 @@ async function renderTheostones(linked) {
   const [enhancement, sources] = await Promise.all([loadEnhancement(), loadSources()]);
   const record = byId(enhancement).theostone;
   body.insertAdjacentHTML('beforeend', theostonesHtml(record, rewardSources(sources, ['Theostone'])));
-  const who = await theoWho(linked);
+  const who = await daevaWho(linked);
   /* With a Daeva linked, every card says how it fits that Daeva's build. */
   if (who?.role && record.fit?.roles?.[who.role]) {
     for (const card of body.querySelectorAll('.ae-th-card')) {
@@ -380,26 +470,12 @@ async function renderTheostones(linked) {
       if (fit && tag && fit.level !== 'other') { tag.textContent = fit.label; tag.dataset.fit = fit.level; tag.hidden = false; card.dataset.fit = fit.level; }
     }
   }
-  /* The detail card: a dialog, opened from any stone, closed with its button, Escape or a click outside. */
-  body.insertAdjacentHTML('beforeend', '<dialog class="ae-th-dialog" id="aeTheoDetail" aria-labelledby="aeTheoDetailTitle"></dialog>');
-  const dialog = body.querySelector('#aeTheoDetail');
-  let opener = null;
-  body.addEventListener('click', event => {
-    const open = event.target.closest('[data-theo-open]');
-    if (open) {
-      event.preventDefault();
-      opener = open;
-      dialog.innerHTML = theoDetailHtml(record, open.dataset.theoOpen, open.dataset.theoAt, who);
-      dialog.showModal();
-      history.replaceState(null, '', `${location.pathname}${location.search}#theo-${open.dataset.theoAt}-${open.dataset.theoOpen}`);
-      dialog.querySelector('[data-theo-close]')?.focus();
-      return;
-    }
-    if (event.target.closest('[data-theo-close]') || event.target === dialog) dialog.close();
+  detailDialog(body, {
+    id: 'aeTheoDetail', title: 'aeTheoDetailTitle', open: '[data-theo-open]', prefix: 'theo',
+    key: open => `${open.dataset.theoAt}-${open.dataset.theoOpen}`,
+    render: open => theoDetailHtml(record, open.dataset.theoOpen, open.dataset.theoAt, who),
+    deep: /^#theo-(rare|epic|unique)-([a-z-]+)$/, find: match => `[data-theo-open="${match[2]}"][data-theo-at="${match[1]}"]`
   });
-  dialog.addEventListener('close', () => { opener?.focus(); if (location.hash.startsWith('#theo-')) history.replaceState(null, '', location.pathname + location.search); });
-  const deep = /^#theo-(rare|epic|unique)-([a-z-]+)$/.exec(location.hash);
-  if (deep) body.querySelector(`[data-theo-open="${deep[2]}"][data-theo-at="${deep[1]}"]`)?.click();
   const show = body.querySelector('.ae-th');
   body.querySelector('.ae-th-pick')?.addEventListener('click', event => {
     const button = event.target.closest('[data-theo-grade]');
@@ -426,10 +502,12 @@ export function arcanaHtml(record, index, arcWindow = null) {
   const where = id => index.byId.get(id)?.name ?? id;
   const both = slot => slot.from.length > 1;
   const cards = record.slots.map(slot => `<li class="ae-arc-card${both(slot) ? ' is-both' : ''}" data-arcana-slot="${esc(slot.id)}">
+      <a class="ae-arc-open" href="#arcana-${esc(slot.id)}" data-arc-open="${esc(slot.id)}" aria-haspopup="dialog" aria-label="${esc(`${slot.name} Arcana, see the details`)}">
       <span class="ae-arc-disc">${medallion(slot.id, `${slot.name} card symbol`)}</span>
       <h3>${esc(slot.name)}</h3>
       <span class="ae-arc-kind">${esc(slot.skills)}</span>
       <p class="ae-arc-from">${both(slot) ? `Both dungeons. ${esc(slot.note ?? '')}` : esc(slot.from.map(where).join(', '))}</p>
+      </a>
     </li>`).join('');
   const last = record.grades.length - 1;
   const climb = record.grades.map((entry, n) => `<li class="ae-arc-grade" data-grade="${esc(gradeId(entry.grade))}" style="--ae-arc-step:${n}">
@@ -475,7 +553,7 @@ export function arcanaHtml(record, index, arcWindow = null) {
     </ul>
     <section class="ae-gx-block ae-arc-block" id="aeArcSlots" aria-labelledby="aeArcSlotsTitle">
       <h2 class="ae-gx-h2" id="aeArcSlotsTitle">The five cards</h2>
-      <p class="ae-arc-sub">One of each goes in your five slots. The symbol on the card back tells you which slot it fills.</p>
+      <p class="ae-arc-sub">One of each goes in your five slots. The symbol on the card back tells you which slot it fills. Tap a card for where it drops and what each grade adds.</p>
       <ul class="ae-arc-cards">${cards}</ul>
     </section>
     <section class="ae-gx-block ae-arc-block" id="aeArcGrades" aria-labelledby="aeArcGradesTitle">
@@ -503,11 +581,42 @@ export function arcanaHtml(record, index, arcWindow = null) {
     ${loop}`;
 }
 
+/** The detail card for one Arcana slot: where it drops, what each grade adds, the first Stage that can drop the top grade
+ *  and the set lines. The data holds no Arcana advice for a role or class, so this card gives no build verdict. */
+export function arcanaDetailHtml(record, index, slotId) {
+  const slot = record.slots.find(item => item.id === slotId);
+  if (!slot) return '';
+  const last = record.grades[record.grades.length - 1];
+  const dungeons = index.transcendence.filter(dungeon => slot.from.includes(dungeon.id));
+  const where = dungeons.map(dungeon => dungeon.name);
+  const firstTop = dungeons.map(dungeon => (dungeon.stages ?? []).find(stage => (stage.arcanaGrades ?? []).includes(last.grade))).filter(Boolean)
+    .sort((a, b) => a.stage - b.stage)[0];
+  const ladder = record.grades.map(entry => `<li data-grade="${esc(gradeId(entry.grade))}"${entry === last ? ' aria-current="true"' : ''}><span>${esc(entry.grade)}</span><b>+${esc(entry.itemLevel)}</b><em>item level</em></li>`).join('');
+  const lines = record.lines.map(line => `<li><span>${esc(line.name)}</span><b>2: ${esc(line.set2)}</b><b>4: ${esc(line.set4)}</b></li>`).join('');
+  return `<div class="ae-th-detail ae-ad-detail" data-grade="${esc(gradeId(last.grade))}">
+      <header>${medallion(slot.id)}
+        <div><p class="ae-th-kind">Arcana, ${esc(slot.skills.toLowerCase())} skills</p><h2 id="aeArcDetailTitle">${esc(slot.name)}</h2></div>
+        <button type="button" class="ae-btn ae-th-close" data-detail-close aria-label="Close">Close</button></header>
+      <p class="ae-th-what">Drops in ${esc(where.length > 1 ? `both ${where.join(' and ')}` : where[0] ?? 'Transcendence')}.${slot.note ? ` ${esc(slot.note)}` : ''}</p>
+      <ol class="ae-th-ladder ae-ad-ladder" aria-label="Item level at each grade">${ladder}</ol>
+      <ul class="ae-th-facts">${firstTop ? `<li><span>${esc(last.grade)} from</span><b>Stage ${esc(firstTop.stage)}, item level ${esc(number(firstTop.entryItemLevel))}+</b></li>` : ''}<li><span>Slot</span><b>${esc(slot.name)}, one of five</b></li></ul>
+      <p class="ae-th-rule">Every card belongs to one of two lines. Two or four from the same line add its bonus.</p>
+      <ul class="ae-ad-lines">${lines}</ul>
+    </div>`;
+}
+
 async function renderArcana() {
   const body = shell('equipment', 'arcana');
   const [sources, text] = await Promise.all([loadSources(), loadGuideText()]);
   const index = indexGearSources(sources);
-  body.insertAdjacentHTML('beforeend', arcanaHtml(index.byId.get('arcana-grades'), index, byId(text)['arcana-window'] ?? null));
+  const record = index.byId.get('arcana-grades');
+  body.insertAdjacentHTML('beforeend', arcanaHtml(record, index, byId(text)['arcana-window'] ?? null));
+  detailDialog(body, {
+    id: 'aeArcDetail', title: 'aeArcDetailTitle', open: '[data-arc-open]', prefix: 'arcana',
+    key: open => open.dataset.arcOpen,
+    render: open => arcanaDetailHtml(record, index, open.dataset.arcOpen),
+    deep: /^#arcana-([a-z-]+)$/, find: match => `[data-arc-open="${match[1]}"]`
+  });
 }
 
 /* Pets and wings art cut from Miguel's own Pets and Wings windows (design/aetherium-pets-wings-page, 22 Oct 2026). */

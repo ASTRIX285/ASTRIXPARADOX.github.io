@@ -251,6 +251,7 @@
           "note": "Until you stop dying, then damage.",
           "stones": [
             {
+              "id": "hp",
               "name": "HP",
               "ids": [
                 "HPMax"
@@ -261,6 +262,7 @@
               "top": "160"
             },
             {
+              "id": "defence",
               "name": "Defence",
               "ids": [
                 "ArmorDefense"
@@ -272,6 +274,7 @@
               "top": "100"
             },
             {
+              "id": "block",
               "name": "Block",
               "ids": [
                 "Block"
@@ -282,6 +285,7 @@
               "top": "20"
             },
             {
+              "id": "accuracy",
               "name": "Accuracy",
               "ids": [
                 "Accuracy",
@@ -300,6 +304,7 @@
           "note": "The Damage Boost family only rolls on the top tier of stone.",
           "stones": [
             {
+              "id": "front-back-boost",
               "name": "Front or Back Damage Boost",
               "ids": [],
               "names": [
@@ -309,6 +314,7 @@
               "top": "100 (1%)"
             },
             {
+              "id": "weapon-crit-boost",
               "name": "Weapon or Critical Damage Boost",
               "ids": [],
               "names": [
@@ -318,6 +324,7 @@
               "top": "100 (1%)"
             },
             {
+              "id": "damage-boost",
               "name": "Damage Boost",
               "ids": [],
               "names": [
@@ -326,6 +333,7 @@
               "top": "100 (1%)"
             },
             {
+              "id": "attack",
               "name": "Attack",
               "ids": [],
               "names": [
@@ -343,6 +351,43 @@
         "support": {
           "pending": true,
           "reason": "The research record has no support manastone order yet."
+        }
+      },
+      "fit": {
+        "status": "reported",
+        "from": "roles",
+        "text": "Which stones suit a role, read from the role order above: the first two are the pick, the next two come after.",
+        "roles": {
+          "tank": {
+            "best": [
+              "hp",
+              "defence"
+            ],
+            "close": [
+              "block",
+              "accuracy"
+            ],
+            "why": {
+              "best": "Tank pick. HP and Defence go in first, until you stop dying.",
+              "close": "Fine on a tank once HP and Defence are in. Block and Accuracy come after them.",
+              "other": "Not a tank stone. Tanks fill their slots with HP and Defence first."
+            }
+          },
+          "dps": {
+            "best": [
+              "front-back-boost",
+              "weapon-crit-boost"
+            ],
+            "close": [
+              "damage-boost",
+              "attack"
+            ],
+            "why": {
+              "best": "DPS pick. Front, Back, Weapon and Critical Damage Boost hit hardest, but they only roll on the top tier of stone.",
+              "close": "Good on DPS, one step behind the Front, Back, Weapon and Critical boosts.",
+              "other": "Not a DPS stone. DPS wants the Damage Boost family first, then Attack."
+            }
+          }
         }
       },
       "provenance": [
