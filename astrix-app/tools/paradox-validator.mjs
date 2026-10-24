@@ -74,6 +74,7 @@ export const validators=[
   browser('test-asset-weight.mjs'), // perf/asset-weight: no first-load image over 300 KB, no full manifest.
   'validate-tools-hub.mjs',
   'validate-sitemap.mjs', // sitemap.xml and robots.txt match the public pages.
+  browser('validate-aetherium-facts.mjs'), // Every Guide page carries what it shows in its own HTML, for crawlers that run no JavaScript.
   'validate-tool-intro.mjs',
   'validate-auth-session.mjs',
   'test-profile-size.mjs',

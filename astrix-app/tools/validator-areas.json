@@ -53,7 +53,9 @@
         "aetherium-worker/",
         "astrix-app/tools/fixtures/aion2/",
         "astrix-app/tools/test-aetherium-*",
-        "astrix-app/tools/test-aion2-*"
+        "astrix-app/tools/test-aion2-*",
+        "astrix-app/tools/build-aetherium-facts.mjs",
+        "astrix-app/tools/validate-aetherium-facts.mjs"
       ],
       "suites": [
         "test-aetherium-pages.mjs",
@@ -69,6 +71,7 @@
         "validate-single-module-urls.mjs",
         "validate-tools-hub.mjs",
         "validate-sitemap.mjs",
+        "validate-aetherium-facts.mjs",
         "validate-visible-release-state.mjs",
         "validate-site-typography.mjs",
         "validate-plain-language.mjs"
