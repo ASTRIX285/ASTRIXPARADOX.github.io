@@ -3,10 +3,12 @@
 //   - every sitemap URL is on astrixparadox.com, ends in / or .html, and its page exists in the repo;
 //   - every page under hub/ that names itself as canonical and is not noindex is in the sitemap;
 //   - no sitemap page is marked noindex, and no sitemap URL is blocked by robots.txt;
-//   - robots.txt points at the sitemap and never blocks the scripts, styles or data pages need to render.
+//   - robots.txt points at the sitemap and never blocks the scripts, styles or data pages need to render;
+//   - every Aetherium page has its search and share tags, up to date, with a photo that exists (build-aetherium-seo.mjs).
 import {existsSync, readFileSync, readdirSync, statSync} from 'node:fs';
 import {join, relative, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {check as aetheriumSeo} from './build-aetherium-seo.mjs';
 
 const root = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const SITE = 'https://astrixparadox.com';
@@ -53,6 +55,7 @@ for (const needed of ['/css/', '/js/', '/img/', '/astrix-app/shared/', '/astrix-
   const rule = disallows.find(item => needed.startsWith(item) || item === '/');
   if (rule) errors.push(`robots.txt blocks ${needed} (Disallow: ${rule}); pages need it to render for search engines`);
 }
+for (const problem of aetheriumSeo()) errors.push(problem);
 if (/[–—]/.test(robots + sitemap)) errors.push('robots.txt or sitemap.xml contains an en or em dash');
 
 if (errors.length) {
