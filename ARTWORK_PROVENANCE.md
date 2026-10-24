@@ -46,3 +46,15 @@ JPEG at the same 1200 x 630 size (quality 0.85, 146,150 bytes, sha256
 `f0f42349ef4419b6c0a402b26807488ff59d5adbbc5bc31868682b89bb05b88e`). Nothing was
 cropped, painted or added; The Hub card places and crops it with CSS. AION 2 and
 its art are trademarks and copyrights of NCSOFT.
+
+## The Aetherium page backdrops and Gathering photo, 24 October 2026
+
+Six screenshots Miguel took in AION 2 (NCSOFT's game world and art) and supplied on 24 October 2026:
+
+- `astrix-app/pages/aetherium/images/page-backgrounds/character.jpg` (the character menu), `titles.jpg`, `compare.jpg`,
+  `skills.jpg` and `daevanion.jpg`: resized to 2560 x 1440 and compressed. `character.jpg` also has a light blur, since it
+  sits behind dense text under the page's 65% darkening.
+- `astrix-app/pages/aetherium/images/page-heroes/gathering.jpg`: a 2400 x 923 crop of the palm forest shot for the Guide's
+  Gathering page.
+
+Placement and optimisation only. The underlying art is NCSOFT's.
