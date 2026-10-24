@@ -680,7 +680,7 @@ for(const width of [1600,390]){
   });
 }
 
-await check('page photos: ten Guide pages wear their own photo, sized, focused and shaded, at 1440 and 390',async()=>{
+await check('page photos: eleven Guide pages wear their own photo, sized, focused and shaded, at 1440 and 390',async()=>{
   for(const [path,name] of Object.entries(PAGE_PHOTOS))for(const width of [1440,390]){
     const {page,context,errors}=await open(path,{viewport:{width,height:width===390?844:900}});
     try{
