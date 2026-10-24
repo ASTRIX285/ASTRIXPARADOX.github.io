@@ -127,8 +127,9 @@ export async function plan(){
     if(usesModules&&graph.length){
       const map={imports:Object.fromEntries(graph.map(site=>[site,`${site}${stamp(site)}`]))};
       const block=formatImportMap(map.imports);
-      // Before the first script or modulepreload, so every module load sees it.
-      const first=source.search(/[ \t]*<(script\b|link\b[^>]*rel="modulepreload")/);
+      // Before the first script or modulepreload, so every module load sees it. Data scripts
+      // (JSON-LD search tags) are not code, so the map does not jump above them.
+      const first=source.search(/[ \t]*<(script\b(?![^>]*type="application\/ld\+json")|link\b[^>]*rel="modulepreload")/);
       const hints=page.site.startsWith(`/${APP}/`)||HINT_PAGE_DIRS.some(dir=>page.site.startsWith(`/${dir}/`))?headHintBlock(pageHeadHints(page,refs,classicTargets,modules,versions)):'';
       source=first<0?source.replace('</head>',`${block}${hints}</head>`):source.slice(0,first)+block+hints+source.slice(first);
     }
