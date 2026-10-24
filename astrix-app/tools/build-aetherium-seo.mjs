@@ -18,8 +18,8 @@ const BASE = 'hub/aetherium';
 const IMAGES = '/astrix-app/pages/aetherium/images';
 
 /* The photo each page shows, the same one its banner or backdrop uses (guide-shell.mjs and the page backdrops). */
-const PAGE_HEROES = ['general/loadouts', 'equipment/slots', 'equipment/titles', 'equipment/where-to-get', 'equipment/manastones', 'equipment/arcana', 'equipment/pets-wings', 'path', 'dungeons', 'dungeons/daily-dungeon'];
-const PAGE_HERO_FILE = { 'general/loadouts': 'loadouts', 'equipment/slots': 'slots', 'equipment/titles': 'titles', 'equipment/where-to-get': 'where-to-get', 'equipment/manastones': 'manastones', 'equipment/arcana': 'arcana', 'equipment/pets-wings': 'pets-wings', path: 'path', dungeons: 'dungeons', 'dungeons/daily-dungeon': 'daily-dungeon' };
+const PAGE_HEROES = ['crafting/gathering', 'general/loadouts', 'equipment/slots', 'equipment/titles', 'equipment/where-to-get', 'equipment/manastones', 'equipment/arcana', 'equipment/pets-wings', 'path', 'dungeons', 'dungeons/daily-dungeon'];
+const PAGE_HERO_FILE = { 'crafting/gathering': 'gathering', 'general/loadouts': 'loadouts', 'equipment/slots': 'slots', 'equipment/titles': 'titles', 'equipment/where-to-get': 'where-to-get', 'equipment/manastones': 'manastones', 'equipment/arcana': 'arcana', 'equipment/pets-wings': 'pets-wings', path: 'path', dungeons: 'dungeons', 'dungeons/daily-dungeon': 'daily-dungeon' };
 const SECTION_OF = [['general', 'general'], ['character', 'character'], ['classes', 'character'], ['skills', 'skills'], ['equipment', 'equipment'], ['crafting', 'crafting'], ['world', 'world'], ['guides', 'guides'], ['path', 'guides'], ['weekly', 'guides'], ['dungeons', 'guides']];
 const ASCENT_TABS = ['mastery', 'skill-bar', 'stigma', 'daevanion', 'macro', 'stats'];
 
@@ -40,7 +40,9 @@ export function imageFor(path) {
     return `${IMAGES}/page-backgrounds/ascent-${ASCENT_TABS.includes(tab) ? tab : 'mastery'}.jpg`;
   }
   if (path === '') return `${IMAGES}/page-backgrounds/daeva-card.jpg`;
-  return `${IMAGES}/page-backgrounds/gear-ledger.jpg`;
+  /* The character pages each have their own backdrop (design/aetherium-more-backdrops, 24 Oct 2026). */
+  const own = { 'gear/': 'character', 'gear/titles/': 'titles', 'compare/': 'compare', 'skills/': 'skills', 'daevanion/': 'daevanion' }[path];
+  return `${IMAGES}/page-backgrounds/${own ?? 'gear-ledger'}.jpg`;
 }
 
 const attr = value => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');

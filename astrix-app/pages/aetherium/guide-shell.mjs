@@ -59,6 +59,7 @@ const pageHero = (name, alt, focus) => Object.freeze({ src: `${PAGE_PHOTOS}${nam
 const PAGE_HEROES = Object.freeze({
   [`${GUIDE_ROOT}general/about/`]: Object.freeze({ src: `${PHOTOS}atreia-vista-01.jpg`, alt: 'A Daeva on a grassy hilltop looking out over cliffside ruins, a spiked dark structure and the sea', width: 2560, height: 1440 }),
   [`${GUIDE_ROOT}general/loadouts/`]: pageHero('loadouts', 'A Daeva in silver armour holding a bow', '70% 20%'),
+  [`${GUIDE_ROOT}crafting/gathering/`]: pageHero('gathering', 'A cliff of tall teal and gold palms with purple and orange shrubs, wooden platforms built among the trunks', '50% 45%'),
   [`${GUIDE_ROOT}equipment/slots/`]: pageHero('slots', 'A Daeva standing front on in a full set of silver armour', '71% 15%'),
   [`${GUIDE_ROOT}equipment/titles/`]: pageHero('titles', 'A huge gold and black spire with red eyes under a ringed sky', '45% 30%'),
   [`${GUIDE_ROOT}equipment/where-to-get/`]: pageHero('where-to-get', 'A floating island of rock beside cliffs topped with red mushroom trees', '60% 40%'),
