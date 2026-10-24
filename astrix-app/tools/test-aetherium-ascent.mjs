@@ -1490,30 +1490,39 @@ await check('every other selectable on the Aetherium pages is the shared button:
   await dv.context.close();
 });
 
-/* ---------- Enhance tab (Miguel, 17 and 18 Oct 2026): what to enhance and when, the build options per class, each piece
-   assessed for the picked build. Before Lv 35 nothing is enhanced but the belt and amulet: gather and craft instead. ---------- */
-await check('Enhance tab at Lv 12: the prepare stage lit, gather and craft with the five professions, held pieces never enhanced, build options switch the judgement',async()=>{
+/* ---------- The gear build (feature/aetherium-gear-build, 24 Oct 2026; was the Enhance tab, 17 and 18 Oct 2026): what to
+   enhance and when, the build options per class, each piece judged for the picked build. Before Lv 35 nothing is enhanced
+   but the belt and amulet: gather and craft instead. An old ?view=enhance link lands on the build bar. ---------- */
+await check('Gear build at Lv 12: old Enhance links land on the build bar, the prepare stage lit, held pieces never enhanced, build options switch the judgement',async()=>{
   const {page,context,errors}=await open(`/hub/aetherium/gear/equipment/?${ref}&view=enhance`,{live:true});
-  await page.waitForSelector('#aeEnhanceView:not([hidden]) #aeEnhanceStage');
-  assert.equal(await page.getAttribute('[data-gear-tab="enhance"]','aria-selected'),'true','The address opens the Enhance tab');
-  assert.equal(await page.isHidden('#aeGearPanel'),true);
+  await page.waitForSelector('#aeBuild #aeBuildScore');
+  assert.equal(await page.locator('[data-gear-tab]').count(),0,'One screen: no Equipment and Enhance tabs');
+  assert.equal(new URL(page.url()).searchParams.get('view'),null,'The old view= is dropped from the address');
+  assert.equal(await page.isVisible('#aeGearPanel'),true);
   assert.match(await plain(page,'#aeEnhanceStage'),/^Lv 12: Unique gear starts at Lv 35\. Save your stones and prepare\. 8 worn pieces to wear, not enhance\.$/);
   assert.match(await plain(page,'.ae-elogic-gate.is-lit'),/Save and prepare: enhance nothing but the belt and amulet, and spend the time gathering materials and levelling your crafting/);
   assert.deepEqual(await page.$$eval('#aeEnhancePrepare .ae-elogic-jobs b',items=>items.map(el=>el.textContent)),['Blacksmithing','Armorsmithing','Handicrafting','Alchemy','Cooking']);
   assert.match(await plain(page,'#aeEnhancePrepare'),/Crafted Dragon Lord gear needs proficiency 55, is Unique/);
   assert.match(await plain(page,'#aeEnhanceNext'),/^Do this next: gather materials and level your crafting until Lv 35\.$/);
-  // A held piece: the assessment says it, and no Enhancement window repeats it.
-  await page.waitForSelector('#aeAssess');
-  assert.match(await plain(page,'#aeAssess'),/Wear it, do not enhance it Wear it, but do not enhance it: no Unique gear drops before Lv 35/);
-  assert.equal(await page.locator('#aeEnhanceDetail #aeAdvice').count(),0);
+  // Held pieces: a steel ring on the tile, Wear it for now on the card, and no Enhancement window repeating it.
+  const held=await page.$$eval('#aeGear li[data-verdict="hold"]',items=>items.map(el=>el.dataset.slotPos));
+  assert.ok(held.length>0,'Pieces before Unique gear are worn for now');
+  await page.click(`#aeGear [data-slot-pos="${held[0]}"] button`);
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeAssess');
+  assert.match(await plain(page,'#aeAssess'),/^Wear it for now For your Gladiator .* Wear it, but do not enhance it: no Unique gear drops before Lv 35/);
+  assert.equal(await page.locator('#aeInfo #aeAdvice').count(),0);
+  await page.keyboard.press('Escape');
   // Build options for the class: pick Tank and the page judges by it, in the address too.
   assert.deepEqual(await page.$$eval('[data-eoption-role]',items=>items.map(el=>[el.dataset.eoptionRole,el.getAttribute('aria-pressed')])),[['dps','true'],['tank','false']]);
   await page.click('[data-eoption-role="tank"]');
   await page.waitForFunction(()=>new URL(location.href).searchParams.get('role')==='tank');
   assert.equal(await page.getAttribute('[data-eoption-role="tank"]','aria-pressed'),'true');
+  assert.match(await plain(page,'#aeBuildTitle'),/^Gladiator Tank/,'The build bar names the build');
   assert.match(await plain(page,'#aeClassNeeds'),/Block \(from Dexterity\)/,'The tank\'s stat order');
   assert.ok(await page.locator('[data-eoption-team]').count()>=2,'The tank\'s team options');
-  assert.match(await plain(page,'#aeAssess'),/^For your Tank/);
+  await page.click(`#aeGear [data-slot-pos="${held[0]}"] button`);
+  await page.waitForSelector('#aeInfo:not([hidden]) #aeAssess');
+  assert.match(await plain(page,'#aeAssess'),/For your Gladiator Tank/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No sideways scroll');
   assert.deepEqual(errors,[]);
   await context.close();

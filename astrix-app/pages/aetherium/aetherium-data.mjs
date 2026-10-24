@@ -581,6 +581,13 @@ export function loadEnhancement() {
   return advisorEnhancement;
 }
 
+/** Where gear comes from (data/advisor/gear-sources.json): Expeditions, Transcendence, cycles. Loaded once, for the Gear Ledger. */
+let advisorGearSources;
+export function loadGearSources() {
+  advisorGearSources ??= getJson(`${ADVISOR}gear-sources.json`).catch(error => { advisorGearSources = undefined; throw error; });
+  return advisorGearSources;
+}
+
 /** Game-wide facts only (boards, unlock levels): a small file, so the menu and Daevanion pages skip the skill catalogue. */
 export function loadProgression() {
   advisorProgression ??= getJson(`${ADVISOR}progression.json`).catch(error => { advisorProgression = undefined; throw error; });
