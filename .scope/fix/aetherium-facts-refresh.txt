@@ -1,0 +1,3 @@
+astrix-app/tools/build-aetherium-facts.mjs
+hub/aetherium/guide/equipment/arcana/index.html
+hub/aetherium/guide/equipment/manastones/index.html

@@ -87,7 +87,9 @@ function readPage() {
       text = title && rest.startsWith(title) && rest.length > title.length ? `${title}: ${rest.slice(title.length).trim()}` : rest;
       /* A card that opens a detail card names itself in its label ("Rare Stun Theostone, see the details"): lead with that,
          so the grade the picture shows is in the words too. */
-      const label = el.querySelector('a[aria-label$=", see the details"]')?.getAttribute('aria-label').replace(/, see the details$/, '');
+      /* Only a card that is one item: a list of several openers (a role's ranked stones) keeps its own words. */
+      const openers = el.querySelectorAll('a[aria-label$=", see the details"]');
+      const label = openers.length === 1 ? openers[0].getAttribute('aria-label').replace(/, see the details$/, '') : null;
       if (label) {
         const words = text.split(' ');
         let k = 0;
