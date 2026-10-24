@@ -1,14 +1,17 @@
 /**
- * Gear page (The Aetherium, hub/aetherium/gear/equipment/): what one Daeva wears, laid out like the game's equipment
- * window. An icon grid of 20 slots in two rows of 10 (weapons and armour, then accessories and runes), each item on its
- * grade tile with the enchant level and the item level on its corners. Hover or focus shows the name; a click or tap opens
- * the item card, drawn like the game's own item tooltip. The Enhance tab (Miguel, 17 Oct 2026) lists the gear on the left
- * and, for the piece picked, its assessment for the class and its Enhancement window. An item the grade rule says to enchant has a pulsing gold edge, one to replace a
- * quieter edge and a chevron, a fully enchanted one a check. Pet, wings, title and Arcana sit beside the grid as small tiles.
- * Item details load in the background after first paint (at most 3 at a time, kept for the session).
- * Skills and Daevanion boards have their own pages (see the character menu).
+ * Gear Ledger (The Aetherium, hub/aetherium/gear/equipment/): the gear half of the Builder (feature/aetherium-gear-build,
+ * Miguel, 24 Oct 2026). One screen, judged against the same build as the Ascent Plan (class, role, team):
+ *   - the build bar: what the gear is judged against (role and team buttons), how many pieces suit it, the next three moves;
+ *   - the game's equipment window: 20 slots in two rows of 10, each item on its grade tile with the enchant and item level on
+ *     its corners and a ring for its verdict (gold: suits your build, dashed gold: close fit, red: replace it, steel: wear it
+ *     for now). The gold pulse still marks the piece to enchant;
+ *   - a click opens the item's card: the game's item tooltip beside the build verdict, the reason, what to do with the
+ *     Enhancement window's five tabs and where a better piece drops.
+ * Pet, wings, title and Arcana sit beside the grid. Item details load in the background after first paint (at most 3 at a
+ * time, kept for the session); a piece has no verdict until its detail lands, never a guess.
+ * Old ?view=enhance links land on the build bar, and ?item=N opens that piece's card.
  */
-import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadEnhancement, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails, rolePick } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadEnhancement, loadGearSources, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails, rolePick } from './aetherium-data.mjs';
 import { $, closeInfo, esc, gradeTile, infoCardHtml, isPending, openInfo, slotLabel } from './aetherium-ui.mjs';
 import { renderStatsPanel } from './stats-panel.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
@@ -16,6 +19,8 @@ import { ROLES, buildFor, enchantAdvice, enchantSteps, gearMoves, gradeInfo, ind
 import { enhancementPlan, indexEnhancement, roleWords } from '/astrix-app/games/aion2/engine/enhancement-advisor.mjs';
 import { rankPointStats, subStatTag } from '/astrix-app/games/aion2/engine/stat-advisor.mjs';
 import { assessItem, classNeeds } from '/astrix-app/games/aion2/engine/item-assessor.mjs';
+import { gearBuild } from '/astrix-app/games/aion2/engine/gear-build.mjs';
+import { indexGearSources, whereToGet } from '/astrix-app/games/aion2/engine/gear-sources.mjs';
 
 /* The game's equipment window: row 1 weapons and armour, row 2 accessories and the two runes. Arcana have their own row. */
 const GRID = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS', 'GLOVES', 'BOOTS', 'CAPE', 'BELT',
@@ -23,7 +28,7 @@ const GRID = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS', 'GL
 const ARCANA = ['ARCANA1', 'ARCANA2', 'ARCANA3', 'ARCANA4', 'ARCANA5'];
 const keyOf = name => String(name ?? '').toUpperCase().replace(/[\s_]/g, '');
 const TAG_WORD = { high: 'High', useful: 'Useful', low: 'Low' };
-const state = { looks: [], model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null, enhancement: null, mechanics: null, plan: null, view: 'equipment', eIndex: null, etab: null, builds: null, pick: { role: null, team: null } };
+const state = { looks: [], model: null, source: null, ref: null, selected: null, slotNames: new Map(), grades: null, progression: null, ring: null, later: new Set(), stats: null, build: null, enhancement: null, mechanics: null, plan: null, view: 'equipment', etab: null, builds: null, pick: { role: null, team: null }, sources: null, gearBuild: null };
 
 const adviceOf = slot => enchantAdvice(slot, { level: state.model.profile.level, grades: state.grades, progression: state.progression });
 const gradeOf = slot => gradeInfo(slot.grade, state.grades, slot.gradeName ?? null);
@@ -46,7 +51,10 @@ const exceedText = slot => (Number.isFinite(slot.exceed) && slot.exceed > 0 ? `E
 /** The tile's accessible name: the item, its grade, +N of the cap and the marker in words, then item level and slot. */
 function tileName(slot) {
   const mark = markOf(slot);
-  return [slot.name, gradeOf(slot).name, capText(slot), exceedText(slot), mark ? MARK_WORDS[mark] : null, Number.isFinite(slot.itemLevel) ? `item level ${slot.itemLevel}` : null, slotLabel(slot.slot)].filter(Boolean).join(', ');
+  // The verdict in words, unless the marker already says it (replace).
+  const verdict = verdictOf(slot);
+  const said = verdict && !(verdict.level === 'replace' && mark === 'replace') ? verdict.label : null;
+  return [slot.name, gradeOf(slot).name, capText(slot), exceedText(slot), said, mark ? MARK_WORDS[mark] : null, Number.isFinite(slot.itemLevel) ? `item level ${slot.itemLevel}` : null, slotLabel(slot.slot)].filter(Boolean).join(', ');
 }
 /** The slot, name, grade and cap as page text, visually hidden (the button's name comes from tileName). */
 function tileWords(slot) {
@@ -70,7 +78,8 @@ const cellOf = (key, worn) => {
   const { slot, index } = worn;
   const mark = markOf(slot);
   const enhance = planOf(slot)?.mark;
-  return `<li class="ae-gcell" data-gear-index="${index}" data-slot-pos="${esc(slot.slotPos)}" data-slot-key="${esc(key)}"${mark ? ` data-advice="${mark}"` : ''}${enhance ? ` data-enhance="${enhance}"` : ''}>${tileHtml(slot, index)}</li>`;
+  const verdict = verdictOf(slot)?.level;
+  return `<li class="ae-gcell" data-gear-index="${index}" data-slot-pos="${esc(slot.slotPos)}" data-slot-key="${esc(key)}"${mark ? ` data-advice="${mark}"` : ''}${enhance ? ` data-enhance="${enhance}"` : ''}${verdict ? ` data-verdict="${verdict}"` : ''}>${tileHtml(slot, index)}</li>`;
 };
 
 function renderGear() {
@@ -109,21 +118,79 @@ function refreshTile(index) {
   if (mark) li.dataset.advice = mark; else delete li.dataset.advice;
   const enhance = planOf(slot)?.mark;
   if (enhance) li.dataset.enhance = enhance; else delete li.dataset.enhance;
+  const verdict = verdictOf(slot)?.level;
+  if (verdict) li.dataset.verdict = verdict; else delete li.dataset.verdict;
 }
 
-/** After an item detail lands the plan can change: every tile's mark and the Do this next line follow. */
+/** After an item detail lands the plan and the verdicts can change: every tile, the build bar and Do this next follow. */
 function refreshEnhance() {
   state.plan = null;
+  state.gearBuild = null;
   for (const li of document.querySelectorAll('#aeGear li[data-gear-index]')) {
     const index = Number(li.dataset.gearIndex);
     const slot = state.model.gear[index];
-    const before = li.dataset.enhance ?? '';
-    const after = planOf(slot)?.mark ?? '';
+    const before = `${li.dataset.enhance ?? ''}|${li.dataset.verdict ?? ''}`;
+    const after = `${planOf(slot)?.mark ?? ''}|${verdictOf(slot)?.level ?? ''}`;
     if (before !== after || li.querySelector('.ae-emark')?.dataset.title !== (planOf(slot)?.next?.title ?? '')) refreshTile(index);
   }
+  renderBuildBar();
   renderEnhanceStrip();
-  renderEnhanceList();
-  if (state.view === 'enhance') renderEnhanceDetail().catch(error => console.error(error));
+}
+
+/* ----- The gear build (feature/aetherium-gear-build, 24 Oct 2026) ----- */
+
+/** Every worn piece's verdict, the count that suit the build and the next moves, worked out once per change. */
+function gearBuildNow() {
+  if (!state.model) return null;
+  const sources = state.sources ? indexGearSources(state.sources) : null;
+  const p = state.model.profile;
+  state.gearBuild ??= gearBuild({
+    model: state.model, build: state.build, stats: state.stats, adviceOf: slot => (state.grades ? adviceOf(slot) : null),
+    judged: slot => slot.detailed === true, plan: enhancePlan(),
+    where: slot => (sources ? whereToGet(slot, { level: p.level, itemLevel: Number.isFinite(p.itemLevel) ? p.itemLevel : null, data: sources, grades: state.grades, progression: state.progression, build: state.build }) : null)
+  });
+  return state.gearBuild;
+}
+function verdictOf(slot) { return gearBuildNow()?.slots.find(entry => entry.slotPos === slot?.slotPos)?.verdict ?? null; }
+
+/** What the build is: "Gladiator DPS: Greatsword bruiser DPS", or the class alone with no build file. */
+const buildName = () => (state.build ? `${state.model.profile.class} ${ROLES[state.build.role] ?? state.build.role}${state.build.label ? `: ${state.build.label}` : ''}` : state.model.profile.class);
+
+/** The build bar: what the gear is judged against, how many pieces suit it, and the next three moves. */
+function renderBuildBar() {
+  const box = $('#aeBuild');
+  if (!box || !state.model) return;
+  const plan = gearBuildNow();
+  const reading = plan.worn - plan.judged;
+  const share = plan.worn ? Math.round(plan.suits / plan.worn * 100) : 0;
+  const moves = plan.moves.map((move, n) => `<li class="ae-gb-move" data-move-kind="${esc(move.kind)}"${move.tab ? ` data-move-tab="${esc(move.tab)}"` : ''}>
+      <button type="button" class="ae-btn ae-gb-move-btn" data-move-slot="${move.index}" aria-haspopup="dialog">
+        <span class="ae-gb-move-n" aria-hidden="true">${n + 1}</span>
+        ${gradeTile({ icon: state.model.gear[move.index]?.icon, grade: gradeOf(state.model.gear[move.index]).id, size: 48 })}
+        <span class="ae-gb-move-text"><b>${esc(move.name)}</b><span class="ae-gb-move-title">${move.tab ? enhanceIcon(move.tab) : ''}${esc(move.title)}</span><small>${esc(move.why)}</small></span>
+      </button></li>`).join('');
+  const none = plan.worn ? (reading ? 'Reading your gear. The moves fill in as each piece lands.' : 'Nothing to do on your gear right now.') : 'No gear worn yet.';
+  box.innerHTML = `<div class="ae-gb-head">
+      <div><p class="ae-gb-kicker">Judged against</p><h2 class="ae-gb-title" id="aeBuildTitle">${esc(buildName())}</h2></div>
+      <div class="ae-gb-score" id="aeBuildScore" role="status">
+        <p><b>${esc(plan.suits)}</b> of ${esc(plan.worn)} ${plan.worn === 1 ? 'piece suits' : 'pieces suit'} your build</p>
+        <span class="ae-gb-meter" role="meter" aria-valuemin="0" aria-valuemax="${esc(plan.worn)}" aria-valuenow="${esc(plan.suits)}" aria-label="Pieces that suit your build"><i style="width:${share}%"></i></span>
+        ${reading ? `<small>${esc(reading)} still reading</small>` : ''}
+      </div>
+    </div>
+    ${optionsHtml()}
+    <div class="ae-gb-next">
+      <h3 class="ae-gb-sub">Your next moves</h3>
+      ${moves ? `<ol class="ae-gb-moves" id="aeBuildMoves">${moves}</ol>${plan.more ? `<p class="ae-gb-more">${esc(plan.more)} more after these. Tap any piece to see its own.</p>` : ''}` : `<p class="ae-card-line" id="aeBuildMoves">${esc(none)}</p>`}
+    </div>
+    <details class="ae-gb-needs" id="aeClassNeeds"><summary>What this build wants from gear</summary><div id="aeClassNeedsBody"></div></details>`;
+  renderClassNeeds();
+}
+
+/** The build half of the item card: the verdict, the assessment, what to do with the Enhancement window, where a better one drops. */
+function buildHalf(slot, d, rules) {
+  const action = adviceOf(slot)?.action;
+  return `<div class="ae-gcard-build">${assessHtml(slot, d)}${action === 'hold' || action === 'replace' ? '' : planBlock(slot, rules, state.etab)}${whereLine(slot)}</div>`;
 }
 
 /** Keeps what an item detail adds on the slot itself (the tile and the rule read it there). */
@@ -137,7 +204,12 @@ function applyDetail(slot, detail) {
   if (Number.isFinite(detail.level)) slot.itemLevel = detail.level;
   // The Enhancement window's facts for this item (manastones, Theostone slots, Soul Binding rate and lines).
   if (detail.enhance) Object.assign(slot, detail.enhance);
+  // The lines and skill boosts the build judges the piece by.
+  if (Array.isArray(detail.subStats)) slot.subStats = detail.subStats;
+  if (Array.isArray(detail.skillPerks)) slot.skillPerks = detail.skillPerks;
+  slot.detailed = true;
   state.plan = null;
+  state.gearBuild = null;
 }
 
 /** The stats record's Arcana source line (stats.json source arcana), with its status. */
@@ -370,9 +442,6 @@ function selectEnhanceTab(id, focus = false) {
 document.addEventListener('click', event => {
   const tab = event.target.closest?.('#aeEnhancePanel [data-etab]');
   if (tab) { selectEnhanceTab(tab.dataset.etab); return; }
-  // The item card hangs off the page body: its Assess and enhance button opens the Enhance tab on that piece.
-  const assess = event.target.closest?.('#aeInfo [data-enhance-item]');
-  if (assess && state.model) { pickEnhanceItem(Number(assess.dataset.enhanceItem)); showGearTab('enhance'); }
 });
 document.addEventListener('keydown', event => {
   const tab = event.target.closest?.('#aeEnhancePanel [data-etab]');
@@ -414,8 +483,7 @@ function renderEnhanceLogic() {
       <p class="ae-card-line"><b>Gather:</b> ${esc(logic.prepare.gather.text)} ${statusTag(logic.prepare.gather.status)}</p>
       <p class="ae-card-line ae-muted">${esc(logic.prepare.namesNote)} ${statusTag(logic.prepare.namesStatus)}</p>
     </div>` : '';
-  box.innerHTML = `<h2 class="ae-section-title" id="aeEnhanceLogicTitle">What to enhance, and when</h2>
-    <p class="ae-elogic-now" id="aeEnhanceStage" data-phase="${esc(phase)}">${esc(now)}</p>
+  box.innerHTML = `<p class="ae-elogic-now" id="aeEnhanceStage" data-phase="${esc(phase)}">${esc(now)}</p>
     <ol class="ae-elogic-gates">${logic.gates.map(gate).join('')}</ol>
     ${prepare}
     <p class="ae-item-sec">Each Unique piece, in this order</p>
@@ -434,7 +502,7 @@ function renderEnhanceStrip() {
   const next = plan.next;
   const index = next ? state.model.gear.findIndex(slot => slot.slotPos === next.slotPos) : -1;
   $('#aeEnhanceNext').innerHTML = next
-    ? `<b>Do this next:</b> <button type="button" class="ae-linkish" data-enext="${index}" data-enhance-item="${index}">${esc(next.name)}</button> <span>${esc(next.title)}. ${esc(next.why.split('. ')[0].replace(/\.$/, ''))}.</span>`
+    ? `<b>Do this next:</b> <button type="button" class="ae-linkish" data-enext="${index}" data-slot-card="${index}" aria-haspopup="dialog">${esc(next.name)}</button> <span>${esc(next.title)}. ${esc(next.why.split('. ')[0].replace(/\.$/, ''))}.</span>`
     : plan.stage?.phase === 'prepare' ? `<b>Do this next:</b> gather materials and level your crafting until Lv ${esc(plan.stage.uniqueFrom)}.` : '<b>Do this next:</b> nothing to enhance right now.';
   if (!$('#aeEnhanceHow').childElementCount) {
     $('#aeEnhanceHow').innerHTML = [...plan.tabs.map(tab => `<li><button type="button" class="ae-linkish ae-ehow-row" data-ehow="${esc(tab.id)}" aria-haspopup="dialog">${enhanceIcon(tab.id)}<b>${esc(tab.name)}</b><span>${esc(tab.purpose)}</span></button></li>`),
@@ -482,6 +550,8 @@ const loadRules = () => (rulesPromise ??= loadMechanics().then(mechanics => inde
 
 async function selectSlot(index, from) {
   const slot = state.model.gear[index];
+  // Another piece opens on its own next tab, not the one picked on the last card.
+  if (state.selected !== index) state.etab = null;
   state.selected = index;
   hideTip();
   openInfo(tooltipHtml(slot, index, null, `Reading ${slot.name}.`), from);
@@ -498,7 +568,9 @@ async function selectSlot(index, from) {
   applyDetail(slot, d);
   refreshTile(index);
   refreshEnhance();
-  openInfo(tooltipHtml(slot, index, d), document.querySelector(`#aeGearPanel [data-slot="${index}"]`) ?? from);
+  const rules = await loadRules();
+  if (state.selected !== index || $('#aeInfo')?.hidden) return;
+  openInfo(`<div class="ae-gcard" data-gcard="${index}">${tooltipHtml(slot, index, d)}${buildHalf(slot, d, rules)}</div>`, document.querySelector(`#aeGearPanel [data-slot="${index}"]`) ?? from);
 }
 
 /**
@@ -547,74 +619,18 @@ function tooltipHtml(slot, index, d, note = null) {
       </div>
       <div class="ae-tt-body">${arcanaNote(slot)}${note ? `<p class="ae-card-line">${esc(note)}</p>` : ''}${body}</div>
       ${foot.length ? `<p class="ae-tt-foot">${foot.map(esc).join(' · ')}</p>` : ''}
-      <div class="ae-tt-actions"><button type="button" class="ae-btn" data-enhance-item="${index}">Assess and enhance this item</button></div>
     </div>`;
 }
 
-/* The Enhance tab (Miguel, 17 Oct 2026): the build options for the class to pick from (role, and team where the build has
-   variants), what that build needs from gear, the gear on the left, and for the piece picked its assessment and its
-   Enhancement window on the right. The tab and the piece are in the address, so the view is bookmarkable. */
-
-/** Shows the Equipment or the Enhance tab; writes ?view=enhance (and the piece) into the address unless told not to. */
-function showGearTab(id, { write = true } = {}) {
-  state.view = id === 'enhance' ? 'enhance' : 'equipment';
-  for (const tab of document.querySelectorAll('[data-gear-tab]')) tab.setAttribute('aria-selected', String(tab.dataset.gearTab === state.view));
-  $('#aeGearPanel').hidden = state.view !== 'equipment';
-  $('#aeEnhanceView').hidden = state.view !== 'enhance';
-  if (state.view === 'enhance') {
-    if (state.eIndex === null) state.eIndex = defaultEnhanceIndex();
-    renderEnhanceList();
-    renderEnhanceDetail().catch(error => console.error(error));
-  }
-  if (write) writeGearUrl();
-}
-
+/* The build to judge by is in the address (?role=, ?team=), so the view is bookmarkable. Older ?view=enhance links land
+   on the build bar, and ?item=N opens that piece's card. */
 function writeGearUrl() {
   const url = new URL(location.href);
-  if (state.view === 'enhance') url.searchParams.set('view', 'enhance'); else url.searchParams.delete('view');
-  const slot = state.view === 'enhance' && state.eIndex !== null ? state.model.gear[state.eIndex] : null;
-  if (slot) url.searchParams.set('item', String(slot.slotPos)); else url.searchParams.delete('item');
+  url.searchParams.delete('view');
+  url.searchParams.delete('item');
   if (state.pick.role) url.searchParams.set('role', state.pick.role); else url.searchParams.delete('role');
   if (state.pick.team) url.searchParams.set('team', state.pick.team); else url.searchParams.delete('team');
   history.replaceState(history.state, '', url);
-}
-
-/** The piece the Enhance tab opens on: the plan's Do this next, else the first worn piece in the grid's order. */
-function defaultEnhanceIndex() {
-  const next = enhancePlan()?.next;
-  const at = next ? state.model.gear.findIndex(slot => slot.slotPos === next.slotPos) : -1;
-  return at >= 0 ? at : wornInOrder()[0]?.index ?? null;
-}
-function wornInOrder() {
-  const order = [...GRID, ...ARCANA];
-  return state.model.gear.map((slot, index) => ({ slot, index })).filter(({ slot }) => !slot.empty)
-    .sort((a, b) => (order.indexOf(keyOf(a.slot.slot)) + 1 || 99) - (order.indexOf(keyOf(b.slot.slot)) + 1 || 99));
-}
-
-function pickEnhanceItem(index) {
-  if (!Number.isInteger(index) || !state.model.gear[index]) return;
-  state.eIndex = index;
-  state.etab = null;
-  closeInfo();
-  renderEnhanceList();
-  if (state.view === 'enhance') { renderEnhanceDetail().catch(error => console.error(error)); writeGearUrl(); }
-}
-
-/** The gear list: each worn piece as one button with its art, name, enchant and its next Enhancement tab. */
-function renderEnhanceList() {
-  const list = $('#aeEnhanceList');
-  if (!list || !state.model) return;
-  list.innerHTML = wornInOrder().map(({ slot, index }) => {
-    const grade = gradeOf(slot);
-    const item = planOf(slot);
-    const cap = Number.isFinite(slot.maxEnchant) ? ` / ${slot.maxEnchant}` : '';
-    const mark = item?.mark ? `<span class="ae-eitem-mark" data-mark="${esc(item.mark)}">${enhanceIcon(item.mark)}${esc(item.label)}</span>` : '';
-    return `<li data-slot-pos="${esc(slot.slotPos)}"><button type="button" class="ae-btn ae-eitem" data-eitem="${index}" aria-pressed="${index === state.eIndex}">
-        ${gradeTile({ icon: slot.icon, grade: grade.id, size: 40 })}
-        <span class="ae-eitem-text"><span class="ae-eitem-name ae-grade-name"${grade.id ? ` data-grade="${esc(grade.id)}"` : ''}>${esc(slot.name)}</span><small>${esc(slotLabel(slot.slot))} · +${esc(slot.enchant)}${esc(cap)}</small></span>
-        ${mark}
-      </button></li>`;
-  }).join('');
 }
 
 /** The build options for this class: one button per role, and per team where the picked build has team variants. */
@@ -631,14 +647,12 @@ function optionsHtml() {
 
 /** What the picked build needs from gear: its stat order, the manastones for armour and weapon, the key skills to boost. */
 function renderClassNeeds() {
-  const box = $('#aeClassNeeds');
+  const box = $('#aeClassNeedsBody');
   if (!box) return;
   const needs = classNeeds(state.build);
   const p = state.model.profile;
   const tag = status => (status === 'confirmed' ? statusTag('confirmed') : status === 'reported' ? statusTag('reported') : statusTag('unknown'));
-  box.innerHTML = `<h2 class="ae-section-title" id="aeClassNeedsTitle">What your ${esc(p.class)} needs from gear</h2>
-    ${optionsHtml()}
-    ${!needs ? '<p class="ae-card-line">No build for this class yet, so the gear is not judged.</p>' : `<dl class="ae-eneeds-list">
+  box.innerHTML = `${!needs ? '<p class="ae-card-line">No build for this class yet, so the gear is not judged.</p>' : `<dl class="ae-eneeds-list">
       <div><dt>Stats, in order ${needs.order.length ? tag(needs.orderStatus) : ''}</dt><dd>${needs.order.length ? `<ol>${needs.order.map(item => `<li>${esc(item)}</li>`).join('')}</ol>` : 'Pending: no stat order for this build yet.'}</dd></div>
       <div><dt>Manastones ${needs.stones ? tag(needs.stones.status) : ''}</dt><dd>${needs.stones ? `${needs.stones.advice ? `<p>${esc(needs.stones.advice)}</p>` : ''}${needs.stones.caps.length ? `<p class="ae-eneeds-caps">${needs.stones.caps.map(cap => `<span>${esc(cap.stat)} up to ${esc(cap.cap)}</span>`).join('')}</p>` : ''}` : 'Pending: no manastone advice for this build yet.'}</dd></div>
       <div><dt>Skill boosts to look for</dt><dd>${needs.skills.length ? needs.skills.map(esc).join(', ') : 'Pending: no key skills for this build yet.'}</dd></div>
@@ -652,44 +666,29 @@ function pickOption({ role = null, team = null }) {
   if (team) state.pick = { ...state.pick, team };
   state.build = state.builds ? buildFor(state.builds, state.pick) : null;
   state.plan = null;
-  renderClassNeeds();
   refreshEnhance();
   renderStats();
   writeGearUrl();
+  // A card left open follows the new build.
+  const open = document.querySelector('#aeInfo:not([hidden]) [data-gcard]');
+  if (open) selectSlot(Number(open.dataset.gcard), document.querySelector(`#aeGearPanel [data-slot="${open.dataset.gcard}"]`)).catch(error => console.error(error));
 }
 
-/** The piece's assessment for the picked build: the verdict, why, what helps and what does not, what to look out for. */
+/** The piece judged for the picked build: the verdict tag (the same words as its ring), who it is judged for, why, and what
+ *  to look out for on this slot. No tag while the piece is not judged yet. */
 function assessHtml(slot, d) {
   const assessment = assessItem({ slot, detail: d, advice: adviceOf(slot), build: state.build, stats: state.stats });
+  const verdict = verdictOf(slot);
   const look = [
     assessment.lookFor.skills.length ? `<li><b>Skill boosts</b> ${esc(assessment.lookFor.skills.join(', '))}</li>` : '',
     assessment.lookFor.stats.length ? `<li><b>Stats</b> ${esc(assessment.lookFor.stats.join(', '))}</li>` : ''
   ].join('');
-  return `<section class="ae-assess is-${esc(assessment.verdict)}" id="aeAssess" aria-labelledby="aeAssessTitle">
-      <p class="ae-item-sec" id="aeAssessTitle">For your ${esc(state.build ? `${ROLES[state.build.role] ?? state.build.role}${state.build.label ? `: ${state.build.label}` : ''}` : state.model.profile.class)}</p>
-      <p class="ae-assess-head">${esc(assessment.title)}</p>
+  return `<section class="ae-th-verdict ae-assess is-${esc(assessment.verdict)}" id="aeAssess"${verdict ? ` data-fit="${esc(verdict.level)}"` : ''} aria-labelledby="aeAssessTitle">
+      ${verdict ? `<span class="ae-th-verdict-tag" id="aeAssessTitle">${esc(verdict.label)}</span>` : `<span class="ae-th-verdict-tag" id="aeAssessTitle">Not judged yet</span>`}
+      <p class="ae-assess-for">For your ${esc(buildName())}</p>
       <ul class="ae-assess-why">${assessment.reasons.map(reason => `<li>${esc(reason)}</li>`).join('')}</ul>
       ${look ? `<p class="ae-item-sec">Look out for on this slot</p><ul class="ae-assess-look">${look}</ul>` : ''}
     </section>`;
-}
-
-/** The right side of the Enhance tab: the piece's name, its assessment, then What to do with the Enhancement window. */
-async function renderEnhanceDetail() {
-  const box = $('#aeEnhanceDetail');
-  if (!box || state.eIndex === null) { if (box) box.innerHTML = '<p class="ae-card-line">No gear worn yet.</p>'; return; }
-  const index = state.eIndex;
-  const slot = state.model.gear[index];
-  const rules = await loadRules();
-  const head = grade => `<div class="ae-eforge-head">${gradeTile({ icon: slot.icon, grade: grade.id, size: 56 })}<div><h2 class="ae-eforge-name ae-grade-name"${grade.id ? ` data-grade="${esc(grade.id)}"` : ''} id="aeEnhanceName">${esc(slot.name)}</h2><p>${esc([grade.name, slotLabel(slot.slot), `+${slot.enchant}`].join(' · '))}</p></div><button type="button" class="ae-btn ae-eforge-card" data-slot-card="${index}">See the item</button></div>`;
-  let d = null;
-  try { d = (await loadItemDetail(state.model, slot))?.detail ?? null; }
-  catch (error) { if (!(error instanceof ArmoryUnavailable)) throw error; }
-  if (state.eIndex !== index) return;
-  if (d) applyDetail(slot, d);
-  const grade = gradeOf(slot);
-  const action = adviceOf(slot)?.action;
-  // A piece not to enhance (hold or replace): the assessment says so; no Enhancement window repeating it.
-  box.innerHTML = `${head(grade)}${assessHtml(slot, d)}${action === 'hold' || action === 'replace' ? '' : planBlock(slot, rules, state.etab)}${whereLine(slot)}`;
 }
 
 /* The hover name: the item name in its grade colour, the grade, the slot and +N of the cap. Mouse hover or keyboard focus
@@ -835,17 +834,21 @@ function render(model, source, ref) {
   const back = !ring ? null : fromCard ? { href: cardUrl(ref), label: 'Daeva Card' } : { href: `${ascentUrl(ref, model.profile.class)}#aeNow`, label: 'Plan' };
   $('#aeStage').innerHTML = `<div class="ae-gw ae-gear-window">
     ${windowBar({ title: 'Gear', model, ref, back })}
-    <div class="ae-gw-tabs is-centred" role="tablist" aria-label="Gear">
-      <button type="button" role="tab" class="ae-btn ae-gw-tab" id="aeGearTab-equipment" data-gear-tab="equipment" aria-controls="aeGearPanel" aria-selected="true">Equipment</button>
-      <button type="button" role="tab" class="ae-btn ae-gw-tab" id="aeGearTab-enhance" data-gear-tab="enhance" aria-controls="aeEnhanceView" aria-selected="false">Enhance</button>
-    </div>
     <div class="ae-gw-body">
-      <div class="ae-ledger ae-gear-page" id="aeGearPanel" role="tabpanel" aria-labelledby="aeGearTab-equipment">
+      <section class="ae-panel ae-gb" id="aeBuild" aria-labelledby="aeBuildTitle"></section>
+      <div class="ae-ledger ae-gear-page" id="aeGearPanel">
         <div class="ae-col">
           <section class="ae-panel" aria-labelledby="aeGearTitle">
             <h2 class="ae-section-title" id="aeGearTitle">Equipped gear <small id="aeGearCount"></small></h2>
             <p class="ae-ring-note" id="aeGearRingNote" role="status" hidden></p>
-            <p class="ae-gear-legend" id="aeGearLegend"><span class="ae-legend-swatch" aria-hidden="true"></span>Gold pulse: enchant it. Tap any item to see it; the Enhance tab says what to do.</p>
+            <ul class="ae-gear-legend" id="aeGearLegend" aria-label="What the rings mean">
+              <li data-legend="best"><span class="ae-legend-ring" aria-hidden="true"></span>Suits your build</li>
+              <li data-legend="close"><span class="ae-legend-ring" aria-hidden="true"></span>Close fit</li>
+              <li data-legend="replace"><span class="ae-legend-ring" aria-hidden="true"></span>Replace it</li>
+              <li data-legend="hold"><span class="ae-legend-ring" aria-hidden="true"></span>Wear it for now</li>
+              <li data-legend="pulse"><span class="ae-legend-swatch" aria-hidden="true"></span>Enchant it next</li>
+            </ul>
+            <p class="ae-gear-tap">Tap any piece for its card: the verdict, why, and what to do.</p>
             <ul class="ae-ggrid" id="aeGear" aria-label="Equipped gear, in the game's order"></ul>
             <p class="ae-accessories" id="aeAccessories"></p>
             <div class="ae-arcana-block" id="aeArcanaBlock">
@@ -879,24 +882,15 @@ function render(model, source, ref) {
           </section>
         </div>
       </div>
-      <div class="ae-eforge" id="aeEnhanceView" role="tabpanel" aria-labelledby="aeGearTab-enhance" hidden>
-        <section class="ae-panel ae-elogic" id="aeEnhanceLogic" aria-labelledby="aeEnhanceLogicTitle"></section>
-        <section class="ae-panel ae-eneeds" id="aeClassNeeds" aria-labelledby="aeClassNeedsTitle"></section>
-        <div class="ae-eforge-grid">
-          <section class="ae-panel ae-eforge-list" aria-labelledby="aeEnhanceListTitle">
-            <h2 class="ae-section-title" id="aeEnhanceListTitle">Your gear</h2>
-            <ul class="ae-eitems" id="aeEnhanceList"></ul>
-          </section>
-          <section class="ae-panel ae-eforge-detail" id="aeEnhanceDetail" aria-live="polite"></section>
-        </div>
-        <section class="ae-panel ae-ehow" id="aeEnhance" aria-labelledby="aeEnhanceTitle" hidden>
-          <h2 class="ae-section-title" id="aeEnhanceTitle">How enhancing works</h2>
-          <p class="ae-enext" id="aeEnhanceNext"></p>
-          <ul class="ae-ehow-list" id="aeEnhanceHow"></ul>
-        </section>
-      </div>
+      <section class="ae-panel ae-ehow" id="aeEnhance" aria-labelledby="aeEnhanceTitle" hidden>
+        <h2 class="ae-section-title" id="aeEnhanceTitle">How enhancing works</h2>
+        <p class="ae-enext" id="aeEnhanceNext"></p>
+        <ul class="ae-ehow-list" id="aeEnhanceHow"></ul>
+        <details class="ae-elogic-fold"><summary>What to enhance, and when</summary><div class="ae-elogic" id="aeEnhanceLogic"></div></details>
+      </section>
     </div>
   </div>`;
+  renderBuildBar();
   renderGear();
   renderEnhanceStrip();
   renderStats();
@@ -904,25 +898,20 @@ function render(model, source, ref) {
   showRing();
   const panel = $('#aeGearPanel');
   wireTips(panel);
-  renderClassNeeds();
-  renderEnhanceList();
-  const view = new URLSearchParams(location.search).get('view');
-  const pick = Number(new URLSearchParams(location.search).get('item'));
-  if (Number.isInteger(pick) && state.model.gear.some(slot => slot.slotPos === pick)) state.eIndex = state.model.gear.findIndex(slot => slot.slotPos === pick);
-  showGearTab(view === 'enhance' ? 'enhance' : 'equipment', { write: false });
+  // Older links: ?view=enhance lands on the build bar, ?item=N opens that piece's card. The address then keeps the build only.
+  const params = new URLSearchParams(location.search);
+  const pick = Number(params.get('item'));
+  const at = params.has('item') && Number.isInteger(pick) ? state.model.gear.findIndex(slot => slot.slotPos === pick && !slot.empty) : -1;
+  if (params.get('view') === 'enhance' && at < 0) $('#aeBuild').scrollIntoView({ block: 'start' });
+  if (params.has('view') || params.has('item')) writeGearUrl();
+  if (at >= 0) selectSlot(at, document.querySelector(`#aeGearPanel [data-slot="${at}"]`)).catch(error => console.error(error));
   $('#aeStage').addEventListener('click', event => {
     const role = event.target.closest('[data-eoption-role]');
     if (role) { pickOption({ role: role.dataset.eoptionRole }); return; }
     const team = event.target.closest('[data-eoption-team]');
     if (team) { pickOption({ team: team.dataset.eoptionTeam }); return; }
-    const card = event.target.closest('[data-slot-card]');
-    if (card) { selectSlot(Number(card.dataset.slotCard), card).catch(error => console.error(error)); return; }
-    const gearTab = event.target.closest('[data-gear-tab]');
-    if (gearTab) { showGearTab(gearTab.dataset.gearTab); return; }
-    const pickItem = event.target.closest('[data-eitem]');
-    if (pickItem) { pickEnhanceItem(Number(pickItem.dataset.eitem)); return; }
-    const enhanceItem = event.target.closest('[data-enhance-item]');
-    if (enhanceItem) { pickEnhanceItem(Number(enhanceItem.dataset.enhanceItem)); showGearTab('enhance'); return; }
+    const card = event.target.closest('[data-slot-card],[data-move-slot]');
+    if (card) { selectSlot(Number(card.dataset.slotCard ?? card.dataset.moveSlot), card).catch(error => console.error(error)); return; }
     const how = event.target.closest('[data-ehow]');
     if (how) { openHow(how.dataset.ehow, how); return; }
     const mark = event.target.closest('.ae-emark');
@@ -952,9 +941,11 @@ function render(model, source, ref) {
 
 startCharacterPage({
   // The grade record and the game facts are small static files: they load while the official site answers.
-  prefetch: className => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); loadStats().catch(() => {}); loadEnhancement().catch(() => {}); loadMechanics().catch(() => {}); if (className) loadBuilds(className).catch(() => {}); },
+  prefetch: className => { loadGrades().catch(() => {}); loadProgression().catch(() => {}); loadStats().catch(() => {}); loadEnhancement().catch(() => {}); loadMechanics().catch(() => {}); loadGearSources().catch(() => {}); if (className) loadBuilds(className).catch(() => {}); },
   async render({ model, source, ref }) {
-    const [catalogue, grades, progression, stats, builds, enhancement, mechanics] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null), loadEnhancement().catch(() => null), loadMechanics().catch(() => null)]);
+    const [catalogue, grades, progression, stats, builds, enhancement, mechanics, sources] = await Promise.all([loadCatalogue(), loadGrades().catch(() => null), loadProgression().catch(() => null), loadStats().catch(() => null), loadBuilds(model.profile.class).catch(() => null), loadEnhancement().catch(() => null), loadMechanics().catch(() => null), loadGearSources().catch(() => null)]);
+    // Where a better piece drops: without it the replace moves still show, with the grade rule's reason.
+    state.sources = sources;
     state.stats = stats;
     state.ref = ref;
     // The Enhancement window record and the enchant rules: without them the page simply has no enhance marks.

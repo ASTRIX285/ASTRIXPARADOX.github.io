@@ -380,13 +380,14 @@ await check('live Gear page: one call for first paint, item detail on demand',as
   await page.click('[data-slot="0"]');
   await page.waitForFunction(()=>document.querySelector('#aeInfo .ae-item-enchant'));
   assert.equal(await page.textContent('#aeInfoTitle'),'Twilight Greatsword');
-  // Item tooltip (Miguel, 17 Oct 2026): the card is the game's item tooltip, the item only; advice is on the Enhance tab.
+  // Item tooltip (Miguel, 17 Oct 2026) beside the build half (feature/aetherium-gear-build, 24 Oct 2026).
   assert.match((await page.textContent('#aeInfo .ae-tt-kind')).replace(/\s+/g,' ').trim(),/^Rare Greatsword$/);
   assert.equal(await page.getAttribute('#aeInfo .ae-tt','data-grade'),'rare');
   assert.equal(await page.locator('#aeInfo .ae-pips i').count(),5,'Enchant pips up to the max');
   assert.equal(await page.locator('#aeInfo .ae-pips i.is-on').count(),2);
-  assert.equal(await page.locator('#aeInfo #aeAdvice, #aeInfo .ae-card-status').count(),0,'No advice inside the item card');
-  assert.equal(await page.locator('#aeInfo [data-enhance-item]').count(),1,'One tap to the Enhance tab');
+  assert.equal(await page.locator('#aeInfo .ae-card-status').count(),0,'No status tags inside the item card');
+  assert.equal(await page.locator('#aeInfo .ae-gcard #aeAssess').count(),1,'The verdict for the build is on the card');
+  assert.equal(await page.locator('#aeInfo [data-enhance-item]').count(),0,'No button to another tab');
   assert.match(await page.textContent('#aeInfo .ae-item-rows'),/Attack48 \+2/);
   assert.equal(await page.locator('#aeInfo .ae-sockets i').count(),2,'Manastone slots drawn as sockets');
   assert.match(await page.textContent('[data-slot="0"] .ae-slot-meta'),/\+2 of 5/,'Tile picks up max enchant from the detail');

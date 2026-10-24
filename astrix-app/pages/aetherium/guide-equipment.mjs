@@ -167,8 +167,8 @@ async function renderEnhancement(linked) {
   };
   body.insertAdjacentHTML('beforeend', `
     ${sectionHtml('aeTabs', 'The Enhancement window', `<p>The game's Enhancement window has five tabs, in this order.</p><ol class="ae-gx-tabs">${tabs}</ol>
-      <p class="ae-gx-cta"><a class="ae-btn" href="${esc(enhanceTabUrl(ref))}" data-enhance-link>${ref ? 'Open your Enhance tab' : 'Open the Enhance tab on the Gear page'}</a></p>
-      <p class="ae-gx-note">The Gear page's Enhance tab goes through your own gear piece by piece, with the next tab lit for each.</p>`)}
+      <p class="ae-gx-cta"><a class="ae-btn" href="${esc(enhanceTabUrl(ref))}" data-enhance-link>${ref ? 'Open your gear build' : 'Open the Gear Ledger'}</a></p>
+      <p class="ae-gx-note">The Gear Ledger judges each piece you wear against your build and names the next tab to work on.</p>`)}
     ${sectionHtml('aeLogic', 'What to enhance, and when', `<p>${esc(logic.text)}</p><ol class="ae-gx-gates">${gates}</ol>`, statusTag(logic.status))}
     ${sectionHtml('aeSteps', 'The steps for each Unique piece', `<ol class="ae-gx-steps">${steps}</ol>${factsHtml(logic.exceptions.map(item => ({ id: 'own-scrolls', text: item.text, status: 'confirmed' })))}`)}
     ${sectionHtml('aeGrowth', 'Growth', factsHtml(records.growth.facts))}

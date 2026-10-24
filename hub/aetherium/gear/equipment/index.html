@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261024-stone-cards-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261024-gear-build-1">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
@@ -41,6 +41,10 @@
 
 "/astrix-app/games/aion2/engine/enhancement-advisor.mjs":"/astrix-app/games/aion2/engine/enhancement-advisor.mjs?v=b535e325be",
 
+"/astrix-app/games/aion2/engine/gear-build.mjs":"/astrix-app/games/aion2/engine/gear-build.mjs?v=0a31fcfba6",
+
+"/astrix-app/games/aion2/engine/gear-sources.mjs":"/astrix-app/games/aion2/engine/gear-sources.mjs?v=cd1a6cbdad",
+
 "/astrix-app/games/aion2/engine/item-assessor.mjs":"/astrix-app/games/aion2/engine/item-assessor.mjs?v=b8921910e3",
 
 "/astrix-app/games/aion2/engine/level-planner.mjs":"/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1",
@@ -51,7 +55,7 @@
 
 "/astrix-app/pages/aetherium/aetherium-config.mjs":"/astrix-app/pages/aetherium/aetherium-config.mjs?v=b662fe1840",
 
-"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=ebf1a15122",
+"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=87c71c2305",
 
 "/astrix-app/pages/aetherium/aetherium-flow.mjs":"/astrix-app/pages/aetherium/aetherium-flow.mjs?v=d212e4f454",
 
@@ -59,7 +63,7 @@
 
 "/astrix-app/pages/aetherium/character-page.mjs":"/astrix-app/pages/aetherium/character-page.mjs?v=044c99a2d9",
 
-"/astrix-app/pages/aetherium/gear-ledger.mjs":"/astrix-app/pages/aetherium/gear-ledger.mjs?v=08394faf49",
+"/astrix-app/pages/aetherium/gear-ledger.mjs":"/astrix-app/pages/aetherium/gear-ledger.mjs?v=35dd227626",
 
 "/astrix-app/pages/aetherium/stats-panel.mjs":"/astrix-app/pages/aetherium/stats-panel.mjs?v=a25c8179d3"
 }}
@@ -72,6 +76,10 @@
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/enhancement-advisor.mjs?v=b535e325be" data-head-hint>
 
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/gear-build.mjs?v=0a31fcfba6" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/games/aion2/engine/gear-sources.mjs?v=cd1a6cbdad" data-head-hint>
+
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/item-assessor.mjs?v=b8921910e3" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/level-planner.mjs?v=8cc8e4c6b1" data-head-hint>
@@ -82,7 +90,7 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-config.mjs?v=b662fe1840" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=ebf1a15122" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=87c71c2305" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-flow.mjs?v=d212e4f454" data-head-hint>
 
@@ -90,10 +98,10 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=044c99a2d9" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/gear-ledger.mjs?v=08394faf49" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/gear-ledger.mjs?v=35dd227626" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/stats-panel.mjs?v=a25c8179d3" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/gear-ledger.mjs?v=08394faf49"></script>
+  <script type="module" src="/astrix-app/pages/aetherium/gear-ledger.mjs?v=35dd227626"></script>
 </head>
 <body class="aetherium-page ae-backdrop" style="--ae-backdrop:url('/astrix-app/pages/aetherium/images/page-backgrounds/gear-ledger.jpg')" data-faction="astrix" data-apx-button-system data-ae-page="gear">
   <a class="ae-skip" href="#aeMain">Skip to the gear</a>
