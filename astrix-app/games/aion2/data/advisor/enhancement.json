@@ -821,6 +821,50 @@
             ]
           }
         ]
+      },
+      "fit": {
+        "status": "reported",
+        "from": "roles",
+        "text": "Which stones suit a role, read from the role advice above.",
+        "roles": {
+          "tank": {
+            "best": [
+              "stun",
+              "root"
+            ],
+            "close": [
+              "blind",
+              "seal",
+              "paralyze",
+              "move",
+              "combat"
+            ],
+            "why": {
+              "best": "The tank pick: a Stun or Root stone holds the enemy in place while you keep it on you.",
+              "close": "Control suits a tank, but the tank pick is Stun or Root.",
+              "other": "A tank's Theostone is for control. Damage stones are not the tank pick."
+            }
+          },
+          "dps": {
+            "best": [
+              "st-fire",
+              "st-water",
+              "st-earth",
+              "st-wind",
+              "aoe-fire",
+              "aoe-water",
+              "aoe-earth",
+              "aoe-wind"
+            ],
+            "close": [],
+            "why": {
+              "best": "The DPS pick: an area stone for packs, a single target stone for bosses.",
+              "bestArea": "The DPS pick for packs: it hits up to 4 targets.",
+              "bestSingle": "The DPS pick for bosses: all of its damage lands on one target.",
+              "other": "Not the DPS pick, which is an element damage stone: area for packs, single target for bosses."
+            }
+          }
+        }
       }
     },
     {

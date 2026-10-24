@@ -256,11 +256,51 @@ function theoCard(effect, grade, group) {
   const unit = effect.duration ? 'lasts' : effect.every ? `every ${effect.every}s for ${effect.lasts}s` : group.targets ? `damage to up to ${group.targets} targets` : 'damage';
   const average = effect.damage && !effect.every ? Math.round(effect.damage[grade] * chance / 100) : null;
   return `<li class="ae-th-card" data-grade="${esc(g)}" data-effect="${esc(effect.id)}">
+      <a class="ae-th-open" href="#theo-${esc(g)}-${esc(effect.id)}" data-theo-open="${esc(effect.id)}" data-theo-at="${esc(g)}" aria-haspopup="dialog" aria-label="${esc(`${grade} ${effect.label} Theostone, see the details`)}">
       <img src="${THEO_ART}${esc(g)}-${esc(effect.id)}.jpg" alt="" width="120" height="120" loading="lazy" decoding="async">
-      <div><h3>${esc(effect.label)}</h3>
-        <p class="ae-th-big"><b>${esc(big)}</b> <span>${esc(unit)}</span></p>
-        <p class="ae-th-chance">${esc(chance)}% chance on attack${average ? ` <em>${esc(fmt(average))} ${group.targets ? 'a target' : 'a hit'} on average</em>` : ''}</p></div>
+      <span class="ae-th-text"><span class="ae-th-name">${esc(effect.label)}</span>
+        <span class="ae-th-big"><b>${esc(big)}</b> <span>${esc(unit)}</span></span>
+        <span class="ae-th-chance">${esc(chance)}% chance on attack${average ? ` <em>${esc(fmt(average))} ${group.targets ? 'a target' : 'a hit'} on average</em>` : ''}</span></span>
+      <span class="ae-th-fit" data-theo-fit hidden></span>
+      </a>
     </li>`;
+}
+
+/** How well a Theostone suits a role, from the role advice in the data: best, close, or other. Null when the data has no
+ *  advice for the role, so the card says nothing rather than guess. */
+export function theoFit(record, role, effectId, groupId) {
+  const rules = record.fit?.roles?.[role];
+  if (!rules) return null;
+  const level = rules.best.includes(effectId) ? 'best' : rules.close.includes(effectId) ? 'close' : 'other';
+  const why = level === 'best' && role === 'dps' ? (groupId === 'area' ? rules.why.bestArea : rules.why.bestSingle) ?? rules.why.best : rules.why[level];
+  return { level, why, label: level === 'best' ? 'Suits your build' : level === 'close' ? 'Close fit' : 'Not the pick for your build' };
+}
+
+/** The detail card for one Theostone: the stone at every grade, what it does, and, with a Daeva linked, whether it suits
+ *  the build that Daeva plays and why. */
+export function theoDetailHtml(record, effectId, gradeId, who = null) {
+  const cat = record.catalogue;
+  const group = cat.groups.find(item => item.effects.some(effect => effect.id === effectId));
+  const effect = group.effects.find(item => item.id === effectId);
+  const grade = cat.grades.find(item => item.toLowerCase() === gradeId) ?? cat.grades[cat.grades.length - 1];
+  const size = g => (effect.duration ? `${effect.duration[g]}s` : fmt(effect.damage[g]));
+  const average = g => (effect.damage && !effect.every ? Math.round(effect.damage[g] * effect.chance[g] / 100) : null);
+  const what = effect.duration ? `Inflicts ${effect.label} for ${effect.duration[grade]}s` : effect.every ? `${fmt(effect.damage[grade])} ${effect.label} damage every ${effect.every}s for ${effect.lasts}s` : `${fmt(effect.damage[grade])} ${effect.label} damage${group.targets ? ` to up to ${group.targets} targets` : ' to one target'}`;
+  const ladder = cat.grades.map(g => `<li data-grade="${esc(g.toLowerCase())}"${g === grade ? ' aria-current="true"' : ''}><span>${esc(g)}</span><b>${esc(size(g))}</b>${average(g) ? `<em>${esc(fmt(average(g)))} avg</em>` : ''}</li>`).join('');
+  const fit = who?.role ? theoFit(record, who.role, effect.id, group.id) : null;
+  const build = who ? (fit ? `<div class="ae-th-verdict" data-fit="${esc(fit.level)}"><span class="ae-th-verdict-tag">${esc(fit.label)}</span>
+        <p><b>${esc(who.name)}</b>, ${esc(who.className)} ${esc(ROLE_NAMES[who.role] ?? who.role)}${who.buildLabel ? ` (${esc(who.buildLabel)})` : ''}</p><p>${esc(fit.why)}</p></div>` : '')
+    : `<div class="ae-th-verdict"><p>Link your Daeva to see if this stone suits the build you play.</p><a class="ae-gd-btn is-gold" href="/hub/aetherium/#aeSearch">Find your Daeva</a></div>`;
+  return `<div class="ae-th-detail" data-grade="${esc(grade.toLowerCase())}">
+      <header><img src="${THEO_ART}${esc(grade.toLowerCase())}-${esc(effect.id)}.jpg" alt="" width="120" height="120">
+        <div><p class="ae-th-kind">${esc(grade)} Theostone, ${esc(group.label)}</p><h2 id="aeTheoDetailTitle">${esc(effect.label)}</h2></div>
+        <button type="button" class="ae-btn ae-th-close" data-theo-close aria-label="Close">Close</button></header>
+      <p class="ae-th-what">${esc(what)}, ${esc(effect.chance[grade])}% chance on attack.</p>
+      <ol class="ae-th-ladder" aria-label="At each grade">${ladder}</ol>
+      <ul class="ae-th-facts"><li><span>Cooldown</span><b>${esc(effect.cooldown)}s</b></li><li><span>Engrave on</span><b>${esc(cat.engravable)}</b></li>${average(grade) ? `<li><span>Average</span><b>${esc(fmt(average(grade)))} ${group.targets ? 'a target' : 'a hit'}</b></li>` : ''}</ul>
+      <p class="ae-th-rule">${esc(cat.rule)}</p>
+      ${build}
+    </div>`;
 }
 
 export function theostonesHtml(record, where) {
@@ -314,10 +354,52 @@ export function theostonesHtml(record, where) {
     </section>`;
 }
 
-async function renderTheostones() {
+/** The linked Daeva as the Theostone cards judge it: name, class and the role it plays (the picked role, else the class's
+ *  main build). From the saved roster entry and the class's build file, so it needs no call to the official site. */
+async function theoWho(linked) {
+  const entry = linked?.entry;
+  if (!entry?.className) return null;
+  const builds = await loadBuilds(entry.className).catch(() => null);
+  const picked = rolePick(linked.ref).role;
+  const build = builds ? buildFor(builds, { role: picked }) : null;
+  return { name: entry.name, className: entry.className, role: picked ?? build?.role ?? null, buildLabel: build?.label ?? null };
+}
+
+async function renderTheostones(linked) {
   const body = shell('equipment', 'theostones');
   const [enhancement, sources] = await Promise.all([loadEnhancement(), loadSources()]);
-  body.insertAdjacentHTML('beforeend', theostonesHtml(byId(enhancement).theostone, rewardSources(sources, ['Theostone'])));
+  const record = byId(enhancement).theostone;
+  body.insertAdjacentHTML('beforeend', theostonesHtml(record, rewardSources(sources, ['Theostone'])));
+  const who = await theoWho(linked);
+  /* With a Daeva linked, every card says how it fits that Daeva's build. */
+  if (who?.role && record.fit?.roles?.[who.role]) {
+    for (const card of body.querySelectorAll('.ae-th-card')) {
+      const group = card.closest('.ae-th-group')?.id.replace('aeTheo-', '');
+      const fit = theoFit(record, who.role, card.dataset.effect, group);
+      const tag = card.querySelector('[data-theo-fit]');
+      if (fit && tag && fit.level !== 'other') { tag.textContent = fit.label; tag.dataset.fit = fit.level; tag.hidden = false; card.dataset.fit = fit.level; }
+    }
+  }
+  /* The detail card: a dialog, opened from any stone, closed with its button, Escape or a click outside. */
+  body.insertAdjacentHTML('beforeend', '<dialog class="ae-th-dialog" id="aeTheoDetail" aria-labelledby="aeTheoDetailTitle"></dialog>');
+  const dialog = body.querySelector('#aeTheoDetail');
+  let opener = null;
+  body.addEventListener('click', event => {
+    const open = event.target.closest('[data-theo-open]');
+    if (open) {
+      event.preventDefault();
+      opener = open;
+      dialog.innerHTML = theoDetailHtml(record, open.dataset.theoOpen, open.dataset.theoAt, who);
+      dialog.showModal();
+      history.replaceState(null, '', `${location.pathname}${location.search}#theo-${open.dataset.theoAt}-${open.dataset.theoOpen}`);
+      dialog.querySelector('[data-theo-close]')?.focus();
+      return;
+    }
+    if (event.target.closest('[data-theo-close]') || event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener('close', () => { opener?.focus(); if (location.hash.startsWith('#theo-')) history.replaceState(null, '', location.pathname + location.search); });
+  const deep = /^#theo-(rare|epic|unique)-([a-z-]+)$/.exec(location.hash);
+  if (deep) body.querySelector(`[data-theo-open="${deep[2]}"][data-theo-at="${deep[1]}"]`)?.click();
   const show = body.querySelector('.ae-th');
   body.querySelector('.ae-th-pick')?.addEventListener('click', event => {
     const button = event.target.closest('[data-theo-grade]');

@@ -863,6 +863,45 @@ await check('Manastones and Theostones: sockets by grade, ranked stones, the Com
   }
 });
 
+// Theostone detail cards (design/aetherium-theostone-cards, 24 Oct 2026): every stone opens its card; with a Daeva linked the
+// card and the grid say whether it suits that Daeva's build, from the role advice in the data, never a guess.
+await check('Theostone cards: click opens the detail card, the grade ladder, and the build verdict for a linked Gladiator',async()=>{
+  const theo=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/enhancement.json'),'utf8')).records.find(record=>record.id==='theostone');
+  for(const width of [1440,390]){
+    const plain=await open('/hub/aetherium/guide/equipment/theostones/',{live:false,viewport:{width,height:width===390?844:900}});
+    try{
+      await plain.page.waitForSelector('.ae-th-card[data-grade="unique"] .ae-th-open');
+      assert.equal(await plain.page.locator('[data-theo-fit]:not([hidden])').count(),0,'No fit badges with no Daeva');
+      await plain.page.click('.ae-th-card[data-grade="unique"][data-effect="stun"] .ae-th-open');
+      await plain.page.waitForSelector('#aeTheoDetail[open]');
+      const look=await plain.page.evaluate(()=>{const d=document.querySelector('#aeTheoDetail');const box=d.getBoundingClientRect();
+        return {title:d.querySelector('h2').textContent,ladder:[...d.querySelectorAll('.ae-th-ladder b')].map(n=>n.textContent),current:d.querySelector('.ae-th-ladder [aria-current]')?.dataset.grade,
+          find:!!d.querySelector('a[href*="aeSearch"]'),inside:box.left>=0&&box.right<=innerWidth,hash:location.hash};});
+      assert.equal(look.title,'Stun');
+      assert.deepEqual(look.ladder,theo.catalogue.grades.map(g=>`${theo.catalogue.groups[0].effects.find(e=>e.id==='stun').duration[g]}s`),'Every grade from the data');
+      assert.equal(look.current,'unique','The grade clicked is lit');
+      assert.ok(look.find,'No Daeva: the card offers Find your Daeva');
+      assert.ok(look.inside,`The card fits the screen at ${width}`);
+      assert.equal(look.hash,'#theo-unique-stun','The card has its own link');
+      await plain.page.keyboard.press('Escape');
+      assert.equal(await plain.page.locator('#aeTheoDetail[open]').count(),0,'Escape closes it');
+    }finally{await plain.context.close();}
+  }
+  const linked=await open('/hub/aetherium/guide/equipment/theostones/#theo-unique-aoe-fire',{live:false,roster:rosterWith(LV45)});
+  try{
+    await linked.page.waitForSelector('#aeTheoDetail[open]');
+    const verdict=await linked.page.evaluate(()=>({fit:document.querySelector('.ae-th-verdict')?.dataset.fit,text:document.querySelector('.ae-th-verdict')?.innerText,
+      badges:[...document.querySelectorAll('.ae-th-card[data-grade="unique"][data-fit="best"]')].map(card=>card.dataset.effect)}));
+    assert.equal(verdict.fit,'best','A deep link opens its card; area Fire suits a Gladiator DPS');
+    assert.match(verdict.text,/GUIDEDAEVA/);assert.match(verdict.text,/Gladiator/);
+    assert.deepEqual(verdict.badges.sort(),[...theo.fit.roles.dps.best].sort(),'The grid marks the stones that suit the build');
+    await linked.page.keyboard.press('Escape');
+    await linked.page.click('.ae-th-card[data-grade="unique"][data-effect="stun"] .ae-th-open');
+    assert.equal(await linked.page.$eval('.ae-th-verdict',node=>node.dataset.fit),'other','Stun is not the DPS pick');
+    assert.deepEqual(linked.errors,[]);
+  }finally{await linked.context.close();}
+});
+
 await check('never the real Worker or NCSOFT',async()=>{assert.deepEqual(realCalls,[]);});
 
 await browser.close();

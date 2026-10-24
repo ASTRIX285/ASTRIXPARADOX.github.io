@@ -3066,18 +3066,67 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-st-where p{marg
 .ae-th:not([data-theo-show="rare"]) .ae-th-card[data-grade="rare"],
 .ae-th:not([data-theo-show="epic"]) .ae-th-card[data-grade="epic"],
 .ae-th:not([data-theo-show="unique"]) .ae-th-card[data-grade="unique"]{display:none}
-.ae-th-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none}
-.ae-th-card{--ae-g:var(--ae-grade-unique);display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;align-items:center;padding:16px;border-left:3px solid var(--ae-g);background:linear-gradient(90deg,color-mix(in srgb,var(--ae-g) 12%,transparent),var(--ae-gd-clear) 80%)}
+.ae-th-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin:0;padding:0;list-style:none}
+.ae-th-card{--ae-g:var(--ae-grade-unique);display:flex}
+.ae-th-open{position:relative;display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;align-items:center;width:100%;min-height:128px;padding:16px;margin:0;border:0;border-left:3px solid var(--ae-g);border-radius:0;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--ae-g) 12%,transparent),var(--ae-gd-clear) 80%);color:inherit;font:400 16px/1.35 var(--ae-gd-display);text-decoration:none;text-align:left;cursor:pointer;transition:background .15s ease,box-shadow .15s ease}
+.ae-th-open:is(:hover,:focus-visible){background:linear-gradient(90deg,color-mix(in srgb,var(--ae-g) 24%,transparent),var(--ae-gd-clear) 90%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ae-g) 50%,transparent)}
+.ae-th-open:focus-visible{outline:2px solid var(--ae-gd-cyan);outline-offset:2px}
+.ae-th-text{display:grid;gap:4px;min-width:0}
+.ae-th-name{font:400 var(--ae-gd-fs-card)/1.2 var(--ae-gd-font-title);color:var(--ae-gd-ink)}
+.ae-th-fit{position:absolute;top:10px;right:10px;font:600 12px/1 var(--ae-gd-display);letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;color:var(--ae-gd-gold-ink);background:var(--ae-gd-gold-fill)}
+.ae-th-fit[data-fit="close"]{color:var(--ae-gd-gold);background:transparent;border:1px solid var(--ae-gd-gold)}
+.ae-th-card[data-fit="best"] .ae-th-open{box-shadow:inset 0 0 0 1px var(--ae-gd-gold),0 0 22px var(--ae-gd-gold-glow)}
 .ae-th-card[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}.ae-th-card[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
-.ae-th-card img{width:96px;height:96px;border-radius:6px;box-shadow:0 0 0 1px color-mix(in srgb,var(--ae-g) 55%,transparent),0 0 20px color-mix(in srgb,var(--ae-g) 30%,transparent)}
-body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-th-card h3{margin:0 0 4px}
-body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-th-big{margin:0;font-size:15px;color:var(--ae-gd-muted)}
+.ae-th-open img{width:96px;height:96px;border-radius:6px;box-shadow:0 0 0 1px color-mix(in srgb,var(--ae-g) 55%,transparent),0 0 20px color-mix(in srgb,var(--ae-g) 30%,transparent)}
+.ae-th-big{font-size:15px;color:var(--ae-gd-muted)}
 .ae-th-big b{font:400 34px/1.1 var(--ae-gd-font-title);color:var(--ae-g)}
-body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-th-chance{margin:6px 0 0;font-size:15px;color:var(--ae-gd-ink-soft)}
+.ae-th-chance{margin-top:2px;font-size:15px;color:var(--ae-gd-ink-soft)}
 .ae-th-chance em{display:block;font-style:normal;color:var(--ae-gd-muted)}
-@media (max-width:1200px){.ae-th-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){
   .ae-th-cards{grid-template-columns:minmax(0,1fr)}
-  .ae-th-card{grid-template-columns:72px minmax(0,1fr)}.ae-th-card img{width:72px;height:72px}
+  .ae-th-open{grid-template-columns:72px minmax(0,1fr)}.ae-th-open img{width:72px;height:72px}
   .ae-th-pick .ae-btn{min-width:0;flex:1}
 }
+
+/* The Theostone detail card, in the game's tooltip look: a dark panel lit in the grade colour. */
+.ae-th-dialog{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 32px);padding:0;border:0;background:transparent;color:var(--ae-gd-ink)}
+.ae-th-dialog::backdrop{background:color-mix(in srgb,var(--ae-gd-deep) 80%,transparent)}
+.ae-th-detail{--ae-g:var(--ae-grade-unique);padding:26px 28px 28px;background:linear-gradient(180deg,var(--ae-gd-raised),var(--ae-gd-panel));border-top:3px solid var(--ae-g);box-shadow:0 0 0 1px color-mix(in srgb,var(--ae-g) 40%,transparent),0 24px 60px rgba(0,0,0,.6)}
+.ae-th-detail[data-grade="rare"]{--ae-g:var(--ae-grade-rare)}.ae-th-detail[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}
+.ae-th-detail header{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:18px;align-items:center}
+.ae-th-detail header img{width:96px;height:96px;border-radius:6px;box-shadow:0 0 24px color-mix(in srgb,var(--ae-g) 45%,transparent)}
+.ae-th-kind{margin:0 0 6px;font:600 13px/1.2 var(--ae-gd-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ae-g)}
+.ae-th-detail h2{margin:0;font:400 34px/1.1 var(--ae-gd-font-title);color:var(--ae-gd-ink)}
+.ae-th-close{min-height:44px}
+.ae-th-what{margin:20px 0 0;font-size:18px;line-height:1.5;color:var(--ae-gd-ink)}
+.ae-th-ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0 0;padding:0;list-style:none}
+.ae-th-ladder li{--ae-g:var(--ae-grade-rare);display:grid;gap:4px;padding:12px;border:1px solid color-mix(in srgb,var(--ae-g) 35%,transparent);opacity:.72}
+.ae-th-ladder li[data-grade="epic"]{--ae-g:var(--ae-grade-epic)}.ae-th-ladder li[data-grade="unique"]{--ae-g:var(--ae-grade-unique)}
+.ae-th-ladder li[aria-current]{opacity:1;background:color-mix(in srgb,var(--ae-g) 14%,transparent);box-shadow:inset 0 0 0 1px var(--ae-g)}
+.ae-th-ladder span{font:600 12px/1 var(--ae-gd-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ae-g)}
+.ae-th-ladder b{font:400 28px/1.1 var(--ae-gd-font-title);color:var(--ae-gd-ink)}
+.ae-th-ladder em{font-style:normal;font-size:14px;color:var(--ae-gd-muted)}
+.ae-th-facts{display:flex;flex-wrap:wrap;gap:10px 28px;margin:18px 0 0;padding:0;list-style:none}
+.ae-th-facts li{display:grid;gap:2px}
+.ae-th-facts span{font:600 12px/1 var(--ae-gd-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-th-facts b{font-size:17px;color:var(--ae-gd-ink)}
+.ae-th-rule{margin:16px 0 0;font-size:15px;color:var(--ae-gd-muted)}
+.ae-th-verdict{margin-top:22px;padding:16px 18px;border-left:3px solid var(--ae-gd-line-strong);background:var(--ae-gd-deep)}
+.ae-th-verdict[data-fit="best"]{border-left-color:var(--ae-gd-gold)}
+.ae-th-verdict[data-fit="close"]{border-left-color:var(--ae-gd-gold-line)}
+.ae-th-verdict p{margin:6px 0 0;font-size:16px;line-height:1.5;color:var(--ae-gd-ink-soft)}
+.ae-th-verdict .ae-gd-btn{margin-top:12px}
+.ae-th-verdict-tag{display:inline-block;font:600 13px/1 var(--ae-gd-display);letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;color:var(--ae-gd-ink);border:1px solid var(--ae-gd-line-strong)}
+.ae-th-verdict[data-fit="best"] .ae-th-verdict-tag{color:var(--ae-gd-gold-ink);background:var(--ae-gd-gold-fill);border-color:var(--ae-gd-gold-edge)}
+.ae-th-verdict[data-fit="close"] .ae-th-verdict-tag{color:var(--ae-gd-gold);border-color:var(--ae-gd-gold)}
+@media (max-width:760px){
+  .ae-th-detail{padding:20px}
+  .ae-th-detail header{grid-template-columns:64px minmax(0,1fr);}
+  .ae-th-detail header img{width:64px;height:64px}
+  .ae-th-close{grid-column:1/-1}
+  .ae-th-detail h2{font-size:28px}
+  .ae-th-ladder b{font-size:22px}
+}
+body.aetherium-page[data-ae-page="guide"] .ae-th-detail h2::before{content:none;display:none}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-th-detail h2{margin:0;font-size:34px}
