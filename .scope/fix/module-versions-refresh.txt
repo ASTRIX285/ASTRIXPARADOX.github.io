@@ -1,0 +1,6 @@
+astrix-app/tools/build-module-versions.mjs
+astrix-app/module-versions.json
+astrix-app/pages/guardian-workspace-v2/index.html
+astrix-app/pages/guardian-workspace-v2/paradox-build-space/index.html
+astrix-app/pages/loadout/index.html
+.scope/fix/module-versions-refresh.txt
