@@ -902,6 +902,72 @@ await check('Theostone cards: click opens the detail card, the grade ladder, and
   }finally{await linked.context.close();}
 });
 
+// Manastone and Arcana detail cards (design/aetherium-manastone-arcana-cards, 24 Oct 2026): the Theostone card on two more
+// pages. Manastones judge the build from the role order in the data; Arcana has no advice in the data, so no verdict.
+await check('Manastone and Arcana cards: click opens the card, its own link, the build verdict only where the data has advice',async()=>{
+  const enh=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/enhancement.json'),'utf8')).records;
+  const mana=enh.find(record=>record.id==='manastone');
+  const arcana=JSON.parse(await readFile(resolve(root,'astrix-app/games/aion2/data/advisor/gear-sources.json'),'utf8')).records.find(record=>record.id==='arcana-grades');
+  for(const width of [1440,390]){
+    const plain=await open('/hub/aetherium/guide/equipment/manastones/',{live:false,viewport:{width,height:width===390?844:900}});
+    try{
+      await plain.page.waitForSelector('[data-mana-open="hp"]');
+      assert.equal(await plain.page.locator('[data-mana-yours]:not([hidden])').count(),0,'No role marked with no Daeva');
+      await plain.page.click('[data-mana-open="hp"]');
+      await plain.page.waitForSelector('#aeManaDetail[open]');
+      const look=await plain.page.evaluate(()=>{const d=document.querySelector('#aeManaDetail');const box=d.getBoundingClientRect();
+        return {title:d.querySelector('h2').textContent,what:d.querySelector('.ae-th-what').textContent,rank:d.querySelector('.ae-md-ranks b')?.textContent,
+          find:!!d.querySelector('a[href*="aeSearch"]'),inside:box.left>=0&&box.right<=innerWidth,hash:location.hash,focus:document.activeElement?.matches('[data-detail-close]')};});
+      assert.equal(look.title,'HP');
+      assert.match(look.what,new RegExp(`Best roll ${mana.roles.tank.stones[0].top}`),'Best roll from the data');
+      assert.equal(look.rank,'1','Where the tank list ranks it');
+      assert.ok(look.find,'No Daeva: the card offers Find your Daeva');
+      assert.ok(look.inside,`The card fits the screen at ${width}`);
+      assert.equal(look.hash,'#mana-hp','The card has its own link');
+      assert.ok(look.focus,'Focus moves to Close');
+      await plain.page.keyboard.press('Escape');
+      assert.equal(await plain.page.locator('#aeManaDetail[open]').count(),0,'Escape closes it');
+      assert.ok(await plain.page.evaluate(()=>document.activeElement?.matches('[data-mana-open="hp"]')),'Focus returns to the stone');
+      assert.deepEqual(plain.errors,[]);
+    }finally{await plain.context.close();}
+    const arc=await open('/hub/aetherium/guide/equipment/arcana/#arcana-chalice',{live:false,roster:rosterWith(LV45),viewport:{width,height:width===390?844:900}});
+    try{
+      await arc.page.waitForSelector('#aeArcDetail[open]');
+      const look=await arc.page.evaluate(()=>{const d=document.querySelector('#aeArcDetail');const box=d.getBoundingClientRect();
+        return {title:d.querySelector('h2').textContent,ladder:[...d.querySelectorAll('.ae-ad-ladder b')].map(n=>n.textContent),
+          colours:new Set([...d.querySelectorAll('.ae-ad-ladder span')].map(n=>getComputedStyle(n).color)).size,
+          lines:d.querySelectorAll('.ae-ad-lines li').length,verdict:d.querySelectorAll('.ae-th-verdict').length,inside:box.left>=0&&box.right<=innerWidth,
+          text:d.innerText};});
+      assert.equal(look.title,'Chalice','A deep link opens its card');
+      assert.deepEqual(look.ladder,arcana.grades.map(entry=>`+${entry.itemLevel}`),'Item level at each grade, from the data');
+      assert.equal(look.colours,arcana.grades.length,'Each grade in its own colour');
+      assert.equal(look.lines,arcana.lines.length,'Both set lines');
+      assert.equal(look.verdict,0,'No Arcana advice in the data: no verdict, even with a Daeva linked');
+      assert.match(look.text,/Stage 3, item level 2,200\+/,'The first Stage that drops Unique, worked out from the stages');
+      assert.ok(!/undefined|NaN|[–—]/.test(look.text),'No broken text or dash');
+      assert.ok(look.inside,`The card fits the screen at ${width}`);
+      assert.deepEqual(arc.errors,[]);
+    }finally{await arc.context.close();}
+  }
+  const linked=await open('/hub/aetherium/guide/equipment/manastones/#mana-front-back-boost',{live:false,roster:rosterWith(LV45)});
+  try{
+    await linked.page.waitForSelector('#aeManaDetail[open]');
+    const verdict=await linked.page.evaluate(()=>({fit:document.querySelector('.ae-th-verdict')?.dataset.fit,text:document.querySelector('.ae-th-verdict')?.innerText,
+      yours:[...document.querySelectorAll('.ae-st-role[data-yours]')].map(node=>node.dataset.role),
+      marked:[...document.querySelectorAll('.ae-st-role[data-yours] .ae-st-pick[data-fit="best"]')].map(node=>node.dataset.stone),
+      edge:getComputedStyle(document.querySelector('.ae-st-role[data-yours] .ae-st-pick[data-fit="best"]')).boxShadow}));
+    assert.equal(verdict.fit,'best','Front or Back Damage Boost suits a Gladiator DPS');
+    assert.match(verdict.text,/GUIDEDAEVA/);assert.match(verdict.text,/Gladiator/);
+    assert.deepEqual(verdict.yours,['dps'],'The DPS list is marked as the Daeva\'s role');
+    assert.deepEqual(verdict.marked,mana.fit.roles.dps.best,'The stones that suit the build carry the edge');
+    assert.ok(verdict.edge&&verdict.edge!=='none','The edge is drawn');
+    await linked.page.keyboard.press('Escape');
+    await linked.page.click('[data-mana-open="hp"]');
+    assert.equal(await linked.page.$eval('.ae-th-verdict',node=>node.dataset.fit),'other','HP is not the DPS pick');
+    assert.deepEqual(linked.errors,[]);
+  }finally{await linked.context.close();}
+});
+
 await check('never the real Worker or NCSOFT',async()=>{assert.deepEqual(realCalls,[]);});
 
 await browser.close();
