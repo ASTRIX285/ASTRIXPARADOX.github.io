@@ -712,8 +712,16 @@ await check('tool backdrops: a fixed, darkened, decorative photo behind the Asce
       assert.equal(look.zIndex,'-1',`${path}: behind the content`);
       assert.equal(look.inset,'0px 0px',`${path}: the size of the screen`);
       assert.notEqual(look.attach,'fixed',`${path}: never a fixed attachment`);
+      if(name==='daeva-card'){
+        // The Daeva Card's light and dark sides (design/aetherium-light-dark-card, 25 Oct 2026): the key art split in two, each
+        // side with its faction's emblem; the narrow layout keeps both sides, dimmer.
+        for(const file of ['/page-backgrounds/daeva-card-light.jpg','/page-backgrounds/daeva-card-dark.jpg'])assert.ok(look.image.includes(file),`${path}: ${file}`);
+        assert.ok(look.image.indexOf('daeva-card-light')<look.image.indexOf('daeva-card-dark'),`${path}: the light side on the left, the dark on the right`);
+        if(width>=1500)for(const file of ['/faction-emblems/elyos-crest.png','/faction-emblems/asmodian-crest.png'])assert.ok(look.image.includes(file),`${path}: ${file} on its side`);
+      }else{
       assert.ok(look.image.includes(`/page-backgrounds/${name}.jpg`),`${path}: the ${name} photo`);
       assert.match(look.image,/rgba\(7, 11, 20, 0\.65\)|color\(srgb [\d. ]+\/ 0\.65\)/,`${path}: the ground at 65% over the photo`);
+      }
       assert.equal(look.bodyBg,'rgba(0, 0, 0, 0)',`${path}: no solid ground over the layer`);
       assert.equal(look.glows,2,`${path}: the two page glows stay`);
       assert.equal(look.panel,look.solid,`${path}: panels solid over the photo`);
