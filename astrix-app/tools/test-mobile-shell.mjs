@@ -63,7 +63,8 @@ try{
     assert.equal(await page.locator('.ax-menu-btn').getAttribute('aria-expanded'),'true');
     const panel=await page.locator('.ax-drawer-panel').boundingBox();
     assert.equal(Math.round(panel.x),0,'The drawer sits on the left edge');assert.equal(Math.round(panel.height),width<600?844:1180,'Full height');
-    assert.equal(await page.locator('.ax-drawer-links a').count(),8,'All 8 tools');
+    assert.equal(await page.locator('.ax-drawer-links a').count(),9,'Home, the seven tools and The Hub');
+    assert.equal(await page.locator('.ax-drawer-links a').last().getAttribute('href'),'/hub/','The Hub closes the drawer list');
     assert.equal(await page.locator('.ax-drawer-links a[aria-current="page"]').innerText(),'JOURNEY');
     assert.equal(await page.evaluate(()=>document.activeElement.closest('.ax-drawer')!==null),true,'Focus moves into the drawer');
     for(let i=0;i<12;i++)await page.keyboard.press('Tab');
@@ -121,7 +122,7 @@ try{
     const {page,errors}=await open(1600);
     assert.equal(await page.locator('.ax-menu-btn').isVisible(),false);
     assert.equal(await page.locator('.ax-refresh-btn').isVisible(),true);
-    assert.equal(await page.locator('.apx-destination-ribbon a:visible').count(),8);
+    assert.equal(await page.locator('.apx-destination-ribbon a:visible').count(),9,'Home, the seven tools and The Hub');
     assert.deepEqual((await visibleCards(page)).sort(),['1','2','3']);
     assert.deepEqual(errors,[]);await page.close();
   }

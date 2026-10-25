@@ -32,8 +32,10 @@ try{
    await page.addScriptTag({url:origin+'/astrix-app/shared/astrix-destination-ribbon.js'});
    await page.locator('.apx-destination-ribbon a').first().waitFor();
    if(route==='reports')await page.locator('#reportsWorkspace').evaluate(node=>node.innerHTML='<p role="status">Reports unavailable</p>');
-   // Approved ribbon (28 Sep 2026): Home plus seven tools as plain-text tabs.
-   const links=page.locator('.apx-destination-ribbon a');assert.equal(await links.count(),8);
+   // Approved ribbon (28 Sep 2026): Home plus seven tools as plain-text tabs, then The Hub (Miguel, 25 Oct 2026).
+   const links=page.locator('.apx-destination-ribbon a');assert.equal(await links.count(),9);
+   assert.equal(await links.last().getAttribute('href'),'/hub/','The Hub is the last tab');
+   assert.equal((await links.last().innerText()).trim().toUpperCase(),'THE HUB');
    assert.equal(await links.locator('..').first().evaluate(node=>getComputedStyle(node.parentElement).gap),'2px');
    const measures=await links.evaluateAll(nodes=>nodes.map(node=>{
     const style=getComputedStyle(node),rect=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);const text=range.getBoundingClientRect();
