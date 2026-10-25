@@ -58,3 +58,9 @@ Six screenshots Miguel took in AION 2 (NCSOFT's game world and art) and supplied
   Gathering page.
 
 Placement and optimisation only. The underlying art is NCSOFT's.
+
+## Faction emblems, 25 October 2026
+
+`astrix-app/pages/aetherium/images/faction-emblems/elyos.png` and `asmodian.png` are NCSOFT's Elyos and Asmodian emblems,
+from images Miguel supplied on 25 October 2026. They are cut from their light backgrounds and recoloured to read on a dark
+panel. This is presentation only. The emblems are NCSOFT's art.

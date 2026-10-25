@@ -128,7 +128,27 @@ try {
         assert.equal(report.gradient,'none',`${id}: clean panel card, no gradient`);
         assert.equal(report.background,'rgb(19, 28, 41)',`${id}: card on the Guide panel colour`);
         assert.equal(report.edge,'rgba(217, 210, 192, 0.35)',`${id}: ivory hairline edge`);
-      } else if(report.facts){assert.ok(report.radius>=12,`${id}: rounded cylinder cards`);assert.match(report.gradient,/linear-gradient/,`${id}: lit card`);}
+      } else if(report.facts&&id!=='about'){assert.ok(report.radius>=12,`${id}: rounded cylinder cards`);assert.match(report.gradient,/linear-gradient/,`${id}: lit card`);}
+      // About in pictures (design/aetherium-about-page, 25 Oct 2026): each faction a photo panel with its emblem, in its own
+      // colour; the rules as four tiles; one picture per story beat; Season 1 as numbers.
+      if(id==='about'){
+        const look=await page.evaluate(async()=>{
+          for(const img of document.querySelectorAll('.ae-ab-faction img,.ae-ab-beat-img')){img.loading='eager';if(!img.complete)await new Promise(done=>{img.onload=img.onerror=done;});}
+          const panels=[...document.querySelectorAll('.ae-ab-faction')].map(el=>({side:el.dataset.side,h:el.getBoundingClientRect().height,photo:el.querySelector('.ae-ab-faction-img')?.naturalWidth>0,emblem:el.querySelector('.ae-ab-emblem')?.naturalWidth>0,
+            colour:getComputedStyle(el,'::after').backgroundColor}));
+          return {panels,rules:document.querySelectorAll('.ae-ab-rule').length,beats:document.querySelectorAll('.ae-ab-beat').length,art:[...document.querySelectorAll('.ae-ab-beat-img')].filter(img=>img.naturalWidth>0).length,
+            story:document.querySelectorAll('[data-fact="story"] li').length,numbers:[...document.querySelectorAll('.ae-ab-numbers b')].map(b=>b.textContent),cap:document.querySelector('[data-season-cap]')?.textContent};
+        });
+        assert.deepEqual(look.panels.map(p=>p.side),['elyos','asmodian'],'Both factions, Elyos first');
+        assert.ok(look.panels.every(p=>p.photo&&p.emblem),'Each faction shows its photo and its emblem');
+        assert.ok(look.panels.every(p=>p.h>=320),`Faction panels are tall (${look.panels.map(p=>Math.round(p.h))})`);
+        assert.notEqual(look.panels[0].colour,look.panels[1].colour,'Each faction in its own colour');
+        assert.equal(look.rules,4,'Four faction rule tiles');
+        assert.equal(look.beats,look.story,'One picture per story beat');
+        assert.equal(look.art,look.beats,'Every story picture loads');
+        assert.equal(look.cap,'Lv 45');
+        assert.deepEqual(look.numbers.slice(-2),['30 Sept','5 Oct'],'Launch dates as numbers');
+      }
       if(REDESIGNED.has(id)){
         const scale=await page.evaluate(()=>{
           const h=document.querySelector('.ae-gg-card .ae-gg-h');
