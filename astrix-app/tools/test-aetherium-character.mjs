@@ -1184,8 +1184,17 @@ await check('Gear grid markers: a 2s gold pulse only on Enchant items, solid und
 await check('Gear grid hover: a name tooltip with the name in its grade colour, the grade, the slot and +N of the cap',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45)}`);
   await settled(page);
-  await page.hover('#aeGear [data-slot-pos="5"] button');
-  await page.waitForSelector('#aeGearTip:not([hidden])');
+  // Scroll first: a hover that scrolls the tile into view fires the page's hide-on-scroll right after the tip shows, and
+  // a tile redrawn by the background detail loader hides it too. Hover again until the tip holds (a real pointer would).
+  const tile=page.locator('#aeGear [data-slot-pos="5"] button');
+  await tile.scrollIntoViewIfNeeded();
+  let shown=false;
+  for(let attempt=0;attempt<5&&!shown;attempt++){
+    await page.mouse.move(5,5);
+    await tile.hover();
+    shown=await page.waitForSelector('#aeGearTip:not([hidden])',{timeout:2000}).then(()=>true,()=>false);
+  }
+  assert.ok(shown,'The tip shows on hover');
   const tip=await page.$eval('#aeGearTip',el=>({text:el.innerText.replace(/\s+/g,' '),colour:getComputedStyle(el.querySelector('strong')).color}));
   assert.match(tip.text,/^Pilgrim Breastplate Epic · Torso · \+0 of 10 · Item level 38$/);
   assert.equal(tip.colour,'rgb(88, 168, 255)','Name in the Epic colour');

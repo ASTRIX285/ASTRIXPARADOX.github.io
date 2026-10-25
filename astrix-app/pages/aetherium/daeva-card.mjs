@@ -356,9 +356,13 @@ function renderCompareLink(current) {
 function renderSwitcher(current) {
   const box = $('#aeRosterSwitchBox');
   box.hidden = current.servers.length < 2;
-  $('#aeRosterSwitch').innerHTML = current.servers
+  // Rebuilt only when the list of servers changes: a redraw while someone is picking would swap the options out from
+  // under the pick (and close an open list), so the pick would land on options no longer on the page.
+  const select = $('#aeRosterSwitch');
+  const options = current.servers
     .map(item => `<option value="${esc(item.id)}">${esc(item.serverName)} · ${esc(regionShort(item.region))}</option>`).join('');
-  $('#aeRosterSwitch').value = current.rosterId ?? '';
+  if (select.dataset.options !== options) { select.innerHTML = options; select.dataset.options = options; }
+  if (select.value !== (current.rosterId ?? '')) select.value = current.rosterId ?? '';
 }
 
 function renderResults(rows) {
@@ -430,20 +434,25 @@ function failedRead(error, retry) {
   if (!state.model) showIntro(true);
 }
 
+/* Reads can overlap (the first load, a search, a roster pick). Only the newest one may show its Daeva: an older read
+   that answers late is dropped, so it never puts a Daeva back over the one just picked. */
+let readSeq = 0;
 async function importCharacter(ref) {
+  const seq = ++readSeq;
   setBusy(true);
   const before = savedLevel(ref);
   try {
     const { model, source } = await loadCharacter(ref);
+    if (seq !== readSeq) return;
     if (!roster.add(model, source)) showNotice(`${model.profile.server.name} already has ${roster.slots} Daevas saved. Remove one to add ${model.profile.name}.`, 'warn');
     else showNotice('');
     show(model, source, ref, before);
     history.replaceState(null, '', `?${new URLSearchParams({ serverId: ref.serverId, characterId: ref.characterId, region: regionOf(ref.region) })}`);
   } catch (error) {
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    failedRead(error, () => importCharacter(ref));
+    if (seq === readSeq) failedRead(error, () => importCharacter(ref));
   } finally {
-    setBusy(false);
+    if (seq === readSeq) setBusy(false);
   }
 }
 
@@ -556,13 +565,13 @@ async function start() {
   const sameDaeva = active && String(active.serverId) === String(ref.serverId) && active.characterId === ref.characterId;
   prefetchAdvisor(sameDaeva ? active.className : null);
   const before = savedLevel(ref);
+  const seq = ++readSeq;
   try {
     const { model, source } = await loadCharacter(ref);
-    show(model, source, ref, before);
+    if (seq === readSeq) show(model, source, ref, before);
   } catch (error) {
-    showLoading(false);
     if (!(error instanceof ArmoryUnavailable)) throw error;
-    failedRead(error, () => importCharacter(ref));
+    if (seq === readSeq) { showLoading(false); failedRead(error, () => importCharacter(ref)); }
   }
   markReady();
 }

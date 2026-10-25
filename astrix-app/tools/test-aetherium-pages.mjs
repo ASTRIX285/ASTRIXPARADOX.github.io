@@ -1305,6 +1305,8 @@ await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or
   // Every width the pages render (10 Oct 2026): a media query can shrink a size at one width only (the class tiles did at 819 and under).
   for(const width of [390,820,1280,1600,1920])for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
     const {page,context}=await open(path,{live:true,extra,viewport:{width,height:width<800?844:1000}});
+    // The Daeva on the page first: measuring while the card is still arriving compares two different pages.
+    await page.waitForSelector(path.includes('/gear/')?'#aeGear [data-slot-pos]':'#aeName');
     const bad=await typeAudit(page);
     assert.deepEqual(bad,[],`${path} at ${width}:\n${bad.join('\n')}`);
     const labels=await labelAudit(page);
@@ -1378,7 +1380,9 @@ await check('crisp tokens: muted text at least 4.5:1 and the hairline at least 1
 await check('crisp surfaces: AX logo, strobe stroke and notched corners on tabs, buttons and tiles; squared surfaces with pills only on chips and counts; gold gradient inside the notched primary action; outline on the rest',async()=>{
   const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':ROSTER8()}});
   // Find character turns from gold to an outline once the Daeva is on the card; its colour change animates over 150ms.
-  await page.waitForTimeout(250);
+  // Wait for the card and for that change to finish, not a fixed time (a loaded machine reads the card later).
+  await page.waitForSelector('#aeName');
+  await page.waitForFunction(()=>document.querySelector('#aeFind').getAnimations().every(animation=>animation.playState!=='running'));
   const logo=await page.$eval('header.apx-destination-header .apx-destination-brand',el=>({href:el.getAttribute('href'),img:Boolean(el.querySelector('img')),shown:el.querySelector('img').getBoundingClientRect().width>0,wordmark:el.querySelector('.ax-wordmark')?.textContent.replace(/\s+/g,'')}));
   assert.deepEqual(logo,{href:'/',img:true,shown:true,wordmark:'ASTRIXPARADOX'},'The AX logo beside the wordmark, linking home');
   // The strobe stroke: the shell draws it as a pseudo-element with the pulse animation, in the Aetherium blue.
