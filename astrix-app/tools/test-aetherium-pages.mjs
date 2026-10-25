@@ -1460,12 +1460,13 @@ await check('crisp ribbon: one raised bar, exactly one active tab as a dark gold
 });
 
 for(const [width,height] of [[1600,1000],[1920,1080]]){
-  await check(`crisp width at ${width}: content 1440 wide with 24px gutters, roster one row of 8 cards with a class icon, no empty band`,async()=>{
+  await check(`crisp width at ${width}: content 1200 wide with 24px gutters (the Daevas stand in the margins), roster one row of 8 cards with a class icon, no empty band`,async()=>{
     const {page,context}=await open('/hub/aetherium/',{live:true,viewport:{width,height},extra:{'aetherium.roster.v2':ROSTER8()}});
     const main=await page.$eval('main',el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {left:r.left,width:r.width,padL:parseFloat(s.paddingLeft),padR:parseFloat(s.paddingRight)};});
-    assert.equal(main.width-main.padL-main.padR,1440,'Content is 1440 wide');
+    // Daeva Card light and dark sides (Miguel, 25 Oct 2026): the card is 1200 wide so the two Daevas stand tall in the margins.
+    assert.equal(main.width-main.padL-main.padR,1200,'Content is 1200 wide');
     assert.equal(main.padL,24);
-    assert.ok(Math.abs(main.left+main.padL-(width-1440)/2)<=1,'Centred');
+    assert.ok(Math.abs(main.left+main.padL-(width-1200)/2)<=1,'Centred');
     const cards=await page.$$eval('.ae-roster-slot.is-filled',items=>items.map(el=>{const r=el.getBoundingClientRect(),img=el.querySelector('img.ae-roster-class');return {top:Math.round(r.top),height:r.height,icon:img?{src:img.getAttribute('src'),w:img.getBoundingClientRect().width,h:img.getBoundingClientRect().height}:null};}));
     assert.equal(cards.length,8);
     assert.equal(new Set(cards.map(c=>c.top)).size,1,'One row of 8');
