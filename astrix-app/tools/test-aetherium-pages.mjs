@@ -1749,6 +1749,29 @@ await check('Compare: two Daevas from different regions side by side, two calls 
     assert.equal(await page.locator('[data-compare-section="main-stats"] .ae-cmp-row').count(),6);
     assert.equal(await page.locator('[data-compare-section="deity-stats"] .ae-cmp-row').count(),10);
     assert.ok(await page.locator('[data-compare-section="main-stats"] .ae-stat-icon').count()===6,'Stat icons from the sprite');
+    // Head to head (Miguel, 25 Oct 2026): the side ahead shows its lead, each number has a bar sized against the larger
+    // of the two, a scoreboard counts the rows each Daeva leads, and the identity header carries the Daeva Card's chips.
+    const cp=[lv45Body.info.profile.combatPower,39000];
+    assert.equal(await plainText(page,'[data-compare-row="combat-power"] .is-a .ae-cmp-lead'),`+${(cp[0]-cp[1]).toLocaleString('en-GB')}`);
+    assert.equal(await page.locator('[data-compare-row="combat-power"] .is-b .ae-cmp-lead').count(),0,'Only the side ahead shows a lead');
+    assert.equal(await page.locator('[data-compare-row="item-level"] .ae-cmp-lead').count(),0,'A tie shows no lead');
+    if(width>520){
+      const bars=await page.$$eval('[data-compare-row="combat-power"] .ae-cmp-bar',els=>els.map(el=>{const t=el.getBoundingClientRect(),f=el.firstElementChild.getBoundingClientRect();return {track:t.width,fill:f.width,left:t.left,right:t.right,fl:f.left,fr:f.right};}));
+      assert.equal(bars.length,2,'A bar on each side');
+      assert.ok(Math.abs(bars[0].fill/bars[0].track-1)<0.02,'The larger number fills its bar');
+      assert.ok(Math.abs(bars[1].fill/bars[1].track-cp[1]/cp[0])<0.03,`The smaller one is in proportion (${bars[1].fill}/${bars[1].track})`);
+      const label=await boxOf(page,'[data-compare-row="combat-power"] .ae-cmp-label');
+      assert.ok(bars[0].right<=label.left+0.5&&bars[1].left>=label.right-0.5,'The bars sit against the label');
+      assert.ok(Math.abs(bars[0].fr-bars[0].right)<1&&Math.abs(bars[1].fl-bars[1].left)<1,'Each bar grows out from the label');
+    }
+    const score=await page.$$eval('#aeCmpScore .ae-cmp-score-side b',els=>els.map(el=>Number(el.textContent)));
+    assert.deepEqual(score,[await page.locator('[data-lead="a"]').count(),await page.locator('[data-lead="b"]').count()],'The scoreboard counts the rows each Daeva leads');
+    assert.match(await plainText(page,'#aeCmpScore .ae-cmp-verdict'),/^(TESTDAEVA|SECONDDAEVA) leads$|^Level pegging$/);
+    const chips=await page.$$eval('#aeCmpHeads .ae-cmp-who',els=>els.map(el=>[...el.querySelectorAll('.ae-chips li')].map(li=>li.textContent)));
+    assert.deepEqual(chips,[['Gladiator','Elyos','Meslamtaeda','Europe','Lv 45'],['Sorcerer','Asmodian','AS Asmodian 1','Asia','Lv 45']],'The Daeva Card chips on each side');
+    const look=await page.evaluate(()=>({title:parseFloat(getComputedStyle(document.querySelector('[data-compare-section="overview"] .ae-section-title')).fontSize),value:parseFloat(getComputedStyle(document.querySelector('[data-compare-row="combat-power"] .ae-cmp-cell')).fontSize),name:document.querySelector('.ae-cmp-name').scrollWidth<=document.querySelector('.ae-cmp-name').clientWidth+1}));
+    assert.ok(look.title>=20&&look.value>=16,`Section heads ${look.title}px, values ${look.value}px`);
+    assert.ok(look.name,'The name fits its card');
     assert.match(await seen(page,'[data-compare-row="board-Nezekan"]'),/^51% Nezekan 51%$/);
     assert.match(await seen(page,'[data-compare-row="titles-attack"]'),/^19 of 103 Offensive 19 of 103$/);
     // Gear: only the icon on its grade tile and one short line (grade, enchant, item level). No item names.
@@ -1767,7 +1790,21 @@ await check('Compare: two Daevas from different regions side by side, two calls 
     assert.ok(copy.h>=44,'44px target');
     const crimson=await page.evaluate(()=>{const el=document.createElement('i');el.style.color='var(--ae-astrix-hi)';document.body.append(el);const c=getComputedStyle(el).color;el.remove();return c;});
     assert.notEqual(copy.color,crimson,'Copy link is not red');
-    assert.equal(await plainText(page,'#aeCmpNote'),'The higher number is in colour.');
+    assert.equal(await plainText(page,'#aeCmpNote'),'Green is the better side, red the worse. Key marks a stat that class ranks high.');
+    // Green better, red worse (Miguel, 25 Oct 2026): the bars at every width, the lead and the pros and cons.
+    const tone=await page.evaluate(()=>{const css=getComputedStyle(document.documentElement);const probe=v=>{const el=document.createElement('i');el.style.color=v;document.body.append(el);const c=getComputedStyle(el).color;el.remove();return c;};return {better:probe('var(--ae-better)'),worse:probe('var(--ae-worse)')};});
+    const fills=await page.$$eval('[data-compare-row="combat-power"] .ae-cmp-bar i',els=>els.map(el=>({image:getComputedStyle(el).backgroundImage,h:el.getBoundingClientRect().height})));
+    assert.ok(fills.length===2&&fills.every(f=>f.h>0),`Both bars show at ${width}`);
+    const rgb=c=>c.replace(/^rgb\((\d+), (\d+), (\d+)\)$/,'$1, $2, $3');
+    assert.ok(fills[0].image.includes(`rgb(${rgb(tone.better)})`),`The leading bar is green (${fills[0].image})`);
+    assert.ok(fills[1].image.includes(`rgb(${rgb(tone.worse)})`),`The trailing bar is red (${fills[1].image})`);
+    assert.equal(await page.$eval('[data-compare-row="combat-power"] .is-higher b',el=>getComputedStyle(el).color),tone.better,'The better number is green');
+    const pcs=await page.$$eval('#aeCmpPros .ae-cmp-pc',els=>els.map(el=>({pros:el.querySelectorAll('.is-pro.ae-cmp-pc-item').length,cons:el.querySelectorAll('.is-con.ae-cmp-pc-item').length,first:el.querySelector('.ae-cmp-pc-item .ae-cmp-pc-stat')?.textContent.trim()??null})));
+    assert.equal(pcs.length,2,'Pros and cons for each Daeva');
+    assert.equal(pcs[0].pros,pcs[1].cons>6?6:pcs[1].cons,'One side\'s pros are the other side\'s cons');
+    assert.ok(await page.locator('#aeCmpPros .ae-cmp-pc-item.is-pro').count()>0,'Something is stronger like for like');
+    assert.equal(await page.$eval('#aeCmpPros .ae-cmp-pc-item.is-pro .ae-cmp-pc-gap',el=>getComputedStyle(el).color),tone.better);
+    assert.equal(await page.$eval('#aeCmpPros .ae-cmp-pc-item.is-con .ae-cmp-pc-gap',el=>getComputedStyle(el).color),tone.worse);
     const note=await boxOf(page,'#aeCmpNote'),first=await boxOf(page,'[data-compare-section="overview"]');
     assert.ok(note.bottom<=first.top,'The note sits above the first section');
     if(process.env.AE_SHOTS&&(width===390||width===1600))await page.screenshot({path:resolve(process.env.AE_SHOTS,`compare-${width}.png`),fullPage:true});
