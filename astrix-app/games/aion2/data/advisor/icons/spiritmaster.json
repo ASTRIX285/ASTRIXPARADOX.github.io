@@ -5,74 +5,87 @@
       "id": "spiritmaster-skill-icons",
       "class": "Spiritmaster",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 16010000,
           "name": "Cold Shock",
           "icon": "ICON_EL_SKILL_001.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 16040000,
           "name": "Combustion",
           "icon": "ICON_EL_SKILL_004.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 16100000,
           "name": "Summon: Fire Spirit",
           "icon": "ICON_EL_SKILL_010.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 16110000,
           "name": "Summon: Water Spirit",
           "icon": "ICON_EL_SKILL_011.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 16140000,
           "name": "Jointstrike: Curse",
           "icon": "ICON_EL_SKILL_014.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 16340000,
           "name": "Rapid Scattershot",
           "icon": "ICON_EL_SKILL_034.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 16130000,
           "name": "Summon: Earth Spirit",
           "icon": "ICON_EL_SKILL_013.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 16330000,
           "name": "Dimensional Control",
           "icon": "ICON_EL_SKILL_033.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 16120000,
           "name": "Summon: Wind Spirit",
           "icon": "ICON_EL_SKILL_012.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 16070000,
           "name": "Soul's Cry",
           "icon": "ICON_EL_SKILL_007.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 16300000,
           "name": "Elemental Fusion",
           "icon": "ICON_EL_SKILL_030.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 16200000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 16240000,
           "name": "Jointstrike: Destructive Attack",
           "icon": "ICON_EL_SKILL_024.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16190000,
           "name": "Enhance: Spirit's Benediction",
           "icon": "ICON_EL_SKILL_019.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16370000,
           "name": "Flame Blessing",
           "icon": "ICON_EL_SKILL_037.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16250000,
           "name": "Summon: Ancient Spirit",
           "icon": "ICON_EL_SKILL_025.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16150000,
           "name": "Jointstrike: Corrode",
           "icon": "ICON_EL_SKILL_015.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16360000,
           "name": "Kaisinel's Power",
           "icon": "ICON_EL_SKILL_036.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16060000,
           "name": "Siphon",
           "icon": "ICON_EL_SKILL_006.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16080000,
           "name": "Cry of Terror",
           "icon": "ICON_EL_SKILL_008.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16220000,
           "name": "Cursed Cloud",
           "icon": "ICON_EL_SKILL_022.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16230000,
           "name": "Seize Magic",
           "icon": "ICON_EL_SKILL_023.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16260000,
           "name": "Magic Block",
           "icon": "ICON_EL_SKILL_026.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16700000,
           "name": "Assault Terror",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 16170000,
           "name": "Command: Proxy",
           "icon": "ICON_EL_SKILL_017.png",
           "category": "Stigma",
@@ -223,6 +249,16 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-skills",
+          "title": "Skill ids and Specialty badge art (perk id = skill id + 10 x the Specialty line, 1 to 5), used with Miguel's approval, 25 Oct 2026",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "region": "global",
+          "reliability": "high"
         }
       ]
     }

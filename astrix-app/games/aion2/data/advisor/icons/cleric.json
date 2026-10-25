@@ -5,74 +5,87 @@
       "id": "cleric-skill-icons",
       "class": "Cleric",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 17010000,
           "name": "Earth's Retribution",
           "icon": "ICON_CL_SKILL_001.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 17040000,
           "name": "Judgment Thunder",
           "icon": "ICON_CL_SKILL_004.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 17080000,
           "name": "Debilitating Mark",
           "icon": "ICON_CL_SKILL_008.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 17150000,
           "name": "Divine Aura",
           "icon": "ICON_CL_SKILL_015.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 17070000,
           "name": "Chain of Torment",
           "icon": "ICON_CL_SKILL_007.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 17370000,
           "name": "Lightning Strike Scattershot",
           "icon": "ICON_CL_SKILL_037.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 17090000,
           "name": "Light of Regeneration",
           "icon": "ICON_CL_SKILL_009.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 17350000,
           "name": "Condemnation",
           "icon": "ICON_CL_SKILL_035.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 17100000,
           "name": "Healing Light",
           "icon": "ICON_CL_SKILL_010.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 17120000,
           "name": "Radiant Recovery",
           "icon": "ICON_CL_SKILL_012.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 17060000,
           "name": "Bolt",
           "icon": "ICON_CL_SKILL_006.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 17240000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 17280000,
           "name": "Power Burst",
           "icon": "ICON_CL_SKILL_027.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17290000,
           "name": "Absolution",
           "icon": "ICON_CL_SKILL_028.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17160000,
           "name": "Benevolence",
           "icon": "ICON_CL_SKILL_047.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17430000,
           "name": "Prayer of Amplification",
           "icon": "ICON_CL_SKILL_044.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17390000,
           "name": "Summon Resurrection",
           "icon": "ICON_CL_SKILL_039.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17400000,
           "name": "Earth Punishment",
           "icon": "ICON_CL_SKILL_040.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17270000,
           "name": "Salvation",
           "icon": "ICON_CL_SKILL_026.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17190000,
           "name": "Root",
           "icon": "ICON_CL_SKILL_019.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17410000,
           "name": "Light of Protection",
           "icon": "ICON_CL_SKILL_041.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17420000,
           "name": "Yustiel's Power",
           "icon": "ICON_CL_SKILL_042.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17300000,
           "name": "Voice of Doom",
           "icon": "ICON_CL_SKILL_029.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17700000,
           "name": "Assault Mark",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 17440000,
           "name": "Noble Aura",
           "icon": "ICON_CL_SKILL_046.png",
           "category": "Stigma",
@@ -223,6 +249,16 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "ref": "mb-skills",
+          "title": "Skill ids and Specialty badge art (perk id = skill id + 10 x the Specialty line, 1 to 5), used with Miguel's approval, 25 Oct 2026",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "region": "global",
+          "reliability": "high"
         }
       ]
     }

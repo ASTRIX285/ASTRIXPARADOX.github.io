@@ -232,6 +232,50 @@ function planSkills(build, catalogue, level, model, facts, capRule) {
   });
 }
 
+/**
+ * The in-game badge of one Specialty pick (Miguel, 25 Oct 2026: show the player the icon they pick in game). The badge
+ * is keyed by the game's perk id, the skill's game id plus 10 for each position in the skill's Specialty list (1 to 5,
+ * the order the game lists them; checked against every skill in the catalogue). Only a pick that matches exactly one
+ * Specialty line gets a badge: two lines at its level and no matching text means no badge, never a guess. Null when
+ * the skill has no game id or the data names no badge source (icons/<class>.json, perkIconBase).
+ */
+export function specialtyIcon(skill, pick, gameSkill) {
+  if (!Number.isInteger(gameSkill?.id) || !gameSkill.perkIconBase) return null;
+  const perks = Array.isArray(skill?.perks) ? skill.perks : [];
+  const atLevel = perks.filter(perk => perk.skillLevel === pick.skillLevel);
+  const perk = atLevel.length === 1 ? atLevel[0] : atLevel.find(item => item.text === (pick.perk ?? pick.pick));
+  if (!perk) return null;
+  return `${gameSkill.perkIconBase}${gameSkill.id + 10 * (perks.indexOf(perk) + 1)}.webp`;
+}
+
+/**
+ * Specialty targets (Miguel, 25 Oct 2026): for each key skill, every Specialty pick the build uses in skill-level order,
+ * whether the Daeva has it open, and the skill level that puts the skill at its maximum for the build (the highest pick),
+ * with how it is reached: Mastery up to the cap, then Daevanion nodes. A level the build's sources cannot reach says
+ * exactly what is missing; nothing is assumed. skills: plan.skills. cap: the Mastery cap (mechanics, mastery-cap).
+ */
+export function specialtyTargets(skills, cap = null, gameIcons = new Map()) {
+  return (skills ?? []).filter(skill => skill.picks?.length).map(skill => {
+    const picks = [...skill.picks].sort((a, b) => a.skillLevel - b.skillLevel).map(pick => ({
+      skillLevel: pick.skillLevel, pick: pick.pick, perk: pick.perk ?? pick.pick,
+      open: skill.skillLevel === null ? null : skill.skillLevel >= pick.skillLevel,
+      reach: pick.reach ?? null,
+      icon: specialtyIcon(skill, pick, gameIcons.get(skill.name))
+    }));
+    const top = picks.at(-1);
+    const reachable = !top.reach || top.reach.reachable !== false;
+    const route = !top.reach ? `Mastery to Lv ${top.skillLevel}` : top.reach.reachable ? top.reach.text : null;
+    // The highest level the build's own sources reach when the top pick is beyond it: the Mastery cap plus the Daevanion
+    // nodes that raise this skill (reachSkillLevel gives their count; 0 when no node raises it).
+    const best = reachable ? top.skillLevel : (cap ?? 0) + (top.reach?.nodes ?? 0);
+    return {
+      name: skill.name, priority: skill.priority, skillLevel: skill.skillLevel, picks, target: top.skillLevel, reachable, route,
+      short: reachable ? null : { reaches: best, viaNodes: (top.reach?.nodes ?? 0) > 0, missing: top.reach?.text ?? null },
+      next: skill.skillLevel === null ? picks[0] : picks.find(pick => pick.skillLevel > skill.skillLevel) ?? null
+    };
+  });
+}
+
 /** Stigma slots open at this level, with the build's pick for each. */
 function planStigmas(build, level, model, facts, gameIcons = new Map()) {
   if (isPending(build.stigmas)) return { pending: build.stigmas };
@@ -606,11 +650,11 @@ export function daevanionMove(boards) {
     : { board, title: `Spend points on the ${board.name} Daevanion board`, detail: `It is open with no nodes taken. Start with: ${Array.isArray(boards.priorities) ? boards.priorities[0] : 'your rotation skill nodes'}.` };
 }
 
-/** name -> { name, icon (full URL), category, needLevel } from data/advisor/icons/<class>.json. */
+/** name -> { id, name, icon (full URL), category, needLevel, perkIconBase } from data/advisor/icons/<class>.json. */
 function iconIndex(icons, className) {
   const record = (icons?.records ?? []).find(item => item.class === className);
   if (!record) return new Map();
-  return new Map(record.skills.map(skill => [skill.name, { ...skill, icon: `${record.iconBase}${skill.icon}` }]));
+  return new Map(record.skills.map(skill => [skill.name, { ...skill, icon: `${record.iconBase}${skill.icon}`, perkIconBase: record.perkIconBase ?? null }]));
 }
 
 /**
@@ -691,6 +735,7 @@ export function buildAscentPlan({ className, role, team = null, level, data, mod
     nextAt: setup.next,
     now: nowList(lvl, levelBuild, skills, stigmas, daevanion, model, mastery, skillBar, { grades: data.grades ?? null, progression: data.progression, setup }),
     skills,
+    specialtyTargets: specialtyTargets(skills, capRule?.cap ?? null, gameIcons),
     stigmas,
     daevanion,
     stats: build.stats,

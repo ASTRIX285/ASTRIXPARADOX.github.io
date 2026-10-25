@@ -497,6 +497,30 @@ body.aetherium-page.ae-backdrop.ae-sides::before{
 .ae-mspend{margin:0 0 16px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--ae-gold) 45%,var(--ae-hairline));background:color-mix(in srgb,var(--ae-gold) 7%,transparent)}
 .ae-mspend ol{margin:6px 0 0;padding-left:22px;display:grid;gap:4px}
 .ae-mspend small{color:var(--ae-text-muted);margin-left:6px}
+/* Specialty targets (Miguel, 25 Oct 2026): each key skill at its maximum for the build, pick by pick. */
+.ae-spec{margin:0 0 16px;padding:14px 16px;border:1px solid var(--ae-hairline-strong);background:var(--ae-panel)}
+.ae-spec-lead{margin:4px 0 12px;font-size:.9375rem;color:var(--ae-text-muted)}
+.ae-spec-list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.ae-spec-row{display:grid;grid-template-columns:minmax(12rem,16rem) minmax(0,1fr);gap:8px 16px;align-items:center;padding:10px 12px;background:var(--ae-raised);box-shadow:var(--ae-bevel)}
+.ae-spec-skill{display:flex;align-items:center;gap:10px;min-width:0}
+.ae-spec-skill b{display:block;font:700 1.0625rem/1.25 var(--ae-font-ui);color:var(--ae-text)}
+.ae-spec-skill span{display:block;font-size:.875rem;color:var(--ae-text-muted)}
+.ae-spec-picks{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.ae-spec-picks li{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--ae-hairline-strong);border-radius:var(--ae-pill);font-size:.9375rem;color:var(--ae-text)}
+.ae-spec-picks li b{font-weight:700;color:var(--ae-text-muted)}
+.ae-spec-badge{flex:none;width:32px;height:32px;margin:-2px 0 -2px -4px;object-fit:contain}
+.ae-spec-picks li.is-open .ae-spec-badge{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--ae-gold) 70%,transparent))}
+.ae-spec-picks li.is-next .ae-spec-badge{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--ae-ice) 70%,transparent))}
+.ae-spec-picks li small{font:700 .8125rem/1 var(--ae-font-ui);letter-spacing:.02em}
+.ae-spec-picks li.is-open{border-color:color-mix(in srgb,var(--ae-gold) 60%,transparent)}
+.ae-spec-picks li.is-open b,.ae-spec-picks li.is-open small{color:var(--ae-gold)}
+.ae-spec-picks li.is-next{border-color:color-mix(in srgb,var(--ae-ice) 60%,transparent)}
+.ae-spec-picks li.is-next b,.ae-spec-picks li.is-next small{color:var(--ae-ice)}
+.ae-spec-picks li.is-short{border-style:dashed;border-color:color-mix(in srgb,var(--ae-warn) 55%,transparent)}
+.ae-spec-picks li.is-short b,.ae-spec-picks li.is-short small{color:var(--ae-warn)}
+.ae-spec-how{grid-column:2;margin:0;font-size:.9375rem;color:var(--ae-text-muted)}
+.ae-spec-how.is-short{color:var(--ae-warn)}
+@media (max-width:719px){.ae-spec-row{grid-template-columns:minmax(0,1fr)}.ae-spec-how{grid-column:1}}
 /* Skills at the Mastery cap: the tile, then where the next +1 comes from. */
 .ae-mcap-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
 .ae-mcap-list li{display:flex;gap:12px;align-items:center;min-width:0}
