@@ -86,7 +86,7 @@
 
 "/astrix-app/shared/astrix-breach-loader.mjs":"/astrix-app/shared/astrix-breach-loader.mjs?v=55b014bfa8",
 
-"/astrix-app/shared/astrix-destination-ribbon.js":"/astrix-app/shared/astrix-destination-ribbon.js?v=f021649673",
+"/astrix-app/shared/astrix-destination-ribbon.js":"/astrix-app/shared/astrix-destination-ribbon.js?v=a18ecabc3b",
 
 "/astrix-app/shared/local-preview.mjs":"/astrix-app/shared/local-preview.mjs?v=07999f6adb",
 
@@ -123,7 +123,7 @@
   <script>window.APX_LOGO='/img/ax-logo-640.webp';</script>
   <script src="../../shared/astrix-portal-loader.js?v=20260913-live-gate-1&amp;navigation=20260919-1&amp;ready=20260920-1&amp;breach=20260926-1&amp;gloss=20260926-1&amp;single=20260927-2&amp;skin=20260927-entry-2&amp;shell=20260929-2&amp;hub=20261003-1&amp;seamless=20261004-1&amp;recovery=20261004-1"></script>
   <link rel="stylesheet" href="../../shared/astrix-paradox-background.css?v=20260830-global-map-background&amp;neutral=20261016-1">
-  <link rel="stylesheet" href="./home.css?v=20260929-brand-1&amp;facts=20261003-2&amp;neutral=20261016-1">
+  <link rel="stylesheet" href="./home.css?v=20260929-brand-1&amp;facts=20261003-2&amp;neutral=20261016-1&amp;menu=20261025-1">
   <script src="/astrix-app/shared/astrix-destination-ribbon.js?v=20261001-mobile-1&amp;shell=20261001-mobile-1&amp;inv=20261002-1&amp;swr=20261002-1&amp;naming=20261003-1&amp;mark=20261003-1&amp;seamless=20261004-1&amp;warm=20261004-1&amp;prebuild=20261005-1" defer></script>
 </head>
 <body class="home-page forge-paradox-map-background">
@@ -134,15 +134,9 @@
         <span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span>
         <span class="home-brand-page">GUARDIAN HOME</span>
       </a>
-      <nav class="home-tools" aria-label="Open a tool">
-        <a href="../journey/">JOURNEY</a>
-        <a href="../guardian-workspace-v2/">CHARACTER</a>
-        <a href="../forge-loader/">FORGE LOADER</a>
-        <a href="../guardian-workspace-v2/paradox-build-space/">BUILDER</a>
-        <a href="../vault/">STORAGE</a>
-        <a href="../loadout/">ARMOURY</a>
-      </nav>
     </header>
+    <!-- One menu for The Forge (Miguel, 25 Oct 2026): the shared tool bar, Home current, The Hub last. -->
+    <div data-forge-destination-ribbon data-active-destination="home"></div>
 
     <section class="home-signed-out" id="homeSignedOut" hidden aria-labelledby="homeSignedOutTitle">
       <h1 id="homeSignedOutTitle">Connect Bungie to see your Guardian</h1>

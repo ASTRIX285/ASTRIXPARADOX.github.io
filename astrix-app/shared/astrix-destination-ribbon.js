@@ -10,6 +10,9 @@
     Object.freeze({key:'vault',label:'Storage',href:'/astrix-app/pages/vault/'}),
     Object.freeze({key:'loadout',label:'Armoury',href:'/astrix-app/pages/loadout/'})
   ]);
+  // The Hub (Miguel, 25 Oct 2026): the way back to every tool, last on the ribbon and in the menu drawer. It is a plain
+  // link, not a Forge destination, so nothing is prepared for it and the transfer cover never runs for it.
+  const HUB=Object.freeze({href:'/hub/',key:'hub',label:'The Hub'});
 
   const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
   const prepared=new Map();
@@ -141,6 +144,7 @@
   // Tab icons for the slim bar (approved Tool navigation ribbon board, 28 Sep 2026).
   const ICONS=Object.freeze({
     home:'<path d="M3 11l9-7 9 7v9H3z"/>',
+    hub:'<circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M6.5 6.5l3.7 3.7M17.5 6.5l-3.7 3.7M6.5 17.5l3.7-3.7M17.5 17.5l-3.7-3.7"/>',
     journey:'<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/>',
     character:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
     'forge-loader':'<path d="M12 3l8 5v8l-8 5-8-5V8z"/>',
@@ -185,7 +189,8 @@
 
   function render(mount){
     const requested=String(mount.dataset.activeDestination||'journey').trim().toLowerCase();
-    const active=destinations.some(destination=>destination.key===requested)?requested:'journey';
+    // Guardian Home uses the same bar (Miguel, 25 Oct 2026) with Home as the current page.
+    const active=requested==='home'||destinations.some(destination=>destination.key===requested)?requested:'journey';
     const nav=document.createElement('nav');
     nav.className='apx-destination-ribbon';
     nav.setAttribute('aria-label','ASTRIX PARADOX destinations');
@@ -197,6 +202,7 @@
     homeLink.href='/astrix-app/pages/home/';
     homeLink.setAttribute('aria-label','Guardian Home');
     withIcon(homeLink,'home','Home');
+    if(active==='home')homeLink.setAttribute('aria-current','page');
     homeItem.append(homeLink);
     list.append(homeItem);
     destinations.forEach(destination=>{
@@ -208,6 +214,13 @@
       item.append(link);
       list.append(item);
     });
+    const hubItem=document.createElement('li');
+    hubItem.className='apx-destination-ribbon__hub';
+    const hubLink=document.createElement('a');
+    hubLink.href=HUB.href;
+    withIcon(hubLink,HUB.key,HUB.label);
+    hubItem.append(hubLink);
+    list.append(hubItem);
     list.addEventListener('keydown',handleKeyboard);
     list.addEventListener('click',navigatePrepared);
     list.addEventListener('pointerover',prepareIntent);
@@ -370,7 +383,7 @@
   function buildDrawer(menu){
     const active=activeShellKey();
     const drawer=document.createElement('div');drawer.className='ax-drawer';drawer.id='axToolDrawer';drawer.hidden=true;
-    const links=[{key:'home',label:'Home',href:'/astrix-app/pages/home/'},...destinations];
+    const links=[{key:'home',label:'Home',href:'/astrix-app/pages/home/'},...destinations,HUB];
     drawer.innerHTML=`<div class="ax-drawer-backdrop" data-drawer-close></div><nav class="ax-drawer-panel" role="dialog" aria-modal="true" aria-label="ASTRIX PARADOX tools"><div class="ax-drawer-head"><a class="ax-drawer-brand" href="/" aria-label="ASTRIX PARADOX home"><img src="/img/ax-logo-160.webp" alt="" width="49" height="40"><span class="ax-wordmark"><span class="ax-wordmark-top">ASTRI<b>X</b></span><span class="ax-wordmark-sub">PARADOX</span></span></a></div><ul class="ax-drawer-links">${links.map(row=>`<li><a href="${row.href}"${row.key===active?' aria-current="page"':''}>${row.label}</a></li>`).join('')}</ul></nav>`;
     const panel=drawer.querySelector('.ax-drawer-panel'),close=iconButton('ax-drawer-close','Close tool menu',CLOSE_ICON);
     drawer.querySelector('.ax-drawer-head').append(close);
