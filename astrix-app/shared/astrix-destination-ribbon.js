@@ -189,7 +189,8 @@
 
   function render(mount){
     const requested=String(mount.dataset.activeDestination||'journey').trim().toLowerCase();
-    const active=destinations.some(destination=>destination.key===requested)?requested:'journey';
+    // Guardian Home uses the same bar (Miguel, 25 Oct 2026) with Home as the current page.
+    const active=requested==='home'||destinations.some(destination=>destination.key===requested)?requested:'journey';
     const nav=document.createElement('nav');
     nav.className='apx-destination-ribbon';
     nav.setAttribute('aria-label','ASTRIX PARADOX destinations');
@@ -201,6 +202,7 @@
     homeLink.href='/astrix-app/pages/home/';
     homeLink.setAttribute('aria-label','Guardian Home');
     withIcon(homeLink,'home','Home');
+    if(active==='home')homeLink.setAttribute('aria-current','page');
     homeItem.append(homeLink);
     list.append(homeItem);
     destinations.forEach(destination=>{

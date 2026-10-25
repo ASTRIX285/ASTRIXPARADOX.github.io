@@ -27,14 +27,15 @@ body.home-page{margin:0;min-height:100vh;color:var(--home-ink);font:16px/1.55 va
 .home-brand{display:flex;align-items:center;gap:12px;color:var(--home-ink);text-decoration:none;flex:none}
 .home-brand img{width:auto;height:40px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
 .home-brand-page{margin-left:8px;padding-left:18px;border-left:1px solid var(--home-line-strong);font:700 13px/1 var(--home-display);letter-spacing:.18em;color:var(--home-steel-light)}
-.home-tools{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}
-.home-tools::-webkit-scrollbar{display:none}
-.home-tools a{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;flex:none;
-  color:#b9b9b8;font:700 13px/1 var(--home-display);letter-spacing:.16em;text-decoration:none;transition:color .2s ease}
-.home-tools a::after{content:"";position:absolute;left:14px;right:14px;bottom:6px;height:2px;background:var(--home-crimson);transform:scaleX(0);transform-origin:left;transition:transform .25s var(--home-ease)}
-.home-tools a:hover{color:#fff}
-.home-tools a:hover::after{transform:scaleX(1)}
-@media (max-width:899px){.home-top{flex-wrap:wrap;gap:0;padding-top:10px}.home-brand-page{display:none}.home-tools{width:100%;margin:0 -14px}}
+@media (max-width:899px){.home-top{flex-wrap:wrap;gap:0;padding-top:10px}.home-brand-page{display:none}}
+
+/* The shared Forge tool bar (Miguel, 25 Oct 2026): straight under the header as on every tool page, plain labels. */
+/* The tool pages pin it under their fixed header; Home's header is sticky, so here it sits in the flow straight under
+   it and sticks there as the page scrolls. In the brand layer: the shared rule that pins it is a layered !important. */
+@layer astrix-brand{
+  html body.home-page .home-shell>[data-forge-destination-ribbon]{position:sticky!important;top:68px!important;z-index:29!important;margin-top:-28px!important;left:auto!important;right:auto!important;width:auto!important}
+}
+html body.home-page [data-forge-destination-ribbon] a{text-decoration:none}
 
 /* Small labels use the wordmark face so the page reads as one brand. */
 .home-eyebrow{font:400 11px/1.4 var(--home-brand);letter-spacing:.24em;color:var(--home-steel);text-transform:uppercase;margin:0}
@@ -58,7 +59,7 @@ body.home-page{margin:0;min-height:100vh;color:var(--home-ink);font:16px/1.55 va
 .home-cta:hover::before,.home-secondary:hover::before{animation:home-sheen .9s var(--home-ease) 1}
 .home-cta:active,.home-secondary:active{transform:translateY(1px)}
 @keyframes home-sheen{from{transform:translateX(-160%)}to{transform:translateX(420%)}}
-.home-cta:focus-visible,.home-secondary:focus-visible,.home-tools a:focus-visible,.home-brand:focus-visible{outline:2px solid var(--home-steel-light);outline-offset:3px}
+.home-cta:focus-visible,.home-secondary:focus-visible,.home-brand:focus-visible{outline:2px solid var(--home-steel-light);outline-offset:3px}
 
 /* Cards: warm black panels with the notched corner and a hairline edge. */
 .home-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:22px 24px;background:linear-gradient(180deg,var(--home-card-top),var(--home-card));

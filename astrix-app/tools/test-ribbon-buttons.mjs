@@ -7,7 +7,8 @@ import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES?`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`:'playwright');
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
-const pages=['journey','guardian-workspace-v2','forge-loader','guardian-workspace-v2/paradox-build-space','reports','vault','loadout'];
+// Guardian Home carries the same bar (Miguel, 25 Oct 2026).
+const pages=['home','journey','guardian-workspace-v2','forge-loader','guardian-workspace-v2/paradox-build-space','reports','vault','loadout'];
 const server=createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  const file=resolve(root,'.'+path+(path.endsWith('/')?'index.html':''));
