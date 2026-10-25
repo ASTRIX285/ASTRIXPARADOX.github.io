@@ -3248,13 +3248,13 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-th-detail h2{margin:0;font-
 .ae-ab-faction:hover .ae-ab-faction-img{transform:scale(1.04)}
 .ae-ab-faction-text{padding:28px 28px 26px;max-width:36rem}
 .ae-ab-kicker{margin:0 0 4px;font:600 .875rem/1.2 var(--ae-gd-display);letter-spacing:.16em;text-transform:uppercase;color:var(--ae-f)}
-body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-faction-name{margin:0;font:400 3.25rem/1 var(--ae-gd-font-title);color:var(--ae-gd-ink);text-shadow:0 2px 18px rgba(0,0,0,.6)}
-body.aetherium-page[data-ae-page="guide"] .ae-ab-faction-name::before{content:none;display:none}
+/* A section heading on the type scale (40, 30 on a phone), so the Guide's sizes stay one set. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-faction-name{margin:0;color:var(--ae-gd-ink);text-shadow:0 2px 18px rgba(0,0,0,.6)}
 .ae-ab-realm{margin:8px 0 12px;font-size:.9375rem;color:var(--ae-gd-ink-soft)}
 .ae-ab-realm b{color:var(--ae-f)}
 .ae-ab-faction-text p:last-child{margin:0;font-size:1.0625rem;line-height:1.6;color:var(--ae-gd-ink)}
 .ae-ab-vs{position:absolute;left:50%;top:2.5rem;transform:translateX(-50%);display:grid;place-items:center;width:3.5rem;height:3.5rem;border-radius:50%;
-  background:var(--ae-gd-deep);border:1px solid var(--ae-gd-line-strong);font:400 1.375rem/1 var(--ae-gd-font-title);color:var(--ae-gd-ink);box-shadow:0 0 24px rgba(0,0,0,.7)}
+  background:var(--ae-gd-deep);border:1px solid var(--ae-gd-line-strong);font:600 1rem/1 var(--ae-gd-display);letter-spacing:.06em;text-transform:uppercase;color:var(--ae-gd-ink);box-shadow:0 0 24px rgba(0,0,0,.7)}
 .ae-ab-block{display:grid;gap:20px}
 body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-h{margin:0}
 .ae-ab-rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
@@ -3293,7 +3293,6 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-h{margin:0}
 }
 @media (max-width:520px){
   .ae-ab-rules{grid-template-columns:minmax(0,1fr)}
-  body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-faction-name{font-size:2.5rem}
   .ae-ab-faction-text{padding:20px}
 }
 @media (prefers-reduced-motion:reduce){.ae-ab-faction-img{transition:none}.ae-ab-faction:hover .ae-ab-faction-img{transform:none}}
