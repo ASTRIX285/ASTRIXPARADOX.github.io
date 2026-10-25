@@ -1305,6 +1305,8 @@ await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or
   // Every width the pages render (10 Oct 2026): a media query can shrink a size at one width only (the class tiles did at 819 and under).
   for(const width of [390,820,1280,1600,1920])for(const [path,extra] of [['/hub/aetherium/',{'aetherium.roster.v2':ROSTER8()}],[`/hub/aetherium/gear/equipment/?${daevaRef}`,{}]]){
     const {page,context}=await open(path,{live:true,extra,viewport:{width,height:width<800?844:1000}});
+    // The Daeva on the page first: measuring while the card is still arriving compares two different pages.
+    await page.waitForSelector(path.includes('/gear/')?'#aeGear [data-slot-pos]':'#aeName');
     const bad=await typeAudit(page);
     assert.deepEqual(bad,[],`${path} at ${width}:\n${bad.join('\n')}`);
     const labels=await labelAudit(page);
