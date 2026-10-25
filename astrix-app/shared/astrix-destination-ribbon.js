@@ -12,7 +12,7 @@
   ]);
   // The Hub (Miguel, 25 Oct 2026): the way back to every tool, last on the ribbon and in the menu drawer. It is a plain
   // link, not a Forge destination, so nothing is prepared for it and the transfer cover never runs for it.
-  const HUB=Object.freeze({key:'hub',label:'The Hub',href:'/hub/'});
+  const HUB=Object.freeze({href:'/hub/',key:'hub',label:'The Hub'});
 
   const scriptUrl=document.currentScript?.src||new URL('/astrix-app/shared/astrix-destination-ribbon.js',location.href).href;
   const prepared=new Map();
