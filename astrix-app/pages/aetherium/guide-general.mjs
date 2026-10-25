@@ -60,15 +60,85 @@ function generalHome() {
   return `<p class="ae-gg-lead">The basics every Daeva needs: who you fight for, when the game resets, how buying and selling works, how to set up your keys, and quick answers to common questions.</p>
     ${overviewHtml('general', GENERAL_PAGES.slice(1).map(page => ({ id: page.id, label: page.title, href: `${BASE}${page.slug}`, blurb: page.blurb })))}`;
 }
+/* About AION 2 in pictures (design/aetherium-about-page, Miguel, 25 Oct 2026: "plain and boring, no images of the two
+   factions"). The two factions as photo panels in their own colours, the faction rules as four tiles, the story as a
+   picture timeline, Season 1 and the launch as numbers. Every word still comes from general.json; the photos are Miguel's
+   own in-game shots already on the site. */
+const IMG = '/astrix-app/pages/aetherium/images/';
+const FACTIONS = Object.freeze({
+  'faction-elyos': { id: 'elyos', emblem: `${IMG}faction-emblems/elyos.png`, kicker: 'Daevas of light', realm: 'Elysea', src: `${IMG}photos/elysea-meadow-01.jpg`, w: 2560, h: 1440, focus: '35% 40%', alt: 'An Elyos Daeva in white and red armour on a sunlit meadow of Elysea, with purple blossom behind' },
+  'faction-asmodians': { id: 'asmodian', emblem: `${IMG}faction-emblems/asmodian.png`, kicker: 'Daevas of shadow', realm: 'Asmodae', src: `${IMG}photos/asmodae-fortress-01.jpg`, w: 1846, h: 967, focus: '50% 30%', alt: 'A dark spired fortress of Asmodae against a low sun, with rubble swirling around its towers' }
+});
+/* One picture per beat of the story, in order. */
+const STORY_ART = Object.freeze([
+  { src: `${IMG}page-heroes/dungeons.jpg`, focus: '60% 50%', alt: 'An island seen from above with a giant spiked spine reaching down to it' },
+  { src: `${IMG}section-heroes/skills.jpg`, focus: '72% 10%', alt: 'A shimmering ring of light rising over a rocky ledge at night' },
+  { src: `${IMG}page-backgrounds/titles.jpg`, focus: '38% 30%', alt: 'A towering statue of a god over ruined halls on the cliffs' },
+  { src: `${IMG}page-heroes/manastones.jpg`, focus: '50% 50%', alt: 'Glowing red pods across a scorched orange plain' },
+  { src: `${IMG}page-heroes/daily-dungeon.jpg`, focus: '69% 30%', alt: 'A blue and red throne inside a dark Balaur research base' }
+]);
+/* The faction rules as four tiles, each from one value in the record. */
+const RULE_TILES = Object.freeze([
+  { key: 'lockedAtCreation', on: true, big: 'For good', line: 'You pick a faction when you make a character. It never changes.' },
+  { key: 'meetIn', big: 'The Abyss', line: 'The only place the two factions meet. Everywhere else they play on separate servers.' },
+  { key: 'crossFactionParty', on: false, big: 'No mixed parties', line: 'An Elyos and an Asmodian cannot party together.' },
+  { key: 'legionSameFaction', on: true, big: 'One-faction Legions', line: 'A Legion only takes members of its own faction.' }
+]);
+const photo = (src, alt, w, h, focus, cls, eager = false) => `<img class="${cls}" src="${src}" alt="${esc(alt)}" width="${w}" height="${h}" style="object-position:${focus}"${eager ? '' : ' loading="lazy"'} decoding="async">`;
+const shortDate = iso => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+
 function aboutPage(r) {
   const season = r['season-1'];
   const launch = r.launch;
+  const rules = r['faction-rules'];
+  const factions = Object.entries(FACTIONS).map(([id, look]) => {
+    const record = r[id];
+    if (!record) return '';
+    return `<section class="ae-ab-faction" data-fact="${esc(record.id)}" data-side="${look.id}" aria-labelledby="gd-${esc(record.id)}">
+        ${photo(look.src, look.alt, look.w, look.h, look.focus, 'ae-ab-faction-img', true)}
+        <div class="ae-ab-faction-text">
+          <img class="ae-ab-emblem" src="${look.emblem}" alt="${esc(record.label)} emblem" width="120" height="120" decoding="async">
+          <p class="ae-ab-kicker">${esc(look.kicker)}</p>
+          <h2 class="ae-ab-faction-name" id="gd-${esc(record.id)}">${esc(record.label)}</h2>
+          <p class="ae-ab-realm">Home: <b>${esc(look.realm)}</b></p>
+          <p>${esc(record.text)}</p>
+        </div>
+      </section>`;
+  }).join('');
+  const tiles = rules ? RULE_TILES.filter(tile => rules.value?.[tile.key] !== undefined && (tile.on === undefined || rules.value[tile.key] === tile.on))
+    .map(tile => `<li class="ae-ab-rule" data-rule="${esc(tile.key)}"><b>${esc(tile.key === 'meetIn' ? `The ${rules.value.meetIn}` : tile.big)}</b><span>${esc(tile.line)}</span></li>`).join('') : '';
+  const story = r.story?.lines ?? [];
+  const beats = story.map((line, n) => {
+    const art = STORY_ART[n];
+    return `<li class="ae-ab-beat${n % 2 ? ' is-flip' : ''}">
+        ${art ? `<figure class="ae-ab-beat-art">${photo(art.src, art.alt, 1600, 900, art.focus, 'ae-ab-beat-img')}</figure>` : ''}
+        <div class="ae-ab-beat-text"><span class="ae-ab-beat-n" aria-hidden="true">${n + 1}</span><p>${esc(line)}</p></div>
+      </li>`;
+  }).join('');
+  const numbers = season ? [
+    { big: `Lv ${season.value.levelCap}`, small: 'Level cap', attr: ' data-season-cap' },
+    { big: String(season.value.daevanionPoints), small: 'Daevanion points' },
+    { big: season.value.heroicItems ? 'Yes' : 'None', small: 'Heroic items' },
+    ...(launch?.value?.advancedAccess ? [{ big: shortDate(launch.value.advancedAccess), small: 'Advanced Access' }] : []),
+    ...(launch?.value?.launch ? [{ big: shortDate(launch.value.launch), small: 'Global launch' }] : [])
+  ] : [];
   return `<p class="ae-gg-lead">AION 2 is NCSOFT's MMORPG set in the world of Atreia. You play a Daeva, a winged warrior, for one of two factions.</p>
-    <div class="ae-gg-pair">${fact(r['faction-elyos'])}${fact(r['faction-asmodians'])}</div>
-    ${fact(r['faction-rules'])}
-    ${fact(r.story)}
-    ${fact(season, `<dl class="ae-gg-stats"><div><dt>Level cap</dt><dd data-season-cap>Lv ${esc(season.value.levelCap)}</dd></div><div><dt>Daevanion points</dt><dd>${esc(season.value.daevanionPoints)}</dd></div><div><dt>Heroic items</dt><dd>None in Season 1</dd></div></dl>`)}
-    ${fact(launch)}`;
+    <div class="ae-ab-factions">${factions}<span class="ae-ab-vs" aria-hidden="true">or</span></div>
+    ${rules ? `<section class="ae-ab-block" data-fact="${esc(rules.id)}" aria-labelledby="gd-${esc(rules.id)}">
+      <h2 class="ae-ab-h" id="gd-${esc(rules.id)}">${esc(rules.label)}</h2>
+      <ul class="ae-ab-rules">${tiles}</ul>
+      <p class="ae-ab-tip">To play with friends, pick the same faction and server.</p>
+    </section>` : ''}
+    ${story.length ? `<section class="ae-ab-block" data-fact="${esc(r.story.id)}" aria-labelledby="gd-${esc(r.story.id)}">
+      <h2 class="ae-ab-h" id="gd-${esc(r.story.id)}">${esc(r.story.label)}</h2>
+      <ol class="ae-ab-story">${beats}</ol>
+    </section>` : ''}
+    ${season ? `<section class="ae-ab-block" data-fact="${esc(season.id)}" aria-labelledby="gd-${esc(season.id)}">
+      <h2 class="ae-ab-h" id="gd-${esc(season.id)}">${esc(season.label)}</h2>
+      <ul class="ae-ab-numbers">${numbers.map(item => `<li><b${item.attr ?? ''}>${esc(item.big)}</b><span>${esc(item.small)}</span></li>`).join('')}</ul>
+      <p class="ae-ab-note">${esc(season.text)}</p>
+      ${launch ? `<p class="ae-ab-note" data-fact="${esc(launch.id)}">${esc(launch.text)}</p>` : ''}
+    </section>` : ''}`;
 }
 function resetsPage(r) {
   const rule = r['reset-times'];

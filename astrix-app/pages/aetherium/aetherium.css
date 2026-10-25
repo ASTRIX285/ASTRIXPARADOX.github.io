@@ -3234,3 +3234,67 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-th-detail h2{margin:0;font-
 .ae-gcard-build .ae-th-verdict[data-fit="close"]{border-left-color:color-mix(in srgb,var(--ae-gold) 60%,transparent)}
 .ae-gcard-build .ae-th-verdict[data-fit="close"] .ae-th-verdict-tag{color:var(--ae-gold);border-color:var(--ae-gold)}
 .ae-gcard-build .ae-assess-why{margin:.5rem 0 0;padding-left:1.125rem;color:var(--ae-text);line-height:1.5}
+
+/* ----- About AION 2 in pictures (design/aetherium-about-page, 25 Oct 2026): the two factions as photo panels in their own
+   colours, the rules as tiles, the story as a picture timeline, Season 1 as numbers. Guide tokens throughout. ----- */
+.ae-gg[data-guide-content="about"]{display:grid;gap:56px}
+.ae-ab-factions{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.ae-ab-faction{--ae-f:var(--ae-elyos);position:relative;display:flex;align-items:flex-end;min-height:30rem;overflow:hidden;border-radius:6px;isolation:isolate;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--ae-f) 45%,transparent),0 24px 60px rgba(0,0,0,.55)}
+.ae-ab-faction[data-side="asmodian"]{--ae-f:var(--ae-asmodian)}
+.ae-ab-faction-img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;transition:transform .8s ease}
+.ae-ab-faction::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 25%,color-mix(in srgb,var(--ae-gd-deep) 70%,transparent) 55%,var(--ae-gd-deep) 100%),linear-gradient(0deg,color-mix(in srgb,var(--ae-f) 22%,transparent),transparent 60%)}
+.ae-ab-faction::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--ae-f);box-shadow:0 0 18px var(--ae-f)}
+.ae-ab-faction:hover .ae-ab-faction-img{transform:scale(1.04)}
+.ae-ab-faction-text{padding:28px 28px 26px;max-width:36rem}
+.ae-ab-kicker{margin:0 0 4px;font:600 .875rem/1.2 var(--ae-gd-display);letter-spacing:.16em;text-transform:uppercase;color:var(--ae-f)}
+/* A section heading on the type scale (40, 30 on a phone), so the Guide's sizes stay one set. */
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-faction-name{margin:0;color:var(--ae-gd-ink);text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.ae-ab-realm{margin:8px 0 12px;font-size:.9375rem;color:var(--ae-gd-ink-soft)}
+.ae-ab-realm b{color:var(--ae-f)}
+.ae-ab-faction-text p:last-child{margin:0;font-size:1.0625rem;line-height:1.6;color:var(--ae-gd-ink)}
+.ae-ab-vs{position:absolute;left:50%;top:2.5rem;transform:translateX(-50%);display:grid;place-items:center;width:3.5rem;height:3.5rem;border-radius:50%;
+  background:var(--ae-gd-deep);border:1px solid var(--ae-gd-line-strong);font:600 1rem/1 var(--ae-gd-display);letter-spacing:.06em;text-transform:uppercase;color:var(--ae-gd-ink);box-shadow:0 0 24px rgba(0,0,0,.7)}
+.ae-ab-block{display:grid;gap:20px}
+body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-h{margin:0}
+.ae-ab-rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
+.ae-ab-rule{display:grid;align-content:start;gap:8px;padding:20px 18px;border-top:3px solid var(--ae-gd-gold);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ae-gd-gold) 9%,var(--ae-gd-panel)),var(--ae-gd-panel))}
+.ae-ab-rule:nth-child(even){border-top-color:var(--ae-asmodian)}
+.ae-ab-rule b{font:400 1.5rem/1.15 var(--ae-gd-font-title);color:var(--ae-gd-ink)}
+.ae-ab-rule span{font-size:1rem;line-height:1.5;color:var(--ae-gd-ink-soft)}
+.ae-ab-tip{margin:0;padding:12px 16px;border-left:3px solid var(--ae-gd-gold);background:var(--ae-gd-deep);font-size:1rem;color:var(--ae-gd-ink)}
+.ae-ab-story{position:relative;display:grid;gap:28px;margin:0;padding:0;list-style:none}
+.ae-ab-story::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:linear-gradient(180deg,var(--ae-gd-gold),color-mix(in srgb,var(--ae-asmodian) 80%,transparent))}
+.ae-ab-beat{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
+.ae-ab-beat-art{margin:0;aspect-ratio:16/9;overflow:hidden;border-radius:6px;box-shadow:0 0 0 1px var(--ae-gd-line-soft),0 18px 40px rgba(0,0,0,.5)}
+.ae-ab-beat-img{width:100%;height:100%;object-fit:cover}
+.ae-ab-beat.is-flip .ae-ab-beat-art{order:2}
+.ae-ab-beat-text{position:relative}
+.ae-ab-beat-n{display:grid;place-items:center;width:2.75rem;height:2.75rem;margin-bottom:12px;border-radius:50%;background:var(--ae-gd-deep);border:2px solid var(--ae-gd-gold);
+  font:600 1.125rem/1 var(--ae-gd-display);color:var(--ae-gd-gold);box-shadow:0 0 18px var(--ae-gd-gold-glow)}
+.ae-ab-beat:last-child .ae-ab-beat-n{border-color:var(--ae-asmodian);color:var(--ae-asmodian-hi);box-shadow:0 0 18px color-mix(in srgb,var(--ae-asmodian) 45%,transparent)}
+.ae-ab-beat-text p{margin:0;font-size:1.125rem;line-height:1.65;color:var(--ae-gd-ink)}
+.ae-ab-numbers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:14px;margin:0;padding:0;list-style:none}
+.ae-ab-numbers li{display:grid;gap:6px;padding:18px;border:1px solid var(--ae-gd-line-soft);background:var(--ae-gd-panel)}
+.ae-ab-numbers b{font:400 2.5rem/1 var(--ae-gd-font-title);color:var(--ae-gd-gold)}
+.ae-ab-numbers span{font:600 .875rem/1.2 var(--ae-gd-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ae-gd-muted)}
+.ae-ab-note{margin:0;font-size:1rem;line-height:1.6;color:var(--ae-gd-ink-soft);max-width:72ch}
+@media (max-width:900px){
+  .ae-ab-factions{grid-template-columns:minmax(0,1fr)}
+  .ae-ab-faction{min-height:22rem}
+  .ae-ab-vs{display:none}
+  .ae-ab-rules{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ae-ab-story::before{left:1.375rem}
+  .ae-ab-beat{grid-template-columns:minmax(0,1fr);gap:14px;padding-left:3.5rem}
+  .ae-ab-beat.is-flip .ae-ab-beat-art{order:0}
+  .ae-ab-beat-n{position:absolute;left:-3.5rem;top:0}
+  .ae-ab-beat-text p{font-size:1.0625rem}
+}
+@media (max-width:520px){
+  .ae-ab-rules{grid-template-columns:minmax(0,1fr)}
+  .ae-ab-faction-text{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){.ae-ab-faction-img{transition:none}.ae-ab-faction:hover .ae-ab-faction-img{transform:none}}
+.ae-ab-emblem{display:block;width:7.5rem;height:7.5rem;margin:0 0 10px -6px;object-fit:contain;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--ae-f) 70%,transparent)) drop-shadow(0 2px 6px rgba(0,0,0,.8))}
+@media (max-width:520px){.ae-ab-emblem{width:5.5rem;height:5.5rem}}
