@@ -80,6 +80,8 @@ const perkItem={...structuredClone(item),id:110300999,name:'Red Agate Helm',grad
 /* More character info (12 Oct 2026): the Lv 45 /aion2/character capture (lv45-character.json, renamed: TESTDAEVA, legion
    TESTLEGION), a second Daeva in Asia made from it (another class, server and stats, an Arcana and an exceed level), and
    a Daeva with no skins. All served by character id through EXTRA. */
+/* The saved server lists (games/aion2/data/servers.json): the mock serves Europe's real list, the other regions derived. */
+const SAVED_SERVERS=JSON.parse(readFileSync(new URL('../games/aion2/data/servers.json',import.meta.url),'utf8')).regions;
 const EXTRA=new Map();
 const lv45Body=await fixture('lv45-character');
 const L45={serverId:'1308',characterId:lv45Body.info.profile.characterId,region:'eu'};
@@ -104,6 +106,9 @@ const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(
 async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,extra={},metaAt=null,servers='ok',saved='ok',noTitle=false,art=null,ready=true,slow=false}={}){
   const context=await browser.newContext({viewport});
   const calls=[];
+  // The server picker reads its live list on every page load (fix/aetherium-server-lists): those reads are kept apart
+  // so the character and search call lists stay exact.
+  const serverCalls=[];
   const urls=[];
   const state={down};
   // saved:'gone' takes the saved server lists away too (servers.json does not load).
@@ -120,7 +125,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   });
   await context.route(`${WORKER}/**`,async route=>{
     const url=new URL(route.request().url());
-    calls.push(url.pathname);
+    (url.pathname==='/aion2/servers'?serverCalls:calls).push(url.pathname);
     urls.push(url);
     const down=state.down;
     if(down)return route.fulfill({status:down===true?502:down,contentType:'application/json',body:JSON.stringify({error:down===true?'armory_unavailable':down===429?'rate_limited':'invalid_region'})});
@@ -134,7 +139,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
     };
     if(url.pathname==='/aion2/servers'){
       if(servers==='down')return route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'armory_unavailable'})});
-      bodies['/aion2/servers']=servers==='empty'?{serverList:[]}:deriveServers(url.searchParams.get('region'));
+      bodies['/aion2/servers']=servers==='empty'?{serverList:[]}:url.searchParams.get('region')==='eu'?{serverList:SAVED_SERVERS.eu}:deriveServers(url.searchParams.get('region'));
     }
     if(noTitle&&url.pathname==='/aion2/character')bodies['/aion2/character']={info:noTitleInfo,equipment:bareEquipment};
     // A Daeva the more-info checks (12 Oct 2026) serve by character id: the Lv 45 capture and its variants.
@@ -156,7 +161,7 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`${base}${path}`);
   if(ready)await page.waitForFunction(()=>document.documentElement.dataset.aetheriumReady==='true',null,{timeout:15000});
-  return {page,context,calls,urls,errors,state};
+  return {page,context,calls,serverCalls,urls,errors,state};
 }
 // Everything a visitor can read on the page: the text, the title and description, and every visible attribute.
 const visibleText=page=>page.evaluate(()=>[document.body.innerText,document.title,document.querySelector('meta[name=description]')?.content,
@@ -189,9 +194,7 @@ const GOLD='rgb(226, 181, 79)',VIOLET='rgb(154, 107, 255)',GOLD_HI='rgb(244, 210
 await check('no Daeva: the intro shows (guide, three steps, search form, 8 class tiles to the plan by hand), no Worker call, no character',async()=>{
   for(const live of [true,false]){
     const {page,context,calls,errors}=await open('/hub/aetherium/',{live});
-    // The server list is read live for the picker (fix/aetherium-server-lists); nothing else before a Daeva is picked.
-    assert.deepEqual(calls.filter(path=>path!=='/aion2/servers'),[],`live=${live}: no character call before a Daeva is picked`);
-    if(!live)assert.deepEqual(calls,[],'not connected: no Worker call at all');
+    assert.deepEqual(calls,[],`live=${live}: no Worker call before a Daeva is picked`);
     assert.equal(await page.isVisible('#aeIntro'),true,'The intro shows');
     assert.match(await page.textContent('#aeIntroTitle'),/Welcome to The Aetherium, Daeva\./);
     // Walkthrough fix (11 Oct 2026): the welcome card follows the form: name, then region (and server, optional).
@@ -293,7 +296,7 @@ await check('the committed intro-art.json lists only NCSOFT CDN addresses, every
 
 await check('live: search to summary uses search then one character call',async()=>{
   const {page,context,calls}=await open('/hub/aetherium/',{live:true});
-  assert.deepEqual(calls.filter(path=>path!=='/aion2/servers'),[],'No Daeva picked yet: only the live server list');
+  assert.deepEqual(calls,[],'No Daeva picked yet: no Worker call');
   assert.equal(await page.isHidden('#aeSource'),true,'No data line before a read');
   await page.fill('#aeNameInput',TEST_NAME);
   await page.click('#aeFind');
@@ -468,14 +471,15 @@ await check('roster add and remove, faction colour switch (a roster per server)'
 });
 
 await check('region picker: five official names, Europe by default, the live server list for every region',async()=>{
-  const {page,context,calls}=await open('/hub/aetherium/',{live:true});
+  const {page,context,calls,serverCalls}=await open('/hub/aetherium/',{live:true});
   assert.deepEqual(await page.$$eval('#aeRegion option',options=>options.map(o=>[o.value,o.textContent])),REGION_TABLE.map(row=>[row.code,row.name]));
   assert.equal(await page.inputValue('#aeRegion'),'eu','Europe when nothing was used before');
   assert.equal(await page.textContent('#aeServer option[value=""]'),'Any server in Europe');
   // Missing servers (Miguel, 25 Oct 2026): Europe has 23 Elyos and 23 Asmodian servers, not the 9 and 9 of the July capture.
   await page.waitForFunction(()=>document.querySelectorAll('#aeServer option[value]:not([value=""])').length===46);
   for(const [group,count] of [['Elyos',23],['Asmodian',23]])assert.equal(await page.locator(`#aeServer optgroup[label="${group}"] option`).count(),count,`Europe: ${count} ${group} servers`);
-  assert.deepEqual(calls,['/aion2/servers'],'Europe reads its live server list too, nothing else');
+  assert.deepEqual(serverCalls,['/aion2/servers'],'Europe reads its live server list too');
+  assert.deepEqual(calls,[],'Nothing else before a Daeva is picked');
   const labels=await page.$$eval('label.ae-field > span',nodes=>nodes.map(n=>n.textContent));
   assert.deepEqual(labels,['Character name','Region','Server']);
   for(const row of REGION_TABLE.filter(item=>item.code!=='eu')){
@@ -484,7 +488,7 @@ await check('region picker: five official names, Europe by default, the live ser
     await page.waitForFunction(count=>document.querySelectorAll('#aeServer option[value]:not([value=""])').length===count,row.servers);
     assert.equal(await page.evaluate(()=>localStorage.getItem('aetherium.region.v1')),row.code,'Remembered on this device');
   }
-  assert.equal(calls.filter(path=>path==='/aion2/servers').length,5,'One server list call on load and one per region switch');
+  assert.equal(serverCalls.length,5,'One server list call on load and one per region switch');
   await page.selectOption('#aeRegion','eu');
   await page.waitForFunction(()=>document.querySelector('#aeServer option[value=""]').textContent==='Any server in Europe');
   await page.waitForFunction(()=>document.querySelectorAll('#aeServer option[value]:not([value=""])').length===46);
@@ -492,7 +496,7 @@ await check('region picker: five official names, Europe by default, the live ser
 });
 
 await check('the saved server list paints at once for every region and stands in when the live read fails',async()=>{
-  const saved=JSON.parse(readFileSync(new URL('../games/aion2/data/servers.json',import.meta.url),'utf8')).regions;
+  const saved=SAVED_SERVERS;
   // Not connected: the saved list is the picker, for every region.
   const off=await open('/hub/aetherium/',{live:false});
   for(const row of REGION_TABLE){
