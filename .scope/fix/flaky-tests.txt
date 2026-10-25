@@ -1,3 +1,5 @@
+astrix-app/module-versions.json
 astrix-app/pages/aetherium/daeva-card.mjs
 astrix-app/tools/test-aetherium-character.mjs
 astrix-app/tools/test-portal-single-skin.mjs
+hub/aetherium/index.html
