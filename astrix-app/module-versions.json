@@ -118,9 +118,9 @@
 
   "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "8eb89bb6d3",
 
-  "/astrix-app/pages/aetherium/aetherium-config.mjs": "b662fe1840",
+  "/astrix-app/pages/aetherium/aetherium-config.mjs": "bd92fe5c19",
 
-  "/astrix-app/pages/aetherium/aetherium-data.mjs": "87c71c2305",
+  "/astrix-app/pages/aetherium/aetherium-data.mjs": "f179febd83",
 
   "/astrix-app/pages/aetherium/aetherium-flow.mjs": "d212e4f454",
 
@@ -138,7 +138,7 @@
 
   "/astrix-app/pages/aetherium/compare-page.mjs": "dc94b71a35",
 
-  "/astrix-app/pages/aetherium/daeva-card.mjs": "56e6f63949",
+  "/astrix-app/pages/aetherium/daeva-card.mjs": "ef1a3c9e15",
 
   "/astrix-app/pages/aetherium/daevanion-board.mjs": "589e8f42ad",
 

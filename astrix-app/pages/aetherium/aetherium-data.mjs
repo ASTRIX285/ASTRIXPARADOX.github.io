@@ -7,7 +7,6 @@ import { createAion2Module } from '/astrix-app/games/aion2/index.mjs';
 import { adaptDaevanionBoard, adaptItemDetail, adaptSearch } from '/astrix-app/games/aion2/engine/armory-adapter.mjs';
 import {
   AETHERIUM_ART_HOST,
-  AETHERIUM_EU_SERVERS,
   AETHERIUM_INTRO_ART,
   AETHERIUM_REGION,
   AETHERIUM_REGIONS,
@@ -16,6 +15,7 @@ import {
   AETHERIUM_ROSTER_KEY,
   AETHERIUM_ROSTER_KEY_V1,
   AETHERIUM_ROSTER_SLOTS,
+  AETHERIUM_SERVERS,
   AETHERIUM_WORKER_URL
 } from './aetherium-config.mjs';
 
@@ -89,12 +89,8 @@ const liveSource = meta => ({ kind: 'live', fetchedAt: meta?.fetchedAt ?? null, 
 
 let catalogue;
 export function loadCatalogue() {
-  catalogue ??= Promise.all([
-    getJson('/astrix-app/games/aion2/data/gear-slots.json'),
-    getJson(AETHERIUM_EU_SERVERS)
-  ]).then(([slots, servers]) => ({
+  catalogue ??= getJson('/astrix-app/games/aion2/data/gear-slots.json').then(slots => ({
     slots: slots.records,
-    servers: servers.serverList,
     module: createAion2Module({ slots: slots.records })
   }));
   return catalogue;
@@ -107,17 +103,31 @@ export async function searchCharacters(name, region = AETHERIUM_REGION) {
   return { rows: adaptSearch(body), source: liveSource(body.meta) };
 }
 
+let savedLists;
 /**
- * The servers of one region, as [{ raceId, serverId, serverName }]. Europe is a small static list (first paint
- * needs no call); the other regions come through the Worker. A failure gives an empty list: the search still works.
+ * The saved servers of one region (servers.json), as [{ raceId, serverId, serverName }]: what the server picker shows
+ * at once, and what it keeps when the live read fails. Never empty for a listed region unless the file did not load.
+ */
+export async function savedServers(region = AETHERIUM_REGION) {
+  savedLists ??= getJson(AETHERIUM_SERVERS).then(body => body.regions ?? {}).catch(() => { savedLists = null; return {}; });
+  const lists = await savedLists;
+  return Array.isArray(lists[regionOf(region)]) ? lists[regionOf(region)] : [];
+}
+
+/**
+ * The servers of one region, live from the official site through the Worker, for every region alike. New servers
+ * the official site adds show up here with no change to the site. When the read fails or comes back empty, the saved
+ * list stands in, so the picker never loses servers it already showed. Returns { servers, live }.
  */
 export async function loadServers(region = AETHERIUM_REGION) {
   const code = regionOf(region);
-  if (code === 'eu' || !armoryLive()) return code === 'eu' ? (await loadCatalogue()).servers : [];
-  try {
-    const body = await worker('/aion2/servers', {}, code);
-    return Array.isArray(body.serverList) ? body.serverList : [];
-  } catch { return []; }
+  if (armoryLive()) {
+    try {
+      const body = await worker('/aion2/servers', {}, code);
+      if (Array.isArray(body.serverList) && body.serverList.length) return { servers: body.serverList, live: true };
+    } catch { /* the saved list below */ }
+  }
+  return { servers: await savedServers(code), live: false };
 }
 
 /**

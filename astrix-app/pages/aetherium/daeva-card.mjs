@@ -18,6 +18,7 @@ import {
   loadCharacter,
   loadIntroArt,
   loadServers,
+  savedServers,
   prefetchAdvisor,
   refFromUrl,
   regionName,
@@ -482,13 +483,22 @@ async function onSearch(event) {
   else renderResults(rows);
 }
 
+/**
+ * The server picker for the current region: the saved list at once, then the live list from the official site
+ * replaces it in the background (new servers appear without a site change). A server already picked stays picked.
+ */
 async function loadRegionServers() {
   const region = currentRegion;
   const select = $('#aeServer');
-  select.disabled = true;
-  select.innerHTML = `<option value="">Loading servers</option>`;
-  const servers = await loadServers(region);
-  if (region === currentRegion) renderServers(servers);
+  const saved = await savedServers(region);
+  if (region !== currentRegion) return;
+  if (saved.length) renderServers(saved);
+  else { select.disabled = true; select.innerHTML = `<option value="">Loading servers</option>`; }
+  const { servers } = await loadServers(region);
+  if (region !== currentRegion) return;
+  const picked = select.value;
+  renderServers(servers);
+  if (picked && [...select.options].some(option => option.value === picked)) select.value = picked;
 }
 
 function onRegionChange() {

@@ -22,8 +22,8 @@ export const AETHERIUM_REGION = 'eu';
 /** Where the last region used is kept on this device. */
 export const AETHERIUM_REGION_KEY = 'aetherium.region.v1';
 
-/** The Europe server list, captured from the official site (an official API response, no character in it). Lets the Europe picker paint with no call. */
-export const AETHERIUM_EU_SERVERS = '/astrix-app/tools/fixtures/aion2/eu/servers.json';
+/** The saved server list for every region: first paint and the fallback. The live list from the Worker wins whenever it answers. */
+export const AETHERIUM_SERVERS = '/astrix-app/games/aion2/data/servers.json';
 
 /** The stat icon sprite: our own art, one symbol per stat (ae-stat-<id>), named by each stat's icon field in stats.json. Never NCSOFT's stat icons. */
 export const AETHERIUM_STAT_ICONS = '/astrix-app/pages/aetherium/icons/stats.svg?v=20261011-1';

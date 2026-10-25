@@ -316,4 +316,25 @@ if(Ajv2020){
   [...skills,...stigmas].forEach(record=>check('catalogue-skill',record,`skill ${record.name}`));
 }
 
+// The saved server lists (fix/aetherium-server-lists, 25 Oct 2026): every region, both factions, ids that match the
+// region's id block, and every server the Europe capture knew. The page reads the live list first; this is its fallback.
+{
+  const saved=json('games/aion2/data/servers.json');
+  assert.ok(!Number.isNaN(Date.parse(saved.savedAt)),'servers.json says when it was saved');
+  assert.deepEqual(Object.keys(saved.regions).sort(),REGION_TABLE.map(row=>row.code).sort(),'a saved list for every region');
+  const block={nae:1,naw:2,eu:3,la:4,as:5};
+  for(const [code,list] of Object.entries(saved.regions)){
+    for(const raceId of [1,2])assert.ok(list.some(server=>server.raceId===raceId),`${code}: ${raceId===1?'Elyos':'Asmodian'} servers listed`);
+    assert.equal(new Set(list.map(server=>server.serverId)).size,list.length,`${code}: no server twice`);
+    for(const server of list){
+      assert.ok(server.serverName&&server.serverShortName,`${code} ${server.serverId}: named`);
+      assert.equal(Math.floor(server.serverId/1000),server.raceId,`${code} ${server.serverName}: the id is in its faction's block`);
+      assert.equal(Math.floor(server.serverId/100)%10,block[code],`${code} ${server.serverName}: the id is in its region's block`);
+    }
+  }
+  const capture=json('tools/fixtures/aion2/eu/servers.json').serverList;
+  for(const server of capture)assert.ok(saved.regions.eu.some(row=>row.serverId===server.serverId&&row.serverName===server.serverName),`Europe keeps ${server.serverName}`);
+  assert.ok(saved.regions.eu.some(row=>row.serverName==='Hadala'&&row.raceId===2),'Europe lists the new Asmodian servers (Hadala)');
+}
+
 console.log('AION2_ADAPTER=PASS');
