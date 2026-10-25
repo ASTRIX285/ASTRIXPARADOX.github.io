@@ -1401,7 +1401,9 @@ async function assertButtons(page,selector,name){
 /** Keyboard focus shows the blue ring. */
 async function assertFocusRing(page,selector,name){
   await page.focus(selector);
-  await page.waitForTimeout(250);
+  // The ring eases in, so a read at a fixed delay can land mid-transition (1.97px of 2px, a colour a step off) and fail on a
+  // slow runner. Wait up to 2s for the finished ring, then read it.
+  await page.waitForFunction(([sel,colour])=>getComputedStyle(document.querySelector(sel)).boxShadow.includes(colour),[selector,STROBE],{timeout:2000}).catch(()=>{});
   const ring=await page.$eval(selector,el=>({visible:el.matches(':focus-visible'),shadow:getComputedStyle(el).boxShadow}));
   assert.ok(ring.visible,`${name}: focus-visible`);
   assert.ok(ring.shadow.includes(STROBE),`${name}: the blue focus ring shows (${ring.shadow})`);
