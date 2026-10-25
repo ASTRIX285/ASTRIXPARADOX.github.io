@@ -2,6 +2,7 @@
   "source": "The official AION 2 server list for each region, read through the Aetherium Worker (/aion2/servers).",
   "savedAt": "2026-10-25T11:35:17.132Z",
   "note": "First paint and the fallback only. The Daeva Card reads the live list for the picked region every time and uses it when the read succeeds. Refresh with node astrix-app/tools/refresh-aion2-servers.mjs.",
+  "provenance": {"kind":"armory","region":"naw, nae, eu, la, as","endpoint":"/aion2/servers","capturedOn":"2026-10-25"},
   "regions": {
     "naw": [
       {"raceId":1,"serverId":1201,"serverName":"Siel","serverShortName":"SIE"},

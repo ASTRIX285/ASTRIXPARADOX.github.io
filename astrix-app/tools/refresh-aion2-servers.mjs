@@ -24,7 +24,9 @@ for(const code of REGIONS){
   const added=regions[code].filter(server=>!before.has(server.serverId)).map(server=>server.serverName);
   console.log(`${code}: ${regions[code].length} servers${added.length?`, new: ${added.join(', ')}`:''}`);
 }
-const lines=['{',`  "source": ${JSON.stringify(current.source)},`,`  "savedAt": ${JSON.stringify(savedAt??current.savedAt)},`,`  "note": ${JSON.stringify(current.note)},`,'  "regions": {'];
+const at=savedAt??current.savedAt;
+const provenance={...current.provenance,kind:'armory',endpoint:'/aion2/servers',region:REGIONS.join(', '),capturedOn:String(at).slice(0,10)};
+const lines=['{',`  "source": ${JSON.stringify(current.source)},`,`  "savedAt": ${JSON.stringify(at)},`,`  "note": ${JSON.stringify(current.note)},`,`  "provenance": ${JSON.stringify(provenance)},`,'  "regions": {'];
 REGIONS.forEach((code,at)=>{
   lines.push(`    "${code}": [`);
   regions[code].forEach((server,i)=>lines.push(`      ${JSON.stringify(server)}${i<regions[code].length-1?',':''}`));
