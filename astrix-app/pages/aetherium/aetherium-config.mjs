@@ -37,4 +37,4 @@ export const AETHERIUM_ART_HOST = 'https://assets.playnccdn.com/';
 export const AETHERIUM_ROSTER_KEY = 'aetherium.roster.v2';
 export const AETHERIUM_ROSTER_KEY_V1 = 'aetherium.roster.v1';
 /** Slots per server (AION 2 allows 8 characters on a server). */
-export const AETHERIUM_ROSTER_SLOTS = 8;
+export const AETHERIUM_ROSTER_SLOTS = 9;

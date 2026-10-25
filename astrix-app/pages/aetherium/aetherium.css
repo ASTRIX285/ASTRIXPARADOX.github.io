@@ -239,35 +239,48 @@ body.aetherium-page.ae-backdrop.ae-sides::before{
 .ae-menu-card.is-skeleton .ae-sk-line{width:80%;margin:0}
 .ae-roster .ae-loading.ae-sk{height:7.75rem;list-style:none}
 
-/* Roster */
-.ae-roster-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px 14px;margin:var(--ae-gap) 0 8px}
-.ae-roster-head h2{margin:0;font:700 .875rem/1.3 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text-muted)}
-.ae-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
-.ae-roster-slot{position:relative;min-height:112px;display:flex}
-.aetherium-page .ae-roster-open,.aetherium-page .ae-roster-add{width:100%;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:14px 16px;
-  text-transform:none;letter-spacing:0;font:500 .875rem/1.35 var(--ae-font-ui);text-align:left}
-.aetherium-page .ae-roster-add{align-items:center;color:var(--ae-text-muted);border:1px dashed var(--ae-hairline-strong)}
-.ae-roster-open strong{font:700 1.125rem/1.2 var(--ae-font-ui);color:var(--ae-text)}
-.ae-roster-state{font:700 .875rem/1 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-accent-hi)}
-.aetherium-page .ae-roster-remove{position:absolute;top:4px;right:6px;min-height:28px;padding:0 8px;font-size:.875rem;letter-spacing:0;color:var(--ae-text-muted)}
-.ae-roster-note{margin:12px 0 0;color:var(--ae-text-muted);font-size:.875rem}
-/* Counts are pills: "Meslamtaeda · EU · 3 of 8". */
+/* Roster (Miguel, 25 Oct 2026): compact blocks in two columns, up to 9 per server. Only saved Daevas show, plus one
+   Add block while there is room. Every block is one height and the full name fits; nothing is cut off. */
+.ae-roster .ae-loading.ae-sk{height:4.25rem}
+.ae-roster-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px 14px;margin:var(--ae-gap) 0 12px}
+.ae-roster-head h2,.ae-classes-head h2{margin:0;font:700 1.25rem/1.25 var(--ae-font-ui);letter-spacing:.01em;text-transform:none;color:var(--ae-text)}
+.ae-roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(4.25rem,1fr);gap:14px 10px;margin:0;padding:6px 0 0;list-style:none}
+/* Every row is as tall as its tallest block, so a long name wraps instead of being cut off and the grid stays even. */
+.ae-roster-slot{position:relative;display:flex;min-height:0}
+.aetherium-page .ae-roster-open,.aetherium-page .ae-roster-add{width:100%;height:100%;min-height:4.25rem;padding:10px 40px 10px 14px;text-transform:none;letter-spacing:0;font:500 .9375rem/1.3 var(--ae-font-ui);text-align:left}
+.aetherium-page .ae-roster-open{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-content:center;align-items:center;justify-content:stretch}
+.aetherium-page .ae-roster-add{display:flex;align-items:center;justify-content:center;padding:10px 14px;color:var(--ae-text-muted);border:1px dashed var(--ae-hairline-strong)}
+.aetherium-page .ae-roster-class{grid-column:1;grid-row:1/3;width:32px;height:32px;object-fit:contain;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline-strong)}
+.aetherium-page .ae-roster-open strong{grid-column:2;grid-row:1;min-width:0;white-space:nowrap;font:700 1.0625rem/1.25 var(--ae-font-ui);color:var(--ae-text)}
+.aetherium-page .ae-roster-line{grid-column:2;grid-row:2;min-width:0;overflow-wrap:anywhere;font:500 .9375rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted)}
+/* One line box at every size, so a shrunk name keeps the lines under it where they are on every block. */
+.aetherium-page .ae-roster-open strong{line-height:1.375rem}
+.aetherium-page .ae-roster-open strong[data-fit="small"]{font-size:.875rem;letter-spacing:-.01em}
+.aetherium-page .ae-roster-open strong[data-fit="wrap"]{font-size:.875rem;white-space:normal;overflow-wrap:anywhere}
+/* Active: a gold tag on the block's top edge, so it never takes room from the name. */
+.aetherium-page .ae-roster-state{position:absolute;top:-9px;left:12px;z-index:1;padding:1px 8px;border:1px solid color-mix(in srgb,var(--ae-gold) 60%,transparent);border-radius:var(--ae-pill);background:var(--ae-panel-solid);font:700 .875rem/1.2 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-gold);pointer-events:none}
+/* Remove: the standard outline button (notch, strobe, accent), sized down to a cross in the corner. */
+.aetherium-page .ae-roster-remove{position:absolute;top:6px;right:6px;width:36px;min-width:36px;height:36px;min-height:36px;padding:0;display:grid;place-items:center;font:500 1.25rem/1 var(--ae-font-ui);letter-spacing:0}
+/* Phones: the icon sits on its own row with the cross, so the name and class get the block's full width and whole
+   words; the level drops under the class. */
+@media (max-width:560px){
+  .aetherium-page .ae-roster-open{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;row-gap:4px;align-content:start;padding:10px 9px}
+  .aetherium-page .ae-roster-class{grid-row:1;width:28px;height:28px}
+  .aetherium-page .ae-roster-open strong{grid-column:1;grid-row:2}
+  .aetherium-page .ae-roster-line{grid-column:1;grid-row:3}
+  .aetherium-page .ae-roster-sep{display:none}
+  .aetherium-page .ae-roster-lv{display:block}
+}
+.ae-roster-note{margin:12px 0 0;color:var(--ae-text-muted);font-size:.9375rem}
+/* Counts are pills: "Meslamtaeda · EU · 3 of 9". */
 .ae-roster-count{margin:0;padding:5px 12px;border:1px solid var(--ae-hairline-strong);border-radius:var(--ae-pill);background:rgba(0,0,0,.35);font:700 .8125rem/1.2 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text)}
-.ae-roster-switch{display:flex;align-items:center;gap:10px;margin:0 0 8px}
-.ae-roster-switch label{font:700 .875rem/1.2 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text-muted)}
-.ae-roster-switch select{box-sizing:border-box;min-height:44px;max-width:100%;padding:0 14px;border:1px solid var(--ae-hairline-strong);background:var(--ae-well);color:var(--ae-text);font:500 1rem/1 var(--ae-font-ui);box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+/* The server heading over the roster: what the list is, and which server it shows. */
+.ae-roster-switch{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 12px}
+.ae-roster-locate{margin:0;font:700 1.0625rem/1.3 var(--ae-font-ui);letter-spacing:.01em;color:var(--ae-text)}
+.ae-roster-switch select{box-sizing:border-box;min-height:44px;max-width:100%;padding:0 40px 0 14px;border:1px solid var(--ae-hairline-strong);background:var(--ae-well);color:var(--ae-text);font:500 1rem/1 var(--ae-font-ui);box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+.ae-roster-switch select:disabled{opacity:1;cursor:default}
 .ae-roster-switch select:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:1px}
 .ae-server-note{margin:8px 0 0;color:var(--ae-text-muted);font-size:.875rem}
-/* Roster cards: one height, the class icon on the left, four rows on fixed baselines, long names cut with an ellipsis. */
-.ae-roster-slot{height:7.75rem;min-height:0}
-.aetherium-page .ae-roster-open{display:grid;grid-template-columns:40px minmax(0,1fr);grid-template-rows:.875rem 1.5rem 1.25rem 1.25rem;justify-content:stretch;align-content:center;justify-items:start;gap:3px 12px;text-align:left;height:100%}
-.aetherium-page .ae-roster-open>*{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.aetherium-page .ae-roster-open>:not(.ae-roster-class){grid-column:2}
-.aetherium-page .ae-roster-open>.ae-roster-state{grid-column:1/-1}
-.aetherium-page .ae-roster-class{grid-column:1;grid-row:2/-1;align-self:center;width:40px;height:40px;object-fit:contain;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline-strong)}
-/* The name sits under the Remove button, so only the state line keeps clear of it. */
-.ae-roster-state{padding-right:64px;box-sizing:border-box}
-.ae-roster-line{font-size:.875rem;line-height:1.25rem}
 .ae-gear-page.is-single{grid-template-columns:minmax(0,1fr)}
 
 /* Gear Ledger */
@@ -905,13 +918,12 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 }
 
 /* Wide screens: the content grows to 1440px and every page uses the width. Ascent Plan goes to three columns,
-   the Daeva Card roster sits on one row of eight. */
+   the Daeva Card roster keeps its two columns. */
 @media (min-width:1500px){
   .ae-ascent-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,2fr)}
   .ae-ascent-side{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ae-gap)}
   .ae-ascent-setup{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
   .ae-summary{grid-template-columns:minmax(0,1fr) minmax(340px,440px)}
-  .ae-roster{grid-template-columns:repeat(8,minmax(0,1fr))}
   .ae-summary-card .ae-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
   .ae-sources ol{display:block;columns:3;column-gap:32px}
   .ae-sources li{break-inside:avoid;margin-bottom:8px}
@@ -923,7 +935,6 @@ body.aetherium-page[data-ae-view] .ae-ascent-setup{display:none}
 @media (max-width:1199px){.ae-main{padding-top:20px}}
 @media (max-width:1099px){
   .ae-summary,.ae-ledger,.ae-ascent-grid,.ae-ascent-setup{grid-template-columns:minmax(0,1fr)}
-  .ae-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
   /* Tablet widths: the name on its own row, region, server and the action under it. */
   .ae-search-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
   .ae-search-form .ae-field:first-child{grid-column:1/-1}
@@ -1085,7 +1096,6 @@ body.aetherium-page [data-forge-destination-ribbon] .apx-destination-ribbon a:fo
 .ae-class-art{display:none;aspect-ratio:1;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#1b2a4a,#0a1120 72%);border:1px solid #3a4560;border-radius:6px}
 .ae-class-row.has-art .ae-class-art{display:block}
 .ae-classes-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;gap:6px 14px;margin:0 0 12px}
-.ae-classes-head h2{margin:0;font:700 13px/1.3 var(--ax-font-head);letter-spacing:.2em;text-transform:uppercase;color:var(--ae-muted)}
 .ae-class-art .ae-art{width:100%;height:100%;object-fit:cover;object-position:50% 10%;display:block}
 .ae-class-name{align-self:center;font:700 .875rem/1.2 var(--ax-font-head);letter-spacing:.04em}
 

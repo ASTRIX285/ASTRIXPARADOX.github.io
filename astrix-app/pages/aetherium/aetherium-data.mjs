@@ -271,7 +271,7 @@ export function sourceLabel(source) {
   return `Read from the official AION 2 site ${age}${source.cache === 'hit' ? ' (cached)' : ''}.`;
 }
 
-/* Roster: up to 8 Daevas per server, added by name, saved on this device. The public data cannot tell which
+/* Roster: up to 9 Daevas per server, added by name, saved on this device. The public data cannot tell which
    characters share an account, so a roster belongs to one server in one region (id "<region>:<serverId>"). */
 const rosterKey = entry => `${entry.serverId}:${entry.characterId}`; // server ids differ between regions, so the key needs no region
 const rosterIdOf = entry => `${regionOf(entry.region)}:${entry.serverId}`;
