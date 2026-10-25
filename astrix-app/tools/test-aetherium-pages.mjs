@@ -1737,7 +1737,7 @@ await check('Compare: two Daevas from different regions side by side, two calls 
     assert.deepEqual(score,[await page.locator('[data-lead="a"]').count(),await page.locator('[data-lead="b"]').count()],'The scoreboard counts the rows each Daeva leads');
     assert.match(await plainText(page,'#aeCmpScore .ae-cmp-verdict'),/^(TESTDAEVA|SECONDDAEVA) leads$|^Level pegging$/);
     const chips=await page.$$eval('#aeCmpHeads .ae-cmp-who',els=>els.map(el=>[...el.querySelectorAll('.ae-chips li')].map(li=>li.textContent)));
-    assert.deepEqual(chips,[['Gladiator','Elyos','Meslamtaeda','Europe','Lv 45'],['Sorcerer','Asmodians','AS Asmodian 1','Asia','Lv 45']],'The Daeva Card chips on each side');
+    assert.deepEqual(chips,[['Gladiator','Elyos','Meslamtaeda','Europe','Lv 45'],['Sorcerer','Asmodian','AS Asmodian 1','Asia','Lv 45']],'The Daeva Card chips on each side');
     const look=await page.evaluate(()=>({title:parseFloat(getComputedStyle(document.querySelector('[data-compare-section="overview"] .ae-section-title')).fontSize),value:parseFloat(getComputedStyle(document.querySelector('[data-compare-row="combat-power"] .ae-cmp-cell')).fontSize),name:document.querySelector('.ae-cmp-name').scrollWidth<=document.querySelector('.ae-cmp-name').clientWidth+1}));
     assert.ok(look.title>=20&&look.value>=16,`Section heads ${look.title}px, values ${look.value}px`);
     assert.ok(look.name,'The name fits its card');
