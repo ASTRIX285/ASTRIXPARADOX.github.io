@@ -39,6 +39,40 @@ const collectRefs=(value,out=new Set())=>{
   return out;
 };
 
+/* The game's bar (Miguel, in game, 25 Oct 2026): fingers rest on W A S D, so 1 to 4, Q and E are the reachable keys and
+   5 to 8 a stretch. Cooldown skills and stigmas claim 1 to 4, cover (stagger, heal, defensive) claims Q and E; the rest
+   (toggle, dash, movement) take what is left of those six, and only then 5 to 8. A cooldown or cover key outside its own
+   keys is allowed only once those are full. No skill the Daeva has now sits on 5 to 8 while a reachable key is free or
+   only held for a later skill. A build's second stack sits on key 1; no own skill on right click. */
+const REACH=['1','2','3','4','Q','E'];
+const KEY_GROUP={cover:['Q','E'],cooldown:['1','2','3','4'],rest:['5','6','7','8']};
+const groupOfStack=stack=>{
+  const reason=stack.skills[0]?.reason??null;
+  if(['stagger','heal','defensive'].includes(reason))return 'cover';
+  if(stack.skills.some(skill=>skill.stigma)||!['toggle','dash','movement'].includes(reason))return 'cooldown';
+  return 'rest';
+};
+function assertKeyGroups(bar,tag){
+  const used=key=>bar.stacks[key].skills.length>0||Boolean(bar.stacks[key].reserved?.length);
+  if(bar.secondStack){
+    assert.equal(bar.secondStackKey,'1',`${tag}: the second stack on key 1`);
+    assert.ok(!used('1'),`${tag}: key 1 holds only the second stack`);
+    assert.ok(bar.stacks[bar.secondStack].skills.length>0,`${tag}: the second stack has skills`);
+  }
+  assert.ok(!bar.stacks.RMB.skills.length,`${tag}: no own skill on right click (it is the main line's)`);
+  // AION 2 stacks only on 1 to 4, Q, E and right click (Miguel, in game, 25 Oct 2026): 5 to 8 hold one skill each.
+  for(const key of ['5','6','7','8'])assert.ok(bar.stacks[key].skills.length<=1&&(bar.stacks[key].reserved?.length??0)<=1,`${tag}: key ${key} holds a stack, but 5 to 8 cannot`);
+  const holdsNow=key=>bar.stacks[key].skills.length>0||(bar.secondStack&&key==='1');
+  for(const key of ['5','6','7','8'].filter(key=>bar.stacks[key].skills.length))
+    assert.ok(REACH.every(holdsNow),`${tag}: ${bar.stacks[key].skills[0].name} is on ${key} while a reachable key (${REACH.filter(k=>!holdsNow(k)).join(', ')}) is free or held for later`);
+  for(const key of bar.left.filter(key=>key!=='RMB'&&bar.stacks[key].skills.length)){
+    const group=groupOfStack(bar.stacks[key]);
+    if(KEY_GROUP[group].includes(key)||group==='rest')continue;
+    const full=KEY_GROUP[group].every(k=>used(k)||(bar.secondStack&&k==='1'));
+    assert.ok(full,`${tag}: ${bar.stacks[key].skills[0].name} (${group}) is on ${key} while its own keys ${KEY_GROUP[group].join(', ')} have room`);
+  }
+}
+
 check('one build file per class, nothing extra',()=>{
   const files=readdirSync(new URL('games/aion2/data/advisor/builds/',root)).sort();
   assert.deepEqual(files,AION2_CLASSES.map(name=>`${name.toLowerCase()}.json`).sort());
@@ -175,16 +209,20 @@ check('Skill bar: basic skill fixed on left click for every class, nothing place
     assert.ok(Object.values(bar.bars[0]).every(cell=>!cell||cell.icon),`${name}: icons on bar 0`);
   }
   // Macro builder (16 Oct 2026): Ruinous Blow is a dash, so it leaves the stack for its own key (it was row 0 of key 1).
-  // Level planner (17 Oct 2026): at Lv 12 it cannot be placed yet, so its key is kept free for it (no skill moves key as
-  // the Daeva levels) and it waits in Comes later; at Lv 14 it is on that same key.
+  // Level planner: at Lv 12 Ruinous Blow cannot be placed yet, so it waits in Comes later. The game's bar (Miguel, in
+  // game, 25 Oct 2026) replaces the 17 Oct "no skill moves key" rule: a key held for a later skill never keeps a
+  // reachable key (1 to 4, Q, E) empty, so the skills the Daeva has now are within reach and a later skill takes a
+  // reachable key once it unlocks.
   const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).skillBar;
   const key=glad.left.find(item=>glad.stacks[item].reserved?.includes('Ruinous Blow'));
-  assert.ok(key,'Ruinous Blow has a key of its own, kept free at Lv 12');
+  assert.ok(key,'Ruinous Blow has a key held for it at Lv 12');
   assert.equal(glad.stacks[key].skills.length,0);
+  assert.ok(['1','2','3','4','Q','E'].every(k=>k===key||glad.stacks[k].skills.length||!['5','6','7','8'].some(far=>glad.stacks[far].skills.length)),'A key held for later never leaves a reachable key empty while 5 to 8 hold skills');
   assert.deepEqual(glad.later.find(item=>item.name==='Ruinous Blow'),{name:'Ruinous Blow',where:'own key',unlockLevel:14,reason:'Unlocks at Lv 14.',icon:glad.later.find(item=>item.name==='Ruinous Blow').icon});
   const at14=buildAscentPlan({className:'Gladiator',role:'dps',level:14,data:data('Gladiator')}).skillBar;
-  assert.equal(at14.stacks[key].skills[0].name,'Ruinous Blow','Same key once it unlocks');
-  assert.equal(at14.stacks[key].skills[0].reason,'dash');
+  const at14Key=at14.left.find(item=>at14.stacks[item].skills[0]?.name==='Ruinous Blow');
+  assert.ok(['1','2','3','4','Q','E'].includes(at14Key),`Once it unlocks it is within reach (key ${at14Key})`);
+  assert.equal(at14.stacks[at14Key].skills[0].reason,'dash');
   // Rage Burst (a stigma, slot 1 at Lv 22) is not placeable at Lv 12: Mocking Blade, which knocks the target down, opens Overhead Slam in its row.
   assert.equal(glad.bars[0].B.name,'Mocking Blade','Row 0 of the main line fires first');
   assert.ok(Object.values(glad.stacks).every(stack=>stack.skills.every(skill=>!skill.locked)),'No locked skill on the bar');
@@ -834,11 +872,18 @@ check('Gladiator bar, DPS and tank: one main line right of left click (Rage Burs
     assert.equal(bar.stacks.A.skills.length,0,`${role}: no second stack`);
     assert.equal(bar.stacks.LMB.skills[0].name,'Keen Strike');
     const left=bar.left.map(key=>bar.stacks[key].skills.map(skill=>skill.name)).filter(list=>list.length);
-    // Keys by the hand (Miguel, in game, 17 Oct 2026): Defiance on Space bar; 1 to 4 first in the record's order, the stacked
-    // movement key on Q, then E; 5 to 8 stay free.
+    // The game's bar (Miguel, in game, 25 Oct 2026): Defiance on Space bar; the stagger on Q and the block on E (cover);
+    // the burst buffs on 1 and 2 (cooldown skills); the movement stack and the dash take the reachable 3 and 4, not 5 to 8.
     assert.equal(bar.space.name,'Defiance',`${role} ${team}: Defiance on Space bar`);
-    assert.deepEqual(Object.fromEntries(bar.left.filter(key=>bar.stacks[key].skills.length).map(key=>[key,bar.stacks[key].skills.map(skill=>skill.name)])),{1:['Sword Aura Rampage'],2:["Zikel's Blessing"],3:[fourth],4:['Ruinous Blow'],Q:['Leaping Slam','Rush Strike'],E:['Focused Block']},`${role} ${team}: own keys by the hand`);
-    assert.deepEqual(left,[['Sword Aura Rampage'],["Zikel's Blessing"],[fourth],['Ruinous Blow'],['Leaping Slam','Rush Strike'],['Focused Block']],`${role} ${team}: own keys in the record's order`);
+    const keys=Object.fromEntries(bar.left.filter(key=>bar.stacks[key].skills.length).map(key=>[key,bar.stacks[key].skills.map(skill=>skill.name)]));
+    assert.deepEqual(keys.Q,['Sword Aura Rampage'],`${role} ${team}: the stagger on Q`);
+    assert.deepEqual(keys[1],["Zikel's Blessing"],`${role} ${team}: the burst buff on 1`);
+    assert.deepEqual(keys[3],['Leaping Slam','Rush Strike'],`${role} ${team}: the movement stack on 3, within reach`);
+    assert.deepEqual(keys[4],['Ruinous Blow'],`${role} ${team}: the dash on 4, within reach`);
+    assert.ok(['5','6','7','8'].every(key=>!keys[key]),`${role} ${team}: 5 to 8 stay free while 1 to 4, Q and E hold everything`);
+    assert.ok(Object.values(keys).some(list=>list[0]===fourth)&&Object.values(keys).some(list=>list[0]==='Focused Block'),`${role} ${team}: ${fourth} and Focused Block both have a key`);
+    assertKeyGroups(bar,`Gladiator ${role} ${team}`);
+    assert.deepEqual(left.flat().filter(name=>['Sword Aura Rampage',"Zikel's Blessing",'Leaping Slam','Rush Strike','Ruinous Blow','Focused Block',fourth].includes(name)).length,7,`${role} ${team}: every own key placed`);
     assert.deepEqual(plan.macro.keys,['B'],'Macro 1 is the main line, one entry');
     assert.deepEqual(plan.macro.entries[0].skills.map(skill=>skill.name),['Rage Burst','Overhead Slam','Rending Blow']);
     assert.equal(plan.macro.verified,true,'Checked against a published top-player build: no Not confirmed yet tag');
@@ -1009,8 +1054,8 @@ check('every stacked key ends with a filler on its top row, or says why the buil
   assert.deepEqual(glad.fillers,['Keen Strike','Rending Blow','Sword Aura Rampage'],'Gladiator fillers: the rotation filler line, the key skill called "Main MP spender and filler", then a 0 s cooldown');
   assert.deepEqual(glad.stackFillers,['Rending Blow'],'Keen Strike stays on left click, so Rending Blow tops the main line');
   assert.equal(glad.stacks.B.fillerMissing,null);
-  // Keys by the hand (Miguel, 17 Oct 2026): the stacked movement key is on Q.
-  assert.match(glad.stacks.Q.fillerMissing,/Its own key, not a macro entry/,'The movement key ends on Rush Strike, a cooldown skill, and says so');
+  // The game's bar (Miguel, 25 Oct 2026): the stacked movement key takes the reachable key 3.
+  assert.match(glad.stacks['3'].fillerMissing,/Its own key, not a macro entry/,'The movement key ends on Rush Strike, a cooldown skill, and says so');
   // Derived, never hard-coded: take Rending Blow's filler word and the record's no-cooldown away and the main line has no filler to end on, and says why.
   const noFiller=structuredClone(builds.Gladiator);
   noFiller.records[0].coreSkills.find(core=>core.name==='Rending Blow').why='Main MP spender.';
@@ -1205,20 +1250,15 @@ const SECTION_6={
   Sorcerer:{A:['Element Enhancement','Delayed Explosion','Fire Wall','Blaze'],main:'Flame Arrow',B:["Winter's Shackles",'Cold Storm','Bittercold Wind','Firestorm'],opener:[],own:['Hellfire','Wish of Concentration','Frost','Frost Burst','Flame Scattershot','Ice Chain','Defiance','Steel Barrier','Arctic Armor','Hibernation']},
   Spiritmaster:{A:['Jointstrike: Curse','Summon: Earth Spirit','Summon: Water Spirit','Summon: Fire Spirit'],main:'Cold Shock',B:['Jointstrike: Corrode','Dimensional Control','Elemental Fusion','Combustion'],opener:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit'],own:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit','Jointstrike: Destructive Attack','Rapid Scattershot',"Soul's Cry",'Defiance']}
 };
-check('keys by the hand (all 8 classes): Defiance on Space bar only; stacked own keys on Q or E; 1 to 4, Q, E fill before 5 to 8',()=>{
-  // Miguel, in game, 17 Oct 2026: Defiance is on Space bar on every class; 1 to 4 sit above Q and E, so they come first,
-  // and Q and E are easier to stack than 5 to 8.
-  const FILL=['1','2','3','4','Q','E','5','6','7','8','RMB'];
+check('the game\'s bar (all 8 classes): Defiance on Space bar only; cover on Q and E, cooldown skills and stigmas on 1 to 4, the rest on 5 to 8; a second stack on key 1; nothing after right click',()=>{
+  // Miguel, in game, 25 Oct 2026: how players set the bar (not a macro rule). Defiance is on Space bar on every class.
   for(const name of AION2_CLASSES)for(const build of builds[name].records)for(const level of [16,30,45]){
     const bar=buildAscentPlan({className:name,role:build.role,level,data:data(name)}).skillBar;
     if(!bar?.fromBlock)continue;
     const tag=`${name} ${build.role} Lv ${level}`;
     assert.equal(bar.space?.name,'Defiance',`${tag}: Defiance on Space bar`);
     assert.ok(Object.values(bar.stacks).every(stack=>!stack.skills.some(skill=>skill.name==='Defiance')),`${tag}: Defiance on no key and in no stack`);
-    const used=key=>bar.stacks[key].skills.length>0||Boolean(bar.stacks[key].reserved?.length);
-    const taken=FILL.filter(used);
-    assert.deepEqual(taken,FILL.slice(0,taken.length),`${tag}: keys fill in the hand's order (${taken.join(', ')})`);
-    for(const key of FILL.filter(key=>bar.stacks[key].skills.length>1))assert.ok(['Q','E'].includes(key)||['Q','E'].every(used),`${tag}: the stacked key ${key} is on Q or E`);
+    assertKeyGroups(bar,tag);
   }
 });
 check('every DPS class matches section 6 of the research record: rows, main attack, own keys, opener',()=>{

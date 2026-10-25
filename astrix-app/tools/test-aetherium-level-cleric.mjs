@@ -327,7 +327,8 @@ if(process.env.AE_BROWSER!=='0'){
       assert.ok(later.every(name=>!onBar.includes(name)),'Never on the bar and in Comes later');
       if(level===45)assert.equal(later.length,0,'Nothing comes later at 45');
       else assert.ok(later.length>0);
-      assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','A','B'],'Left click, the thunder stack on right click, the torment stack in one more column');
+      assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','A'],'Left click and the thunder stack on right click; the game\'s bar ends there (Miguel, 25 Oct 2026)');
+      assert.equal(await page.locator('#aeLeftBlock [data-bar-col="B"][data-block-col="1"]').count(),1,'The torment stack on key 1');
       assert.doesNotMatch(await plain(page,'main'),/Cooldown not captured yet/,'Every Cleric cooldown is captured from the tooltip');
       await context.close();
     }
