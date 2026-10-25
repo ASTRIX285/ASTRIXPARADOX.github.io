@@ -1,5 +1,5 @@
 /**
- * Daeva Card (The Aetherium): find a character, see the summary, keep up to 8 Daevas per server on this device.
+ * Daeva Card (The Aetherium): find a character, see the summary, keep up to 9 Daevas per server on this device.
  * With no Daeva the page opens on the intro: official class art, the NPC guide with three steps, the search and
  * the eight class tiles (a plan by hand for each). A failed read says why and offers Try again; nothing stands
  * in for a character, and no page ever shows an example Daeva.
@@ -314,7 +314,7 @@ function showLoading(on) {
 
 function renderRoster() {
   const current = roster.read();
-  // "<Server> · <short region> · <n> of 8", for the server whose roster is shown.
+  // "<Server> · <short region> · <n> of 9", for the server whose roster is shown.
   const count = `${current.entries.length} of ${roster.slots}`;
   $('#aeRosterCount').textContent = current.rosterId ? `${current.serverName} · ${regionShort(current.region)} · ${count}` : count;
   renderSwitcher(current);
@@ -323,22 +323,37 @@ function renderRoster() {
     const key = roster.key(entry);
     const active = key === current.active;
     const icon = classArt(entry.className);
+    // A compact block (Miguel, 25 Oct 2026): class icon, the full name, class and level. The server is the heading's,
+    // so it is not repeated on every block. Remove is a small cross in the corner.
     return `<li class="ae-roster-slot is-filled${active ? ' is-active' : ''}" data-faction="${factionOf(entry.raceName, entry.raceId)}">
-      <button type="button" class="ae-btn ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''}>
-        ${icon ? `<img class="ae-roster-class" src="${esc(icon)}" alt="" width="40" height="40" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-roster-class" aria-hidden="true"></span>'}
-        <span class="ae-roster-state">${active ? 'Active' : ''}</span>
-        <strong title="${esc(entry.name)}">${esc(entry.name)}</strong>
-        <span class="ae-roster-line">${esc(entry.className)} · Lv ${esc(entry.level)}</span>
-        <span class="ae-roster-line ae-muted">${esc(entry.serverName)} · ${esc(regionShort(entry.region))}</span>
+      <button type="button" class="ae-btn ae-roster-open" data-roster-open="${esc(key)}"${active ? ' aria-current="true"' : ''} title="${esc(entry.name)}, ${esc(entry.className)} Lv ${esc(entry.level)}, ${esc(entry.serverName)}">
+        ${icon ? `<img class="ae-roster-class" src="${esc(icon)}" alt="" width="32" height="32" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '<span class="ae-roster-class" aria-hidden="true"></span>'}
+        <strong>${esc(entry.name)}</strong>
+        <span class="ae-roster-line">${esc(entry.className)}<span class="ae-roster-sep"> · </span><span class="ae-roster-lv">Lv ${esc(entry.level)}</span></span>
+        <span class="ae-sr">${esc(entry.serverName)} · ${esc(regionShort(entry.region))}</span>
       </button>
-      <button type="button" class="ae-roster-remove" data-roster-remove="${esc(key)}" aria-label="Remove ${esc(entry.name)} from your Daevas">Remove</button>
+      ${active ? '<span class="ae-roster-state">Active</span>' : ''}
+      <button type="button" class="ae-roster-remove" data-roster-remove="${esc(key)}" aria-label="Remove ${esc(entry.name)} from your Daevas" title="Remove"><span aria-hidden="true">×</span></button>
     </li>`;
   });
-  for (let i = current.entries.length; i < roster.slots; i++) {
+  // Only filled blocks show, plus one Add block while the server has room (up to 9).
+  if (current.entries.length < roster.slots) {
     cards.push('<li class="ae-roster-slot is-empty"><button type="button" class="ae-roster-add" data-roster-add>+ Add a Daeva</button></li>');
   }
   $('#aeRoster').innerHTML = cards.join('');
+  fitRosterNames();
 }
+
+/* A name too long for its block steps down to 14px on one line, so every block keeps the same lines; only a name too
+   long even then wraps. Measured, never cut off. */
+function fitRosterNames() {
+  for (const name of document.querySelectorAll('#aeRoster .ae-roster-open strong')) {
+    name.dataset.fit = '';
+    if (name.scrollWidth > name.clientWidth + 1) name.dataset.fit = 'small';
+    if (name.scrollWidth > name.clientWidth + 1) name.dataset.fit = 'wrap';
+  }
+}
+if ('ResizeObserver' in window) { let width = 0; new ResizeObserver(entries => { const next = Math.round(entries[0].contentRect.width); if (next !== width) { width = next; fitRosterNames(); } }).observe(document.documentElement); }
 
 /** Compare: shown once two Daevas are saved on this device (any server or region). It opens on the active one and the next. */
 function renderCompareLink(current) {
@@ -352,13 +367,17 @@ function renderCompareLink(current) {
   link.href = compareUrl(first, second);
 }
 
-/** The server switcher lists only servers that have saved Daevas, and hides when there is one. */
+/**
+ * The server picker under "Locate Your Characters on Server": the servers that have saved Daevas. It shows once one
+ * Daeva is saved, so the per-server list is always explained; with one server it names that server.
+ */
 function renderSwitcher(current) {
   const box = $('#aeRosterSwitchBox');
-  box.hidden = current.servers.length < 2;
+  box.hidden = current.servers.length < 1;
   // Rebuilt only when the list of servers changes: a redraw while someone is picking would swap the options out from
   // under the pick (and close an open list), so the pick would land on options no longer on the page.
   const select = $('#aeRosterSwitch');
+  select.disabled = current.servers.length < 2;
   const options = current.servers
     .map(item => `<option value="${esc(item.id)}">${esc(item.serverName)} · ${esc(regionShort(item.region))}</option>`).join('');
   if (select.dataset.options !== options) { select.innerHTML = options; select.dataset.options = options; }

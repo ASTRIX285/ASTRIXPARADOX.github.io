@@ -212,7 +212,9 @@ await check('no Daeva: the intro shows (guide, three steps, search form, 8 class
     assert.equal(await page.isHidden('#aeSource'),true,'No data line: nothing was read');
     assert.equal(await page.isHidden('#aeNotice'),true,'No notice: nothing went wrong');
     assert.equal(await page.getAttribute('body','data-faction'),'astrix','ASTRIX crimson with no character');
-    assert.equal(await page.locator('.ae-roster-slot').count(),8,'8 roster slots');
+    // Roster grid (Miguel, 25 Oct 2026): only saved Daevas show, plus one Add block while there is room.
+    assert.equal(await page.locator('.ae-roster-slot').count(),1,'No Daevas yet: only the Add block');
+    assert.equal(await page.locator('.ae-roster-slot.is-empty .ae-roster-add').count(),1);
     await assertNoGamerTag(page,`intro live=${live}`);
     assert.deepEqual(await imageSources(page),[],'No art until the art data has an official image');
     assert.deepEqual(errors,[]);
@@ -440,7 +442,7 @@ await check('roster drops a blank saved Daeva and the strobe runs blue',async()=
   assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),1,'The blank entry is gone');
   assert.equal(await page.inputValue('#aeNameInput'),'','The name box starts empty');
   assert.equal(await page.getAttribute('#aeNameInput','placeholder'),'Type your in-game character name','A prompt, not a name');
-  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 1 of 8','Heading names the server, short region and count');
+  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 1 of 9','Heading names the server, short region and count');
   assert.equal(await page.locator('.ae-roster-slot.is-active').count(),1,'The remaining Daeva becomes active');
   const stroke=await page.evaluate(()=>getComputedStyle(document.body).getPropertyValue('--ax-stroke').trim());
   assert.equal(stroke,'#4fb6ff','Strobe colour is the bright blue');
@@ -459,10 +461,10 @@ await check('roster add and remove, faction colour switch (a roster per server)'
   assert.equal(await page.getAttribute('body','data-faction'),'asmodian');
   assert.equal(await style(page,'.ae-chip-faction','color'),VIOLET,'Asmodian accent');
   assert.match(await page.textContent('.ae-roster-slot.is-active'),/NOCTIS/);
-  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 8');
+  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 9');
   await page.click('[data-roster-remove^="2301:"]');
   assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),1,'The other server\'s roster is shown after the last Daeva is removed');
-  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 1 of 8');
+  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 1 of 9');
   const saved=JSON.parse(await page.evaluate(()=>localStorage.getItem('aetherium.roster.v2')));
   const all=Object.values(saved.rosters).flatMap(bucket=>bucket.entries);
   assert.equal(all.length,1);
@@ -630,33 +632,36 @@ await check('Worker down on search: the plain message, Try again, the intro stay
   await context.close();
 });
 
-await check('roster per server: 8 slots on each server, the full message, the heading names server, short region and count',async()=>{
-  const eight=Array.from({length:8},(_,i)=>saved(`FULL${i}`,1308,'Meslamtaeda'));
+await check('roster per server: 9 on each server, the full message, the heading names server, short region and count',async()=>{
+  const eight=Array.from({length:9},(_,i)=>saved(`FULL${i}`,1308,'Meslamtaeda'));
   const other=saved('NOCTIS',2301,'Israphel');
   const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2([...eight,other]))}});
-  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 8 of 8');
-  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),8);
-  assert.equal(await page.locator('.ae-roster-slot.is-empty').count(),0);
+  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 9 of 9');
+  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),9);
+  assert.equal(await page.locator('.ae-roster-slot.is-empty').count(),0,'Full: no Add block');
   assert.equal(await page.isVisible('#aeRosterSwitchBox'),true,'Two servers have Daevas: the switcher shows');
   await page.fill('#aeNameInput',TEST_NAME);await page.click('#aeFind');
   await page.waitForSelector('#aeNotice:not([hidden])');
-  assert.equal(await page.textContent('#aeNotice'),`Meslamtaeda already has 8 Daevas saved. Remove one to add ${TEST_NAME}.`);
-  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),8,'Nothing was added');
-  assert.equal(JSON.stringify((await v2(page)).rosters['eu:1308'].entries.length),'8');
+  assert.equal(await page.textContent('#aeNotice'),`Meslamtaeda already has 9 Daevas saved. Remove one to add ${TEST_NAME}.`);
+  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),9,'Nothing was added');
+  assert.equal(JSON.stringify((await v2(page)).rosters['eu:1308'].entries.length),'9');
   await page.click('[data-roster-remove="1308:full0-1308="]');
-  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 7 of 8');
+  assert.equal(await page.textContent('#aeRosterCount'),'Meslamtaeda · EU · 8 of 9');
   await page.fill('#aeNameInput',TEST_NAME);await page.click('#aeFind');
-  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Meslamtaeda · EU · 8 of 8');
-  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),8,'The new Daeva took the freed slot');
+  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Meslamtaeda · EU · 9 of 9');
+  assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),9,'The new Daeva took the freed slot');
   await context.close();
 });
 
 await check('roster per server: a new Daeva goes to its own server and that roster is shown; the switcher lists only used servers',async()=>{
   const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2([saved('NOCTIS',2301,'Israphel')]))}});
-  assert.equal(await page.isHidden('#aeRosterSwitchBox'),true,'One server with Daevas: no switcher');
-  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 8');
+  // "Locate Your Characters on Server" (Miguel, 25 Oct 2026) shows with one server too, naming it; the picker is inert.
+  assert.equal(await page.isVisible('#aeRosterSwitchBox'),true,'One server with Daevas: the heading names it');
+  assert.equal(await page.textContent('#aeRosterLocate'),'Locate Your Characters on Server');
+  assert.equal(await page.isDisabled('#aeRosterSwitch'),true,'One server: nothing to switch to');
+  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 9');
   await page.fill('#aeNameInput',TEST_NAME);await page.click('#aeFind');
-  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Meslamtaeda · EU · 1 of 8');
+  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Meslamtaeda · EU · 1 of 9');
   assert.equal(await page.isVisible('#aeRosterSwitchBox'),true);
   assert.deepEqual(await page.$$eval('#aeRosterSwitch option',options=>options.map(o=>o.textContent)),['Israphel · EU','Meslamtaeda · EU'],'Only servers with saved Daevas');
   assert.equal(await page.inputValue('#aeRosterSwitch'),'eu:1308');
@@ -664,7 +669,7 @@ await check('roster per server: a new Daeva goes to its own server and that rost
   assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),1,'The strip shows one server\'s Daevas only');
   // Picking the other server shows its roster and makes its first Daeva active.
   await page.selectOption('#aeRosterSwitch','eu:2301');
-  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Israphel · EU · 1 of 8');
+  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Israphel · EU · 1 of 9');
   await page.waitForFunction(()=>document.body.dataset.faction==='asmodian');
   assert.match(await page.textContent('.ae-roster-slot.is-active'),/NOCTIS/);
   assert.equal((await v2(page)).active.key,'2301:Zm9vYmFyMTIz=','The first Daeva of that server is active');
@@ -683,7 +688,7 @@ await check('roster v1 moves to v2 per server: every entry kept, the active Daev
   assert.equal(store.rosters['eu:1305'].entries[0].region,'eu','An entry with no region is Europe');
   assert.deepEqual(store.active,{roster:'eu:2301',key:keyOf(c)},'The active Daeva is still active');
   assert.equal(await page.evaluate(()=>localStorage.getItem('aetherium.roster.v1')),raw,'v1 is left as it was');
-  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 8');
+  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 9');
   assert.deepEqual(await page.$$eval('#aeRosterSwitch option',options=>options.map(o=>o.textContent)),['Meslamtaeda · EU','Israphel · EU','Naw One · NA West','Nezekan · EU']);
   await context.close();
   // v2 wins once it exists: a later v1 never re-migrates over it.
@@ -696,13 +701,13 @@ await check('short region labels on roster cards and the heading; full names on 
   const entries=[saved('SHORTONE',1211,'Naw One','naw'),saved('SHORTTWO',1211,'Naw One','naw',{characterId:'two='})];
   const {page,context}=await open(`/hub/aetherium/?${new URLSearchParams({serverId:'1211',characterId:info.profile.characterId,region:'naw'})}`,{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2(entries))}});
   assert.match(await page.textContent('.ae-roster-slot.is-filled'),/Naw One · NA West/);
-  assert.equal(await page.textContent('#aeRosterCount'),'Naw One · NA West · 2 of 8');
+  assert.equal(await page.textContent('#aeRosterCount'),'Naw One · NA West · 2 of 9');
   assert.doesNotMatch(await page.textContent('#aeRoster'),/North America/);
   assert.equal(await page.textContent('.ae-chip-faction + li + li'),'North America - West','The chip keeps the full official name');
   assert.equal(await page.$eval('#aeRegion option[value="naw"]',o=>o.textContent),'North America - West');
   for(const [code,label] of [['nae','NA East'],['eu','EU'],['la','SA'],['as','Asia']]){
     const one=await open('/hub/aetherium/',{extra:{'aetherium.roster.v2':JSON.stringify(storeV2([saved('LBL',1311,'Kaisinel',code)]))}});
-    assert.equal(await one.page.textContent('#aeRosterCount'),`Kaisinel · ${label} · 1 of 8`);
+    assert.equal(await one.page.textContent('#aeRosterCount'),`Kaisinel · ${label} · 1 of 9`);
     assert.match(await one.page.textContent('.ae-roster-slot.is-filled'),new RegExp(`Kaisinel · ${label}`));
     await one.context.close();
   }
@@ -722,13 +727,18 @@ for(const [width,height] of [[390,844],[1280,900],[1600,1000]]){
     const rows=await page.$$eval('.ae-roster-slot.is-filled',nodes=>nodes.map(n=>{
       const r=n.getBoundingClientRect();
       const top=sel=>n.querySelector(sel).getBoundingClientRect().top-r.top;
-      return {height:r.height,name:top('strong'),line:top('.ae-roster-line'),server:top('.ae-roster-line.ae-muted'),state:top('.ae-roster-state')};
+      return {height:r.height,name:top('strong'),line:top('.ae-roster-line')};
     }));
     for(const row of rows){
-      for(const key of ['height','name','line','server','state']) assert.ok(Math.abs(row[key]-rows[0][key])<=0.5,`${key} differs: ${row[key]} vs ${rows[0][key]}`);
+      for(const key of ['height','name','line']) assert.ok(Math.abs(row[key]-rows[0][key])<=0.5,`${key} differs: ${row[key]} vs ${rows[0][key]}`);
     }
     const empties=await page.$$eval('.ae-roster-slot.is-empty',nodes=>nodes.map(n=>n.getBoundingClientRect().height));
-    assert.ok(empties.every(h=>Math.abs(h-rows[0].height)<=0.5),'Empty slots match the card height');
+    assert.ok(empties.length===1&&empties.every(h=>Math.abs(h-rows[0].height)<=0.5),'One Add block, the card height');
+    // Two columns at every width, and nothing in a block is cut off (long names wrap, every row keeps one height).
+    const cols=await page.$$eval('.ae-roster-slot',nodes=>[...new Set(nodes.map(n=>Math.round(n.getBoundingClientRect().left)))].length);
+    assert.equal(cols,2,'Two columns');
+    const cut=await page.$$eval('.ae-roster-open strong,.ae-roster-line',nodes=>nodes.filter(n=>n.scrollWidth>n.clientWidth+1||getComputedStyle(n).textOverflow==='ellipsis').map(n=>n.textContent));
+    assert.deepEqual(cut,[],'No name or class cut off');
     // With a second server the switcher shows; it lines up with the left edge of the roster strip.
     await context.close();
     const two=await open('/hub/aetherium/',{live:true,viewport:{width,height},extra:{'aetherium.roster.v2':JSON.stringify(storeV2([...entries.slice(0,4),entries[4]]))}});
@@ -736,7 +746,7 @@ for(const [width,height] of [[390,844],[1280,900],[1600,1000]]){
     assert.ok(rowsTwo.every(h=>Math.abs(h-rows[0].height)<=0.5),'A long server name does not change the height');
     const sw=await two.page.$eval('#aeRosterSwitch',el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,height:r.height};});
     const strip=await two.page.$eval('#aeRoster',el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right};});
-    const label=await two.page.$eval('#aeRosterSwitchBox label',el=>el.getBoundingClientRect().left);
+    const label=await two.page.$eval('#aeRosterLocate',el=>el.getBoundingClientRect().left);
     assert.ok(Math.abs(label-strip.left)<=1,`Switcher label starts on the grid (${label} vs ${strip.left})`);
     assert.ok(sw.right<=strip.right+0.5&&sw.height>=44,'Switcher stays inside the strip and is tappable');
     const overflow=await two.page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
@@ -1032,7 +1042,7 @@ await check('wide screens: Gear page columns side by side, roster on one row at 
   await gear.context.close();
   const card=await open('/hub/aetherium/',{viewport:{width:1920,height:1000}});
   const tops=await card.page.$$eval('.ae-roster-slot',items=>[...new Set(items.map(el=>Math.round(el.getBoundingClientRect().top)))]);
-  assert.equal(tops.length,1,'8 roster slots on one row');
+  assert.equal(tops.length,1,'No Daevas: the one Add block');
   await card.context.close();
 });
 
@@ -1266,7 +1276,7 @@ const typeAudit=page=>page.evaluate(({TABS,TINY})=>{
   return bad;
 },{TABS,TINY});
 /** Field labels and small heads: sentence case, 14px, weight 700, no uppercase transform. */
-const labelAudit=page=>page.$$eval('label.ae-field>span,.ae-eyebrow,.ae-section-title,#aeRosterTitle,.ae-roster-switch label,.ae-slot-label,.ae-tile dt',els=>els.filter(el=>el.getBoundingClientRect().height).map(el=>{
+const labelAudit=page=>page.$$eval('label.ae-field>span,.ae-eyebrow,.ae-section-title,.ae-slot-label,.ae-tile dt',els=>els.filter(el=>el.getBoundingClientRect().height).map(el=>{
   const s=getComputedStyle(el);const text=(el.firstChild?.nodeValue||el.textContent).trim();
   return {text,transform:s.textTransform,size:parseFloat(s.fontSize),weight:s.fontWeight,caps:text.length>1&&!/[a-z]/.test(text)};}));
 /** Text that is cut off: an element that hides its overflow and whose words do not fit (an ellipsis on purpose is allowed). */
@@ -1316,6 +1326,16 @@ await check('crisp type: body 16px, nothing under 13px, labels 14px at 0.02em or
       assert.equal(label.caps,false,`${path} "${label.text}" is sentence case`);
       assert.equal(label.size,14,`${path} "${label.text}" is ${label.size}px`);
       assert.equal(label.weight,'700',`${path} "${label.text}" is bold`);
+    }
+    // Roster headings (Miguel, 25 Oct 2026: "fonts are a bit small on headers"): section heads at 20px, the server head at 17px.
+    if(path==='/hub/aetherium/'){
+      const heads=await page.$$eval('#aeRosterTitle,#aeClassesTitle,#aeRosterLocate',els=>els.filter(el=>el.getBoundingClientRect().height).map(el=>({id:el.id,size:parseFloat(getComputedStyle(el).fontSize),weight:getComputedStyle(el).fontWeight,transform:getComputedStyle(el).textTransform})));
+      for(const head of heads){
+        assert.ok(head.size>=(head.id==='aeRosterLocate'?17:20),`${head.id} is ${head.size}px at ${width}`);
+        assert.equal(head.weight,'700');assert.equal(head.transform,'none');
+      }
+      const names=await page.$$eval('.ae-roster-open strong',els=>els.map(el=>parseFloat(getComputedStyle(el).fontSize)));
+      assert.ok(names.length&&names.every(size=>size>=17),`Roster names at 17px (${names})`);
     }
     const body=await page.$eval('body',el=>{const s=getComputedStyle(el);return {size:parseFloat(s.fontSize),numbers:s.fontVariantNumeric,font:s.fontFamily};});
     assert.equal(body.size,16,'Body text is 16px');
@@ -1495,7 +1515,7 @@ await check('crisp ribbon: one raised bar, exactly one active tab as a dark gold
 });
 
 for(const [width,height] of [[1600,1000],[1920,1080]]){
-  await check(`crisp width at ${width}: content 1200 wide with 24px gutters (the Daevas stand in the margins), roster one row of 8 cards with a class icon, no empty band`,async()=>{
+  await check(`crisp width at ${width}: content 1200 wide with 24px gutters (the Daevas stand in the margins), roster in two columns of compact cards with a class icon, no empty band`,async()=>{
     const {page,context}=await open('/hub/aetherium/',{live:true,viewport:{width,height},extra:{'aetherium.roster.v2':ROSTER8()}});
     const main=await page.$eval('main',el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {left:r.left,width:r.width,padL:parseFloat(s.paddingLeft),padR:parseFloat(s.paddingRight)};});
     // Daeva Card light and dark sides (Miguel, 25 Oct 2026): the card is 1200 wide so the two Daevas stand tall in the margins.
@@ -1504,12 +1524,12 @@ for(const [width,height] of [[1600,1000],[1920,1080]]){
     assert.ok(Math.abs(main.left+main.padL-(width-1200)/2)<=1,'Centred');
     const cards=await page.$$eval('.ae-roster-slot.is-filled',items=>items.map(el=>{const r=el.getBoundingClientRect(),img=el.querySelector('img.ae-roster-class');return {top:Math.round(r.top),height:r.height,icon:img?{src:img.getAttribute('src'),w:img.getBoundingClientRect().width,h:img.getBoundingClientRect().height}:null};}));
     assert.equal(cards.length,8);
-    assert.equal(new Set(cards.map(c=>c.top)).size,1,'One row of 8');
+    assert.equal(new Set(cards.map(c=>c.top)).size,4,'8 Daevas in two columns: four rows');
     assert.equal(new Set(cards.map(c=>c.height)).size,1,'Equal heights');
     for(const card of cards){
       assert.ok(card.icon,'A class icon on each card');
       assert.match(card.icon.src,/^https:\/\/assets\.playnccdn\.com\/.*board_icon_start_[a-z]+\.png$/,'The class art we already hotlink');
-      assert.equal(card.icon.w,40);assert.equal(card.icon.h,40);
+      assert.equal(card.icon.w,32);assert.equal(card.icon.h,32);
     }
     assert.equal(new Set(cards.map(c=>c.icon.src)).size,8,'Each class has its own icon');
     const panelsLeft=await page.$$eval('.ae-search, .ae-summary-card, #aeRoster',els=>[...new Set(els.map(el=>Math.round(el.getBoundingClientRect().left)))]);
@@ -1549,7 +1569,7 @@ await check('crisp loading: skeletons in the final shape (portrait, name bar, ch
     assert.equal(shape.words,'Reading your character.','The words are still there for screen readers');
     assert.equal(shape.visible,'absolute','and visually hidden');
     assert.equal(shape.shimmer,motion==='reduce'?'none':'ae-shimmer',`Shimmer with motion ${motion}`);
-    assert.equal(await page.$eval('#aeRoster .ae-loading',el=>el.classList.contains('ae-sk')&&el.getBoundingClientRect().height>=100),true,'The roster loading row is a card shape');
+    assert.equal(await page.$eval('#aeRoster .ae-loading',el=>el.classList.contains('ae-sk')&&el.getBoundingClientRect().height>=64),true,'The roster loading row is a compact card shape');
     await context.close();
   }
 });
