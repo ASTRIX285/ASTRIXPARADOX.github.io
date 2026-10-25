@@ -506,8 +506,11 @@ body.aetherium-page.ae-backdrop.ae-sides::before{
 .ae-spec-skill b{display:block;font:700 1.0625rem/1.25 var(--ae-font-ui);color:var(--ae-text)}
 .ae-spec-skill span{display:block;font-size:.875rem;color:var(--ae-text-muted)}
 .ae-spec-picks{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
-.ae-spec-picks li{display:inline-flex;align-items:baseline;gap:6px;padding:5px 10px;border:1px solid var(--ae-hairline-strong);border-radius:var(--ae-pill);font-size:.9375rem;color:var(--ae-text)}
+.ae-spec-picks li{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--ae-hairline-strong);border-radius:var(--ae-pill);font-size:.9375rem;color:var(--ae-text)}
 .ae-spec-picks li b{font-weight:700;color:var(--ae-text-muted)}
+.ae-spec-badge{flex:none;width:32px;height:32px;margin:-2px 0 -2px -4px;object-fit:contain}
+.ae-spec-picks li.is-open .ae-spec-badge{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--ae-gold) 70%,transparent))}
+.ae-spec-picks li.is-next .ae-spec-badge{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--ae-ice) 70%,transparent))}
 .ae-spec-picks li small{font:700 .8125rem/1 var(--ae-font-ui);letter-spacing:.02em}
 .ae-spec-picks li.is-open{border-color:color-mix(in srgb,var(--ae-gold) 60%,transparent)}
 .ae-spec-picks li.is-open b,.ae-spec-picks li.is-open small{color:var(--ae-gold)}
@@ -517,6 +520,7 @@ body.aetherium-page.ae-backdrop.ae-sides::before{
 .ae-spec-picks li.is-short b,.ae-spec-picks li.is-short small{color:var(--ae-warn)}
 .ae-spec-how{grid-column:2;margin:0;font-size:.9375rem;color:var(--ae-text-muted)}
 .ae-spec-how.is-short{color:var(--ae-warn)}
+.ae-spec-credit{margin:10px 0 0;font-size:.8125rem;color:var(--ae-text-muted)}
 @media (max-width:719px){.ae-spec-row{grid-template-columns:minmax(0,1fr)}.ae-spec-how{grid-column:1}}
 /* Skills at the Mastery cap: the tile, then where the next +1 comes from. */
 .ae-mcap-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}

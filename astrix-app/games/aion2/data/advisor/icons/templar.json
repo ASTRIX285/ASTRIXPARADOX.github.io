@@ -5,74 +5,87 @@
       "id": "templar-skill-icons",
       "class": "Templar",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 12010000,
           "name": "Vicious Strike",
           "icon": "ICON_TE_SKILL_001.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 12040000,
           "name": "Pummel",
           "icon": "ICON_TE_SKILL_006.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 12130000,
           "name": "Poach",
           "icon": "ICON_TE_SKILL_013.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 12100000,
           "name": "Shield Smite",
           "icon": "ICON_TE_SKILL_010.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 12240000,
           "name": "Judgment",
           "icon": "ICON_TE_SKILL_004.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 12340000,
           "name": "Flash Rampage",
           "icon": "ICON_GL_SKILL_027.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 12270000,
           "name": "Debilitating Smash",
           "icon": "ICON_TE_SKILL_025.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 12350000,
           "name": "Warding Strike",
           "icon": "ICON_TE_SKILL_035.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 12430000,
           "name": "Shield Rush",
           "icon": "ICON_TE_SKILL_015.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 12300000,
           "name": "Annihilate",
           "icon": "ICON_TE_SKILL_028.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 12090000,
           "name": "Punishment",
           "icon": "ICON_TE_SKILL_009.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 12260000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 12310000,
           "name": "Empyrean Lord's Punishment",
           "icon": "ICON_TE_SKILL_029.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12320000,
           "name": "Nezekan's Shield",
           "icon": "ICON_TE_SKILL_030.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12110000,
           "name": "Shield of Protection",
           "icon": "ICON_TE_SKILL_011.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12120000,
           "name": "Taunt",
           "icon": "ICON_TE_SKILL_012.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12200000,
           "name": "Armor of Balance",
           "icon": "ICON_GL_SKILL_013.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12190000,
           "name": "Second Skin",
           "icon": "ICON_TE_SKILL_018.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12070000,
           "name": "Doom Shield",
           "icon": "ICON_TE_SKILL_007.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12230000,
           "name": "Noble Armor",
           "icon": "ICON_TE_SKILL_022.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12410000,
           "name": "Executing Blade",
           "icon": "ICON_TE_SKILL_041.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12250000,
           "name": "Comrade in Arms",
           "icon": "ICON_TE_SKILL_024.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12220000,
           "name": "Grapple",
           "icon": "ICON_TE_SKILL_021.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12700000,
           "name": "Assault Fury",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 12450000,
           "name": "Battlefield Banner",
           "icon": "ICON_TE_SKILL_045.png",
           "category": "Stigma",
@@ -223,6 +249,13 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "note": "Skill id is the game's own skill id (the same id the armory skill list gives). Specialty badge art is perkIconBase + (id + 10 x the Specialty position, 1 to 5) + .webp: MetaBot's copy of the in-game art, used with Miguel's approval (25 Oct 2026) because NCSOFT does not publish the Specialty art."
         }
       ]
     }

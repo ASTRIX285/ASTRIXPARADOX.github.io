@@ -5,74 +5,87 @@
       "id": "sorcerer-skill-icons",
       "class": "Sorcerer",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 15210000,
           "name": "Flame Arrow",
           "icon": "ICON_SO_SKILL_020.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 15090000,
           "name": "Ice Chain",
           "icon": "ICON_SO_SKILL_009.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 15040000,
           "name": "Firestorm",
           "icon": "ICON_SO_SKILL_004.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 15280000,
           "name": "Bittercold Wind",
           "icon": "ICON_SO_SKILL_025.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 15050000,
           "name": "Blaze",
           "icon": "ICON_SO_SKILL_005.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 15010000,
           "name": "Flame Scattershot",
           "icon": "ICON_SO_SKILL_001.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 15150000,
           "name": "Frost",
           "icon": "ICON_SO_SKILL_015.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 15110000,
           "name": "Winter's Shackles",
           "icon": "ICON_SO_SKILL_011.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 15220000,
           "name": "Frost Burst",
           "icon": "ICON_SO_SKILL_022.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 15310000,
           "name": "Wish of Concentration",
           "icon": "ICON_SO_SKILL_028.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 15060000,
           "name": "Hellfire",
           "icon": "ICON_SO_SKILL_006.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 15240000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 15360000,
           "name": "Divine Burst",
           "icon": "ICON_SO_SKILL_036.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15160000,
           "name": "Steel Barrier",
           "icon": "ICON_SO_SKILL_016.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15400000,
           "name": "Element Enhancement",
           "icon": "ICON_SO_SKILL_040.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15140000,
           "name": "Curse: Tree",
           "icon": "ICON_SO_SKILL_014.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15230000,
           "name": "Arctic Armor",
           "icon": "ICON_SO_SKILL_021.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15130000,
           "name": "Soul Freeze",
           "icon": "ICON_SO_SKILL_013.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15200000,
           "name": "Cold Storm",
           "icon": "ICON_SO_SKILL_019.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15390000,
           "name": "Fire Wall",
           "icon": "ICON_SO_SKILL_039.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15300000,
           "name": "Lumiel's Space",
           "icon": "ICON_SO_SKILL_027.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15320000,
           "name": "Delayed Explosion",
           "icon": "ICON_SO_SKILL_032.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15120000,
           "name": "Glacial Smite",
           "icon": "ICON_SO_SKILL_012.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15700000,
           "name": "Assault Bombardment",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 15410000,
           "name": "Hibernation",
           "icon": "ICON_SO_SKILL_041.png",
           "category": "Stigma",
@@ -223,6 +249,13 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "note": "Skill id is the game's own skill id (the same id the armory skill list gives). Specialty badge art is perkIconBase + (id + 10 x the Specialty position, 1 to 5) + .webp: MetaBot's copy of the in-game art, used with Miguel's approval (25 Oct 2026) because NCSOFT does not publish the Specialty art."
         }
       ]
     }

@@ -5,74 +5,87 @@
       "id": "ranger-skill-icons",
       "class": "Ranger",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 14020000,
           "name": "Snipe",
           "icon": "ICON_RA_SKILL_001.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 14340000,
           "name": "Tempest Shot",
           "icon": "ICON_RA_SKILL_034.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 14130000,
           "name": "Snare Shot",
           "icon": "ICON_RA_SKILL_013.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 14090000,
           "name": "Marking Shot",
           "icon": "ICON_RA_SKILL_031.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 14050000,
           "name": "Drill Dart",
           "icon": "ICON_RA_SKILL_005.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 14330000,
           "name": "Arrow Scattershot",
           "icon": "ICON_RA_SKILL_033.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 14110000,
           "name": "Gale Arrow",
           "icon": "ICON_RA_SKILL_011.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 14170000,
           "name": "Explosion Trap",
           "icon": "ICON_RA_SKILL_017.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 14080000,
           "name": "Burst Arrow",
           "icon": "ICON_RA_SKILL_008.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 14070000,
           "name": "Suppressing Arrow",
           "icon": "ICON_RA_SKILL_007.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 14010000,
           "name": "Deadshot",
           "icon": "ICON_RA_SKILL_002.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 14260000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 14270000,
           "name": "Arrow Storm",
           "icon": "ICON_RA_SKILL_026.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14310000,
           "name": "Vaizel's Authority",
           "icon": "ICON_RA_SKILL_022.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14220000,
           "name": "Bow of Blessing",
           "icon": "ICON_RA_SKILL_030.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14120000,
           "name": "Ambush Kick",
           "icon": "ICON_RA_SKILL_012.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14180000,
           "name": "Ensnaring Trap",
           "icon": "ICON_RA_SKILL_018.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14150000,
           "name": "Illusory Arrow",
           "icon": "ICON_RA_SKILL_015.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14190000,
           "name": "Stealth",
           "icon": "ICON_RA_SKILL_019.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14160000,
           "name": "Sealing Arrow",
           "icon": "ICON_RA_SKILL_016.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14350000,
           "name": "Mother Nature's Breath",
           "icon": "ICON_RA_SKILL_035.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14060000,
           "name": "Griffon Arrow",
           "icon": "ICON_RA_SKILL_006.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14360000,
           "name": "Explosive Arrow",
           "icon": "ICON_RA_SKILL_023.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14700000,
           "name": "Assault Smite",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 14380000,
           "name": "Supporting Fire",
           "icon": "ICON_RA_SKILL_038.png",
           "category": "Stigma",
@@ -223,6 +249,13 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "note": "Skill id is the game's own skill id (the same id the armory skill list gives). Specialty badge art is perkIconBase + (id + 10 x the Specialty position, 1 to 5) + .webp: MetaBot's copy of the in-game art, used with Miguel's approval (25 Oct 2026) because NCSOFT does not publish the Specialty art."
         }
       ]
     }

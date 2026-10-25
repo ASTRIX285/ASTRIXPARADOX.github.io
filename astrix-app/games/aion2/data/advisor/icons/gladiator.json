@@ -5,74 +5,87 @@
       "id": "gladiator-skill-icons",
       "class": "Gladiator",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 11020000,
           "name": "Keen Strike",
           "icon": "ICON_GL_SKILL_002.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 11010000,
           "name": "Rending Blow",
           "icon": "ICON_GL_SKILL_001.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 11190000,
           "name": "Leaping Slam",
           "icon": "ICON_GL_SKILL_019.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 11290000,
           "name": "Mocking Blade",
           "icon": "ICON_GL_SKILL_028.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 11170000,
           "name": "Overhead Slam",
           "icon": "ICON_GL_SKILL_017.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 11280000,
           "name": "Sword Aura Rampage",
           "icon": "ICON_TE_SKILL_034.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 11200000,
           "name": "Ankle Slice",
           "icon": "ICON_GL_SKILL_020.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 11050000,
           "name": "Crushing Wave",
           "icon": "ICON_GL_SKILL_005.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 11360000,
           "name": "Rush Strike",
           "icon": "ICON_GL_SKILL_036.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 11300000,
           "name": "Aerial Snare",
           "icon": "ICON_GL_SKILL_015.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 11100000,
           "name": "Ruinous Blow",
           "icon": "ICON_GL_SKILL_010.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 11260000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 11240000,
           "name": "Wrath Wave",
           "icon": "ICON_GL_SKILL_007.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11400000,
           "name": "Lunge Stance",
           "icon": "ICON_GL_SKILL_024.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11250000,
           "name": "Zikel's Blessing",
           "icon": "ICON_GL_SKILL_040.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11110000,
           "name": "Focused Block",
           "icon": "ICON_GL_SKILL_011.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11130000,
           "name": "Armor of Balance",
           "icon": "ICON_GL_SKILL_013.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11080000,
           "name": "Blade Toss",
           "icon": "ICON_GL_SKILL_008.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11380000,
           "name": "Tenaciousness",
           "icon": "ICON_GL_SKILL_038.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11340000,
           "name": "Lifestealing Blade",
           "icon": "ICON_GL_SKILL_034.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11390000,
           "name": "Rage Burst",
           "icon": "ICON_GL_SKILL_039.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11410000,
           "name": "Wave Armor",
           "icon": "ICON_GL_SKILL_041.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11430000,
           "name": "Forced Restraint",
           "icon": "ICON_GL_SKILL_043.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11700000,
           "name": "Assault Strike",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 11450000,
           "name": "Fracturing Rush",
           "icon": "ICON_GL_SKILL_045.png",
           "category": "Stigma",
@@ -223,6 +249,13 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "note": "Skill id is the game's own skill id (the same id the armory skill list gives). Specialty badge art is perkIconBase + (id + 10 x the Specialty position, 1 to 5) + .webp: MetaBot's copy of the in-game art, used with Miguel's approval (25 Oct 2026) because NCSOFT does not publish the Specialty art."
         }
       ]
     }

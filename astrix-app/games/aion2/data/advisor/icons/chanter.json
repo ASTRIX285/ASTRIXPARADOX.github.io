@@ -5,74 +5,87 @@
       "id": "chanter-skill-icons",
       "class": "Chanter",
       "iconBase": "https://assets.playnccdn.com/static-aion2-gamedata/resources/",
+      "perkIconBase": "https://metabot.gg/web/aion2/stigma/",
       "skills": [
         {
+          "id": 18010000,
           "name": "Onslaught",
           "icon": "ICON_CH_SKILL_001.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 18040000,
           "name": "Incandescent Blow",
           "icon": "ICON_CH_SKILL_004.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 18090000,
           "name": "Rushing Smash",
           "icon": "ICON_CH_SKILL_009.png",
           "category": "Active",
           "needLevel": 1
         },
         {
+          "id": 18060000,
           "name": "Impactful Crush",
           "icon": "ICON_CH_SKILL_006.png",
           "category": "Active",
           "needLevel": 3
         },
         {
+          "id": 18100000,
           "name": "Dark Crush",
           "icon": "ICON_CH_SKILL_010.png",
           "category": "Active",
           "needLevel": 4
         },
         {
+          "id": 18300000,
           "name": "Gust Rampage",
           "icon": "ICON_CH_SKILL_030.png",
           "category": "Active",
           "needLevel": 5
         },
         {
+          "id": 18150000,
           "name": "Heat Wave Blow",
           "icon": "ICON_CH_SKILL_015.png",
           "category": "Active",
           "needLevel": 7
         },
         {
+          "id": 18120000,
           "name": "Recuperation",
           "icon": "ICON_CH_SKILL_013.png",
           "category": "Active",
           "needLevel": 8
         },
         {
+          "id": 18210000,
           "name": "Tremor Crush",
           "icon": "ICON_CH_SKILL_021.png",
           "category": "Active",
           "needLevel": 10
         },
         {
+          "id": 18080000,
           "name": "Wave Blow",
           "icon": "ICON_CH_SKILL_008.png",
           "category": "Active",
           "needLevel": 12
         },
         {
+          "id": 18290000,
           "name": "Spinning Strike",
           "icon": "ICON_CH_SKILL_029.png",
           "category": "Active",
           "needLevel": 14
         },
         {
+          "id": 18200000,
           "name": "Defiance",
           "icon": "ICON_CO_SKILL_002.png",
           "category": "Active",
@@ -139,78 +152,91 @@
           "needLevel": 25
         },
         {
+          "id": 18220000,
           "name": "Obliterate",
           "icon": "ICON_CH_SKILL_022.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18190000,
           "name": "Undefeated Mantra",
           "icon": "ICON_CH_SKILL_019.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18140000,
           "name": "Focused Defense",
           "icon": "ICON_CH_SKILL_014.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18160000,
           "name": "Sprint Mantra",
           "icon": "ICON_CH_SKILL_016.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18130000,
           "name": "Fracturing Blow",
           "icon": "ICON_CH_SKILL_043.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18330000,
           "name": "Marchutan's Wrath",
           "icon": "ICON_CH_SKILL_033.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18240000,
           "name": "Impeding Authority",
           "icon": "ICON_CH_SKILL_024.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18230000,
           "name": "Ensnaring Mark",
           "icon": "ICON_CH_SKILL_023.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18170000,
           "name": "Healing Touch",
           "icon": "ICON_CH_SKILL_017.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18250000,
           "name": "Power of the Storm",
           "icon": "ICON_CH_SKILL_025.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18420000,
           "name": "Guardian Blessing",
           "icon": "ICON_CH_SKILL_042.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18700000,
           "name": "Assault Shock",
           "icon": "ICON_CO_SKILL_003.png",
           "category": "Stigma",
           "needLevel": 22
         },
         {
+          "id": 18440000,
           "name": "Barrier Spell",
           "icon": "ICON_CH_SKILL_044.png",
           "category": "Stigma",
@@ -223,6 +249,13 @@
           "region": "eu",
           "endpoint": "/api/character/equipment",
           "capturedOn": "2026-10-07"
+        },
+        {
+          "kind": "community-guide",
+          "publisher": "MetaBot",
+          "url": "https://metabot.gg/en/aion-2/skills",
+          "retrievedOn": "2026-10-25",
+          "note": "Skill id is the game's own skill id (the same id the armory skill list gives). Specialty badge art is perkIconBase + (id + 10 x the Specialty position, 1 to 5) + .webp: MetaBot's copy of the in-game art, used with Miguel's approval (25 Oct 2026) because NCSOFT does not publish the Specialty art."
         }
       ]
     }

@@ -928,7 +928,8 @@ function selectMastery(skill) {
 /**
  * Specialty targets (Miguel, 25 Oct 2026): each key skill at its maximum for the build. The Specialty pick every skill
  * level opens, which are open for this Daeva, the level that maxes the skill and how to reach it. A level the build's
- * sources cannot reach says what is missing, never a guess.
+ * sources cannot reach says what is missing, never a guess. Each pick carries its in-game Specialty badge, so the player
+ * can match it on the Specialty screen at a glance; a badge that fails to load drops away and the words stay.
  */
 function specialtyTargetsHtml(plan, icons) {
   const list = plan.specialtyTargets ?? [];
@@ -943,7 +944,7 @@ function specialtyTargetsHtml(plan, icons) {
         <div class="ae-spec-skill">${iconTile(target.name, icons[target.name])}<div><b>${esc(target.name)}</b><span>${target.skillLevel !== null ? `Your Lv ${esc(target.skillLevel)}. ` : ''}Max for the build: Lv ${esc(target.target)}</span></div></div>
         <ol class="ae-spec-picks">${target.picks.map(pick => {
           const cls = state(target, pick);
-          return `<li class="${cls}" data-spec-level="${esc(pick.skillLevel)}"><b>Lv ${esc(pick.skillLevel)}</b><span>${esc(pick.pick)}</span>${stateWord[cls] ? `<small>${esc(stateWord[cls])}</small>` : ''}</li>`;
+          return `<li class="${cls}" data-spec-level="${esc(pick.skillLevel)}">${pick.icon ? `<img class="ae-spec-badge" src="${esc(pick.icon)}" alt="" width="32" height="32" loading="lazy" decoding="async">` : ''}<b>Lv ${esc(pick.skillLevel)}</b><span>${esc(pick.pick)}</span>${stateWord[cls] ? `<small>${esc(stateWord[cls])}</small>` : ''}</li>`;
         }).join('')}</ol>
         ${how}
       </li>`;
@@ -952,6 +953,7 @@ function specialtyTargetsHtml(plan, icons) {
       <h2 class="ae-mskills-title" id="aeSpecTitle">Specialty targets</h2>
       <p class="ae-spec-lead">Each key skill at its maximum for this build: the Specialty pick each skill level opens, and how to get there.</p>
       <ul class="ae-spec-list">${list.map(row).join('')}</ul>
+      ${list.some(target => target.picks.some(pick => pick.icon)) ? '<p class="ae-spec-credit">Specialty badges: in-game art via MetaBot.</p>' : ''}
     </section>`;
 }
 

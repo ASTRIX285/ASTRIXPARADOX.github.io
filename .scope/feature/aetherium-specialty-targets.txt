@@ -69,3 +69,11 @@ hub/aetherium/guide/weekly/index.html
 hub/aetherium/guide/world/index.html
 hub/aetherium/index.html
 hub/aetherium/skills/index.html
+astrix-app/games/aion2/data/advisor/icons/assassin.json
+astrix-app/games/aion2/data/advisor/icons/chanter.json
+astrix-app/games/aion2/data/advisor/icons/cleric.json
+astrix-app/games/aion2/data/advisor/icons/gladiator.json
+astrix-app/games/aion2/data/advisor/icons/ranger.json
+astrix-app/games/aion2/data/advisor/icons/sorcerer.json
+astrix-app/games/aion2/data/advisor/icons/spiritmaster.json
+astrix-app/games/aion2/data/advisor/icons/templar.json

@@ -161,6 +161,8 @@ async function open(path,{live=false,down=false,viewport={width:1600,height:1000
   // Icons and portraits come from the NCSOFT CDN; never fetched in tests.
   // A 1x1 PNG stands in for every NCSOFT icon, so icon tiles keep their <img> as they do live.
   await context.route(/playnccdn\.com/,route=>route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
+  // Specialty badges (MetaBot's copy of the in-game art, approved by Miguel 25 Oct 2026): the same stand-in pixel.
+  await context.route(/metabot\.gg\/web\/aion2\/stigma\//,route=>route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
   await context.route(/plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
   // Never the real Worker or NCSOFT: a request to either is blocked and fails the run. Registered last, so it wins over the CDN stub above.
   await context.route(/aetherium-worker\.[^/]*workers\.dev|api-search\.plaync\.com|aion2\.plaync\.com/,route=>{realCalls.push(route.request().url());return route.abort();});
@@ -1538,6 +1540,14 @@ await check('Mastery: Specialty targets show each key skill at its maximum for t
   assert.match(await row.innerText(),/Max for the build: Lv 16/);
   assert.match(await row.locator('.ae-spec-how').innerText(),/^Mastery and Daevanion reach Lv 15\. Lv 16 needs 1 more skill level from a source the build does not name yet\.$/);
   assert.match(await page.locator('[data-spec-skill="Recuperation"] .ae-spec-how').innerText(),/^Mastery 11, then \+1 from Daevanion nodes\.$/);
+  // Each pick shows the badge the player picks in game: Onslaught (game id 18010000) Lv 8 is the build's Specialty line,
+  // Lv 12 the 4th line and Lv 16 the 5th, so the badges are perk ids 1801xx40 and 1801xx50, sized and in line with the text.
+  const badges=await row.locator('.ae-spec-picks li').evaluateAll(els=>els.map(el=>{const img=el.querySelector('img.ae-spec-badge');const b=img?.getBoundingClientRect();const t=el.querySelector('b').getBoundingClientRect();return img?{src:img.getAttribute('src'),w:Math.round(b.width),h:Math.round(b.height),before:b.right<=t.left+1,mid:Math.abs((b.top+b.bottom)/2-(t.top+t.bottom)/2)<=3}:null;}));
+  assert.ok(badges.every(Boolean),'Every Onslaught pick has a badge');
+  assert.match(badges[0].src,/^https:\/\/metabot\.gg\/web\/aion2\/stigma\/180100[123]0\.webp$/);
+  assert.deepEqual(badges.slice(1).map(b=>b.src),['https://metabot.gg/web/aion2/stigma/18010040.webp','https://metabot.gg/web/aion2/stigma/18010050.webp']);
+  assert.ok(badges.every(b=>b.w===32&&b.h===32&&b.before&&b.mid),JSON.stringify(badges));
+  assert.match(await page.locator('#aeSpecTargets .ae-spec-credit').innerText(),/in-game art via MetaBot/);
   const size=await page.$eval('[data-spec-skill="Onslaught"] .ae-spec-picks li',el=>parseFloat(getComputedStyle(el).fontSize));
   assert.ok(size>=15,`Pick text at ${size}px`);
   assert.deepEqual(errors,[]);
