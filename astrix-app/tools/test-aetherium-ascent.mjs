@@ -1530,6 +1530,20 @@ await check('Gear build at Lv 12: old Enhance links land on the build bar, the p
   await context.close();
 });
 
+await check('Mastery: Specialty targets show each key skill at its maximum for the build, pick by pick, with the route or what is missing',async()=>{
+  const {page,context,errors}=await open(ascent('class=chanter&level=45','mastery'));
+  await page.waitForSelector('#aeSpecTargets');
+  const row=page.locator('[data-spec-skill="Onslaught"]');
+  assert.deepEqual(await row.locator('[data-spec-level]').evaluateAll(els=>els.map(el=>el.dataset.specLevel)),['8','12','16']);
+  assert.match(await row.innerText(),/Max for the build: Lv 16/);
+  assert.match(await row.locator('.ae-spec-how').innerText(),/^Mastery and Daevanion reach Lv 15\. Lv 16 needs 1 more skill level from a source the build does not name yet\.$/);
+  assert.match(await page.locator('[data-spec-skill="Recuperation"] .ae-spec-how').innerText(),/^Mastery 11, then \+1 from Daevanion nodes\.$/);
+  const size=await page.$eval('[data-spec-skill="Onslaught"] .ae-spec-picks li',el=>parseFloat(getComputedStyle(el).fontSize));
+  assert.ok(size>=15,`Pick text at ${size}px`);
+  assert.deepEqual(errors,[]);
+  await context.close();
+});
+
 await check('no request reached the real Worker or NCSOFT',async()=>assert.deepEqual(realCalls,[]));
 
 await browser.close();

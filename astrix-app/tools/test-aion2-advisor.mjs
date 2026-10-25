@@ -10,7 +10,7 @@
 //   - Roles: pending builds stay pending, unknown roles fall back to the main role.
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
-import {AION2_CLASSES,ROLES,TEAMS,applyTeam,buildAscentPlan,daevanionMove,teamsFor,clampLevel,enchantAdvice,enchantSteps,fillerProblems,gearMoves,gradeInfo,indexMechanics,levelOrder,masteryCap,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
+import {specialtyTargets,AION2_CLASSES,ROLES,TEAMS,applyTeam,buildAscentPlan,daevanionMove,teamsFor,clampLevel,enchantAdvice,enchantSteps,fillerProblems,gearMoves,gradeInfo,indexMechanics,levelOrder,masteryCap,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {classesWanting,combatNamesIn,indexStats,mostlyLow,rankPointStats,statOrder,statReason,subStatTag} from '../games/aion2/engine/stat-advisor.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
@@ -1557,4 +1557,25 @@ check('sub stat lines on an item are tagged for the class; near-zero main stats 
 });
 
 if(failed){console.log(`AION2_ADVISOR=FAIL ${failed}`);process.exitCode=1;}
-else console.log('AION2_ADVISOR=PASS');
+else check('Specialty targets: every key skill at its maximum for the build, pick by pick, with the route or what is missing',()=>{
+  // Miguel, 25 Oct 2026: factor in each skill's Specialty picks and the skill level each needs.
+  const plan=buildAscentPlan({className:'Chanter',level:45,data:data('Chanter')});
+  const onslaught=plan.specialtyTargets.find(item=>item.name==='Onslaught');
+  assert.deepEqual(onslaught.picks.map(pick=>pick.skillLevel),[8,12,16],'Picks in skill-level order');
+  assert.equal(onslaught.target,16,'The highest pick is the max for the build');
+  assert.equal(onslaught.reachable,false);
+  assert.deepEqual([onslaught.short.reaches,onslaught.short.viaNodes],[15,true],'Mastery 11 and +4 from Daevanion nodes reach 15');
+  assert.equal(onslaught.picks[1].reach.text,'Mastery 11, then +1 from Daevanion nodes','Lv 12 is reached through the nodes');
+  const recup=plan.specialtyTargets.find(item=>item.name==='Recuperation');
+  assert.deepEqual([recup.target,recup.reachable,recup.route],[12,true,'Mastery 11, then +1 from Daevanion nodes']);
+  for(const name of AION2_CLASSES)for(const build of builds[name].records){
+    const p=buildAscentPlan({className:name,role:build.role,level:45,data:data(name)});
+    for(const item of p.specialtyTargets??[]){
+      assert.equal(item.target,Math.max(...item.picks.map(pick=>pick.skillLevel)),`${name} ${item.name}: target is the top pick`);
+      assert.ok(item.reachable?item.route:item.short&&item.short.reaches<item.target,`${name} ${item.name}: a route, or what is missing`);
+    }
+  }
+  assert.deepEqual(specialtyTargets([],11),[]);
+});
+
+console.log('AION2_ADVISOR=PASS');

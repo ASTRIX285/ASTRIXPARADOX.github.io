@@ -925,6 +925,36 @@ function selectMastery(skill) {
   if (entry) openInfo(masteryCard(entry), skill);
 }
 
+/**
+ * Specialty targets (Miguel, 25 Oct 2026): each key skill at its maximum for the build. The Specialty pick every skill
+ * level opens, which are open for this Daeva, the level that maxes the skill and how to reach it. A level the build's
+ * sources cannot reach says what is missing, never a guess.
+ */
+function specialtyTargetsHtml(plan, icons) {
+  const list = plan.specialtyTargets ?? [];
+  if (!list.length) return '';
+  const state = (target, pick) => (pick.open === true ? 'is-open' : pick.reach?.reachable === false ? 'is-short' : target.next === pick ? 'is-next' : 'is-ahead');
+  const stateWord = { 'is-open': 'Open', 'is-next': 'Next', 'is-ahead': '', 'is-short': 'Out of reach' };
+  const row = target => {
+    const how = target.reachable
+      ? `<p class="ae-spec-how">${esc(target.route)}.</p>`
+      : `<p class="ae-spec-how is-short">${target.short.viaNodes ? 'Mastery and Daevanion reach' : 'Mastery reaches'} Lv ${esc(target.short.reaches)}. Lv ${esc(target.target)} needs ${esc(target.target - target.short.reaches)} more skill level${target.target - target.short.reaches === 1 ? '' : 's'} from a source the build does not name yet.</p>`;
+    return `<li class="ae-spec-row" data-spec-skill="${esc(target.name)}">
+        <div class="ae-spec-skill">${iconTile(target.name, icons[target.name])}<div><b>${esc(target.name)}</b><span>${target.skillLevel !== null ? `Your Lv ${esc(target.skillLevel)}. ` : ''}Max for the build: Lv ${esc(target.target)}</span></div></div>
+        <ol class="ae-spec-picks">${target.picks.map(pick => {
+          const cls = state(target, pick);
+          return `<li class="${cls}" data-spec-level="${esc(pick.skillLevel)}"><b>Lv ${esc(pick.skillLevel)}</b><span>${esc(pick.pick)}</span>${stateWord[cls] ? `<small>${esc(stateWord[cls])}</small>` : ''}</li>`;
+        }).join('')}</ol>
+        ${how}
+      </li>`;
+  };
+  return `<section class="ae-spec" id="aeSpecTargets" aria-labelledby="aeSpecTitle">
+      <h2 class="ae-mskills-title" id="aeSpecTitle">Specialty targets</h2>
+      <p class="ae-spec-lead">Each key skill at its maximum for this build: the Specialty pick each skill level opens, and how to get there.</p>
+      <ul class="ae-spec-list">${list.map(row).join('')}</ul>
+    </section>`;
+}
+
 function renderMastery(plan) {
   const m = plan.mastery;
   if (!m) return '';
@@ -933,6 +963,7 @@ function renderMastery(plan) {
   return `<div class="ae-mastery" id="aeMastery">
     ${levelOrder(plan).length ? `<div class="ae-icon-group ae-mspend" id="aeMasterySpend"><p class="ae-mskills-title">Level these next</p><div class="ae-icon-row">${levelOrder(plan).map(step => iconTile(step.name, icons[step.name], { big: true, badge: step.from !== null ? `${step.from}→${step.to}` : `→${step.to}`, attr: `data-mastery="${esc(step.name)}"`, tip: `${step.name}: ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`}` })).join('')}</div></div>` : ''}
     ${levelOrder(plan).length ? `<ol class="ae-mwhy" id="aeMasteryWhy">${levelOrder(plan).slice(0, 4).map(step => `<li data-mastery-why="${esc(step.name)}"><b>${esc(step.name)}</b> ${esc(step.from !== null ? `Lv ${step.from} to ${step.to}` : `up to Lv ${step.to}`)}. ${esc(step.why ?? `It ${step.reason}.`)}</li>`).join('')}</ol>` : ''}
+    ${specialtyTargetsHtml(plan, icons)}
     ${atCap.length ? `<div class="ae-mspend ae-mcap" id="aeMasteryCap"><p class="ae-mskills-title">At the Mastery cap (${esc(m.cap)})</p><ul class="ae-mcap-list">${atCap.map(entry => `<li data-mastery-cap="${esc(entry.name)}">${iconTile(entry.name, icons[entry.name], { badge: String(entry.skillLevel), attr: `data-mastery="${esc(entry.name)}"`, tip: `${entry.name}: skill Lv ${entry.skillLevel}` })}<span><strong>${esc(entry.name)}</strong> is Lv ${esc(entry.skillLevel)}. Mastery stops at ${esc(entry.cap)}, so no more skill points go here.<br>Next +1: ${nextLevelHtml(entry.next)}</span></li>`).join('')}</ul></div>` : ''}
     <div class="ae-mskills">
       <p class="ae-mskills-title">Active</p>
