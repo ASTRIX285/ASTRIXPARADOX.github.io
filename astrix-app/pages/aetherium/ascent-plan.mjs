@@ -413,11 +413,13 @@ const MOUSE_SVG = left => `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="
  * A key's label under its column. On the Skill Bar screen (face) it is drawn as the game's key strip: the row 0 skill dimmed
  * behind the key name (1 to 8, Q, E, or the mouse button). cap 'RMB' puts a macro stack on right click.
  */
-function keyCap(key, stack, { face = null, cap = null } = {}) {
+function keyCap(key, stack, { face = null, cap = null, onKey = null } = {}) {
   const on = cap ?? key;
   const label = `${on === 'RMB' && cap ? `Right click, ${keyName(key)}` : keyName(key)}. ${stackSentence(stack)}`;
   const behind = face?.icon ? `<span class="ae-keycap-art" aria-hidden="true">${art(face.icon)}</span>` : '';
   if (on === 'LMB' || on === 'RMB') return `<span class="ae-keycap is-mouse${behind ? ' has-art' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" data-tip="${esc(cap ? `Right click: ${keyName(key)}` : KEY_LABEL[key])}" aria-label="${esc(label)}">${behind}<span class="ae-keycap-mark">${MOUSE_SVG(on === 'LMB')}</span>${cap ? `<span class="ae-sr">${esc(keyName(key))}</span>` : ''}</span>`;
+  // A build's second stack drawn on its game key (key 1): the key strip says 1, the label and sentence say which stack.
+  if (onKey) return `<span class="ae-keycap is-stack-on${behind ? ' has-art' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" data-tip="${esc(`Key ${onKey}: ${keyName(key)}`)}" aria-label="${esc(`Key ${onKey}, ${label}`)}">${behind}<span class="ae-keycap-mark">${esc(onKey)}</span></span>`;
   const stacked = key === 'A' || key === 'B';
   return `<span class="ae-keycap${stacked ? ' is-stack' : ''}${behind ? ' has-art' : ''}" role="button" tabindex="0" data-bar-keycap="${esc(key)}" aria-label="${esc(label)}">${behind}<span class="ae-keycap-mark">${esc(stacked ? (face && stack.label ? stack.label : keyName(key)) : key)}</span></span>`;
 }
@@ -437,14 +439,14 @@ function barCell(item, key, row, stack) {
   </span>`;
 }
 /** One key as the game draws it: rows 3 to 0 top to bottom, the key label underneath. */
-function barColumn(bar, key, { game = false, cap = null, group = false } = {}) {
+function barColumn(bar, key, { game = false, cap = null, group = false, onKey = null } = {}) {
   const stack = bar.stacks[key];
   // In game the main attack column on left click has row 0 only; the rows above it stay open space.
   const only0 = game && key === 'LMB';
   const slot = row => (only0 && row > 0 ? `<span class="ae-bar-slot is-none" aria-hidden="true"></span>` : `<span class="ae-bar-slot" data-bar-row="${row}">${barCell(bar.bars[row][key], key, row, stack)}</span>`);
-  return `<div class="ae-bar-col${key === 'LMB' ? ' is-main' : ''}${group ? ' is-group' : ''}" data-bar-col="${esc(key)}"${game ? ` data-block-col="${esc(key)}"` : ''}>
+  return `<div class="ae-bar-col${key === 'LMB' ? ' is-main' : ''}${group ? ' is-group' : ''}${onKey ? ' is-stack-on' : ''}" data-bar-col="${esc(key)}"${game ? ` data-block-col="${esc(onKey ?? key)}"` : ''}>
     ${[3, 2, 1, 0].map(slot).join('')}
-    ${keyCap(key, stack, game ? { face: bar.bars[0][key], cap } : {})}
+    ${keyCap(key, stack, game ? { face: bar.bars[0][key], cap, onKey } : {})}
   </div>`;
 }
 /** The game's own key order for the Skill Bar screen (Miguel, in game, 17 Oct 2026): 1 to 8, Q, E, left click, right click. */
@@ -456,9 +458,9 @@ const GAME_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E
  */
 function macroColumns(bar) {
   const stacks = ['A', 'B'].filter(key => bar.stacks[key].skills.length);
-  const main = stacks.find(key => bar.stacks[key].name === 'Main line') ?? stacks[0] ?? null;
+  const main = bar.mainStack ?? stacks.find(key => bar.stacks[key].name === 'Main line') ?? stacks[0] ?? null;
   const ownRight = Boolean(bar.stacks.RMB.skills.length || bar.stacks.RMB.reserved?.length);
-  return { main, second: stacks.find(key => key !== main) ?? null, ownRight };
+  return { main, second: bar.secondStack ?? stacks.find(key => key !== main) ?? null, ownRight };
 }
 /** Left click, right click and the second stack, as the game draws them after E. The guide lights this block. */
 function mouseBlock(bar, { id = 'aeRightBlock' } = {}) {
@@ -466,18 +468,19 @@ function mouseBlock(bar, { id = 'aeRightBlock' } = {}) {
   const cols = [barColumn(bar, 'LMB', { game: true, group: true })];
   if (ownRight) cols.push(barColumn(bar, 'RMB', { game: true }));
   if (main) cols.push(barColumn(bar, main, { game: true, cap: ownRight ? null : 'RMB' }));
-  if (second) cols.push(barColumn(bar, second, { game: true }));
-  const names = ['main attack on left click', ownRight ? `${keyName('RMB')}` : null, main ? `${keyName(main)}${ownRight ? '' : ' on right click'}` : null, second ? keyName(second) : null].filter(Boolean);
+  // The game's bar ends at right click: a second stack sits on key 1 in the left-hand block, never in a column after it.
+  const names = ['main attack on left click', ownRight ? `${keyName('RMB')}` : null, main ? `${keyName(main)}${ownRight ? '' : ' on right click'}` : null].filter(Boolean);
   return `<div class="ae-bar-block is-right is-game" id="${id}" aria-label="${esc(names.join(', '))}">${cols.join('')}</div>`;
 }
-/** Where the macro stacks sit, in words: "The main line is on right click and is your macro." */
+/** Where the build's stacks sit on the game's bar, in words: "The main line is on right click: repeated attacks and instant skills." */
 function macroWhere(bar) {
   const { main, second, ownRight } = macroColumns(bar);
   if (!main) return '';
   const name = key => (/^Stack /.test(keyName(key)) ? keyName(key) : `the ${keyName(key).toLowerCase()}`);
   const cap = text => text[0].toUpperCase() + text.slice(1);
-  if (ownRight) return second ? `${cap(name(main))} and ${name(second)} sit after right click and go into your macro.` : `${cap(name(main))} sits after right click and is your macro.`;
-  return second ? `${cap(name(main))} is on right click and ${name(second)} sits next to it. Both go into your macro.` : `${cap(name(main))} is on right click and is your macro.`;
+  // How the game's bar is set (Miguel, 25 Oct 2026); the macro is its own screen.
+  const onRight = ownRight ? `${cap(name(main))} sits after right click` : `${cap(name(main))} is on right click`;
+  return second ? `${onRight}: repeated attacks and instant skills. ${cap(name(second))} is on key 1 with your cooldown skills and stigmas.` : `${onRight}: repeated attacks and instant skills.`;
 }
 /** The "What fires now" panel: what stack A and stack B fire at this level, and what joins them later. */
 function firesNowPanel(plan) {
@@ -536,7 +539,7 @@ function renderSkillBarScreen(plan) {
         <p class="ae-bar-swipe" aria-hidden="true">Swipe the keys to see them all ›</p>
         <div class="ae-bar-scroll" id="aeSkillBar">
           <div class="ae-bar-blocks">
-            <div class="ae-bar-block is-left is-game" id="aeLeftBlock" aria-label="Keys 1 to 8, Q and E: one skill per key">${GAME_KEYS.map(key => barColumn(bar, key, { game: true, group: groupStart.has(key) })).join('')}</div>
+            <div class="ae-bar-block is-left is-game" id="aeLeftBlock" aria-label="Keys 1 to 4: cooldown skills and stigmas. 5 to 8: the rest. Q and E: stagger, heals and defensives">${GAME_KEYS.map(key => (key === bar.secondStackKey ? barColumn(bar, bar.secondStack, { game: true, group: groupStart.has(key), onKey: key }) : barColumn(bar, key, { game: true, group: groupStart.has(key) }))).join('')}</div>
             ${mouseBlock(bar)}
             <ol class="ae-bar-rows" aria-hidden="true"><li>3</li><li>2</li><li>1</li><li>0</li></ol>
           </div>
@@ -751,8 +754,8 @@ function guideSteps(view, plan) {
     }
     if (['A', 'B'].some(key => stacks[key].nextUnlock !== null)) add(`This is what your stacks fire at Lv ${plan.level}. Greyed skills join as you level.`, '#aeFiresNow');
     const own = bar.left.map(key => stacks[key].skills[0]).filter(Boolean);
-    if (own.length) add(`The left-hand block: one skill per key, in the order you use them${bar.opener.length ? `. Open with ${bar.opener.join(', then ')}` : ''}. Tap any of them to see why it stays off the macro.`, '#aeLeftBlock');
-    add('Copy it across key by key, then add stack A and stack B to Macro 1.', '#aeCopyBar');
+    if (own.length) add(`Keys 1 to 4 hold your cooldown skills and stigmas, Q and E your stagger, heals and defensives, 5 to 8 the rest${bar.opener.length ? `. Open with ${bar.opener.join(', then ')}` : ''}. Tap any of them to see why it sits there.`, '#aeLeftBlock');
+    add('Copy it across key by key. The macro is set on its own screen.', '#aeCopyBar');
     if (plan.chains?.chains?.length) add('Follow-up skills light up after their lead-in. Press them then.', '#aeFollowUps');
     if (bar.notOnBar.length) add('Skills that get no key are listed here, with the reason.', '#aeNotOnBar');
   } else if (view === 'macro') {

@@ -809,12 +809,34 @@ function setupSummary(setup, { mastery, stigmas, daevanion, build, level, skillB
 export const LEFT_KEYS = Object.freeze(['1', '2', '3', '4', '5', '6', '7', '8', 'Q', 'E', 'RMB']);
 export const RIGHT_KEYS = Object.freeze(['A', 'LMB', 'B']);
 /**
- * The order own keys are filled in, the way a player's hand sits (Miguel, in game, 17 Oct 2026): 1 to 4 sit right above
- * Q and E, so 1 to 4 come first, then Q and E, then 5 to 8. A key that holds a stack of skills goes on Q or E first: they
- * are easier to stack than 5 to 8.
+ * How the game's skill bar is laid out (Miguel, in game, 25 Oct 2026). This is how players set the bar, not a macro rule.
+ * Fingers rest on W A S D: 1 to 4 sit right above Q, W and E, and Q and E sit beside W, so those six are the keys a hand
+ * reaches without looking; 5 to 8 are a stretch.
+ *   - right click: the stack of repeated attacks and instant skills (the build's main line);
+ *   - 1 to 4: cooldown skills and stigmas, so a build's second stack goes on key 1;
+ *   - Q and E: cover, the stagger, heal and defensive skills;
+ *   - 5 to 8: toggles, dashes and movement, and only then what the reachable keys cannot hold.
+ * Skills the Daeva has now take the reachable keys first; a key for a skill that comes later never holds one empty.
+ * Left click keeps the main attack on its own; there is no key after right click.
  */
 export const KEY_FILL = Object.freeze(['1', '2', '3', '4', 'Q', 'E', '5', '6', '7', '8', 'RMB']);
+/** The six keys a hand on W A S D reaches without looking. In AION 2 these and right click are also the only keys that
+    hold a stack (Miguel, in game, 25 Oct 2026): 5 to 8 hold one skill each. */
+export const REACH_KEYS = Object.freeze(['1', '2', '3', '4', 'Q', 'E']);
+export const STACKABLE_KEYS = Object.freeze([...REACH_KEYS, 'RMB']);
 export const STACK_KEYS = Object.freeze(['Q', 'E']);
+/** The keys each own-key reason goes to first, in order; a group that runs out takes the next free key in KEY_FILL. */
+export const KEY_GROUPS = Object.freeze({
+  cover: Object.freeze(['Q', 'E']),
+  cooldown: Object.freeze(['1', '2', '3', '4']),
+  rest: Object.freeze(['5', '6', '7', '8'])
+});
+const COVER_REASONS = Object.freeze(['stagger', 'heal', 'defensive']);
+const REST_REASONS = Object.freeze(['toggle', 'dash', 'movement']);
+/** Which group an own key belongs to: cover (Q and E), cooldown skills and stigmas (1 to 4), or the rest (5 to 8). */
+export const keyGroupOf = (reason, stigma = false) => (COVER_REASONS.includes(reason) ? 'cover' : stigma || !REST_REASONS.includes(reason) ? 'cooldown' : 'rest');
+/** The build's second stack (the one that is not its main line) sits on this key. */
+export const SECOND_STACK_KEY = '1';
 export const SKILL_BAR_KEYS = Object.freeze([...LEFT_KEYS, ...RIGHT_KEYS]);
 /** The skill every class has on Space bar (Miguel, in game, 17 Oct 2026): Defiance, the crowd control break. It never takes
     a numbered key, a mouse button or a stack row; the bar shows it on Space. */
@@ -949,6 +971,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   const put = (key, entries, extra = {}) => { stacks[key] = { ...stacks[key], skills: entries, ...extra }; entries.forEach(item => placed.add(item.name)); };
 
   const notOnBar = [];
+  let secondStack = null, mainStack = null;
   if (block) {
     // The right-hand block: stack A, the main attack on left click, stack B, each row as the block lists it.
     for (const [id, key] of MACRO_STACKS) {
@@ -965,6 +988,11 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
         fillerMissing: rows.length > 1 && !(top.noCooldown && !top.conditional) ? 'No filler on top: when every skill here is on cooldown, the macro skips this entry and your held main attack fills the gap.' : null
       });
     }
+    // Right click holds the main line (the stack the build names "Main line", else stack A); the other stack is on key 1.
+    const withSkills = MACRO_STACKS.map(([, key]) => key).filter(key => stacks[key].skills.length);
+    const mainLine = withSkills.find(key => stacks[key].name === 'Main line') ?? withSkills[0] ?? null;
+    secondStack = withSkills.find(key => key !== mainLine) ?? null;
+    mainStack = mainLine;
     const main = block.mainAttack?.name && byName.has(block.mainAttack.name) ? block.mainAttack : { name: basic.name, why: null };
     // The main attack's line can change with the level ("You can leave it alone" at 45 for a build that runs the macro alone).
     const mainWhy = (main.atLevel ?? []).filter(item => level >= item.from).at(-1)?.why ?? main.why;
@@ -980,18 +1008,38 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     const rank = item => (first(item) >= 0 ? first(item) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
     // The build's own order when it gives one (the keys a published bar uses), else the opener first, then by reason.
     const ordered = own.map((item, index) => ({ ...item, index })).sort((a, b) => (block.ownKeysOrder === 'listed' ? a.index - b.index : rank(a) - rank(b) || a.index - b.index));
-    // Keys by the hand: stacked own keys take Q and E first, then every key in its order takes the next free key.
-    const free = [...KEY_FILL];
+    // Keys as the game's bar is set (KEY_GROUPS): cover on Q and E, cooldown skills and stigmas on 1 to 4, the rest on
+    // 5 to 8. Key 1 is the second stack's when the build has one. A group that runs out takes the next free key.
+    const free = KEY_FILL.filter(key => key !== 'RMB' && !(secondStack && key === SECOND_STACK_KEY));
     const keyOf = new Map();
-    // A key's full stack as the build lists it, open or still to come, so it keeps Q or E at every level.
+    const take = key => { free.splice(free.indexOf(key), 1); return key; };
+    const isStigmaKey = item => namesOf(item).some(name => byName.get(name)?.category === 'Stigma') || (item.reserved ?? []).some(name => byName.get(name)?.category === 'Stigma');
+    // 1. Skills the Daeva has now: cooldown skills and stigmas claim 1 to 4, cover claims Q and E.
+    // 2. Everything else it has now (toggles, dashes, movement, and what did not fit) takes the next free key in reach
+    //    order: what is left of 1 to 4, Q and E first, then 5 to 8.
+    // 3. Keys kept for skills that come later take what is left, so they never hold a reachable key empty.
+    // A key with two or more skills (open now or still to come) only goes where the game stacks: 1 to 4, Q or E.
     const fullSize = item => (item.reserved ?? [...(Array.isArray(item.stack) ? item.stack : [item.name]), ...(item.waiting ?? [])]).filter(name => name !== SPACE_SKILL).length;
-    for (const item of ordered.filter(entry => fullSize(entry) > 1)) {
-      const key = STACK_KEYS.find(name => free.includes(name));
-      if (!key) break;
-      free.splice(free.indexOf(key), 1);
-      keyOf.set(item, key);
+    const stackedKey = item => fullSize(item) > 1;
+    const nextFree = item => (stackedKey(item) ? free.find(name => STACKABLE_KEYS.includes(name)) : free[0]) ?? null;
+    const now = ordered.filter(entry => !entry.reserved);
+    const later = ordered.filter(entry => entry.reserved);
+    const groupOf = item => keyGroupOf(item.reason, isStigmaKey(item));
+    const deferred = [];
+    // Stacked keys first, so they still find a key that holds a stack.
+    now.sort((a, b) => Number(stackedKey(b)) - Number(stackedKey(a)));
+    for (const item of now) {
+      const group = groupOf(item);
+      const key = group === 'rest' ? null : KEY_GROUPS[group].find(name => free.includes(name));
+      if (key) keyOf.set(item, take(key)); else deferred.push(item);
     }
-    for (const item of ordered) if (!keyOf.has(item)) keyOf.set(item, free.shift() ?? null);
+    for (const item of deferred) { const key = nextFree(item); keyOf.set(item, key ? take(key) : null); }
+    for (const item of later) {
+      // The rest group has no keys of its own to claim: like everything else it takes the next free key in reach order.
+      const key = (groupOf(item) === 'rest' ? null : KEY_GROUPS[groupOf(item)].find(name => free.includes(name))) ?? nextFree(item);
+      keyOf.set(item, key ? take(key) : null);
+    }
+    // Keys keep the build's own order inside the bar: assignment above only decides where, not what fires first.
     for (const item of ordered) {
       const key = keyOf.get(item);
       if (item.reserved) { if (key) stacks[key].reserved = item.reserved.filter(name => byName.has(name) && name !== SPACE_SKILL); continue; }
@@ -1047,7 +1095,9 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   })));
   const stackFillers = MACRO_STACKS.map(([, key]) => stacks[key].skills.at(-1)).filter(skill => skill && skill.noCooldown && !skill.conditional).map(skill => skill.name);
   const result = {
-    keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
+    keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars,
+    // Where the build's stacks sit on the game's bar: the main line on right click, the second stack on key 1.
+    mainStack, secondStack, secondStackKey: secondStack ? SECOND_STACK_KEY : null, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
     notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null, space,
     // Skills the plan puts on the bar once the Daeva can place them (the Comes later strip), soonest first.
     later: later.map(item => ({ ...item, ...(item.name === SPACE_SKILL ? { where: 'Space bar', reason: `${item.reason ?? ''} It goes on Space bar.`.trim() } : {}), icon: byName.get(item.name)?.icon ?? null })),
@@ -1066,20 +1116,22 @@ const keyWords = key => (key === 'A' ? 'Stack A' : key === 'B' ? 'Stack B' : key
 export const keyPhrase = key => keyWords(key).replace(/^(Stack|Key)/, word => word.toLowerCase()).replace(/^Left click|^Right click/, words => words.toLowerCase());
 
 /**
- * "Copy this bar": key by key, row by row, in the order to drag them in game (left-hand block left to right, then stack A
- * and stack B; left click is set by the game), ending with the macro step.
+ * "Copy this bar": key by key, row by row, in the order to drag them in game: Space, keys 1 to 8 (the second stack on key 1),
+ * Q and E, then right click (the main line). Left click is set by the game. The macro is its own screen, not part of the bar.
  */
 function copySteps(bar) {
   const steps = [];
   if (bar.space) steps.push({ key: 'Space', label: 'Space bar', space: true, rows: [{ row: 0, name: bar.space.name, locked: bar.space.locked, needsSlot: false, unlockLevel: bar.space.unlockLevel }], empty: [] });
-  for (const key of [...LEFT_KEYS, 'A', 'B']) {
-    const stack = bar.stacks[key];
-    if (!stack.skills.length) continue;
-    steps.push({ key, label: stack.name ?? keyWords(key), rows: stack.skills.map(skill => ({ row: skill.row, name: skill.name, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })), empty: stack.empty ?? [] });
+  const step = (stackKey, onKey, label) => {
+    const stack = bar.stacks[stackKey];
+    if (!stack?.skills.length) return;
+    steps.push({ key: onKey, label, rows: stack.skills.map(skill => ({ row: skill.row, name: skill.name, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel })), empty: stack.empty ?? [] });
+  };
+  for (const key of LEFT_KEYS) {
+    if (key === bar.secondStackKey) step(bar.secondStack, key, `${keyWords(key)}: ${bar.stacks[bar.secondStack].name ?? 'second stack'}`);
+    else step(key, key, bar.stacks[key].name ?? keyWords(key));
   }
-  const entries = ['A', 'B'].filter(key => bar.stacks[key].skills.length);
-  const named = key => (bar.stacks[key].name ? `the ${bar.stacks[key].name.toLowerCase()}` : keyWords(key).replace(/^Stack/, 'stack'));
-  if (entries.length) steps.push({ key: null, label: 'Macro 1', macro: true, text: entries.length === 2 ? `Then add ${named('A')} and ${named('B')} to Macro 1.` : `Then add ${named(entries[0])} to Macro 1.` });
+  if (bar.mainStack) step(bar.mainStack, 'RMB', `Right click: ${bar.stacks[bar.mainStack].name ?? 'main line'}`);
   return steps;
 }
 
