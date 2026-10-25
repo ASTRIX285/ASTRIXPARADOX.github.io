@@ -252,10 +252,13 @@
         },
         {
           "kind": "community-guide",
+          "ref": "mb-skills",
+          "title": "Skill ids and Specialty badge art (perk id = skill id + 10 x the Specialty line, 1 to 5), used with Miguel's approval, 25 Oct 2026",
           "publisher": "MetaBot",
           "url": "https://metabot.gg/en/aion-2/skills",
           "retrievedOn": "2026-10-25",
-          "note": "Skill id is the game's own skill id (the same id the armory skill list gives). Specialty badge art is perkIconBase + (id + 10 x the Specialty position, 1 to 5) + .webp: MetaBot's copy of the in-game art, used with Miguel's approval (25 Oct 2026) because NCSOFT does not publish the Specialty art."
+          "region": "global",
+          "reliability": "high"
         }
       ]
     }
