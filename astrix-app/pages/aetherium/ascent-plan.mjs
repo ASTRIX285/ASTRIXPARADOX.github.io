@@ -953,7 +953,6 @@ function specialtyTargetsHtml(plan, icons) {
       <h2 class="ae-mskills-title" id="aeSpecTitle">Specialty targets</h2>
       <p class="ae-spec-lead">Each key skill at its maximum for this build: the Specialty pick each skill level opens, and how to get there.</p>
       <ul class="ae-spec-list">${list.map(row).join('')}</ul>
-      ${list.some(target => target.picks.some(pick => pick.icon)) ? '<p class="ae-spec-credit">Specialty badges: in-game art via MetaBot.</p>' : ''}
     </section>`;
 }
 

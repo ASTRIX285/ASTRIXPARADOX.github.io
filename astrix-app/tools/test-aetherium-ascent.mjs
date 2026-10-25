@@ -1547,7 +1547,6 @@ await check('Mastery: Specialty targets show each key skill at its maximum for t
   assert.match(badges[0].src,/^https:\/\/metabot\.gg\/web\/aion2\/stigma\/180100[123]0\.webp$/);
   assert.deepEqual(badges.slice(1).map(b=>b.src),['https://metabot.gg/web/aion2/stigma/18010040.webp','https://metabot.gg/web/aion2/stigma/18010050.webp']);
   assert.ok(badges.every(b=>b.w===32&&b.h===32&&b.before&&b.mid),JSON.stringify(badges));
-  assert.match(await page.locator('#aeSpecTargets .ae-spec-credit').innerText(),/in-game art via MetaBot/);
   const size=await page.$eval('[data-spec-skill="Onslaught"] .ae-spec-picks li',el=>parseFloat(getComputedStyle(el).fontSize));
   assert.ok(size>=15,`Pick text at ${size}px`);
   assert.deepEqual(errors,[]);
