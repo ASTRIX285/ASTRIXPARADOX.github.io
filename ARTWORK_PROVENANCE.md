@@ -65,6 +65,10 @@ Placement and optimisation only. The underlying art is NCSOFT's.
 from images Miguel supplied on 25 October 2026. They are cut from their light backgrounds and recoloured to read on a dark
 panel. This is presentation only. The emblems are NCSOFT's art.
 
+`elyos-crest.png` and `asmodian-crest.png` in the same folder are NCSOFT's Elyos and Asmodian crests with their names, cut
+from the in-game faction select screen Miguel supplied on 25 October 2026. The dark backdrop is keyed out and a soft glow in
+each faction's colour is laid back behind the crest. This is presentation only. The crests are NCSOFT's art.
+
 ## Daeva Card light and dark sides, 25 October 2026
 
 `astrix-app/pages/aetherium/images/page-backgrounds/daeva-card-light.jpg` and `daeva-card-dark.jpg` are the two Daevas from

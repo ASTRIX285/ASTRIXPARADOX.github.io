@@ -717,7 +717,7 @@ await check('tool backdrops: a fixed, darkened, decorative photo behind the Asce
         // side with its faction's emblem; the narrow layout keeps both sides, dimmer.
         for(const file of ['/page-backgrounds/daeva-card-light.jpg','/page-backgrounds/daeva-card-dark.jpg'])assert.ok(look.image.includes(file),`${path}: ${file}`);
         assert.ok(look.image.indexOf('daeva-card-light')<look.image.indexOf('daeva-card-dark'),`${path}: the light side on the left, the dark on the right`);
-        if(width>=1500)for(const file of ['/faction-emblems/elyos.png','/faction-emblems/asmodian.png'])assert.ok(look.image.includes(file),`${path}: ${file} on its side`);
+        if(width>=1500)for(const file of ['/faction-emblems/elyos-crest.png','/faction-emblems/asmodian-crest.png'])assert.ok(look.image.includes(file),`${path}: ${file} on its side`);
       }else{
       assert.ok(look.image.includes(`/page-backgrounds/${name}.jpg`),`${path}: the ${name} photo`);
       assert.match(look.image,/rgba\(7, 11, 20, 0\.65\)|color\(srgb [\d. ]+\/ 0\.65\)/,`${path}: the ground at 65% over the photo`);

@@ -96,14 +96,14 @@ body.aetherium-page.ae-backdrop::before{content:"";position:fixed;inset:0;z-inde
 /* The Daeva Card's light and dark sides (design/aetherium-light-dark-card, Miguel, 25 Oct 2026): the AION 2 key art split
    in two, the Elyos Daeva standing in the left margin in light and the Asmodian in the right margin in shadow, facing each other
    across the card. Each Daeva is sized to its margin (the screen less the page width, halved), so the whole figure shows and never
-   slips under the card. Each side carries its faction's emblem below the Daeva and is washed in its own colour, lighter on the left. */
+   slips under the card. Each side carries its faction's crest (the in-game faction select emblem with its glow and name) below the Daeva and is washed in its own colour, lighter on the left. */
 /* The card is a little narrower here (Miguel, 25 Oct 2026: "the 2560 one"), so on a 1920 screen the two Daevas get margins
    wide enough to stand tall in, as they do at 2560. */
-body.aetherium-page.ae-backdrop.ae-sides{--ae-max:1200px;--ae-side:max(0px,calc(50vw - (var(--ae-max) / 2) - var(--ae-gutter)))}
+body.aetherium-page.ae-backdrop.ae-sides{--ae-max:1200px;--ae-side:max(0px,calc(50vw - (var(--ae-max) / 2) - var(--ae-gutter)));--ae-crest:clamp(8rem,10.5vw,13rem)}
 body.aetherium-page.ae-backdrop.ae-sides::before{
   background:
-    url('/astrix-app/pages/aetherium/images/faction-emblems/elyos.png') left calc(var(--ae-side) / 2 - clamp(3rem,4vw,4.5rem)) bottom 4%/clamp(6rem,8vw,9rem) auto no-repeat,
-    url('/astrix-app/pages/aetherium/images/faction-emblems/asmodian.png') right calc(var(--ae-side) / 2 - clamp(3rem,4vw,4.5rem)) bottom 4%/clamp(6rem,8vw,9rem) auto no-repeat,
+    url('/astrix-app/pages/aetherium/images/faction-emblems/elyos-crest.png') left calc(var(--ae-side) / 2 - var(--ae-crest) / 2) bottom 4%/var(--ae-crest) auto no-repeat,
+    url('/astrix-app/pages/aetherium/images/faction-emblems/asmodian-crest.png') right calc(var(--ae-side) / 2 - var(--ae-crest) / 2) bottom 4%/var(--ae-crest) auto no-repeat,
     linear-gradient(180deg,transparent 0,transparent calc(5.5rem + var(--ae-side) * 1.9),color-mix(in srgb,var(--ae-page) 60%,transparent) calc(5.5rem + var(--ae-side) * 2.35),color-mix(in srgb,var(--ae-page) 60%,transparent) 100%),
     linear-gradient(90deg,color-mix(in srgb,var(--ae-page) 5%,transparent) 0,color-mix(in srgb,var(--ae-page) 20%,transparent) var(--ae-side),var(--ae-page) calc(var(--ae-side) + 2rem),var(--ae-page) calc(100% - var(--ae-side) - 2rem),color-mix(in srgb,var(--ae-page) 30%,transparent) calc(100% - var(--ae-side)),color-mix(in srgb,var(--ae-page) 20%,transparent) 100%),
     var(--ae-side-light,none) left top 5.5rem/var(--ae-side) auto no-repeat,

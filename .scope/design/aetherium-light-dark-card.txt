@@ -69,3 +69,5 @@ hub/aetherium/guide/weekly/index.html
 hub/aetherium/guide/world/index.html
 hub/aetherium/index.html
 hub/aetherium/skills/index.html
+astrix-app/pages/aetherium/images/faction-emblems/elyos-crest.png
+astrix-app/pages/aetherium/images/faction-emblems/asmodian-crest.png
