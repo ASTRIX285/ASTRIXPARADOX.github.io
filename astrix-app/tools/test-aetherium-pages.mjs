@@ -1759,7 +1759,21 @@ await check('Compare: two Daevas from different regions side by side, two calls 
     assert.ok(copy.h>=44,'44px target');
     const crimson=await page.evaluate(()=>{const el=document.createElement('i');el.style.color='var(--ae-astrix-hi)';document.body.append(el);const c=getComputedStyle(el).color;el.remove();return c;});
     assert.notEqual(copy.color,crimson,'Copy link is not red');
-    assert.equal(await plainText(page,'#aeCmpNote'),'The higher number is in colour.');
+    assert.equal(await plainText(page,'#aeCmpNote'),'Green is the better side, red the worse. Key marks a stat that class ranks high.');
+    // Green better, red worse (Miguel, 25 Oct 2026): the bars at every width, the lead and the pros and cons.
+    const tone=await page.evaluate(()=>{const css=getComputedStyle(document.documentElement);const probe=v=>{const el=document.createElement('i');el.style.color=v;document.body.append(el);const c=getComputedStyle(el).color;el.remove();return c;};return {better:probe('var(--ae-better)'),worse:probe('var(--ae-worse)')};});
+    const fills=await page.$$eval('[data-compare-row="combat-power"] .ae-cmp-bar i',els=>els.map(el=>({image:getComputedStyle(el).backgroundImage,h:el.getBoundingClientRect().height})));
+    assert.ok(fills.length===2&&fills.every(f=>f.h>0),`Both bars show at ${width}`);
+    const rgb=c=>c.replace(/^rgb\((\d+), (\d+), (\d+)\)$/,'$1, $2, $3');
+    assert.ok(fills[0].image.includes(`rgb(${rgb(tone.better)})`),`The leading bar is green (${fills[0].image})`);
+    assert.ok(fills[1].image.includes(`rgb(${rgb(tone.worse)})`),`The trailing bar is red (${fills[1].image})`);
+    assert.equal(await page.$eval('[data-compare-row="combat-power"] .is-higher b',el=>getComputedStyle(el).color),tone.better,'The better number is green');
+    const pcs=await page.$$eval('#aeCmpPros .ae-cmp-pc',els=>els.map(el=>({pros:el.querySelectorAll('.is-pro.ae-cmp-pc-item').length,cons:el.querySelectorAll('.is-con.ae-cmp-pc-item').length,first:el.querySelector('.ae-cmp-pc-item .ae-cmp-pc-stat')?.textContent.trim()??null})));
+    assert.equal(pcs.length,2,'Pros and cons for each Daeva');
+    assert.equal(pcs[0].pros,pcs[1].cons>6?6:pcs[1].cons,'One side\'s pros are the other side\'s cons');
+    assert.ok(await page.locator('#aeCmpPros .ae-cmp-pc-item.is-pro').count()>0,'Something is stronger like for like');
+    assert.equal(await page.$eval('#aeCmpPros .ae-cmp-pc-item.is-pro .ae-cmp-pc-gap',el=>getComputedStyle(el).color),tone.better);
+    assert.equal(await page.$eval('#aeCmpPros .ae-cmp-pc-item.is-con .ae-cmp-pc-gap',el=>getComputedStyle(el).color),tone.worse);
     const note=await boxOf(page,'#aeCmpNote'),first=await boxOf(page,'[data-compare-section="overview"]');
     assert.ok(note.bottom<=first.top,'The note sits above the first section');
     if(process.env.AE_SHOTS&&(width===390||width===1600))await page.screenshot({path:resolve(process.env.AE_SHOTS,`compare-${width}.png`),fullPage:true});

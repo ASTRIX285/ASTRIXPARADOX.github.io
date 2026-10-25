@@ -36,6 +36,8 @@ const GEAR_ORDER = ['MAINHAND', 'SUBHAND', 'HELMET', 'SHOULDER', 'TORSO', 'PANTS
   'NECKLACE', 'EARRING1', 'EARRING2', 'RING1', 'RING2', 'BRACELET1', 'BRACELET2', 'AMULET', 'RUNE1', 'RUNE2'];
 const keyOf = name => String(name ?? '').toUpperCase().replace(/[\s_]/g, '');
 const state = { a: null, b: null, grades: null, stats: null, loaded: [null, null], wants: [null, null] };
+/* Every like-for-like number row compareHtml draws: { label, values, win, wants, unit, section }. Pros and cons read it. */
+let tally = [];
 const DASH = '<span class="ae-cmp-none">-</span>';
 
 /** The pair from the address. */
@@ -79,6 +81,7 @@ const leadText = (x, y) => {
 };
 function row(label, cells, values = null, { key = null, icon = '', wants = [false, false], unit = '' } = {}) {
   const win = values ? higher(values[0], values[1]) : null;
+  if (values && values.every(Number.isFinite) && cells.every(cell => !/ae-cmp-item/.test(cell))) tally.push({ label, values, win, wants, unit });
   const numeric = values && values.some(Number.isFinite) && cells.every(cell => !/ae-cmp-item/.test(cell));
   const top = numeric ? Math.max(...values.filter(Number.isFinite), 0) : 0;
   const cell = side => {
@@ -112,12 +115,10 @@ function headCell(loaded, ref, side) {
     </div>`;
 }
 
-/** The scoreboard between the two: how many rows each Daeva leads, and the two headline gaps. */
+/** The scoreboard between the two: how many like-for-like rows each Daeva leads. Reads the tally of the last draw. */
 function scoreHtml(models) {
   if (!models[0] || !models[1]) return '';
-  const html = compareHtml(models);
-  const leads = side => (html.match(new RegExp(`data-lead="${side}"`, 'g')) ?? []).length;
-  const [a, b] = [leads('a'), leads('b')];
+  const [a, b] = [0, 1].map(side => tally.filter(row => row.win === side).length);
   const name = side => esc(models[side].profile.name);
   const verdict = a === b ? 'Level pegging' : `${name(a > b ? 0 : 1)} leads`;
   return `<div class="ae-cmp-score" id="aeCmpScore" aria-label="Rows each Daeva leads">
@@ -125,6 +126,52 @@ function scoreHtml(models) {
       <p class="ae-cmp-score-mid"><span class="ae-cmp-vs" aria-hidden="true"><span>VS</span></span><span class="ae-cmp-verdict">${verdict}</span></p>
       <p class="ae-cmp-score-side is-b"><b>${b}</b><span>rows ahead</span></p>
     </div>`;
+}
+
+/*
+ * Pros and cons (Miguel, 25 Oct 2026): for each Daeva, the same stat on both sides, where it is stronger and where it
+ * is weaker. Stats its own class ranks high come first (they matter most for it), then the biggest gaps, by how far
+ * ahead in proportion. Ties are left out: neither side is better.
+ */
+const PROS_LIMIT = 6;
+const gapOf = row => Math.abs(row.values[0] - row.values[1]) / Math.max(Math.abs(row.values[0]), Math.abs(row.values[1]), 1);
+function prosCons(side) {
+  const other = side ? 0 : 1;
+  const order = (rows, who) => rows.slice().sort((x, y) => (y.wants[who] ? 1 : 0) - (x.wants[who] ? 1 : 0) || gapOf(y) - gapOf(x));
+  return {
+    pros: order(tally.filter(row => row.win === side), side),
+    cons: order(tally.filter(row => row.win === other), side)
+  };
+}
+function prosItem(row, side, good) {
+  const mine = row.values[side], theirs = row.values[side ? 0 : 1];
+  const fmt = value => `${number(value)}${row.unit}`;
+  return `<li class="ae-cmp-pc-item${good ? ' is-pro' : ' is-con'}">
+      <span class="ae-cmp-pc-stat">${esc(row.label)}${row.wants[side] ? ' <span class="ae-cmp-key">Key</span>' : ''}</span>
+      <span class="ae-cmp-pc-vals"><b>${fmt(mine)}</b> vs ${fmt(theirs)}</span>
+      <span class="ae-cmp-pc-gap">${good ? '+' : '-'}${leadText(mine, theirs)}${row.unit}</span>
+    </li>`;
+}
+function prosConsHtml(models) {
+  if (!models[0] || !models[1] || !tally.length) return '';
+  const card = side => {
+    const { pros, cons } = prosCons(side);
+    const list = (rows, good, empty) => (rows.length
+      ? `<ul class="ae-cmp-pc-list">${rows.slice(0, PROS_LIMIT).map(row => prosItem(row, side, good)).join('')}</ul>${rows.length > PROS_LIMIT ? `<p class="ae-cmp-pc-more">and ${rows.length - PROS_LIMIT} more below</p>` : ''}`
+      : `<p class="ae-cmp-pc-none">${empty}</p>`);
+    const p = models[side].profile;
+    return `<article class="ae-cmp-pc" data-side="${side ? 'b' : 'a'}" data-faction="${esc(factionOf(p.raceName, p.raceId))}" aria-labelledby="aeCmpPc-${side}">
+        <h3 class="ae-cmp-pc-name" id="aeCmpPc-${side}">${esc(p.name)} <span>${esc(p.class)}</span></h3>
+        <p class="ae-cmp-pc-head is-pro">Stronger on <b>${pros.length}</b></p>
+        ${list(pros, true, 'Nothing ahead like for like.')}
+        <p class="ae-cmp-pc-head is-con">Weaker on <b>${cons.length}</b></p>
+        ${list(cons, false, 'Nothing behind like for like.')}
+      </article>`;
+  };
+  return `<section class="ae-panel ae-cmp-section ae-cmp-pcs" id="aeCmpPros" aria-labelledby="aeCmpH-pros">
+      <h2 class="ae-section-title" id="aeCmpH-pros">Pros and cons<small>The same stat on both, Key stats first</small></h2>
+      <div class="ae-cmp-pc-grid">${card(0)}${card(1)}</div>
+    </section>`;
 }
 
 /** A gear or Arcana slot: only the icon on its grade tile, then grade, +N (Exceed N above 0) and item level on one line. */
@@ -138,6 +185,7 @@ function itemCell(slot) {
 const itemScore = slot => (slot && !slot.empty && Number.isFinite(slot.itemLevel) ? slot.itemLevel : null);
 
 function compareHtml(models) {
+  tally = [];
   const both = fn => models.map(model => (model ? fn(model) : null));
   const sections = [];
   const itemLevel = m => (isPending(m.profile.itemLevel) ? null : m.profile.itemLevel);
@@ -209,12 +257,14 @@ function render() {
       ${saved < 2 ? '<p><a class="btn" href="/hub/aetherium/#aeSearch">Find a Daeva</a></p>' : ''}</div></div>`;
     return;
   }
+  const body = compareHtml(models);
   stage.innerHTML = `<div class="ae-gw ae-compare-window">${barHtml()}<div class="ae-gw-body">
     ${pickers}
     <div class="ae-cmp-heads" id="aeCmpHeads">${headCell(state.loaded[0], state.a, 'a')}${headCell(state.loaded[1], state.b, 'b')}</div>
     ${scoreHtml(models)}
-    <div class="ae-cmp-tools"><p class="ae-note" id="aeCmpNote">The higher number is in colour.</p><button type="button" id="aeCmpCopy">Copy link</button><span class="ae-cmp-copied" id="aeCmpCopied" role="status"></span></div>
-    <div class="ae-cmp" id="aeCompare">${compareHtml(models)}</div>
+    ${prosConsHtml(models)}
+    <div class="ae-cmp-tools"><p class="ae-note" id="aeCmpNote">Green is the better side, red the worse. Key marks a stat that class ranks high.</p><button type="button" id="aeCmpCopy">Copy link</button><span class="ae-cmp-copied" id="aeCmpCopied" role="status"></span></div>
+    <div class="ae-cmp" id="aeCompare">${body}</div>
   </div></div>`;
 }
 
