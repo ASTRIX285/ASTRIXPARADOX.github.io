@@ -654,7 +654,11 @@ await check('roster per server: 9 on each server, the full message, the heading 
 });
 
 await check('roster per server: a new Daeva goes to its own server and that roster is shown; the switcher lists only used servers',async()=>{
-  const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2([saved('NOCTIS',2301,'Israphel')]))}});
+  // NOCTIS is saved with the character id the mock site returns for it, as a real save would be. With a made-up id the
+  // read after the switch saved a second NOCTIS ("2 of 9"), and this check only passed when it caught the "1 of 9" frame
+  // before that read landed (the flake in handover v07).
+  const noctis=saved('NOCTIS',2301,'Israphel','eu',{characterId:asmoInfo.profile.characterId});
+  const {page,context}=await open('/hub/aetherium/',{live:true,extra:{'aetherium.roster.v2':JSON.stringify(storeV2([noctis]))}});
   // "Locate Your Characters on Server" (Miguel, 25 Oct 2026) shows with one server too, naming it; the picker is inert.
   assert.equal(await page.isVisible('#aeRosterSwitchBox'),true,'One server with Daevas: the heading names it');
   assert.equal(await page.textContent('#aeRosterLocate'),'Locate Your Characters on Server');
@@ -669,7 +673,11 @@ await check('roster per server: a new Daeva goes to its own server and that rost
   assert.equal(await page.locator('.ae-roster-slot.is-filled').count(),1,'The strip shows one server\'s Daevas only');
   // Picking the other server shows its roster and makes its first Daeva active.
   await page.selectOption('#aeRosterSwitch','eu:2301');
-  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent==='Israphel · EU · 1 of 9');
+  await page.waitForFunction(()=>document.querySelector('#aeRosterCount').textContent.startsWith('Israphel · EU'));
+  // Wait for the read of NOCTIS to land (the saved Lv 20 becomes the live Lv 12), then the count must still be 1:
+  // the read refreshes the saved Daeva, never adds a second one.
+  await page.waitForFunction(()=>/Lv 12/.test(document.querySelector('.ae-roster-slot.is-active')?.textContent??''));
+  assert.equal(await page.textContent('#aeRosterCount'),'Israphel · EU · 1 of 9');
   await page.waitForFunction(()=>document.body.dataset.faction==='asmodian');
   assert.match(await page.textContent('.ae-roster-slot.is-active'),/NOCTIS/);
   assert.equal((await v2(page)).active.key,'2301:Zm9vYmFyMTIz=','The first Daeva of that server is active');
