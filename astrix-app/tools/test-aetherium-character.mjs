@@ -1116,6 +1116,11 @@ await check('Gear grid: grade colour behind every worn tile (computed), empty sl
   assert.equal(seen.length,17);
   assert.deepEqual([...new Set(seen.map(([grade])=>grade))].sort(),['epic','rare','unique']);
   for(const [grade,border,fill] of seen){assert.equal(border,want[grade],`${grade} edge`);assert.notEqual(fill,'rgba(0, 0, 0, 0)',`${grade} fill`);}
+  // Fills as the game's bag draws them (Miguel, 26 Oct 2026: richer blue and richer gold): a deep top lighting to the
+  // grade's bright colour at the bottom edge, sampled from his in-game bag.
+  const fills=await page.$$eval('#aeGear .ae-gtile',items=>Object.fromEntries(items.map(el=>[el.dataset.grade,getComputedStyle(el).backgroundImage])));
+  assert.equal(fills.unique,'linear-gradient(rgb(77, 53, 2) 0%, rgb(77, 53, 2) 50%, rgb(219, 164, 11) 100%)','Unique: rich gold');
+  assert.equal(fills.epic,'linear-gradient(rgb(5, 33, 47) 0%, rgb(5, 33, 47) 50%, rgb(31, 116, 160) 100%)','Epic: rich blue');
   const empty=await page.$$eval('#aeGear .ae-gempty',items=>items.map(el=>[el.getAttribute('aria-label'),getComputedStyle(el).borderTopStyle,Number(getComputedStyle(el).opacity)]));
   assert.deepEqual(empty.map(([label])=>label),['Bracelet 2: empty','Rune 1: empty','Rune 2: empty']);
   for(const [,style,opacity] of empty){assert.equal(style,'dashed');assert.ok(opacity<1,'dim');}
@@ -1295,12 +1300,12 @@ await check('Gear build: the build bar names the build, counts the pieces that s
    Enhancement window, the item card has an Enhance panel drawn like the window's five tabs, and a How enhancing works strip
    holds one Do this next line. Lv 45 fixture with the role in the address. */
 const enhanceOf=page=>page.$$eval('#aeGear > li[data-slot-pos]',items=>Object.fromEntries(items.map(el=>{const mark=el.querySelector('.ae-emark');const tile=el.querySelector('.ae-gtile').getBoundingClientRect();const box=mark?.getBoundingClientRect();
-  return [el.dataset.slotPos,{enhance:el.dataset.enhance??null,word:mark?.querySelector('.ae-emark-word').textContent??null,icon:Boolean(mark?.querySelector('svg.ae-eicon path,svg.ae-eicon circle')),below:box?box.top>=tile.bottom:null,size:mark?parseFloat(getComputedStyle(mark).fontSize):null,
+  return [el.dataset.slotPos,{enhance:el.dataset.enhance??null,word:mark?.querySelector('.ae-emark-word').textContent??null,icon:(img=>img?{src:img.getAttribute('src'),loaded:img.complete&&img.naturalWidth===40,size:Math.round(img.getBoundingClientRect().width)}:null)(mark?.querySelector('img.ae-eicon.is-game')),below:box?box.top>=tile.bottom:null,size:mark?parseFloat(getComputedStyle(mark).fontSize):null,
     described:el.querySelector('button').getAttribute('aria-describedby'),said:mark?.querySelector('.ae-sr').textContent??null}];})));
 // The Enhancement window lives on each piece's card (feature/aetherium-gear-build, 24 Oct 2026; was the Enhance tab).
 const openItem=async(page,pos)=>{if(!(await page.isHidden('#aeInfo').catch(()=>true)))await page.keyboard.press('Escape');await page.click(`#aeGear [data-slot-pos="${pos}"] button`);await page.waitForFunction(p=>document.querySelector(`#aeInfo:not([hidden]) [data-gcard]`)&&document.querySelector('#aeInfo h3')?.textContent&&document.querySelector('#aeInfo #aeEnhancePanel'),pos);};
 const enhanceText=page=>page.$eval('#aeEnhancePanel',el=>el.innerText.replace(/\s+/g,' '));
-await check('Enhance marks: each tile names its next tab with our icon and one word, under the tile, never over the art',async()=>{
+await check('Enhance marks: each tile names its next tab with the game\'s icon and one word, under the tile, never over the art',async()=>{
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
   await settled(page);
   const by=await enhanceOf(page);
@@ -1309,7 +1314,9 @@ await check('Enhance marks: each tile names its next tab with our icon and one w
   for(const [pos,word] of Object.entries(want)){
     assert.equal(by[pos].word,word,`slot ${pos}`);
     if(!word)continue;
-    assert.ok(by[pos].icon,`slot ${pos}: our tab icon`);
+    // The game's own icon for the tab (Miguel, 26 Oct 2026: Enhance Item for Growth), loaded and drawn at 16px.
+    assert.match(by[pos].icon?.src??'',/^\/astrix-app\/pages\/aetherium\/images\/enhance-icons\/growth\.png\?v=/,`slot ${pos}: the game's Enhance Item icon`);
+    assert.equal(by[pos].icon.size,16,`slot ${pos}: icon at 16px`);
     assert.equal(by[pos].below,true,`slot ${pos}: the mark sits under the tile`);
     assert.ok(by[pos].size>=13,`slot ${pos}: ${by[pos].size}px`);
     assert.match(by[pos].described??'',/^aeEmark\d+$/,'The button is described by its mark');
@@ -1326,8 +1333,10 @@ await check('Enhance panel: the weapon and the guard, the window\'s five tabs wi
   const {page,context}=await open(`/hub/aetherium/gear/equipment/${refQuery(LV45,{role:'tank',team:'main-tank'})}`);
   await settled(page);
   await openItem(page,2);
-  const tabs=await page.$$eval('#aeEnhancePanel [role="tab"]',items=>items.map(el=>[el.textContent.trim(),el.getAttribute('aria-selected'),el.classList.contains('is-next'),Boolean(el.querySelector('svg.ae-eicon'))]));
-  assert.deepEqual(tabs,[['Growth','true',true,true],['Manastone','false',false,true],['Theostone','false',false,true],['Soul Binding','false',false,true],['Transfer','false',false,true]]);
+  // Each tab wears an icon: the game's own where it is captured (Enhance Item, Engrave Manastone, Soul Bind, Substance Morph), our line icon for Theostone.
+  const tabs=await page.$$eval('#aeEnhancePanel [role="tab"]',items=>items.map(el=>[el.textContent.trim(),el.getAttribute('aria-selected'),el.classList.contains('is-next'),(img=>img?(img.getAttribute('src').match(/enhance-icons\/([a-z-]+)\.png/)?.[1]??'bad'):el.querySelector('svg.ae-eicon path')?'line':'none')(el.querySelector('img.ae-eicon.is-game'))]));
+  assert.deepEqual(tabs,[['Growth','true',true,'growth'],['Manastone','false',false,'manastone'],['Theostone','false',false,'line'],['Soul Binding','false',false,'soul-binding'],['Transfer','false',false,'transfer']]);
+  assert.ok(await page.$$eval('#aeEnhancePanel img.ae-eicon.is-game',imgs=>imgs.every(img=>img.complete&&img.naturalWidth===40)),'Every game icon loads');
   const tabSize=await page.$eval('#aeEnhancePanel [role="tab"]',el=>el.getBoundingClientRect().height);
   assert.ok(tabSize>=44,`tab ${tabSize}px tall`);
   let text=await enhanceText(page);

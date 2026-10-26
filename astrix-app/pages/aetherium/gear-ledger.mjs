@@ -250,7 +250,7 @@ function subRows(list) {
    Enhance panel drawn like the window's five tabs, and the page a How enhancing works strip with one Do this next line.
    No cost numbers. */
 
-/* Our own icons for the five tabs, 16 by 16, stroke only. */
+/* Our own line icons, 16 by 16, stroke only: the fallback where the game's icon is not captured yet. */
 const ENHANCE_ICONS = {
   growth: '<path d="M8 13.5V3M3.5 7.5 8 3l4.5 4.5M3.5 13.5h9"/>',
   manastone: '<path d="M8 1.75 13.25 7 8 14.25 2.75 7Z"/><path d="M2.75 7h10.5M8 1.75 6 7l2 7.25L10 7Z"/>',
@@ -259,7 +259,13 @@ const ENHANCE_ICONS = {
   transfer: '<path d="M2.5 5.5h10M10 3l2.5 2.5L10 8M13.5 10.5h-10M6 8l-2.5 2.5L6 13"/>',
   done: '<path d="M3 8.5l3.2 3.2L13 4.8"/>'
 };
-const enhanceIcon = id => `<svg class="ae-eicon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ENHANCE_ICONS[id] ?? ''}</svg>`;
+/* The game's own icons for the Enhancement window's actions (Miguel's in-game captures, 26 Oct 2026): Enhance Item for
+   Growth, Engrave Manastone, Soul Bind and Substance Morph for Transfer. Theostone and Done keep our line icons until the
+   game's art for them is captured. */
+const GAME_ENHANCE_ICONS = { growth: 'growth', manastone: 'manastone', 'soul-binding': 'soul-binding', transfer: 'transfer' };
+const enhanceIcon = id => (GAME_ENHANCE_ICONS[id]
+  ? `<img class="ae-eicon is-game" src="/astrix-app/pages/aetherium/images/enhance-icons/${GAME_ENHANCE_ICONS[id]}.png?v=20261026-1" alt="" width="40" height="40" aria-hidden="true" decoding="async">`
+  : `<svg class="ae-eicon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ENHANCE_ICONS[id] ?? ''}</svg>`);
 const statusTag = () => '';
 const enhanceRecords = () => (state.enhancement ? indexEnhancement(state.enhancement) : null);
 
