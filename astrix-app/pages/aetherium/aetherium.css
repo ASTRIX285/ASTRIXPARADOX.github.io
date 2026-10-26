@@ -1738,9 +1738,9 @@ body.aetherium-page #aeRoleChange{display:inline-flex;align-items:center;min-hei
 .ae-emark{position:absolute;left:50%;top:calc(100% + .25rem);transform:translateX(-50%);display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap;
   font:700 .875rem/1.15 var(--ae-font-ui);letter-spacing:0;color:var(--ae-text-muted);cursor:pointer}
 .ae-eicon{width:.875rem;height:.875rem;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-img.ae-eicon.is-game{width:1.25rem;height:1.25rem;object-fit:contain}
-:is(.ae-eitem-mark,.ae-elogic-steps li,.ae-gb-move-title) img.ae-eicon.is-game{width:1.25rem;height:1.25rem}
-.ae-emark img.ae-eicon.is-game{width:1rem;height:1rem}
+.ae-eicon.is-game{width:1.25rem;height:1.25rem;object-fit:contain}
+.ae-eitem-mark .ae-eicon.is-game,.ae-elogic-steps li .ae-eicon.is-game,.ae-gb-move-title .ae-eicon.is-game{width:1.25rem;height:1.25rem}
+.ae-emark .ae-eicon.is-game{width:1rem;height:1rem}
 .ae-emark[data-mark="growth"]{color:var(--ae-gold)}
 .ae-emark[data-mark="manastone"]{color:var(--ae-ice)}
 .ae-emark[data-mark="theostone"]{color:var(--ae-strobe-hi)}
