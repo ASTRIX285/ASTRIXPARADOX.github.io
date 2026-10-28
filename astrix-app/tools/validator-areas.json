@@ -55,7 +55,8 @@
         "astrix-app/tools/test-aetherium-*",
         "astrix-app/tools/test-aion2-*",
         "astrix-app/tools/build-aetherium-facts.mjs",
-        "astrix-app/tools/validate-aetherium-facts.mjs"
+        "astrix-app/tools/validate-aetherium-facts.mjs",
+        "astrix-app/tools/aion2-bar-rules.mjs"
       ],
       "suites": [
         "test-aetherium-pages.mjs",
@@ -63,6 +64,18 @@
         "test-aetherium-worker.mjs",
         "test-aion2-adapter.mjs",
         "test-aion2-advisor.mjs",
+        "test-aetherium-level-planner.mjs",
+        "test-aetherium-level-assassin.mjs",
+        "test-aetherium-level-chanter.mjs",
+        "test-aetherium-level-cleric.mjs",
+        "test-aetherium-level-ranger.mjs",
+        "test-aetherium-level-sorcerer.mjs",
+        "test-aetherium-level-spiritmaster.mjs",
+        "test-aetherium-level-templar.mjs",
+        "test-aion2-guide.mjs",
+        "test-aion2-gear-sources.mjs",
+        "test-aion2-eu-fixtures.mjs",
+        "test-aetherium-guide-crafting.mjs",
         "test-aetherium-ascent.mjs",
         "test-aetherium-guide.mjs",
         "test-aetherium-guide-general.mjs",

@@ -28,6 +28,20 @@ export const validators=[
   {name:'test-aetherium-ascent.mjs',browser:true,serial:true}, // The Aetherium Ascent Plan page: by hand, with a Daeva, Worker down, layout. Serial: its title and data line layout check failed under load (18 Oct 2026).
   browser('test-aetherium-guide.mjs'), // The Aetherium AION 2 Guide: shell, home grid, class roles table, class pages, setup flag, layout.
   browser('test-aetherium-guide-general.mjs'), // The Aetherium Guide, General section and FAQ: facts with sources, resets in the local zone, layout.
+  // The Aetherium level planner, one suite per class (28 Oct 2026: these were in no list, so they never ran; the 17 Oct key
+  // checks in them went stale when the 25 Oct Skill Bar rules landed). Each starts Chromium for its page checks.
+  browser('test-aetherium-level-planner.mjs'), // Gladiator level planner: setup per level, role and team, the game's bar at every level.
+  browser('test-aetherium-level-assassin.mjs'), // Assassin level planner.
+  browser('test-aetherium-level-chanter.mjs'), // Chanter level planner.
+  browser('test-aetherium-level-cleric.mjs'), // Cleric level planner.
+  browser('test-aetherium-level-ranger.mjs'), // Ranger level planner.
+  browser('test-aetherium-level-sorcerer.mjs'), // Sorcerer level planner.
+  browser('test-aetherium-level-spiritmaster.mjs'), // Spiritmaster level planner.
+  browser('test-aetherium-level-templar.mjs'), // Templar level planner.
+  browser('test-aetherium-guide-crafting.mjs'), // The Aetherium Guide, Crafting section.
+  'test-aion2-guide.mjs', // AION 2 Guide data.
+  'test-aion2-gear-sources.mjs', // AION 2 gear sources data.
+  'test-aion2-eu-fixtures.mjs', // AION 2 EU fixture contract.
   'test-workbench-editor.mjs',
   'validate-local-preview.mjs',
   'validate-ribbon-buttons.mjs',

@@ -1,0 +1,12 @@
+astrix-app/tools/aion2-bar-rules.mjs
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-aetherium-level-assassin.mjs
+astrix-app/tools/test-aetherium-level-chanter.mjs
+astrix-app/tools/test-aetherium-level-cleric.mjs
+astrix-app/tools/test-aetherium-level-planner.mjs
+astrix-app/tools/test-aetherium-level-ranger.mjs
+astrix-app/tools/test-aetherium-level-sorcerer.mjs
+astrix-app/tools/test-aetherium-level-spiritmaster.mjs
+astrix-app/tools/test-aetherium-level-templar.mjs
+astrix-app/tools/test-aion2-advisor.mjs
+astrix-app/tools/validator-areas.json

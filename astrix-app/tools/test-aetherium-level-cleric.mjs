@@ -12,6 +12,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {AION2_CLASSES,buildAscentPlan,stackProblems} from '../games/aion2/engine/ascent-advisor.mjs';
+import {assertKeyGroups} from './aion2-bar-rules.mjs';
 import {weightsFor} from '../games/aion2/engine/level-planner.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
 import {planRoleRoute,routePriorities} from '../games/aion2/engine/daevanion-planner.mjs';
@@ -105,15 +106,10 @@ check('Lv 1 and Lv 5: a real low-level setup',()=>{
   }
 });
 
-check('own keys never move as the Daeva levels: a skill still to come keeps its key free',()=>{
-  for(const role of ROLES){
-    const keyOf=(p,name)=>p.skillBar.left.find(key=>p.skillBar.stacks[key].skills.some(cell=>cell.name===name)||p.skillBar.stacks[key].reserved?.includes(name));
-    const top=plan(45,role);
-    for(const level of LEVELS){
-      const p=plan(level,role);
-      for(const key of top.skillBar.left)for(const cell of top.skillBar.stacks[key].skills)assert.equal(keyOf(p,cell.name),key,`${label(level,role)}: ${cell.name} on key ${key}`);
-    }
-  }
+/* The 25 Oct 2026 Skill Bar rules (Miguel, in game) replace the 17 Oct "own keys never move as the Daeva levels": every
+   level is held to the game's bar instead (aion2-bar-rules.mjs). */
+check('the game\'s bar at every level: 1 to 4 cooldowns and stigmas, Q and E cover, nothing on 5 to 8 while a reachable key is free',()=>{
+  for(const role of ROLES)for(const level of LEVELS)assertKeyGroups(plan(level,role).skillBar,`${label(level,role)}`);
 });
 
 check('Mastery never past the cap; a step the trainer cannot sell yet says from which level',()=>{
