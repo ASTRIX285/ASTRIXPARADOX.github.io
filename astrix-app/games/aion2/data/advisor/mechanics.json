@@ -147,6 +147,10 @@
       "status": "confirmed",
       "value": {
         "cap": 11,
+        "caps": {
+          "Active": 11,
+          "Passive": 10
+        },
         "beyond": [
           {
             "kind": "daevanion",
@@ -163,7 +167,7 @@
           }
         ]
       },
-      "text": "Mastery takes a skill to Lv 11 at most. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana.",
+      "text": "Mastery takes an active skill to Lv 11 and a passive skill to Lv 10 at most. Levels above that come from Daevanion skill nodes (+1 each), gear stat lines and Arcana.",
       "provenance": [
         {
           "kind": "in-game-capture",
@@ -174,12 +178,51 @@
           "note": "Mastery stops at skill Lv 11. Keen Strike read at Lv 10. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana, as the class research note (claude/aion2-class-research-6oct2026.md) lists them."
         },
         {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-28",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Mastery window",
+          "note": "Skill points stop at Lv 11 for active skills and Lv 10 for passive skills (Wind's Promise at Lv 10 is at its max). The cap is on the Mastery part of the level: Daevanion nodes, gear stat lines and Arcana add on top."
+        },
+        {
           "kind": "community-guide",
           "ref": "gt-skills",
           "title": "Skills guide: active, passive and stigma",
           "publisher": "gameplay.tips",
           "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
           "retrievedOn": "2026-10-06",
+          "region": "korea",
+          "reliability": "medium",
+          "publishedOn": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "id": "stigma-cap",
+      "label": "Stigma cap",
+      "status": "confirmed",
+      "value": {
+        "cap": 20,
+        "levelledWith": "Stigma Shards"
+      },
+      "text": "Stigma skills level with Stigma Shards, not skill points, up to Lv 20 on the global servers. Lv 20 opens the last stigma Specialty perk.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-28",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Stigma window",
+          "note": "Stigma max is Lv 20 on global. Lv 25 is the Korean value after the Lv 50 update, not global."
+        },
+        {
+          "kind": "community-guide",
+          "ref": "gt-skills",
+          "title": "Skills guide: active, passive and stigma",
+          "publisher": "gameplay.tips",
+          "url": "https://gameplay.tips/guides/aion-2-skills-guide-active-passive-and-stigma.html",
+          "retrievedOn": "2026-10-28",
           "region": "korea",
           "reliability": "medium",
           "publishedOn": "2026-10-01"

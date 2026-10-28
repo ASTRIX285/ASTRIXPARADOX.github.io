@@ -85,7 +85,8 @@ const capInfo=structuredClone(info);
 Object.assign(capInfo.profile,{characterName:'CAPDAEVA',characterId:'Y2FwZGFldmE=',serverId:1315,serverName:'Siel'});
 const capEquipment=structuredClone(equipment);
 for(const skill of capEquipment.skill.skillList){
-  const level={'Keen Strike':12,'Rending Blow':11,'Overhead Slam':10}[skill.name];
+  // Experienced Counterstrike (a passive) at 10: the passive Mastery cap (Miguel, in game, 28 Oct 2026).
+  const level={'Keen Strike':12,'Rending Blow':11,'Overhead Slam':10,'Experienced Counterstrike':10}[skill.name];
   if(level)Object.assign(skill,{skillLevel:level,acquired:1,equip:1});
 }
 const capRef=new URLSearchParams({serverId:'1315',characterId:capInfo.profile.characterId});
@@ -333,6 +334,20 @@ await check('Mastery without a Daeva: every class skill as a game icon, key skil
   assert.equal(srcs.length,22,'An icon for every active and passive skill');
   assert.ok(srcs.every(src=>/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\/ICON_[A-Z]{2}_SKILL_/.test(src)),srcs.join());
   assert.ok(await page.locator('.ae-mskill.is-key').count()>=3);
+  await context.close();
+});
+
+await check('Mastery cap per skill type: a key passive at 10 is at its cap, gets no step, and says so',async()=>{
+  const {page,context,errors}=await open(ascent(`${capRef}&role=tank`,'mastery'),{live:true});
+  await page.waitForSelector('#aeMasteryCap li[data-mastery-cap="Experienced Counterstrike"]');
+  assert.equal(await plain(page,'#aeMasteryCap .ae-mskills-title'),'At the Mastery cap (11 active, 10 passive)');
+  const row=await plain(page,'#aeMasteryCap li[data-mastery-cap="Experienced Counterstrike"]');
+  assert.match(row,/Experienced Counterstrike is Lv 10\. Mastery stops at 10 for passives, so no more skill points go here\./);
+  const spend=await page.$$eval('#aeMasterySpend [data-mastery]',items=>items.map(el=>el.dataset.mastery));
+  assert.ok(!spend.includes('Experienced Counterstrike'),`No skill point step for a passive at 10: ${spend.join()}`);
+  const passiveSteps=await page.$$eval('#aeMasterySpend [data-mastery] .ae-itile-badge',items=>items.map(el=>el.textContent));
+  assert.ok(passiveSteps.every(badge=>Number(badge.split('→').pop())<=11),passiveSteps.join());
+  assert.deepEqual(errors,[]);
   await context.close();
 });
 

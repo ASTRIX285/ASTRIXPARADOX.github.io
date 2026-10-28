@@ -601,7 +601,7 @@
         {
           "name": "Experienced Counterstrike",
           "priority": 2,
-          "target": "Lv 11, then Daevanion nodes",
+          "target": "Lv 10 (the passive Mastery cap), then Daevanion nodes",
           "why": "A block gives the party more PvE damage for 20 s. Top players level it second.",
           "refs": [
             "ql-gladiator",

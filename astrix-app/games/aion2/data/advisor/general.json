@@ -1121,13 +1121,17 @@
       "status": "confirmed",
       "value": {
         "cap": 11,
+        "caps": {
+          "Active": 11,
+          "Passive": 10
+        },
         "beyond": [
           "Daevanion skill nodes (+1 each)",
           "gear stat lines",
           "Arcana"
         ]
       },
-      "text": "Mastery takes a skill to Lv 11 at most. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana.",
+      "text": "Mastery takes an active skill to Lv 11 and a passive skill to Lv 10 at most. Levels above that come from Daevanion skill nodes (+1 each), gear stat lines and Arcana.",
       "provenance": [
         {
           "kind": "in-game-capture",
@@ -1136,6 +1140,14 @@
           "gameVersion": "global launch (Oct 2026)",
           "where": "Skill > Mastery window",
           "note": "Mastery stops at skill Lv 11. Levels above 11 come from Daevanion skill nodes (+1 each), gear stat lines and Arcana."
+        },
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-28",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill > Mastery window",
+          "note": "Skill points stop at Lv 11 for active skills and Lv 10 for passive skills."
         },
         {
           "kind": "community-guide",

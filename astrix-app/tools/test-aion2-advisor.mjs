@@ -10,7 +10,7 @@
 //   - Roles: pending builds stay pending, unknown roles fall back to the main role.
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
-import {specialtyIcon,specialtyTargets,AION2_CLASSES,ROLES,TEAMS,applyTeam,buildAscentPlan,daevanionMove,teamsFor,clampLevel,enchantAdvice,enchantSteps,fillerProblems,gearMoves,gradeInfo,indexMechanics,levelOrder,masteryCap,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
+import {specialtyIcon,specialtyTargets,AION2_CLASSES,ROLES,TEAMS,applyTeam,buildAscentPlan,daevanionMove,teamsFor,clampLevel,enchantAdvice,enchantSteps,fillerProblems,gearMoves,gradeInfo,indexMechanics,levelOrder,masteryCap,masteryCaps,stigmaCap,bonusLevels,nextLevelSource,pickBuild,reachSkillLevel,rolesFor,stackProblems,stigmaKeyProblems,targetAgainstCap} from '../games/aion2/engine/ascent-advisor.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {classesWanting,combatNamesIn,indexStats,mostlyLow,rankPointStats,statOrder,statReason,subStatTag} from '../games/aion2/engine/stat-advisor.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
@@ -249,7 +249,10 @@ check('Mastery without a character: key skills from the guide, no invented level
   assert.ok([...m.active,...m.passive].every(skill=>/^https:\/\/assets\.playnccdn\.com\/static-aion2-gamedata\/resources\/ICON_/.test(skill.icon)),'Game icon on every skill without a Daeva');
   assert.ok(m.active.filter(skill=>skill.priority).length>=3,'Key skills ranked');
   assert.ok(m.spend.length>0,'Still says where points go first');
-  assert.ok(m.spend.every(step=>step.from===null&&step.to===8),'No guessed current level, aim for the first slot');
+  // Actives aim for their first Specialty slot. Passives have no Specialty perks (28 Oct 2026), so they aim for the
+  // passive Mastery cap (10) instead of stopping at a slot they do not have.
+  const types=Object.fromEntries([...m.active,...m.passive].map(skill=>[skill.name,skill.category]));
+  assert.ok(m.spend.every(step=>step.from===null&&step.to===(types[step.name]==='Passive'?10:8)),'No guessed current level, aim for the first slot (actives) or the passive cap (passives)');
 });
 
 check('ASTRIX285: skills show armory levels and the next Specialty slot',()=>{
@@ -777,6 +780,57 @@ check('no Mastery step above the cap for any class, with or without a Daeva',()=
   assert.ok(plan.mastery.spend.every(step=>step.to<=11));
   assert.ok(!plan.now.some(move=>/^Level (Keen Strike|Rending Blow|Overhead Slam)/.test(move.title)),'No "level it" move for a capped skill');
 });
+/* Caps per skill type (Miguel, in game, 28 Oct 2026): skill points stop at Lv 11 for actives and Lv 10 for passives;
+   stigmas level with Stigma Shards to Lv 20. The cap holds on the Mastery part: the level the site sends is the total. */
+const daevaOf=(className,levelOf,{gear=[]}={})=>{
+  const live=structuredClone(astrix);
+  live.profile.class=className;live.profile.level=45;
+  live.gear=gear;
+  live.skills=icons[className].records[0].skills.map(skill=>({name:skill.name,category:skill.category==='Stigma'?'Dp':skill.category,needLevel:skill.needLevel,skillLevel:levelOf(skill),acquired:true,equipped:true,icon:null}));
+  return live;
+};
+check('caps per skill type: actives 11, passives 10, stigmas 20, all from mechanics.json',()=>{
+  assert.deepEqual(masteryCaps(mechanics),{Active:11,Passive:10});
+  assert.equal(stigmaCap(mechanics),20);
+  const record=mechanics.records.find(item=>item.id==='mastery-cap');
+  assert.ok(record.provenance.some(source=>source.kind==='in-game-capture'&&source.capturedOn==='2026-10-28'&&/Lv 10 for passive/.test(source.note)));
+  assert.equal(mechanics.records.find(item=>item.id==='stigma-cap').status,'confirmed');
+  // A rule with one cap still works: both types use it.
+  assert.deepEqual(masteryCaps({records:[{id:'mastery-cap',value:{cap:9}}]}),{Active:9,Passive:9});
+});
+check('every class: no skill point step past its type cap, and a skill at its cap gets none',()=>{
+  for(const name of AION2_CLASSES){
+    const passives=icons[name].records[0].skills.filter(skill=>skill.category==='Passive').map(skill=>skill.name);
+    for(const role of rolesFor(builds[name]).map(item=>item.role)){
+      // Every skill one below its cap: steps stop at 11 (active) and 10 (passive), never past.
+      const below=buildAscentPlan({className:name,role,data:data(name),model:daevaOf(name,skill=>skill.category==='Passive'?9:10)});
+      if(below.pending)continue;
+      for(const step of below.mastery.spend)assert.ok(step.to<=(passives.includes(step.name)?10:11),`${name} ${role}: ${step.name} ${step.from} to ${step.to}`);
+      // Every skill at its cap: nothing left to spend, and every key skill is listed at the cap with its type's cap.
+      const capped=buildAscentPlan({className:name,role,data:data(name),model:daevaOf(name,skill=>skill.category==='Passive'?10:11)});
+      assert.deepEqual(capped.mastery.spend.map(step=>step.name),[],`${name} ${role}: a skill at its cap gets no step`);
+      assert.ok(!capped.now.some(move=>/^Level /.test(move.title)),`${name} ${role}: no level move at the cap`);
+      for(const entry of capped.mastery.atCap)assert.equal(entry.cap,passives.includes(entry.name)?10:11,`${name}: ${entry.name}`);
+    }
+  }
+});
+check('Chanter Wind\'s Promise at Lv 10 is at the passive cap; with a +1 gear line it is Mastery 9 and takes one more point',()=>{
+  // Lv 9: one point to its cap, 10 (the screenshot of 28 Oct 2026 asked for 11).
+  const nine=buildAscentPlan({className:'Chanter',role:'dps',data:data('Chanter'),model:daevaOf('Chanter',skill=>skill.name==="Wind's Promise"?9:5)});
+  assert.deepEqual(nine.mastery.spend.filter(item=>item.name==="Wind's Promise").map(item=>[item.from,item.to,item.reason]),[[9,10,'reaches the Mastery cap']]);
+  const maxed=buildAscentPlan({className:'Chanter',role:'dps',data:data('Chanter'),model:daevaOf('Chanter',skill=>skill.name==="Wind's Promise"?10:5)});
+  assert.ok(!maxed.mastery.spend.some(step=>step.name==="Wind's Promise"),'No step for a passive at 10');
+  const wind=maxed.mastery.passive.find(entry=>entry.name==="Wind's Promise");
+  assert.deepEqual([wind.cap,wind.masteryLevel,wind.bonus],[10,10,0]);
+  const ring={slot:'Ring1',slotPos:13,empty:false,itemId:1,skillLines:[{name:"Wind's Promise",level:1}]};
+  const lined=buildAscentPlan({className:'Chanter',role:'dps',data:data('Chanter'),model:daevaOf('Chanter',skill=>skill.name==="Wind's Promise"?10:5,{gear:[ring]})});
+  assert.deepEqual(bonusLevels("Wind's Promise",daevaOf('Chanter',()=>10,{gear:[ring]})),{daevanion:0,gear:1,total:1,unread:[]});
+  const step=lined.mastery.spend.find(item=>item.name==="Wind's Promise");
+  assert.ok(step,'The DPS build levels Wind\'s Promise');
+  assert.deepEqual([step.from,step.to,step.reason],[10,11,'reaches the Mastery cap'],'Mastery 9 plus the gear line: one point to Lv 11');
+  // A worn item whose detail is not read yet is named as unread; it can only lower the Mastery part.
+  assert.deepEqual(bonusLevels("Wind's Promise",daevaOf('Chanter',()=>10,{gear:[{slot:'Helm',slotPos:3,empty:false,itemId:2,skillLines:{pending:true,reason:'x'}}]})).unread,['Helm']);
+});
 check('Keen Strike at 10 still gets a Mastery step to 11',()=>{
   const plan=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':10})});
   const step=plan.mastery.spend.find(item=>item.name==='Keen Strike');
@@ -806,12 +860,20 @@ check('a skill at 11 points at its Daevanion node on the first open board where 
   assert.equal(twelve.mastery.atCap[0].skillLevel,12);
   // Nezekan's node taken, Zikel open but not read yet: the page has to read Zikel next.
   const taken=nezekanNodes.map(node=>node.nodeId===110131?{...node,taken:true}:node);
-  const unread=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':11},board=>board.id===11?{nodes:taken}:board.id===12?{open:true}:null)});
+  // (Mastery 11 plus that node shows as Lv 12: the level sent is the total, 28 Oct 2026.)
+  const unread=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':12},board=>board.id===11?{nodes:taken}:board.id===12?{open:true}:null)});
   assert.deepEqual(unread.mastery.atCap[0].next,{kind:'unread',board:{id:12,name:'Zikel'},text:'a Daevanion skill node (Zikel not read yet)'});
   assert.ok(!unread.now.some(item=>item.title.startsWith('Take the Keen Strike')),'No node move until the board is read');
   // Every open board read and the node taken on each: gear or Arcana, as text, nothing invented.
-  const spent=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':11},board=>board.id===11?{nodes:taken}:null)});
+  // The level sent is the total (28 Oct 2026): with the Nezekan node taken, Mastery 11 shows as Lv 12.
+  const spent=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':12},board=>board.id===11?{nodes:taken}:null)});
   assert.deepEqual(spent.mastery.atCap[0].next,{kind:'other',text:'gear stat lines or Arcana'});
+  assert.deepEqual([spent.mastery.atCap[0].masteryLevel,spent.mastery.atCap[0].bonus],[11,1]);
+  // Lv 11 with that node taken is Mastery 10: one more skill point still goes in, to Lv 12.
+  const oneMore=buildAscentPlan({className:'Gladiator',role:'dps',data:data('Gladiator'),model:withSkillLevels({'Keen Strike':11},board=>board.id===11?{nodes:taken}:null)});
+  assert.equal(oneMore.mastery.atCap.length,0,'Not at the cap: the node gave one of its 11 levels');
+  const step=oneMore.mastery.spend.find(item=>item.name==='Keen Strike');
+  assert.deepEqual([step.from,step.to,step.reason],[11,12,'opens Specialty slot 2']);
   assert.deepEqual(nextLevelSource('Keen Strike',[],[]),{kind:'pending',text:'not known yet'});
 });
 check('build targets above the cap are reworded, only where the data supports it',()=>{

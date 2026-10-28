@@ -258,13 +258,18 @@ export function orderMastery(ctx, weights, { entries, cap, slotLevels, picks = n
     // Without weights only the build's key skills are levelled (today's data). With weights, any skill worth something.
     if (!key && !(own.score >= EXTRA_SKILL_SCORE)) continue;
     if (!weights && (!key || entry.category !== 'Active')) continue;
-    const goal = cap ?? (Number(/Lv\s*(\d+)/i.exec(key?.target ?? '')?.[1]) || null);
-    if (!goal) continue;
+    // The cap is per skill type (actives 11, passives 10) and holds on the Mastery part of the level: the level sent is
+    // the total, so the highest total Mastery reaches is the cap plus the bonus levels read so far (nodes, gear lines).
+    const typeCap = Number.isInteger(entry.cap) ? entry.cap : cap;
     const from = entry.skillLevel;
+    const top = typeCap === null || typeCap === undefined ? null : from === null ? typeCap : typeCap + (Number.isInteger(entry.bonus) ? entry.bonus : 0);
+    const goal = top ?? (Number(/Lv\s*(\d+)/i.exec(key?.target ?? '')?.[1]) || null);
+    if (!goal) continue;
     if (from !== null && from >= goal) continue;
     const at = from ?? 1;
-    const nextSlot = slotLevels.find(level => level > at) ?? null;
-    const to = Math.min(nextSlot ? Math.min(nextSlot, goal) : goal, cap ?? Infinity);
+    // Passives have no Specialty perks, so a passive step never stops at a Specialty slot.
+    const nextSlot = entry.category === 'Passive' ? null : slotLevels.find(level => level > at) ?? null;
+    const to = Math.min(nextSlot ? Math.min(nextSlot, goal) : goal, top ?? Infinity);
     if (from !== null && from >= to) continue;
     // What the next slot's pick is worth: its values, and a synergy it opens only once its target is placeable.
     const pick = (picks.get(entry.name) ?? []).find(item => item.skillLevel === to) ?? null;
@@ -276,7 +281,7 @@ export function orderMastery(ctx, weights, { entries, cap, slotLevels, picks = n
     // says so, and gets no "near the slot" bonus.
     const trainFrom = Number(ctx.catalogue.get(entry.name)?.training?.[String(to)]) || null;
     const waits = trainFrom && ctx.level < trainFrom ? trainFrom : null;
-    const reason = nextSlot && to === nextSlot ? `opens Specialty slot ${slotLevels.indexOf(nextSlot) + 1}` : cap !== null && to === cap ? 'reaches the Mastery cap' : 'reaches the build target';
+    const reason = nextSlot && to === nextSlot ? `opens Specialty slot ${slotLevels.indexOf(nextSlot) + 1}` : top !== null && to === top ? 'reaches the Mastery cap' : 'reaches the build target';
     const lead = waits ? `Train it as far as the game lets you: skill Lv ${to} is sold from character Lv ${waits}. ` : '';
     const why = lead + (near ? `${to - from === 1 ? 'One level' : 'Two levels'} from its Specialty slot ${slotLevels.indexOf(nextSlot) + 1}${pick ? `: ${pick.pick}` : ''}.`
       : pickValue > 0 && pick ? `Skill Lv ${to} opens its Specialty pick: ${pick.pick}.`

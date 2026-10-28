@@ -82,7 +82,7 @@
 
   "/astrix-app/games/aion2/engine/armory-adapter.mjs": "655d894d8d",
 
-  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "5ab870a3dc",
+  "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "012e2ed48e",
 
   "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "009d0b5160",
 
@@ -98,7 +98,7 @@
 
   "/astrix-app/games/aion2/engine/item-assessor.mjs": "b8921910e3",
 
-  "/astrix-app/games/aion2/engine/level-planner.mjs": "8cc8e4c6b1",
+  "/astrix-app/games/aion2/engine/level-planner.mjs": "acc6f2494f",
 
   "/astrix-app/games/aion2/engine/stat-advisor.mjs": "17b4c6fdfa",
 
@@ -130,7 +130,7 @@
 
   "/astrix-app/pages/aetherium/aetherium-ui.mjs": "aed77c45f5",
 
-  "/astrix-app/pages/aetherium/ascent-plan.mjs": "3583725bca",
+  "/astrix-app/pages/aetherium/ascent-plan.mjs": "dbcf9f7d90",
 
   "/astrix-app/pages/aetherium/character-menu.mjs": "59326b7ac3",
 
