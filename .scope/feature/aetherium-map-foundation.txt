@@ -90,3 +90,5 @@ hub/aetherium/index.html
 hub/aetherium/map/index.html
 hub/aetherium/skills/index.html
 sitemap.xml
+astrix-app/pages/aetherium/images/map/verteron.webp
+astrix-app/pages/aetherium/images/map/verteron-small.webp

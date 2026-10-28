@@ -68,10 +68,10 @@ function start({ zones, layers, markers }) {
   $('#aeAtlasPanel').innerHTML = panelHtml(layers.layers);
 
   let wantsFull = false;
-  /** The small WebP when it covers the screen at the current zoom, else the full one. */
+  /** The small WebP when it covers the map as drawn at the current zoom, else the full one. */
   function pickImage() {
     if (!zone.image) return;
-    const need = viewEl.clientWidth * (window.devicePixelRatio || 1) * (view.state.scale / view.state.fit);
+    const need = Math.min(zone.width * view.state.scale, viewEl.clientWidth) * (window.devicePixelRatio || 1);
     const small = zone.imageSmall && zone.smallWidth && need <= zone.smallWidth;
     const src = small && !wantsFull ? zone.imageSmall : zone.image;
     if (!small) wantsFull = true;

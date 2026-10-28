@@ -248,7 +248,8 @@ try {
   /* Layout at three widths. */
   for(const [width,height] of [[1600,900],[820,1180],[390,844]]){
     const {context,page,errors}=await open({width,height});
-    if(zones.records.some(zone=>zone.id===zones.records.at(-1).id&&zone.image))await mapLoaded(page);
+    const shownId=await page.evaluate(()=>document.body.dataset.zone);
+    if(zones.records.find(zone=>zone.id===shownId)?.image)await mapLoaded(page);
     const layout=await page.evaluate(()=>{
       const doc=document.documentElement;
       const box=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {top:r.top+scrollY,bottom:r.bottom+scrollY,left:r.left,right:r.right,height:r.height,width:r.width};};
