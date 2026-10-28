@@ -10,7 +10,7 @@
  * and gets the plan from static data alone, with no call to the official site. Advice comes from
  * games/aion2/engine/ascent-advisor.mjs; the sources behind every pick stay in the data, never on the page.
  */
-import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, refFromUrl, regionName, rolePick, roster, sourceLabel } from './aetherium-data.mjs';
+import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, gearUrl, loadAdvisor, loadBoard, loadCharacter, prefetchAdvisor, preloadItemDetails, refFromUrl, regionName, rolePick, roster, sourceLabel } from './aetherium-data.mjs';
 import { $, esc, gradeTile, infoCardHtml, isPending, markCharacterShown, markReady, openInfo, setFaction, showNotice, showSource, statIcon, wireDrawer } from './aetherium-ui.mjs';
 import { guideSeen, markGuideSeen, mountGuide } from './aetherium-guide.mjs';
 import { renderNext, renderStepBar } from './aetherium-flow.mjs';
@@ -715,7 +715,7 @@ function guideSteps(view, plan) {
     const m = plan.mastery;
     const pick = () => {};
     for (const entry of m.active.filter(item => item.priority && item.equipped === false && item.acquired)) add(`${entry.name} is a key skill but it is not on your skill bar. Drag it onto your bar in game.`, `[data-mastery="${CSS.escape(entry.name)}"]`, pick(entry.name));
-    for (const entry of m.atCap ?? []) add(`${entry.name} is at the Mastery cap (${entry.cap}), so no more skill points go into it. Its next +1: ${nextLevelText(entry.next)}.`, `[data-mastery-cap="${CSS.escape(entry.name)}"]`, pick(entry.name));
+    for (const entry of m.atCap ?? []) add(`${entry.name} is at the Mastery cap (${entry.cap}${entry.category === 'Passive' ? ' for a passive' : ''}), so no more skill points go into it. Its next +1: ${nextLevelText(entry.next)}.`, `[data-mastery-cap="${CSS.escape(entry.name)}"]`, pick(entry.name));
     for (const step of levelOrder(plan).slice(0, 3)) add(`Put skill points into ${step.name}${step.from !== null ? `: Lv ${step.from} to ${step.to}` : ` up to Lv ${step.to}`}. That ${step.reason}.`, `[data-mastery="${CSS.escape(step.name)}"]`, pick(step.name));
     for (const skill of plan.skills) {
       const due = skill.picks.filter(item => skill.skillLevel !== null && item.skillLevel <= skill.skillLevel);
@@ -882,7 +882,7 @@ function masteryCard(entry) {
     sub: `${entry.category}${entry.priority ? ` · key skill ${entry.priority}` : ''}`,
     status,
     chips: [cd, entry.targetText ?? entry.target ? `Target: ${entry.targetText ?? entry.target}` : null],
-    lines: [entry.summary, entry.why, capped ? `At the Mastery cap (${capped.cap}). Next +1: ${nextLevelText(capped.next)}.` : null],
+    lines: [entry.summary, entry.why, capped ? `At the Mastery cap (${capped.cap}${capped.category === 'Passive' ? ' for a passive' : ''})${bonusText(capped)}. Next +1: ${nextLevelText(capped.next)}.` : null],
     body: `${specialty}${chainHtml(state.plan, entry.chains)}`
   });
 }
@@ -959,6 +959,47 @@ function specialtyTargetsHtml(plan, icons) {
     </section>`;
 }
 
+/* The cap title: one number when every capped skill is the same type, else both ("11 active, 10 passive"). */
+function capTitle(atCap) {
+  const caps = [...new Map(atCap.map(entry => [entry.category, entry.cap])).entries()];
+  return caps.length === 1 ? String(caps[0][1]) : caps.sort().map(([type, cap]) => `${cap} ${type.toLowerCase()}`).join(', ');
+}
+/* The bonus levels in a capped skill's level, said once: " (Mastery 11, +2 from Daevanion nodes and gear lines)". */
+function bonusText(entry) {
+  if (!entry.bonus) return '';
+  const from = [entry.bonusFrom?.daevanion ? 'Daevanion nodes' : null, entry.bonusFrom?.gear ? 'gear lines' : null].filter(Boolean).join(' and ');
+  return ` (Mastery ${entry.masteryLevel}, +${entry.bonus} from ${from})`;
+}
+/* What is still being read for the cap list: boards and worn items, named once each. */
+function unreadText(atCap) {
+  const names = [...new Set(atCap.flatMap(entry => entry.bonusUnread))];
+  const gear = names.filter(name => !(state.model?.daevanion ?? []).some(board => board.name === name));
+  const boards = names.filter(name => !gear.includes(name));
+  return [gear.length ? 'gear' : null, boards.length ? `${boards.join(', ')} board${boards.length === 1 ? '' : 's'}` : null].filter(Boolean).join(' and ');
+}
+
+/**
+ * The skill bonus lines on worn gear (Arcana included) come from the item detail call. The Mastery screen reads them in
+ * the background, kept for the session and shared with the Gear page (the same budget), so the cap is judged on the
+ * Mastery part of each skill's level, then draws the plan again once. One read per Daeva per visit.
+ */
+const gearReads = { model: null };
+async function readGearLines() {
+  const model = state.model;
+  if (!model || gearReads.model === model) return;
+  gearReads.model = model;
+  let landed = false;
+  await preloadItemDetails(model, model.gear, {
+    onDetail: (slot, result) => {
+      const detail = result?.detail;
+      if (state.model !== model || !detail?.enhance || (detail.id !== undefined && detail.id !== slot.itemId)) return;
+      Object.assign(slot, detail.enhance);
+      landed = true;
+    }
+  });
+  if (landed && state.model === model) renderPlan();
+}
+
 function renderMastery(plan) {
   const m = plan.mastery;
   if (!m) return '';
@@ -968,7 +1009,7 @@ function renderMastery(plan) {
     ${levelOrder(plan).length ? `<div class="ae-icon-group ae-mspend" id="aeMasterySpend"><p class="ae-mskills-title">Level these next</p><div class="ae-icon-row">${levelOrder(plan).map(step => iconTile(step.name, icons[step.name], { big: true, badge: step.from !== null ? `${step.from}→${step.to}` : `→${step.to}`, attr: `data-mastery="${esc(step.name)}"`, tip: `${step.name}: ${step.from !== null ? `Lv ${step.from} to ${step.to}` : `to Lv ${step.to}`}` })).join('')}</div></div>` : ''}
     ${levelOrder(plan).length ? `<ol class="ae-mwhy" id="aeMasteryWhy">${levelOrder(plan).slice(0, 4).map(step => `<li data-mastery-why="${esc(step.name)}"><b>${esc(step.name)}</b> ${esc(step.from !== null ? `Lv ${step.from} to ${step.to}` : `up to Lv ${step.to}`)}. ${esc(step.why ?? `It ${step.reason}.`)}</li>`).join('')}</ol>` : ''}
     ${specialtyTargetsHtml(plan, icons)}
-    ${atCap.length ? `<div class="ae-mspend ae-mcap" id="aeMasteryCap"><p class="ae-mskills-title">At the Mastery cap (${esc(m.cap)})</p><ul class="ae-mcap-list">${atCap.map(entry => `<li data-mastery-cap="${esc(entry.name)}">${iconTile(entry.name, icons[entry.name], { badge: String(entry.skillLevel), attr: `data-mastery="${esc(entry.name)}"`, tip: `${entry.name}: skill Lv ${entry.skillLevel}` })}<span><strong>${esc(entry.name)}</strong> is Lv ${esc(entry.skillLevel)}. Mastery stops at ${esc(entry.cap)}, so no more skill points go here.<br>Next +1: ${nextLevelHtml(entry.next)}</span></li>`).join('')}</ul></div>` : ''}
+    ${atCap.length ? `<div class="ae-mspend ae-mcap" id="aeMasteryCap"><p class="ae-mskills-title">At the Mastery cap (${esc(capTitle(atCap))})</p><ul class="ae-mcap-list">${atCap.map(entry => `<li data-mastery-cap="${esc(entry.name)}"${entry.bonus ? ` data-mastery-bonus="${esc(entry.bonus)}"` : ''}>${iconTile(entry.name, icons[entry.name], { badge: String(entry.skillLevel), attr: `data-mastery="${esc(entry.name)}"`, tip: `${entry.name}: skill Lv ${entry.skillLevel}` })}<span><strong>${esc(entry.name)}</strong> is Lv ${esc(entry.skillLevel)}${esc(bonusText(entry))}. Mastery stops at ${esc(entry.cap)}${entry.category === 'Passive' ? ' for passives' : ''}, so no more skill points go here.<br>Next +1: ${nextLevelHtml(entry.next)}</span></li>`).join('')}</ul>${atCap.some(entry => entry.bonusUnread.length) ? `<p class="ae-muted" id="aeMasteryCapUnread">Still reading your ${esc(unreadText(atCap))}. A skill bonus line found there frees one more skill point on that skill.</p>` : ''}</div>` : ''}
     <div class="ae-mskills">
       <p class="ae-mskills-title">Active</p>
       <div class="ae-mskill-grid">${m.active.map(masteryTile).join('')}</div>
@@ -1228,6 +1269,7 @@ function renderPlan() {
   state.team = plan.team?.id ?? null;
   fillTeamSelect(plan.team);
   if (state.model && (VIEW === 'mastery' || VIEW === 'menu')) queueMicrotask(() => readCapBoards().catch(fail));
+  if (state.model && VIEW === 'mastery') queueMicrotask(() => readGearLines().catch(fail));
   state.role = plan.role;
   fillRoleSelect(plan.roles, plan.role);
   $('#aeClass').value = plan.className;

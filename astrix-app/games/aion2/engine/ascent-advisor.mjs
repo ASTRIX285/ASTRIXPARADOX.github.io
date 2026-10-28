@@ -53,6 +53,51 @@ export function masteryCap(mechanics) {
   return Number.isInteger(cap) && cap > 0 ? cap : null;
 }
 
+/**
+ * The Mastery cap per skill type (Miguel, in game, 28 Oct 2026: actives stop at Lv 11, passives at Lv 10), from the
+ * mastery-cap rule's caps. A type the rule does not list falls back to its single cap.
+ */
+export function masteryCaps(mechanics) {
+  const value = recordsById(mechanics)['mastery-cap']?.value;
+  const one = masteryCap(mechanics);
+  const of = type => (Number.isInteger(value?.caps?.[type]) && value.caps[type] > 0 ? value.caps[type] : one);
+  return { Active: of('Active'), Passive: of('Passive') };
+}
+
+/** The highest level Stigma Shards take a stigma to (mechanics.json stigma-cap), or null when the rule is not loaded. */
+export function stigmaCap(mechanics) {
+  const cap = recordsById(mechanics)['stigma-cap']?.value?.cap;
+  return Number.isInteger(cap) && cap > 0 ? cap : null;
+}
+
+/**
+ * Skill levels a Daeva has from outside Mastery, as far as the data read so far shows: each taken Daevanion skill node
+ * for this skill on a board that has been read (+1, or the +N its effect names), and each worn item's skill line for it
+ * (item detail, Arcana included). The skill level the official site sends is the total, so the Mastery part is that
+ * total less these. unread names what could still hold one: an open board with nodes taken that is not read yet, or a
+ * worn item whose detail is not read. An unread source can only lower the Mastery part, never raise it.
+ */
+export function bonusLevels(skillName, model) {
+  const wanted = String(skillName).toLowerCase();
+  let daevanion = 0;
+  let gear = 0;
+  const unread = [];
+  for (const board of model?.daevanion ?? []) {
+    if (!board.open) continue;
+    if (!Array.isArray(board.nodes)) { if (board.nodesTaken !== 0) unread.push(board.name); continue; }
+    for (const node of board.nodes) {
+      if (!node.taken || (nodeSkill(node) ?? '').toLowerCase() !== wanted) continue;
+      daevanion += Number(/\+(\d+)\s*$/.exec(node.effects?.[0] ?? '')?.[1]) || 1;
+    }
+  }
+  for (const slot of model?.gear ?? []) {
+    if (slot.empty) continue;
+    if (!Array.isArray(slot.skillLines)) { unread.push(slot.slot); continue; }
+    for (const line of slot.skillLines) if (String(line.name).toLowerCase() === wanted && Number.isFinite(line.level)) gear += line.level;
+  }
+  return { daevanion, gear, total: daevanion + gear, unread };
+}
+
 /** Where levels above the Mastery cap come from, as the mastery-cap rule lists them ({ kind, label }). */
 export function levelSourcesBeyondCap(mechanics) {
   const list = recordsById(mechanics)['mastery-cap']?.value?.beyond;
@@ -673,6 +718,7 @@ export function buildAscentPlan({ className, role, team = null, level, data, mod
   const facts = indexProgression(data.progression);
   const capRule = {
     cap: masteryCap(data.mechanics),
+    caps: masteryCaps(data.mechanics),
     beyond: levelSourcesBeyondCap(data.mechanics),
     nodeBoards: (facts['daevanion-boards']?.value ?? []).filter(board => board.skillNodes === true).length
   };
@@ -699,6 +745,9 @@ export function buildAscentPlan({ className, role, team = null, level, data, mod
     macroOrder: facts['macro-order'] ?? null,
     specialtyRule: facts['specialty-perks'] ?? null,
     masteryCap: capRule.cap,
+    // The cap per skill type (actives 11, passives 10) and the stigma cap (Stigma Shards, 20), from mechanics.json.
+    masteryCaps: capRule.caps,
+    stigmaCap: stigmaCap(data.mechanics),
     // The game's icon for each skill the armory lists (empty without a Daeva).
     skillIcons: { ...Object.fromEntries([...gameIcons.values()].map(skill => [skill.name, skill.icon])), ...Object.fromEntries((model?.skills ?? []).filter(skill => skill.icon).map(skill => [skill.name, skill.icon])) }
   };
@@ -1267,6 +1316,8 @@ function planMacro({ build, skillBar, mechanics, facts, level, later: waiting = 
 function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(), capRule = { cap: null, beyond: [], nodeBoards: 0 }, boards = [], planner = null) {
   const slotLevels = specialtySlotLevels(facts);
   const cap = capRule.cap;
+  // Each skill type has its own cap (passives stop one below actives); a rule with one cap uses it for both.
+  const capOf = category => capRule.caps?.[category] ?? cap;
   const core = new Map((build.coreSkills ?? []).map(skill => [skill.name, skill]));
   const picks = new Map((build.specialties ?? []).map(entry => [entry.skill, entry.picks]));
   const nodeSkills = daevanionSkillNodes(build);
@@ -1286,10 +1337,18 @@ function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(
     const needLevel = Number.isInteger(skill.needLevel) ? skill.needLevel : null;
     const skillLevel = skill.acquired ? skill.skillLevel : null;
     const skillPicks = picks.get(skill.name) ?? [];
+    const category = skill.category === 'Passive' ? 'Passive' : 'Active';
+    // The level sent is the total: the Mastery part is that less the bonus levels read so far (nodes, gear lines).
+    const bonus = model && skillLevel !== null ? bonusLevels(skill.name, model) : null;
     return {
       name: skill.name,
       icon: skill.icon ?? null,
-      category: skill.category === 'Passive' ? 'Passive' : 'Active',
+      category,
+      cap: capOf(category),
+      bonus: bonus ? bonus.total : 0,
+      bonusFrom: bonus ? { daevanion: bonus.daevanion, gear: bonus.gear } : null,
+      bonusUnread: bonus ? bonus.unread : [],
+      masteryLevel: skillLevel === null ? null : skillLevel - (bonus ? bonus.total : 0),
       needLevel,
       unlocked: needLevel === null ? null : level >= needLevel,
       acquired: skill.acquired,
@@ -1323,10 +1382,11 @@ function planMastery(build, catalogue, level, model, facts, gameIcons = new Map(
   const spend = planner
     ? orderMastery(planner.ctx, weightsFor(build, planner.ctx.team), { entries: [...active, ...passive], cap, slotLevels, picks: planner.picks, stigmaSet: planner.stigmaSet })
     : [];
-  const atCap = cap === null ? [] : active
-    .filter(entry => entry.priority !== null && entry.skillLevel !== null && entry.skillLevel >= cap)
-    .map(entry => ({ name: entry.name, skillLevel: entry.skillLevel, cap, refs: entry.refs, next: nextLevelSource(entry.name, boards, capRule.beyond) }));
-  return { active, passive, spend, atCap, cap, slotLevels, fromArmory: Boolean(model) };
+  // At the cap: a key skill (active or passive) whose Mastery part has reached its type's cap.
+  const atCap = cap === null ? [] : [...active, ...passive]
+    .filter(entry => entry.priority !== null && entry.masteryLevel !== null && entry.cap !== null && entry.masteryLevel >= entry.cap)
+    .map(entry => ({ name: entry.name, category: entry.category, skillLevel: entry.skillLevel, masteryLevel: entry.masteryLevel, bonus: entry.bonus, bonusFrom: entry.bonusFrom, bonusUnread: entry.bonusUnread, cap: entry.cap, refs: entry.refs, next: nextLevelSource(entry.name, boards, capRule.beyond) }));
+  return { active, passive, spend, atCap, cap, caps: { Active: capOf('Active'), Passive: capOf('Passive') }, slotLevels, fromArmory: Boolean(model) };
 }
 
 /**
