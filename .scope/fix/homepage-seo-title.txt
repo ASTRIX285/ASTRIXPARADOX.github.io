@@ -1,2 +1,1 @@
 index.html
-.scope/fix/homepage-seo-title.txt
