@@ -21,6 +21,7 @@ astrix-app/tools/test-aetherium-guide.mjs
 astrix-app/tools/test-aetherium-map.mjs
 astrix-app/tools/test-aetherium-pages.mjs
 astrix-app/tools/validate-aetherium-map.mjs
+astrix-app/tools/validate-game-folders.mjs
 astrix-app/tools/validator-areas.json
 hub/aetherium/ascent/daevanion/index.html
 hub/aetherium/ascent/index.html
