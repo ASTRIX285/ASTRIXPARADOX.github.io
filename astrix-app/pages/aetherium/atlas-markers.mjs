@@ -1,14 +1,18 @@
 /**
  * Atreia Atlas markers on the map (feature/aetherium-map-capture, 28 Oct 2026). Pins sit in an overlay above the base map,
  * placed in screen pixels, so an icon keeps its size at every zoom. Pins closer than CLUSTER_PX on screen join into one
- * numbered cluster; zooming in splits them. Places are drawn as their name and never clustered. Only the markers it is given
- * are drawn: markers.json, plus this device's captures in capture mode.
+ * numbered cluster; zooming in splits them. Landmark layers (camps and villages, areas, dungeon entrances: landmark in
+ * layers.json) are drawn as their in-game icon with the name under it, like the in-game map, and never clustered; the names
+ * show once the map is drawn at least NAMES_AT_PX wide, so the whole-zone view stays readable on a phone. Only the markers it is
+ * given are drawn: markers.json, plus this device's captures in capture mode.
  */
 import { esc } from './aetherium-ui.mjs';
 import { layerIcon } from './atlas-card.mjs';
 
 const CLUSTER_PX = 44;
 const DRAG_PX = 4;
+/** Landmark names show under their icons once the map is drawn at least this wide, in CSS pixels, so they never pile up. */
+export const NAMES_AT_PX = 1800;
 
 export function createMarkerLayer({ overlay, view, layers }) {
   const byLayer = new Map(layers.map(layer => [layer.id, layer]));
@@ -30,7 +34,7 @@ export function createMarkerLayer({ overlay, view, layers }) {
     for (const marker of list) {
       if (!shown.has(marker.layer)) continue;
       const at = view.toView(marker.x, marker.y);
-      if (marker.layer === 'place') { out.push({ place: true, at, members: [marker] }); continue; }
+      if (byLayer.get(marker.layer)?.landmark) { out.push({ place: true, at, members: [marker] }); continue; }
       /* The selected marker always stands alone, so the one you picked or linked to is never hidden in a cluster. */
       if (marker.id === selected) { out.push({ solo: true, at, members: [marker] }); continue; }
       const near = out.find(group => !group.place && !group.solo && Math.hypot(group.at.x - at.x, group.at.y - at.y) < CLUSTER_PX);
@@ -48,6 +52,7 @@ export function createMarkerLayer({ overlay, view, layers }) {
     const { tx, ty, scale } = view.state;
     base = { tx, ty, scale };
     overlay.dataset.scale = scale.toFixed(4);
+    overlay.classList.toggle('is-named', view.state.width * scale >= NAMES_AT_PX);
     pins.style.transform = '';
     pins.innerHTML = groups().map(group => {
       const pos = `left:${group.at.x.toFixed(1)}px;top:${group.at.y.toFixed(1)}px`;
@@ -59,7 +64,7 @@ export function createMarkerLayer({ overlay, view, layers }) {
       const layer = byLayer.get(marker.layer);
       const flags = `${marker.id === selected ? ' is-selected' : ''}${marker.captured ? ' is-captured' : ''}${marker.status === 'reported' ? ' is-reported' : ''}`;
       const attrs = `type="button" data-atlas-pin data-marker="${esc(marker.id)}" data-layer="${esc(marker.layer)}" style="${pos}" aria-pressed="${marker.id === selected}"`;
-      if (group.place) return `<button class="ae-atlas-place${flags}" ${attrs}>${esc(marker.name)}</button>`;
+      if (group.place) return `<button class="ae-atlas-place${flags}" ${attrs} aria-label="${esc(marker.name)}, ${esc(layer?.label ?? marker.layer)}">${layerIcon(layer?.icon ?? marker.layer, 32)}<span class="ae-atlas-place-name">${esc(marker.name)}</span></button>`;
       return `<button class="ae-atlas-pin${flags}" ${attrs} aria-label="${esc(marker.name)}, ${esc(layer?.label ?? marker.layer)}">${layerIcon(layer?.icon ?? marker.layer, 34)}</button>`;
     }).join('');
   }

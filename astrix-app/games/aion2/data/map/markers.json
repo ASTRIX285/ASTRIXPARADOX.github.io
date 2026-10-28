@@ -731,6 +731,788 @@
         "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
         "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
       }
+    },
+    {
+      "id": "verteron-place-valley-outpost",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.3264,
+      "y": 0.3851,
+      "name": "Valley Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-steep-guard-post",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.3428,
+      "y": 0.3694,
+      "name": "Steep Guard Post",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-illusion-cavaliers-campsite",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.4328,
+      "y": 0.4307,
+      "name": "Illusion Cavaliers' Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-ruin-exploration-campsite",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.3635,
+      "y": 0.4868,
+      "name": "Ruin Exploration Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 6 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-pamos-farm",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.367,
+      "y": 0.4582,
+      "name": "Pamos Farm",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 6 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-dawn-legion-base",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.2999,
+      "y": 0.3617,
+      "name": "Dawn Legion Base",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-marsh-legion-camp",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.4542,
+      "y": 0.3769,
+      "name": "Marsh Legion Camp",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-scarlet-forest-observation-site",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.5731,
+      "y": 0.3459,
+      "name": "Scarlet Forest Observation Site",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 2 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-dundus-rest",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.4098,
+      "y": 0.4724,
+      "name": "Dundu's Rest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 7 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-hideout-in-front-of-the-ruins",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.4002,
+      "y": 0.4733,
+      "name": "Hideout in Front of the Ruins",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-collapsed-pillar",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.4505,
+      "y": 0.4922,
+      "name": "Collapsed Pillar",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-southern-shugo-station",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.3608,
+      "y": 0.571,
+      "name": "Southern Shugo Station",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 7 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-rock-hill-outpost",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.5139,
+      "y": 0.5716,
+      "name": "Rock Hill Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-beast-hunter-campsite",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.5286,
+      "y": 0.6542,
+      "name": "Beast Hunter Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 2 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-night-dew-cave",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.3816,
+      "y": 0.5986,
+      "name": "Night Dew Cave",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-eastern-shugo-station",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.4144,
+      "y": 0.5662,
+      "name": "Eastern Shugo Station",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-astin-mercenaries-base",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.3623,
+      "y": 0.6107,
+      "name": "Astin Mercenaries Base",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-highlands-end-campsite",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.5528,
+      "y": 0.7176,
+      "name": "Highland's End Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-zumion-village",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.552,
+      "y": 0.5023,
+      "name": "Zumion Village",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-laborers-rest-stop",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.5882,
+      "y": 0.4155,
+      "name": "Laborer's Rest Stop",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 2 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-drana-transport-hub",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.6491,
+      "y": 0.4082,
+      "name": "Drana Transport Hub",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 2 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-place-notos-legion-outpost",
+      "zone": "verteron",
+      "layer": "place",
+      "x": 0.6319,
+      "y": 0.4282,
+      "name": "Notos Legion Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, camp icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-ellun-river-meadow",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.4038,
+      "y": 0.4143,
+      "name": "Ellun River Meadow",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 7 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-eastern-cantas-valley",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3554,
+      "y": 0.4031,
+      "name": "Eastern Cantas Valley",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 8 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-western-cantas-valley",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3137,
+      "y": 0.4285,
+      "name": "Western Cantas Valley",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-ellun-river-marsh",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.4318,
+      "y": 0.377,
+      "name": "Ellun River Marsh",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 7 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-anguish-hill",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3323,
+      "y": 0.4822,
+      "name": "Anguish Hill",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-ellun-river-midstream",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3985,
+      "y": 0.4568,
+      "name": "Ellun River Midstream",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 6 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-contaminated-marsh",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.4747,
+      "y": 0.3753,
+      "name": "Contaminated Marsh",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-verteron-fortress-ruins",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.4366,
+      "y": 0.4995,
+      "name": "Verteron Fortress Ruins",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-pilgrims-ridge",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.4703,
+      "y": 0.5522,
+      "name": "Pilgrim's Ridge",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 3 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-northern-tolbas-forest",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3768,
+      "y": 0.5602,
+      "name": "Northern Tolbas Forest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-eastern-tolbas-forest",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.4121,
+      "y": 0.5832,
+      "name": "Eastern Tolbas Forest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-rock-tomb-hill",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.5084,
+      "y": 0.6228,
+      "name": "Rock Tomb Hill",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-southern-tolbas-forest",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3572,
+      "y": 0.5959,
+      "name": "Southern Tolbas Forest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 6 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-forest-of-exiles",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.3763,
+      "y": 0.6546,
+      "name": "Forest of Exiles",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-southern-altamia-highland",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.5114,
+      "y": 0.6832,
+      "name": "Southern Altamia Highland",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 3 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-garden-of-the-illusion-god",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.6109,
+      "y": 0.705,
+      "name": "Garden of the Illusion God",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 4 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-kraka-footpath",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.608,
+      "y": 0.4632,
+      "name": "Kraka Footpath",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 3 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-scarlet-forest",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.5786,
+      "y": 0.361,
+      "name": "Scarlet Forest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-drana-plantation",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.6296,
+      "y": 0.3925,
+      "name": "Drana Plantation",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-nahid-brigade-fortress",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.6767,
+      "y": 0.3287,
+      "name": "Nahid Brigade Fortress",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-area-crimson-isle",
+      "zone": "verteron",
+      "layer": "area",
+      "x": 0.6009,
+      "y": 0.213,
+      "name": "Crimson Isle",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, crossed swords icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-dungeon-urugugu-canyon",
+      "zone": "verteron",
+      "layer": "dungeon-entrance",
+      "x": 0.3445,
+      "y": 0.5252,
+      "name": "Urugugu Canyon",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, dungeon icon and its name label, seen in 6 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-dungeon-krao-cave",
+      "zone": "verteron",
+      "layer": "dungeon-entrance",
+      "x": 0.4093,
+      "y": 0.5225,
+      "name": "Krao Cave",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, dungeon icon and its name label, seen in 5 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-dungeon-draupnir",
+      "zone": "verteron",
+      "layer": "dungeon-entrance",
+      "x": 0.6774,
+      "y": 0.6795,
+      "name": "Draupnir",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, dungeon icon and its name label, seen in 1 screenshot(s)",
+        "note": "Position and name read from the in-game Verteron map and placed on our Verteron base map."
+      }
     }
   ]
 }

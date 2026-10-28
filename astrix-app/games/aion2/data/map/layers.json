@@ -1,13 +1,14 @@
 {
-  "description": "Atreia Atlas layers: the page's own set of toggles, in the order the layer panel lists them (Miguel's brief, 28 Oct 2026; Places added for named spots with capture mode). Each line says what the layer shows on our map, not a fact about the game. Each layer has our own icon (pages/aetherium/icons/atlas-layers.svg).",
+  "description": "Atreia Atlas layers: the page's own set of toggles, in the order the layer panel lists them (Miguel's brief, 28 Oct 2026; Places added for named spots with capture mode; in-game icons and Areas added 28 Oct at Miguel's request). Each line says what the layer shows on our map, not a fact about the game. image is the in-game icon, cut from Miguel's own map captures (pages/aetherium/icons/game/); a layer whose in-game icon we have not confirmed yet keeps our own icon (pages/aetherium/icons/atlas-layers.svg). landmark layers are drawn with their name under the icon, like the in-game map, and never clustered.",
   "layers": [
     { "id": "hidden-cube", "label": "Hidden Cubes", "icon": "hidden-cube", "text": "Hidden Cubes we have found in this zone." },
     { "id": "empyrean-trace", "label": "Empyrean Traces", "icon": "empyrean-trace", "text": "Empyrean Traces we have found in this zone." },
-    { "id": "kibelisk", "label": "Kibelisks", "icon": "kibelisk", "text": "Kibelisks we have found in this zone." },
+    { "id": "kibelisk", "label": "Kibelisks", "icon": "kibelisk", "text": "Kibelisks we have found in this zone.", "image": "/astrix-app/pages/aetherium/icons/game/kibelisk.webp" },
     { "id": "gathering", "label": "Gathering", "icon": "gathering", "text": "Gathering spots we have found in this zone." },
     { "id": "named-monster", "label": "Named monsters", "icon": "named-monster", "text": "Named monsters and where we saw them spawn." },
-    { "id": "dungeon-entrance", "label": "Dungeon entrances", "icon": "dungeon-entrance", "text": "Where you walk in to each dungeon." },
+    { "id": "dungeon-entrance", "label": "Dungeon entrances", "icon": "dungeon-entrance", "text": "Where you walk in to each dungeon.", "image": "/astrix-app/pages/aetherium/icons/game/dungeon.webp", "landmark": true },
     { "id": "rift", "label": "Rifts", "icon": "rift", "text": "Where we have seen the Spacetime Rift open." },
-    { "id": "place", "label": "Places", "icon": "place", "text": "Towns, camps and landmarks, named as the game names them." }
+    { "id": "place", "label": "Camps and villages", "icon": "place", "text": "Camps, outposts and villages, named as the game names them.", "image": "/astrix-app/pages/aetherium/icons/game/settlement.webp", "landmark": true },
+    { "id": "area", "label": "Areas", "icon": "area", "image": "/astrix-app/pages/aetherium/icons/game/area.webp", "landmark": true, "text": "Named areas, where the in-game map puts the crossed swords." }
   ]
 }

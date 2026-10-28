@@ -8,11 +8,14 @@
  *
  * Markers (feature/aetherium-map-capture): drawn by atlas-markers.mjs, the card opens in the panel, ?zone=<id>&marker=<id>
  * opens the zone centred on the marker with its card. ?capture=1 loads atlas-capture.mjs, never linked from the site.
+ *
+ * Drill down (28 Oct 2026, Miguel): each layer row opens a list of its markers in this zone, A to Z, and a search box finds a
+ * marker by name across every layer. Picking one centres the map on it, turns its layer on and opens its card.
  */
 import { $, esc, markReady, showNotice, wireDrawer } from './aetherium-ui.mjs';
 import { createAtlasView } from './atlas-view.mjs';
-import { layerIcon, markerCardHtml } from './atlas-card.mjs';
-import { createMarkerLayer } from './atlas-markers.mjs';
+import { layerIcon, markerCardHtml, useLayerImages } from './atlas-card.mjs';
+import { createMarkerLayer, NAMES_AT_PX } from './atlas-markers.mjs';
 
 const DATA = '/astrix-app/games/aion2/data/map/';
 const ZONE_KEY = 'ae-atlas-zone';
@@ -46,16 +49,41 @@ function panelHtml(layers) {
     </div>
     <div class="ae-atlas-panel-body" id="aeAtlasLayers">
       <div class="ae-atlas-card-slot" id="aeAtlasCard" aria-live="polite"></div>
+      <div class="ae-atlas-find" role="search">
+        <label class="ae-atlas-find-label" for="aeAtlasFind">Find on the map</label>
+        <input class="ae-atlas-find-input" id="aeAtlasFind" type="search" placeholder="Kibelisk, camp, area or dungeon" autocomplete="off" spellcheck="false" aria-controls="aeAtlasFound">
+        <ul class="ae-atlas-found" id="aeAtlasFound" aria-live="polite" hidden></ul>
+      </div>
       <p class="ae-atlas-empty" id="aeAtlasEmpty" hidden>No markers captured for this zone yet.</p>
-      <ul class="ae-atlas-layers">${layers.map(layer => `<li>
-        <button class="ae-btn ae-atlas-layer" type="button" data-layer="${esc(layer.id)}" aria-pressed="true" title="${esc(layer.text)}">
-          ${layerIcon(layer.icon, 36)}
-          <span class="ae-atlas-layer-text"><b>${esc(layer.label)}</b><small>${esc(layer.text)}</small></span>
-          <span class="ae-atlas-count" data-count="${esc(layer.id)}">0</span>
-        </button>
+      <ul class="ae-atlas-layers">${layers.map(layer => `<li class="ae-atlas-layer-item">
+        <div class="ae-atlas-layer-row">
+          <button class="ae-btn ae-atlas-layer" type="button" data-layer="${esc(layer.id)}" aria-pressed="true" title="${esc(layer.text)}">
+            ${layerIcon(layer.icon, 36)}
+            <span class="ae-atlas-layer-text"><b>${esc(layer.label)}</b><small>${esc(layer.text)}</small></span>
+            <span class="ae-atlas-count" data-count="${esc(layer.id)}">0</span>
+          </button>
+          <button class="ae-btn ae-atlas-drill" type="button" data-drill="${esc(layer.id)}" aria-expanded="false" aria-controls="aeAtlasList-${esc(layer.id)}" aria-label="List the ${esc(layer.label)}" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+        <ul class="ae-atlas-list" id="aeAtlasList-${esc(layer.id)}" hidden></ul>
       </li>`).join('')}</ul>
     </div>`;
 }
+
+/** Buttons for a list of markers, A to Z, each one going to its marker. */
+const byName = (a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+function listHtml(members, byLayer, { withLayer = false } = {}) {
+  return members.slice().sort(byName).map(marker => {
+    const layer = byLayer.get(marker.layer);
+    return `<li><button class="ae-btn ae-atlas-goto" type="button" data-goto="${esc(marker.id)}">
+      ${layerIcon(layer?.icon ?? marker.layer, 26)}
+      <span class="ae-atlas-goto-text"><b>${esc(marker.name)}</b>${withLayer ? `<small>${esc(layer?.label ?? marker.layer)}</small>` : ''}</span>
+    </button></li>`;
+  }).join('');
+}
+/** Lower case, accents and punctuation off, so "pilgrims rest" finds "Pilgrim's Rest". */
+const fold = text => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/['’]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 function clusterHtml(members, byLayer) {
   return `<article class="ae-atlas-card ae-atlas-card-list"><h3>${members.length} markers here</h3><ul>${members.map(marker => `<li>
@@ -65,6 +93,7 @@ function clusterHtml(members, byLayer) {
 
 function start({ zones, layers, markers, captureModule }) {
   const list = zones.records ?? [];
+  useLayerImages(layers.layers);
   const params = new URLSearchParams(location.search);
   const linked = params.get('marker');
   const linkedMarker = linked ? (markers.records ?? []).find(marker => marker.id === linked) : null;
@@ -142,6 +171,52 @@ function start({ zones, layers, markers, captureModule }) {
     closeCard();
   });
 
+  /** From a list or the search: turn the layer on if it is off, centre the map on the marker and open its card. */
+  function goTo(id) {
+    const marker = zoneMarkers().find(item => item.id === id);
+    if (!marker) return;
+    if (!shown.has(marker.layer)) {
+      shown.add(marker.layer);
+      document.querySelector(`.ae-atlas-layer[data-layer="${CSS.escape(marker.layer)}"]`)?.setAttribute('aria-pressed', 'true');
+      pins.setShown(shown);
+    }
+    /* Close enough that the pick and its neighbours have room for their names, on a phone as on a desktop. */
+    const close = Math.max(3, NAMES_AT_PX / (zone.width * view.state.fit) * 1.15);
+    if (zone.image) view.focus(marker.x, marker.y, Math.max(close, view.state.scale / view.state.fit));
+    openCard(id);
+    pins.flush();
+  }
+  function fillLists() {
+    const here = zoneMarkers();
+    for (const layer of layers.layers) {
+      const members = here.filter(marker => marker.layer === layer.id);
+      const drill = document.querySelector(`[data-drill="${CSS.escape(layer.id)}"]`);
+      const box = document.getElementById(`aeAtlasList-${layer.id}`);
+      if (!drill || !box) continue;
+      drill.disabled = members.length === 0;
+      if (!members.length) { drill.setAttribute('aria-expanded', 'false'); box.hidden = true; }
+      box.innerHTML = listHtml(members, byLayer);
+    }
+    find();
+  }
+  function find() {
+    const input = $('#aeAtlasFind');
+    const out = $('#aeAtlasFound');
+    const words = fold(input.value).split(' ').filter(Boolean);
+    if (!words.length) { out.hidden = true; out.replaceChildren(); return; }
+    const hits = zoneMarkers().filter(marker => { const name = fold(marker.name); return words.every(word => name.includes(word)); });
+    out.hidden = false;
+    out.innerHTML = hits.length
+      ? listHtml(hits.slice(0, 40), byLayer, { withLayer: true })
+      : `<li class="ae-atlas-found-none">Nothing called that on the ${esc(zone.name)} map yet.</li>`;
+  }
+  $('#aeAtlasFind').addEventListener('input', find);
+  $('#aeAtlasFind').addEventListener('keydown', event => {
+    if (event.key !== 'Enter') return;
+    const first = $('#aeAtlasFound [data-goto]');
+    if (first) { event.preventDefault(); goTo(first.dataset.goto); }
+  });
+
   function counts() {
     const here = zoneMarkers();
     pins.set(zone.image ? here : []);
@@ -152,6 +227,7 @@ function start({ zones, layers, markers, captureModule }) {
     }
     $('#aeAtlasEmpty').hidden = here.length > 0;
     $('#aeAtlasTotal').textContent = `${here.length} marker${here.length === 1 ? '' : 's'}`;
+    fillLists();
   }
 
   function show(next, { load = true } = {}) {
@@ -197,6 +273,15 @@ function start({ zones, layers, markers, captureModule }) {
       pins.setShown(shown);
       return;
     }
+    const drill = event.target.closest('[data-drill]');
+    if (drill) {
+      const open = drill.getAttribute('aria-expanded') !== 'true';
+      drill.setAttribute('aria-expanded', String(open));
+      document.getElementById(drill.getAttribute('aria-controls')).hidden = !open;
+      return;
+    }
+    const go = event.target.closest('[data-goto]');
+    if (go) { goTo(go.dataset.goto); return; }
     const pick = event.target.closest('[data-pick]');
     if (pick) { openCard(pick.dataset.pick); return; }
     const sheet = event.target.closest('#aeAtlasSheet');

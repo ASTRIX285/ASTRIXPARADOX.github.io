@@ -1,0 +1,19 @@
+# feature/aetherium-atlas-game-icons: Atreia Atlas in-game icons, the stitched Verteron base map, camps, areas and dungeon entrances from Miguel's captures, and drill down with search (Miguel, 28 Oct 2026).
+astrix-app/games/aion2/data/map/layers.json
+astrix-app/games/aion2/data/map/markers.json
+astrix-app/games/aion2/data/map/zones.json
+astrix-app/games/aion2/schema/atlas-layers.schema.json
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/atlas-card.mjs
+astrix-app/pages/aetherium/atlas-markers.mjs
+astrix-app/pages/aetherium/atlas-page.mjs
+astrix-app/pages/aetherium/atlas.css
+astrix-app/pages/aetherium/icons/game/area.webp
+astrix-app/pages/aetherium/icons/game/dungeon.webp
+astrix-app/pages/aetherium/icons/game/kibelisk.webp
+astrix-app/pages/aetherium/icons/game/settlement.webp
+astrix-app/pages/aetherium/images/map/verteron-small.webp
+astrix-app/pages/aetherium/images/map/verteron.webp
+astrix-app/tools/test-aetherium-map.mjs
+astrix-app/tools/validate-aetherium-map.mjs
+hub/aetherium/map/index.html

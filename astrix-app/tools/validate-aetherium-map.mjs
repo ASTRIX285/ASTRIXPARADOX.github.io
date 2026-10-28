@@ -17,7 +17,7 @@ const {atlasProblems}=await import(pathToFileURL(resolve(root,'astrix-app/games/
 
 const problems=atlasProblems({zones,layers,markers});
 assert.deepEqual(problems,[],`Atlas data:\n${problems.join('\n')}`);
-assert.deepEqual(layers.layers.map(layer=>layer.id),['hidden-cube','empyrean-trace','kibelisk','gathering','named-monster','dungeon-entrance','rift','place'],'Layer order');
+assert.deepEqual(layers.layers.map(layer=>layer.id),['hidden-cube','empyrean-trace','kibelisk','gathering','named-monster','dungeon-entrance','rift','place','area'],'Layer order');
 const DASH=/[–—]/;
 for(const [name,data] of [['zones',zones],['layers',layers],['markers',markers]])assert.ok(!DASH.test(JSON.stringify(data)),`No en or em dash in ${name}.json`);
 
