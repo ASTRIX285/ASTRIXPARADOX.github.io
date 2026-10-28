@@ -2,7 +2,8 @@
  * Atreia Atlas pan and zoom (feature/aetherium-map-foundation, 28 Oct 2026). Built by hand, no library: one stage the size
  * of the zone's base map, moved with a CSS transform inside a clipped viewport. Drag to pan, wheel or pinch to zoom, and on
  * the focused map the arrow keys pan, + and - zoom and 0 fits the whole zone. Markers sit on the stage at x and y fractions
- * of the base map, so they move and scale with it.
+ * of the base map. A press on a marker pin ([data-atlas-pin]) is left to the pin; a short press on the map with no drag is
+ * a tap, which capture mode uses to drop a marker (feature/aetherium-map-capture).
  */
 const KEY_STEP = 80;
 const ZOOM_STEP = 1.4;
@@ -11,6 +12,7 @@ const MAX_ZOOM = 6;
 export function createAtlasView(viewport, stage) {
   const state = { width: 1, height: 1, scale: 1, tx: 0, ty: 0, fit: 1 };
   const listeners = new Set();
+  const tapListeners = new Set();
   const size = () => ({ w: viewport.clientWidth, h: viewport.clientHeight });
 
   function clamp() {
@@ -46,15 +48,30 @@ export function createAtlasView(viewport, stage) {
     apply();
   }
   function panBy(dx, dy) { state.tx += dx; state.ty += dy; apply(); }
+  /** Viewport pixels to fractions of the base map (fx, fy), and back. */
+  const toMap = (x, y) => ({ fx: (x - state.tx) / (state.width * state.scale), fy: (y - state.ty) / (state.height * state.scale) });
+  const toView = (fx, fy) => ({ x: state.tx + fx * state.width * state.scale, y: state.ty + fy * state.height * state.scale });
+  /** Centres the map on (fx, fy) at the given zoom (1 is the whole zone). */
+  function focus(fx, fy, zoom = 3) {
+    const { w, h } = size();
+    state.scale = state.fit * zoom;
+    clamp();
+    state.tx = w / 2 - fx * state.width * state.scale;
+    state.ty = h / 2 - fy * state.height * state.scale;
+    apply();
+  }
 
   /* Mouse, pen and touch: one pointer pans, two pinch. */
   const pointers = new Map();
   let pinch = null;
-  const local = event => { const box = viewport.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
+  let tap = null;
+  const local = event => { const box = viewport.getBoundingClientRect(); return { x: event.clientX - box.left - viewport.clientLeft, y: event.clientY - box.top - viewport.clientTop }; };
   viewport.addEventListener('pointerdown', event => {
     if (event.button !== 0 && event.pointerType === 'mouse') return;
+    if (event.target.closest?.('[data-atlas-pin]')) return;
     viewport.setPointerCapture?.(event.pointerId);
     pointers.set(event.pointerId, local(event));
+    tap = pointers.size === 1 ? { ...local(event), id: event.pointerId } : null;
     viewport.classList.add('is-dragging');
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
@@ -65,6 +82,7 @@ export function createAtlasView(viewport, stage) {
     if (!pointers.has(event.pointerId)) return;
     const prev = pointers.get(event.pointerId), next = local(event);
     pointers.set(event.pointerId, next);
+    if (tap && Math.hypot(next.x - tap.x, next.y - tap.y) > 6) tap = null;
     if (pointers.size === 1) { panBy(next.x - prev.x, next.y - prev.y); return; }
     if (pinch && pointers.size === 2) {
       const [a, b] = [...pointers.values()];
@@ -74,6 +92,11 @@ export function createAtlasView(viewport, stage) {
     }
   });
   const release = event => {
+    if (event.type === 'pointerup' && tap && tap.id === event.pointerId && pointers.size === 1) {
+      const at = { x: tap.x, y: tap.y };
+      for (const fn of tapListeners) fn({ ...at, ...toMap(at.x, at.y) });
+    }
+    if (pointers.size <= 1) tap = null;
     pointers.delete(event.pointerId);
     if (pointers.size < 2) pinch = null;
     if (!pointers.size) viewport.classList.remove('is-dragging');
@@ -115,9 +138,15 @@ export function createAtlasView(viewport, stage) {
       fitAll();
     },
     zoomIn: () => zoomAt(ZOOM_STEP),
+    zoomAt,
+    focus,
+    toMap,
+    toView,
+    maxZoom: MAX_ZOOM,
     zoomOut: () => zoomAt(1 / ZOOM_STEP),
     fit: fitAll,
     panBy,
-    onChange: fn => listeners.add(fn)
+    onChange: fn => listeners.add(fn),
+    onTap: fn => tapListeners.add(fn)
   };
 }

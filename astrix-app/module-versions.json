@@ -134,11 +134,15 @@
 
   "/astrix-app/pages/aetherium/ascent-plan.mjs": "5f250dd633",
 
+  "/astrix-app/pages/aetherium/atlas-capture.mjs": "0bc461f6be",
+
   "/astrix-app/pages/aetherium/atlas-card.mjs": "c6e5edb9d7",
 
-  "/astrix-app/pages/aetherium/atlas-page.mjs": "c493183a45",
+  "/astrix-app/pages/aetherium/atlas-markers.mjs": "893b578baa",
 
-  "/astrix-app/pages/aetherium/atlas-view.mjs": "6196a84520",
+  "/astrix-app/pages/aetherium/atlas-page.mjs": "810f806af0",
+
+  "/astrix-app/pages/aetherium/atlas-view.mjs": "8b9b6ff452",
 
   "/astrix-app/pages/aetherium/character-menu.mjs": "59326b7ac3",
 
