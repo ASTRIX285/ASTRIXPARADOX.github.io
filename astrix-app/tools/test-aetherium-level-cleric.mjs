@@ -106,9 +106,9 @@ check('Lv 1 and Lv 5: a real low-level setup',()=>{
   }
 });
 
-/* The 25 Oct 2026 Skill Bar rules (Miguel, in game) replace the 17 Oct "own keys never move as the Daeva levels": every
+/* The bar by cooldown (Miguel, in game, 28 Oct 2026; it replaces the 25 Oct key groups and the 17 Oct "own keys never move"): every
    level is held to the game's bar instead (aion2-bar-rules.mjs). */
-check('the game\'s bar at every level: 1 to 4 cooldowns and stigmas, Q and E cover, nothing on 5 to 8 while a reachable key is free',()=>{
+check('the bar by cooldown at every level: Q and E stack the shortest, 1 to 4 the long cooldowns, 5 to 8 one skill each',()=>{
   for(const role of ROLES)for(const level of LEVELS)assertKeyGroups(plan(level,role).skillBar,`${label(level,role)}`);
 });
 
@@ -324,7 +324,8 @@ if(process.env.AE_BROWSER!=='0'){
       if(level===45)assert.equal(later.length,0,'Nothing comes later at 45');
       else assert.ok(later.length>0);
       assert.deepEqual(await page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','A'],'Left click and the thunder stack on right click; the game\'s bar ends there (Miguel, 25 Oct 2026)');
-      assert.equal(await page.locator('#aeLeftBlock [data-bar-col="B"][data-block-col="1"]').count(),1,'The torment stack on key 1');
+      // The bar by cooldown (Miguel, in game, 28 Oct 2026): the torment stack, the second macro stack, sits on Q or E.
+      assert.equal(await page.locator('#aeLeftBlock [data-bar-col="B"][data-block-col="Q"], #aeLeftBlock [data-bar-col="B"][data-block-col="E"]').count(),1,'The torment stack on Q or E');
       assert.doesNotMatch(await plain(page,'main'),/Cooldown not captured yet/,'Every Cleric cooldown is captured from the tooltip');
       await context.close();
     }

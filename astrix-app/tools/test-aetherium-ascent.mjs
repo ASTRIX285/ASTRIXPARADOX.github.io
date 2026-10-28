@@ -428,10 +428,11 @@ await check('Skill Bar: the game layout, Keen Strike set by the game on left cli
   assert.deepEqual(await col('1'),['Rush Strike','Leaping Slam'],'The movement stack on key 1');
   assert.equal(await page.locator('#aeSkillBar .ae-lock').count(),0,'No locked skill on the bar');
   assert.deepEqual(await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>[el.dataset.laterSkill,el.querySelector('small').textContent])),[['Lunge Stance','Stigma slot 2 opens at Lv 27.'],["Zikel's Blessing",'Stigma slot 3 opens at Lv 32.'],['Focused Block','Stigma slot 4 opens at Lv 37.']]);
-  assert.match(await page.getAttribute('[data-bar-keycap="3"]','aria-label'),/kept free for Zikel's Blessing/);
+  // The bar by cooldown (Miguel, in game, 28 Oct 2026): a skill that comes later holds no key; it waits in Comes later.
+  assert.doesNotMatch(await page.getAttribute('[data-bar-keycap="3"]','aria-label'),/kept free/,'No key held for a later skill');
   assert.doesNotMatch(await plain(page,'#aeCopyBar'),/Zikel|Lunge|Focused|from Lv/,'Copy this bar lists only what goes on now');
   assert.match(await page.getAttribute('[data-bar-key="3:B"] img','src'),/ICON_GL_SKILL_001\.png$/,'Rending Blow game icon');
-  assert.match(await plain(page,'.ae-guide'),/After E: your main attack \(Keen Strike\) on left click\. The main line is on right click: repeated attacks and instant skills\./);
+  assert.match(await plain(page,'.ae-guide'),/After E: your main attack \(Keen Strike\) on left click\. The main line is on right click: the instant skills you spam\. Q and E stack your shortest cooldowns, and 1 to 4 hold the long cooldown power skills\./);
   assert.match(await page.getAttribute('#aeRightBlock','class'),/ae-guide-target/);
   await page.click('[data-bar-key="1:B"]');
   assert.match(await plain(page,'#aeInfoTitle'),/Overhead Slam/,'Tap a cell for the skill card');
@@ -910,10 +911,11 @@ await check('stacks: keys as columns with rows 0 to 3, row 0 at the bottom above
   const templar=await open(ascent('class=templar&level=45','skill-bar'));
   assert.equal(await templar.page.locator('.ae-bar-cell.is-cd-pending').count(),0,'No Templar cooldown left pending');
   assert.equal(await templar.page.locator('.ae-bar-pending').count(),0,'No pending cooldown line for the Templar');
-  // The game's bar (Miguel, in game, 25 Oct 2026): it ends at right click. The smash stack (cooldown skills) is on key 1.
+  // The game's bar ends at right click. The bar by cooldown (Miguel, in game, 28 Oct 2026): the smash stack, the build's
+  // second macro stack, sits on Q, the shorter of the two stacks (its longest is 20 s against Taunt's 30 s on E).
   assert.deepEqual(await templar.page.$$eval('#aeRightBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','A'],'Left click, the shield stack on right click, nothing after it');
-  assert.equal(await templar.page.locator('#aeLeftBlock [data-bar-col="B"][data-block-col="1"]').count(),1,'The smash stack is on key 1 in the left-hand block');
-  assert.equal(await plain(templar.page,'#aeLeftBlock [data-bar-keycap="B"]'),'1','Its key strip says 1');
+  assert.equal(await templar.page.locator('#aeLeftBlock [data-bar-col="B"][data-block-col="Q"]').count(),1,'The smash stack is on Q in the left-hand block');
+  assert.equal(await plain(templar.page,'#aeLeftBlock [data-bar-keycap="B"]'),'Q','Its key strip says Q');
   assert.equal(await templar.page.locator('[data-bar-keycap="A"].is-mouse').count(),1,'Stack A on right click');
   await templar.context.close();
   // The classes not checked against a published top-player build carry the tag on the Skill Bar and Macro screens. The
@@ -979,7 +981,7 @@ await check('macro window: one entry for the main line, each row in place, the l
   const {page,context,errors}=await open(ascent('class=gladiator&role=dps&level=45','macro'));
   assert.deepEqual(await page.$$eval('.ae-macro-entry',items=>items.map(el=>[el.dataset.macroEntry,el.dataset.macroKey,[...el.querySelectorAll('.ae-macro-row')].map(row=>row.dataset.tip)])),[
     ['1','B',['Rage Burst','Overhead Slam','Rending Blow']]]);
-  assert.match(await plain(page,'#aeMacroCount'),/^One entry\. The main line is on right click: repeated attacks and instant skills\./);
+  assert.match(await plain(page,'#aeMacroCount'),/^One entry\. The main line is on right click: the instant skills you spam\. Q and E stack your shortest cooldowns, and 1 to 4 hold the long cooldown power skills\./);
   assert.deepEqual(await page.$$eval('#aeMacroBlock [data-block-col]',items=>items.map(el=>el.dataset.blockCol)),['LMB','B'],'The right-hand block above the window, no empty second stack');
   assert.equal(await plain(page,'#aeMacroHold p'),'Hold both. Your basic attack fills the gaps, gives MP and cuts each animation short.');
   assert.equal(await page.locator('#aeMacroHold [data-status-tag="hold-basic"]').count(),0,'No status tag');
@@ -991,7 +993,7 @@ await check('macro window: one entry for the main line, each row in place, the l
   await context.close();
   // A class with two stacks still shows two entries and the two-entry line.
   const templar=await open(ascent('class=templar&level=45','macro'));
-  assert.equal(await plain(templar.page,'#aeMacroCount'),'Two entries, one for each stack. The shield stack is on right click: repeated attacks and instant skills. The smash stack is on key 1 with your cooldown skills and stigmas.');
+  assert.equal(await plain(templar.page,'#aeMacroCount'),'Two entries, one for each stack. The shield stack is on right click: the instant skills you spam. The smash stack is on Q. Q and E stack your shortest cooldowns, and 1 to 4 hold the long cooldown power skills.');
   await templar.context.close();
 });
 await check('the in-game tests: the chain test where its rule is unconfirmed, the stack test not shown because the rule is confirmed; the macro shows the dummy test',async()=>{
@@ -1040,8 +1042,9 @@ await check('Lv 12 walk: the main line in place with Rage Burst greyed, Ruinous 
   // Level planner (17 Oct 2026): only what this Lv 12 Daeva can place is on the bar. Mocking Blade opens Overhead Slam in
   // Rage Burst's row until Rage Burst comes at Lv 22; key 4 stays free for Ruinous Blow (Lv 14). Both wait in Comes later.
   assert.deepEqual(await col('B'),['Mocking Blade','Overhead Slam','Rending Blow'],'Rows 0, 1 and 3 of the main line');
-  assert.deepEqual(await col('4'),[],'Key 4 kept free for Ruinous Blow');
-  assert.match(await page.getAttribute('[data-bar-keycap="4"]','aria-label'),/kept free for Ruinous Blow, which comes later/);
+  // The bar by cooldown (Miguel, in game, 28 Oct 2026): Ruinous Blow (Lv 14) holds no key yet; it waits in Comes later.
+  assert.equal(await page.locator('#aeSkillBar [data-bar-skill="Ruinous Blow"]').count(),0,'Ruinous Blow not on the bar at Lv 12');
+  assert.equal(await page.locator('[data-bar-keycap][aria-label*="kept free"]').count(),0,'No key held for a later skill');
   assert.equal(await page.locator('#aeSpaceKey').count(),0,'Defiance (Lv 16) not on Space yet: it waits in Comes later');
   assert.equal(await page.locator('#aeSkillBar .ae-bar-cell.is-locked').count(),0,'Nothing greyed on the bar');
   assert.deepEqual(await page.$$eval('#aeComesLater [data-later-skill]',items=>items.map(el=>el.dataset.laterSkill)).then(list=>list.slice(0,2)),['Ruinous Blow','Defiance']);

@@ -36,6 +36,26 @@
       ]
     },
     {
+      "id": "skill-bar",
+      "label": "Skill bar by cooldown",
+      "status": "confirmed",
+      "value": {
+        "longCooldownSeconds": 45,
+        "stackRows": 4
+      },
+      "text": "Right click holds the instant, spammable main line. Q and E hold stacks of up to four of the shortest cooldowns, Q the very shortest, the longest cooldown on row 0. Keys 1 to 4 hold the long cooldown power skills and stigmas (45 s and over), one per key. Toggles, dashes, movement and charged skills keep a key of their own. 5 to 8 take what is left.",
+      "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel (ASTRIX285)",
+          "capturedOn": "2026-10-28",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Stacks hold up to four per key. Q and E: the shortest cooldowns. Right click: instant spammable skills, and stigmas that cycle. 1 to 4: long cooldown power stigmas or skills only, to make it easier to play. Long cooldown starts at 45 s (the data has nothing between 30 s and 45 s). Toggles keep their own key; heals and staggers stack by cooldown. Replaces the 25 Oct key groups (Q and E cover, 1 to 4 cooldowns, second stack on key 1)."
+        }
+      ]
+    },
+    {
       "id": "chain-follow-up",
       "label": "Chain skills",
       "status": "unconfirmed",

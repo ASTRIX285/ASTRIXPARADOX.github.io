@@ -468,7 +468,7 @@ function mouseBlock(bar, { id = 'aeRightBlock' } = {}) {
   const cols = [barColumn(bar, 'LMB', { game: true, group: true })];
   if (ownRight) cols.push(barColumn(bar, 'RMB', { game: true }));
   if (main) cols.push(barColumn(bar, main, { game: true, cap: ownRight ? null : 'RMB' }));
-  // The game's bar ends at right click: a second stack sits on key 1 in the left-hand block, never in a column after it.
+  // The game's bar ends at right click. The build's second stack is spread over Q, E and 1 to 4 by cooldown (28 Oct 2026).
   const names = ['main attack on left click', ownRight ? `${keyName('RMB')}` : null, main ? `${keyName(main)}${ownRight ? '' : ' on right click'}` : null].filter(Boolean);
   return `<div class="ae-bar-block is-right is-game" id="${id}" aria-label="${esc(names.join(', '))}">${cols.join('')}</div>`;
 }
@@ -480,7 +480,8 @@ function macroWhere(bar) {
   const cap = text => text[0].toUpperCase() + text.slice(1);
   // How the game's bar is set (Miguel, 25 Oct 2026); the macro is its own screen.
   const onRight = ownRight ? `${cap(name(main))} sits after right click` : `${cap(name(main))} is on right click`;
-  return second ? `${onRight}: repeated attacks and instant skills. ${cap(name(second))} is on key 1 with your cooldown skills and stigmas.` : `${onRight}: repeated attacks and instant skills.`;
+  const onKey = second && bar.secondStackKey ? ` ${cap(name(second))} is on ${bar.secondStackKey}.` : '';
+  return `${onRight}: the instant skills you spam.${onKey} Q and E stack your shortest cooldowns, and 1 to 4 hold the long cooldown power skills.`;
 }
 /** The "What fires now" panel: what stack A and stack B fire at this level, and what joins them later. */
 function firesNowPanel(plan) {
@@ -539,7 +540,7 @@ function renderSkillBarScreen(plan) {
         <p class="ae-bar-swipe" aria-hidden="true">Swipe the keys to see them all ›</p>
         <div class="ae-bar-scroll" id="aeSkillBar">
           <div class="ae-bar-blocks">
-            <div class="ae-bar-block is-left is-game" id="aeLeftBlock" aria-label="Keys 1 to 4: cooldown skills and stigmas. 5 to 8: the rest. Q and E: stagger, heals and defensives">${GAME_KEYS.map(key => (key === bar.secondStackKey ? barColumn(bar, bar.secondStack, { game: true, group: groupStart.has(key), onKey: key }) : barColumn(bar, key, { game: true, group: groupStart.has(key) }))).join('')}</div>
+            <div class="ae-bar-block is-left is-game" id="aeLeftBlock" aria-label="Q and E: your shortest cooldowns, stacked. Keys 1 to 4: long cooldown power skills and stigmas. 5 to 8: toggles, movement and the rest">${GAME_KEYS.map(key => (key === bar.secondStackKey ? barColumn(bar, bar.secondStack, { game: true, group: groupStart.has(key), onKey: key }) : barColumn(bar, key, { game: true, group: groupStart.has(key) }))).join('')}</div>
             ${mouseBlock(bar)}
             <ol class="ae-bar-rows" aria-hidden="true"><li>3</li><li>2</li><li>1</li><li>0</li></ol>
           </div>
@@ -754,7 +755,7 @@ function guideSteps(view, plan) {
     }
     if (['A', 'B'].some(key => stacks[key].nextUnlock !== null)) add(`This is what your stacks fire at Lv ${plan.level}. Greyed skills join as you level.`, '#aeFiresNow');
     const own = bar.left.map(key => stacks[key].skills[0]).filter(Boolean);
-    if (own.length) add(`Keys 1 to 4 hold your cooldown skills and stigmas, Q and E your stagger, heals and defensives, 5 to 8 the rest${bar.opener.length ? `. Open with ${bar.opener.join(', then ')}` : ''}. Tap any of them to see why it sits there.`, '#aeLeftBlock');
+    if (own.length) add(`Q and E stack your shortest cooldowns, Q the very shortest. Keys 1 to 4 hold the long cooldown power skills and stigmas, one each, so you choose when they go. Toggles and movement keep a key of their own${bar.opener.length ? `. Open with ${bar.opener.join(', then ')}` : ''}. Tap any of them to see why it sits there.`, '#aeLeftBlock');
     add('Copy it across key by key. The macro is set on its own screen.', '#aeCopyBar');
     if (plan.chains?.chains?.length) add('Follow-up skills light up after their lead-in. Press them then.', '#aeFollowUps');
     if (bar.notOnBar.length) add('Skills that get no key are listed here, with the reason.', '#aeNotOnBar');

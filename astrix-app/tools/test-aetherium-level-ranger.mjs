@@ -112,15 +112,18 @@ check('the stacks by level: built from the first level, nothing used before it u
   assert.deepEqual(line(5,'B'),['Arrow Scattershot']);
   assert.deepEqual(line(12,'A'),['Snare Shot','Gale Arrow','Drill Dart','Tempest Shot']);
   assert.deepEqual(line(12,'B'),['Burst Arrow','Arrow Scattershot']);
-  assert.deepEqual(line(27,'B'),['Burst Arrow','Griffon Arrow','Arrow Scattershot']);
+  // The bar by cooldown (Miguel, in game, 28 Oct 2026): Griffon Arrow (45 s, a long cooldown) leaves the stack for a key of its own on 1 to 4.
+  assert.deepEqual(line(27,'B'),['Burst Arrow','Arrow Scattershot']);
+  const griffon=plan(27).skillBar;
+  assert.ok(['1','2','3','4'].some(key=>griffon.stacks[key].skills.map(cell=>cell.name).join()==='Griffon Arrow'),'Griffon Arrow alone on 1 to 4');
   for(const level of LEVELS)assert.equal(plan(level).skillBar.mainAttack,'Snipe');
   // Snare Shot's Slow is what Burst Arrow needs: it is on the set-up stack from Lv 1, and only there.
   for(const level of LEVELS)assert.equal(cells(plan(level).skillBar).filter(cell=>cell.name==='Snare Shot').length,1);
 });
 
-/* The 25 Oct 2026 Skill Bar rules (Miguel, in game) replace the 17 Oct "own keys never move as the Daeva levels": every
+/* The bar by cooldown (Miguel, in game, 28 Oct 2026; it replaces the 25 Oct key groups and the 17 Oct "own keys never move"): every
    level is held to the game's bar instead (aion2-bar-rules.mjs). */
-check('the game\'s bar at every level: 1 to 4 cooldowns and stigmas, Q and E cover, nothing on 5 to 8 while a reachable key is free',()=>{
+check('the bar by cooldown at every level: Q and E stack the shortest, 1 to 4 the long cooldowns, 5 to 8 one skill each',()=>{
   for(const level of LEVELS)assertKeyGroups(plan(level).skillBar,`Lv ${level}`);
 });
 

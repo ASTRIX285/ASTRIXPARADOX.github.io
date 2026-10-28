@@ -183,10 +183,9 @@ check('Skill bar: basic skill fixed on left click for every class, nothing place
   // reachable key (1 to 4, Q, E) empty, so the skills the Daeva has now are within reach and a later skill takes a
   // reachable key once it unlocks.
   const glad=buildAscentPlan({className:'Gladiator',role:'dps',level:12,data:data('Gladiator')}).skillBar;
-  const key=glad.left.find(item=>glad.stacks[item].reserved?.includes('Ruinous Blow'));
-  assert.ok(key,'Ruinous Blow has a key held for it at Lv 12');
-  assert.equal(glad.stacks[key].skills.length,0);
-  assert.ok(['1','2','3','4','Q','E'].every(k=>k===key||glad.stacks[k].skills.length||!['5','6','7','8'].some(far=>glad.stacks[far].skills.length)),'A key held for later never leaves a reachable key empty while 5 to 8 hold skills');
+  // The bar by cooldown (Miguel, in game, 28 Oct 2026) replaces the 25 Oct held keys: a skill that comes later holds no key,
+  // it waits in Comes later and takes its key once it unlocks.
+  assert.ok(!glad.left.some(item=>glad.stacks[item].reserved?.includes('Ruinous Blow')||glad.stacks[item].skills.some(cell=>cell.name==='Ruinous Blow')),'No key held for Ruinous Blow at Lv 12');
   assert.deepEqual(glad.later.find(item=>item.name==='Ruinous Blow'),{name:'Ruinous Blow',where:'own key',unlockLevel:14,reason:'Unlocks at Lv 14.',icon:glad.later.find(item=>item.name==='Ruinous Blow').icon});
   const at14=buildAscentPlan({className:'Gladiator',role:'dps',level:14,data:data('Gladiator')}).skillBar;
   const at14Key=at14.left.find(item=>at14.stacks[item].skills[0]?.name==='Ruinous Blow');
@@ -903,11 +902,13 @@ check('Gladiator bar, DPS and tank: one main line right of left click (Rage Burs
     assert.equal(bar.stacks.A.skills.length,0,`${role}: no second stack`);
     assert.equal(bar.stacks.LMB.skills[0].name,'Keen Strike');
     const left=bar.left.map(key=>bar.stacks[key].skills.map(skill=>skill.name)).filter(list=>list.length);
-    // The game's bar (Miguel, in game, 25 Oct 2026): Defiance on Space bar; the stagger on Q and the block on E (cover);
-    // the burst buffs on 1 and 2 (cooldown skills); the movement stack and the dash take the reachable 3 and 4, not 5 to 8.
+    // The bar by cooldown (Miguel, in game, 28 Oct 2026): Defiance on Space bar; the short cooldowns stacked on Q (Focused
+    // Block 20 s on row 0, Sword Aura Rampage, always ready, on top); the long cooldowns on 1 to 4 (Zikel's Blessing 120 s,
+    // Ruinous Blow 45 s); the movement stack keeps a key of its own within reach.
     assert.equal(bar.space.name,'Defiance',`${role} ${team}: Defiance on Space bar`);
     const keys=Object.fromEntries(bar.left.filter(key=>bar.stacks[key].skills.length).map(key=>[key,bar.stacks[key].skills.map(skill=>skill.name)]));
-    assert.deepEqual(keys.Q,['Sword Aura Rampage'],`${role} ${team}: the stagger on Q`);
+    assert.deepEqual(keys.Q.slice(-1),['Sword Aura Rampage'],`${role} ${team}: the always-ready stagger on top of the Q stack`);
+    assert.ok(keys.Q.includes('Focused Block'),`${role} ${team}: the 20 s block stacked on Q`);
     assert.deepEqual(keys[1],["Zikel's Blessing"],`${role} ${team}: the burst buff on 1`);
     assert.deepEqual(keys[3],['Leaping Slam','Rush Strike'],`${role} ${team}: the movement stack on 3, within reach`);
     assert.deepEqual(keys[4],['Ruinous Blow'],`${role} ${team}: the dash on 4, within reach`);
@@ -1111,8 +1112,12 @@ check('stigmas sit where the macro block puts them: in stack A or B, or on a key
       if(skill.needsSlot)assert.ok(!bar.stacks[skill.key].firesNow.includes(skill.name));
     }
   }
-  const bad={stigmas:['A','B','C','D'],stacks:{'1':{key:'1',skills:[{name:'X'},{name:'A',stigma:true}]},'5':{key:'5',skills:[{name:'Y'}]}}};
-  assert.equal(stigmaKeyProblems(bad).length,2,'A stack on a left key, and a stigma in it, both fail');
+  // The bar by cooldown (Miguel, in game, 28 Oct 2026): a stigma stacks by its cooldown like any short skill; a stack on
+  // 5 to 8, a long cooldown (45 s and over) in a stack, and a stack not marked as one all fail.
+  const ok={stacks:{'Q':{key:'Q',ownStack:true,skills:[{name:'X',cooldownSeconds:20},{name:'A',stigma:true,cooldownSeconds:15}]}}};
+  assert.deepEqual(stigmaKeyProblems(ok),[],'A short stigma in a Q stack is fine');
+  const bad={stacks:{'5':{key:'5',ownStack:true,skills:[{name:'X',cooldownSeconds:10},{name:'Y',cooldownSeconds:5}]},'E':{key:'E',ownStack:true,skills:[{name:'L',cooldownSeconds:60},{name:'S',cooldownSeconds:5}]},'2':{key:'2',skills:[{name:'P',cooldownSeconds:5},{name:'R',cooldownSeconds:3}]}}};
+  assert.equal(stigmaKeyProblems(bad).length,3,'A stack on 5, a long cooldown in a stack, and an unmarked stack all fail');
 });
 // Level planner (17 Oct 2026): the bar holds only what the Daeva can place now. At Lv 12 Rage Burst is not placeable (its
 // slot opens at 22), so Mocking Blade takes row 0 to open Overhead Slam; at Lv 41 the line is the build's own.
@@ -1127,8 +1132,10 @@ check('Gladiator Lv 12 and Lv 41: the main line at Lv 41 is Rage Burst, Overhead
     // Defiance opens at Lv 16: before that it waits in Comes later for Space bar, never drawn locked.
     assert.deepEqual(bar.later.filter(item=>item.where==='Space bar').map(item=>[item.name,item.unlockLevel]),level<16?[['Defiance',16]]:[]);
     assert.equal(bar.space?.name??null,level<16?null:'Defiance');
-    const ruinous=bar.left.map(key=>bar.stacks[key]).find(stack=>stack.skills[0]?.name==='Ruinous Blow'||stack.reserved?.includes('Ruinous Blow'));
-    assert.equal(ruinous.skills.length,level<14?0:1);
+    // A skill that comes later holds no key (28 Oct 2026): before Lv 14 Ruinous Blow is only in Comes later.
+    const ruinous=bar.left.map(key=>bar.stacks[key]).find(stack=>stack.skills.some(cell=>cell.name==='Ruinous Blow'));
+    assert.equal(Boolean(ruinous),level>=14);
+    assert.equal(bar.later.some(item=>item.name==='Ruinous Blow'),level<14);
   }
 });
 check('stigma screen data: an equipped build swap is a swap once, never "swap it out", and is not offered again',()=>{
@@ -1281,13 +1288,14 @@ const SECTION_6={
   Sorcerer:{A:['Element Enhancement','Delayed Explosion','Fire Wall','Blaze'],main:'Flame Arrow',B:["Winter's Shackles",'Cold Storm','Bittercold Wind','Firestorm'],opener:[],own:['Hellfire','Wish of Concentration','Frost','Frost Burst','Flame Scattershot','Ice Chain','Defiance','Steel Barrier','Arctic Armor','Hibernation']},
   Spiritmaster:{A:['Jointstrike: Curse','Summon: Earth Spirit','Summon: Water Spirit','Summon: Fire Spirit'],main:'Cold Shock',B:['Jointstrike: Corrode','Dimensional Control','Elemental Fusion','Combustion'],opener:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit'],own:["Enhance: Spirit's Benediction",'Flame Blessing','Summon: Ancient Spirit','Jointstrike: Destructive Attack','Rapid Scattershot',"Soul's Cry",'Defiance']}
 };
-check('the game\'s bar (all 8 classes): Defiance on Space bar only; cover on Q and E, cooldown skills and stigmas on 1 to 4, the rest on 5 to 8; a second stack on key 1; nothing after right click',()=>{
-  // Miguel, in game, 25 Oct 2026: how players set the bar (not a macro rule). Defiance is on Space bar on every class.
-  for(const name of AION2_CLASSES)for(const build of builds[name].records)for(const level of [16,30,45]){
+check('the bar by cooldown (all 8 classes): Defiance on Space bar only; Q and E stack the shortest, 1 to 4 the long cooldowns, 5 to 8 one skill each; nothing after right click',()=>{
+  // Miguel, in game, 28 Oct 2026 (replaces the 25 Oct key groups): how players set the bar. Defiance is on Space bar on every class.
+  for(const name of AION2_CLASSES)for(const build of builds[name].records)for(const level of [1,5,12,16,22,30,37,45]){
     const bar=buildAscentPlan({className:name,role:build.role,level,data:data(name)}).skillBar;
     if(!bar?.fromBlock)continue;
     const tag=`${name} ${build.role} Lv ${level}`;
-    assert.equal(bar.space?.name,'Defiance',`${tag}: Defiance on Space bar`);
+    // Defiance opens at Lv 16: before that it waits in Comes later.
+    assert.equal(bar.space?.name??null,level>=16?'Defiance':null,`${tag}: Defiance on Space bar`);
     assert.ok(Object.values(bar.stacks).every(stack=>!stack.skills.some(skill=>skill.name==='Defiance')),`${tag}: Defiance on no key and in no stack`);
     assertKeyGroups(bar,tag);
   }
@@ -1298,16 +1306,26 @@ check('every DPS class matches section 6 of the research record: rows, main atta
     const bar=plan.skillBar;
     // Level planner (17 Oct 2026): a row whose stigma is not in the four slots leaves the bar for Comes later, with the reason.
     const waiting=new Set(bar.later.filter(item=>item.reason==='Needs a stigma slot.').map(item=>item.name));
-    assert.deepEqual(bar.stacks.A.skills.map(skill=>skill.name),want.A.filter(item=>!waiting.has(item)),`${name} stack A`);
-    assert.deepEqual(bar.stacks.B.skills.map(skill=>skill.name),want.B.filter(item=>!waiting.has(item)),`${name} stack B`);
+    // The bar by cooldown (Miguel, in game, 28 Oct 2026): a long cooldown (45 s and over) leaves the second stack (not the
+    // main line) for a key of its own.
+    const cdOf=item=>skills.records.find(record=>record.class===name&&record.name===item)?.cooldownSeconds;
+    const isLong=item=>typeof cdOf(item)==='number'&&cdOf(item)>=45;
+    const peeled=key=>(want[key]??[]).filter(item=>!waiting.has(item)&&!(key===bar.secondStack&&isLong(item)));
+    assert.deepEqual(bar.stacks.A.skills.map(skill=>skill.name),peeled('A'),`${name} stack A`);
+    assert.deepEqual(bar.stacks.B.skills.map(skill=>skill.name),peeled('B'),`${name} stack B`);
     for(const item of [...want.A,...want.B].filter(item=>waiting.has(item)))assert.ok(!plan.stigmas.slots.some(slot=>slot.name===item),`${name}: ${item} is out only because it is not slotted`);
     assert.equal(bar.stacks.LMB.skills[0].name,want.main,`${name} main attack`);
     assert.deepEqual(bar.opener,want.opener,`${name} opener`);
     assert.deepEqual(plan.macro.opener.map(item=>item.name),want.opener);
     // Level planner (17 Oct 2026): a stigma outside the four slots keeps its key free (reserved) and waits in Comes later.
     // Space bar (Miguel, in game, 17 Oct 2026): the record's Defiance key is Space bar on every class, never a number key.
-    const own=[...bar.left.map(key=>bar.stacks[key].skills[0]?.name??bar.stacks[key].reserved?.[0]).filter(Boolean),...(bar.space?[bar.space.name]:[])];
-    assert.deepEqual([...own].sort(),[...want.own].sort(),`${name} own keys`);
+    // Every own-key skill is on a key, stacked by cooldown or alone (28 Oct 2026); the second stack's long cooldowns join them.
+    const own=[...bar.left.flatMap(key=>bar.stacks[key].skills.map(skill=>skill.name)),...(bar.space?[bar.space.name]:[])];
+    const out=bar.secondStack?(want[bar.secondStack]??[]).filter(item=>!waiting.has(item)&&isLong(item)):[];
+    // A skill that waits (a stigma outside the four slots) holds no key now (28 Oct 2026): it is in Comes later instead.
+    const later=new Set(bar.later.map(item=>item.name));
+    assert.deepEqual([...own].sort(),[...want.own.filter(item=>!later.has(item)),...out].sort(),`${name} own keys`);
+    for(const item of want.own.filter(item=>later.has(item)))assert.ok(!own.includes(item),`${name}: ${item} waits in Comes later, never on a key too`);
     assert.equal(bar.space?.name,'Defiance',`${name}: Defiance on Space bar`);
     assert.ok(!bar.left.some(key=>bar.stacks[key].skills.some(skill=>skill.name==='Defiance')),`${name}: Defiance on no number key`);
     for(const key of bar.left.filter(item=>bar.stacks[item].reserved))assert.ok(bar.later.some(item=>bar.stacks[key].reserved.includes(item.name)),`${name}: a free key's skill is in Comes later`);
