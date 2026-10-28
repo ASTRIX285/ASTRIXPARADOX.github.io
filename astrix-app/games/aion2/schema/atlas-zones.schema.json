@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/aion2/schema/atlas-zones.schema.json",
+  "title": "Atreia Atlas zones",
+  "description": "data/map/zones.json: one record per zone with the sources for its name and faction. Its base map (an in-game capture) comes with image, width and height together and an in-game-capture entry in provenance; a zone with no capture yet has none of them. imageSmall is the same capture scaled down for phones.",
+  "type": "object",
+  "required": ["records"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "faction", "provenance"],
+        "dependentRequired": {
+          "image": ["width", "height"],
+          "width": ["image"],
+          "height": ["image"],
+          "imageSmall": ["image", "smallWidth"],
+          "smallWidth": ["imageSmall"]
+        },
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "faction": { "enum": ["elyos", "asmodian", "abyss"] },
+          "image": { "type": "string", "pattern": "^/astrix-app/pages/aetherium/images/map/[a-z0-9-]+\\.webp$" },
+          "width": { "type": "integer", "minimum": 1 },
+          "height": { "type": "integer", "minimum": 1 },
+          "imageSmall": { "type": "string", "pattern": "^/astrix-app/pages/aetherium/images/map/[a-z0-9-]+\\.webp$" },
+          "smallWidth": { "type": "integer", "minimum": 1 },
+          "provenance": {
+            "description": "Sources in the shape of platform/contracts/provenance.schema.json (validate-game-folders.mjs checks each one). A captured map adds an in-game-capture entry: capturedBy, capturedOn, gameVersion, where and note.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": { "kind": { "enum": ["official-post", "in-game-capture", "community-guide"] } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

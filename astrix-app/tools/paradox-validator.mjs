@@ -39,6 +39,8 @@ export const validators=[
   browser('test-aetherium-level-spiritmaster.mjs'), // Spiritmaster level planner.
   browser('test-aetherium-level-templar.mjs'), // Templar level planner.
   browser('test-aetherium-guide-crafting.mjs'), // The Aetherium Guide, Crafting section.
+  browser('test-aetherium-map.mjs'), // Atreia Atlas: both zones, pan and zoom, layer panel and empty state, marker card, layout, no outside hosts.
+  'validate-aetherium-map.mjs', // Atreia Atlas data: markers in a known zone and layer, x and y 0 to 1, provenance; base maps ours, WebP, under 400 KB.
   'test-aion2-guide.mjs', // AION 2 Guide data.
   'test-aion2-gear-sources.mjs', // AION 2 gear sources data.
   'test-aion2-eu-fixtures.mjs', // AION 2 EU fixture contract.

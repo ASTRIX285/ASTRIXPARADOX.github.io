@@ -1,0 +1,29 @@
+{
+  "description": "Test only. Made-up markers for test-aetherium-map.mjs to draw the marker card. Never loaded by a page and never copied into data/map/markers.json.",
+  "records": [
+    {
+      "id": "fixture-confirmed",
+      "zone": "verteron",
+      "layer": "named-monster",
+      "x": 0.25,
+      "y": 0.5,
+      "gameX": 1234.4,
+      "gameY": 567.6,
+      "name": "Fixture Named Monster",
+      "note": "Test note for the card.",
+      "level": 12,
+      "status": "confirmed",
+      "provenance": { "capturedBy": "test", "capturedOn": "2026-10-28", "where": "test fixture" }
+    },
+    {
+      "id": "fixture-reported",
+      "zone": "altgard",
+      "layer": "hidden-cube",
+      "x": 0.75,
+      "y": 0.1,
+      "name": "Fixture Hidden Cube",
+      "status": "reported",
+      "provenance": { "capturedBy": "test", "capturedOn": "2026-10-28", "where": "test fixture" }
+    }
+  ]
+}

@@ -218,7 +218,7 @@ await check('the Guide link sits in the ribbon and the menu drawer of every Aeth
     const drawer=html.match(/<ul class="ax-drawer-links">[\s\S]*?<\/ul>/)[0];
     for(const [where,block] of [['ribbon',ribbon],['drawer',drawer]]){
       const links=[...block.matchAll(/<a href="([^"]+)"( aria-current="page")?>([^<]+)<\/a>/g)].map(m=>({href:m[1],current:Boolean(m[2]),text:m[3]}));
-      assert.deepEqual(links.map(link=>link.text),['Daeva Card','Gear Ledger','Ascent Plan','Guide','The Hub'],`${path} ${where}`);
+      assert.deepEqual(links.map(link=>link.text),['Daeva Card','Gear Ledger','Ascent Plan','Guide','Atreia Atlas','The Hub'],`${path} ${where}`);
       assert.equal(links[3].href,'/hub/aetherium/guide/',`${path} ${where}: Guide link`);
       assert.equal(links[3].current,path.startsWith('/hub/aetherium/guide/'),`${path} ${where}: Guide lit only on Guide pages`);
     }
@@ -613,7 +613,7 @@ const OVERVIEWS=[
   ['skills','/hub/aetherium/guide/skills/',['by-class','mastery','specialty','skill-bar'],{'by-class':'game',mastery:'game',specialty:'game','skill-bar':'game'}],
   ['equipment','/hub/aetherium/guide/equipment/',['slots','enhancement','manastones','theostones','arcana','pets-wings','titles','where-to-get'],{slots:'game',manastones:'game','pets-wings':'game'}],
   ['crafting','/hub/aetherium/guide/crafting/',['professions','gathering','crafted-gear'],{}],
-  ['world','/hub/aetherium/guide/world/',['zones','sealed','abyss','rift','events'],{}],
+  ['world','/hub/aetherium/guide/world/',['zones','atlas','sealed','abyss','rift','events'],{}],
   ['guides','/hub/aetherium/guide/guides/',['path','dungeons','weekly'],{}]
 ];
 for(const width of [1600,390]){
