@@ -40,6 +40,8 @@ export function imageFor(path) {
     return `${IMAGES}/page-backgrounds/ascent-${ASCENT_TABS.includes(tab) ? tab : 'mastery'}.jpg`;
   }
   if (path === '') return `${IMAGES}/page-backgrounds/daeva-card.jpg`;
+  /* The Atreia Atlas shares the Guide's World photo. */
+  if (path === 'map/') return `${IMAGES}/section-heroes/world.jpg`;
   /* The character pages each have their own backdrop (design/aetherium-more-backdrops, 24 Oct 2026). */
   const own = { 'gear/': 'character', 'gear/titles/': 'titles', 'compare/': 'compare', 'skills/': 'skills', 'daevanion/': 'daevanion' }[path];
   return `${IMAGES}/page-backgrounds/${own ?? 'gear-ledger'}.jpg`;

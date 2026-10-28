@@ -218,7 +218,7 @@ await check('the Guide link sits in the ribbon and the menu drawer of every Aeth
     const drawer=html.match(/<ul class="ax-drawer-links">[\s\S]*?<\/ul>/)[0];
     for(const [where,block] of [['ribbon',ribbon],['drawer',drawer]]){
       const links=[...block.matchAll(/<a href="([^"]+)"( aria-current="page")?>([^<]+)<\/a>/g)].map(m=>({href:m[1],current:Boolean(m[2]),text:m[3]}));
-      assert.deepEqual(links.map(link=>link.text),['Daeva Card','Gear Ledger','Ascent Plan','Guide','The Hub'],`${path} ${where}`);
+      assert.deepEqual(links.map(link=>link.text),['Daeva Card','Gear Ledger','Ascent Plan','Guide','Atreia Atlas','The Hub'],`${path} ${where}`);
       assert.equal(links[3].href,'/hub/aetherium/guide/',`${path} ${where}: Guide link`);
       assert.equal(links[3].current,path.startsWith('/hub/aetherium/guide/'),`${path} ${where}: Guide lit only on Guide pages`);
     }

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/aion2/schema/atlas-zones.schema.json",
+  "title": "Atreia Atlas zones",
+  "description": "data/map/zones.json: one record per zone with its base map, an in-game capture. imageSmall is the same capture scaled down for phones.",
+  "type": "object",
+  "required": ["records"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "faction", "image", "width", "height", "provenance"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "faction": { "enum": ["elyos", "asmodian", "abyss"] },
+          "image": { "type": "string", "pattern": "^/astrix-app/pages/aetherium/images/map/[a-z0-9-]+\\.webp$" },
+          "width": { "type": "integer", "minimum": 1 },
+          "height": { "type": "integer", "minimum": 1 },
+          "imageSmall": { "type": "string", "pattern": "^/astrix-app/pages/aetherium/images/map/[a-z0-9-]+\\.webp$" },
+          "smallWidth": { "type": "integer", "minimum": 1 },
+          "provenance": {
+            "type": "object",
+            "required": ["kind", "capturedBy", "capturedOn", "gameVersion"],
+            "additionalProperties": false,
+            "properties": {
+              "kind": { "const": "in-game-capture" },
+              "capturedBy": { "type": "string", "minLength": 1 },
+              "capturedOn": { "type": "string", "format": "date" },
+              "gameVersion": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

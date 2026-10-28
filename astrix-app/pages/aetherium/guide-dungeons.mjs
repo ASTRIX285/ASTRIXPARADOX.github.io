@@ -320,6 +320,7 @@ function weeklyHtml(data) {
 /** The World Overview cards: each part of this page, and the Sealed Dungeons page. */
 const WORLD_TOPICS = [
   { id: 'zones', label: 'Zones', href: '#aeWorld-zone', blurb: 'The zones you level through.' },
+  { id: 'atlas', label: 'Atreia Atlas', href: '/hub/aetherium/map/', blurb: 'Our map of Verteron and Altgard, layer by layer.' },
   { id: 'sealed', label: 'Sealed Dungeons and Strongholds', href: `${GUIDE_ROOT}dungeons/sealed-dungeons/`, blurb: 'The question marks on your map.' },
   { id: 'abyss', label: 'The Abyss', href: '#aeWorld-abyss', blurb: 'Where the two factions meet.' },
   { id: 'rift', label: 'Crossing to the other faction', href: '#aeWorld-rift', blurb: 'The Spacetime Rift.' },

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://astrixparadox.com/astrix-app/games/aion2/schema/atlas-markers.schema.json",
+  "title": "Atreia Atlas markers",
+  "description": "data/map/markers.json. x and y are fractions of the zone's base map, 0 to 1. Zone and layer must exist in zones.json and layers.json (engine/atlas-data.mjs checks that).",
+  "type": "object",
+  "required": ["records"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "records": { "type": "array", "items": { "$ref": "#/$defs/marker" } }
+  },
+  "$defs": {
+    "marker": {
+      "type": "object",
+      "required": ["id", "zone", "layer", "x", "y", "name", "status", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "zone": { "type": "string", "minLength": 1 },
+        "layer": { "type": "string", "minLength": 1 },
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "gameX": { "type": "number" },
+        "gameY": { "type": "number" },
+        "name": { "type": "string", "minLength": 1 },
+        "note": { "type": "string" },
+        "level": { "type": "integer", "minimum": 1 },
+        "status": { "enum": ["confirmed", "reported"] },
+        "provenance": {
+          "type": "object",
+          "required": ["capturedBy", "capturedOn", "where"],
+          "additionalProperties": false,
+          "properties": {
+            "capturedBy": { "type": "string", "minLength": 1 },
+            "capturedOn": { "type": "string", "format": "date" },
+            "where": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

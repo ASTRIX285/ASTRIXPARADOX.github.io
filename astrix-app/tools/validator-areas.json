@@ -56,6 +56,7 @@
         "astrix-app/tools/test-aion2-*",
         "astrix-app/tools/build-aetherium-facts.mjs",
         "astrix-app/tools/validate-aetherium-facts.mjs",
+        "astrix-app/tools/validate-aetherium-map.mjs",
         "astrix-app/tools/aion2-bar-rules.mjs"
       ],
       "suites": [
@@ -79,6 +80,8 @@
         "test-aetherium-ascent.mjs",
         "test-aetherium-guide.mjs",
         "test-aetherium-guide-general.mjs",
+        "test-aetherium-map.mjs",
+        "validate-aetherium-map.mjs",
         "test-hub-cards.mjs",
         "test-forge-tint.mjs",
         "validate-single-module-urls.mjs",

@@ -1,0 +1,4 @@
+{
+  "description": "Atreia Atlas markers. Every marker comes from an in-game capture. x and y are fractions of the zone's base map (0 to 1), so a marker stays put at any drawn size. Schema: schema/atlas-markers.schema.json.",
+  "records": []
+}

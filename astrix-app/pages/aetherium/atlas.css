@@ -1,0 +1,94 @@
+/* Atreia Atlas, The Aetherium's map (feature/aetherium-map-foundation, 28 Oct 2026). Loaded by /hub/aetherium/map/ only,
+   on top of aetherium.css. The map fills the space between the ribbon and the footer; the layer panel sits beside it on
+   desktop and tablet and becomes a bottom sheet on a phone. Every pick is the one Aetherium button (.ae-btn). */
+
+.ae-atlas-page{--ae-atlas-panel:340px;--ae-atlas-above:calc(var(--ax-shell-top,108px) + var(--ax-shell-tabs,46px) + 34px + 112px)}
+.ae-atlas.ae-main{max-width:none;padding-bottom:24px}
+.ae-atlas-bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin:0 0 14px}
+.ae-atlas-heading{min-width:0}
+.ae-atlas-heading .ae-eyebrow{margin-bottom:4px}
+.ae-atlas-heading h1{margin:0;font:400 clamp(1.375rem,2.6vw,2rem)/1.15 var(--ax-font-brand);letter-spacing:.01em;color:var(--ae-text)}
+.ae-atlas-zones{display:flex;flex-wrap:wrap;gap:10px 18px;min-width:0}
+.ae-atlas-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.ae-atlas-group-name{font:700 .75rem/1 var(--ae-font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--ae-text-dim)}
+.ae-atlas-group-name[data-faction="elyos"]{color:var(--ae-elyos)}
+.ae-atlas-group-name[data-faction="asmodian"]{color:var(--ae-asmodian-hi)}
+.aetherium-page .ae-atlas-zone{min-height:48px;padding:0 1.375rem;font-size:.9375rem}
+
+.ae-atlas-body{display:grid;grid-template-columns:minmax(0,1fr) var(--ae-atlas-panel);gap:var(--ae-gap);
+  height:max(420px,calc(100svh - var(--ae-atlas-above)));min-height:0}
+.ae-atlas-map{position:relative;min-width:0;min-height:0}
+.ae-atlas-view{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;outline:none;user-select:none;-webkit-user-select:none;
+  background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--ae-strobe) 8%,var(--ae-well)),var(--ae-well));
+  border:1px solid var(--ae-hairline);box-shadow:var(--ae-top-light),var(--ae-shadow)}
+.ae-atlas-view.is-dragging{cursor:grabbing}
+.ae-atlas-view:focus-visible{border-color:var(--ae-strobe);box-shadow:0 0 0 2px var(--ae-strobe),var(--ae-shadow)}
+.ae-atlas-stage{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.ae-atlas-image{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none}
+.ae-atlas-image:not([src]){visibility:hidden}
+.ae-atlas-markers{position:absolute;inset:0}
+.ae-atlas-view.is-loading::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
+  border:3px solid color-mix(in srgb,var(--ae-strobe) 25%,transparent);border-top-color:var(--ae-strobe);animation:ae-atlas-spin 900ms linear infinite}
+@keyframes ae-atlas-spin{to{transform:rotate(1turn)}}
+@media (prefers-reduced-motion:reduce){.ae-atlas-view.is-loading::after{animation:none}}
+
+.ae-atlas-tools{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:2}
+.aetherium-page .ae-atlas-tool{width:48px;min-height:48px;padding:0;justify-content:center}
+
+.ae-atlas-panel{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;box-sizing:border-box;padding:18px;
+  background:var(--ae-panel);border:1px solid var(--ae-hairline);box-shadow:var(--ae-top-light),var(--ae-shadow)}
+.ae-atlas-panel::before{content:"";position:absolute;top:-1px;right:-1px;width:14px;height:14px;z-index:1;pointer-events:none;
+  background:linear-gradient(to bottom left,var(--ae-page) 0 50%,var(--ae-hairline) 50% calc(50% + 1.5px),transparent calc(50% + 1.5px))}
+.ae-atlas-panel-title{margin:0 0 12px;font:700 1.0625rem/1.2 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text)}
+.ae-atlas-sheet-toggle{display:none}
+.ae-atlas-panel-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+.ae-atlas-empty{margin:0 0 12px;padding:10px 14px;font-size:.875rem;line-height:1.45;color:var(--ae-text);border:1px solid var(--ae-hairline);
+  border-left:3px solid var(--ae-accent-2);background:color-mix(in srgb,var(--ae-ice) 6%,var(--ae-panel))}
+.ae-atlas-layers{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.aetherium-page .ae-atlas-layer{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;min-height:60px;
+  padding:8px 14px 8px 10px;text-align:left}
+html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){border-radius:var(--ae-btn-card-radius)!important}
+.ae-atlas-icon{display:block;flex:0 0 auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.ae-atlas-layer[aria-pressed="false"] .ae-atlas-icon{opacity:.4;filter:grayscale(.7)}
+.ae-atlas-layer-text{display:grid;gap:2px;min-width:0}
+.ae-atlas-layer-text b{font:700 .9375rem/1.2 var(--ae-font-ui)}
+.ae-atlas-layer-text small{font:500 .75rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted);overflow-wrap:anywhere}
+.ae-atlas-count{min-width:2rem;padding:4px 8px;box-sizing:border-box;text-align:center;font:700 .8125rem/1 var(--ae-font-ui);color:var(--ae-text);
+  border-radius:999px;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline-strong)}
+
+/* The marker card. */
+.ae-atlas-card-slot:empty{display:none}
+.ae-atlas-card-slot{margin-top:14px}
+.ae-atlas-card{position:relative;padding:14px 16px;background:var(--ae-raised);border:1px solid var(--ae-hairline-strong);
+  box-shadow:var(--ae-top-light),var(--ae-shadow-tight);color:var(--ae-text)}
+.ae-atlas-card-head{display:flex;align-items:center;gap:12px}
+.ae-atlas-card h3{margin:0;font:700 1.0625rem/1.2 var(--ae-font-ui)}
+.ae-atlas-card-layer{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 0;font:600 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-atlas-card-note{margin:12px 0 0;font-size:.9375rem;line-height:1.5}
+.ae-atlas-card-level,.ae-atlas-card-where{margin:8px 0 0;font:700 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-gold)}
+.ae-atlas-card-where{color:var(--ae-ice)}
+.ae-atlas-tag{display:inline-flex;align-items:center;padding:3px 9px;font:700 .6875rem/1 var(--ae-font-ui);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ae-gold-ink);background:linear-gradient(180deg,var(--ae-gold-top),var(--ae-gold-bottom));border-radius:999px}
+
+/* Under 1200 the shell puts the header in the page flow and hides the ribbon. */
+@media (max-width:1199px){.ae-atlas-page{--ae-atlas-above:calc(var(--ax-shell-top,72px) + 20px + 120px)}}
+@media (max-width:1099px){.ae-atlas-page{--ae-atlas-panel:300px}}
+
+/* Phone: one column, and the layer panel is a bottom sheet with a handle that opens it. */
+@media (max-width:819px){
+  .ae-atlas-page{--ae-atlas-sheet:64px;--ae-atlas-above:calc(var(--ax-shell-top,72px) + 20px + 150px + var(--ae-atlas-sheet))}
+  .ae-atlas-page .ae-footer{padding-bottom:calc(28px + var(--ae-atlas-sheet))}
+  .ae-atlas-bar{flex-direction:column;align-items:stretch}
+  .ae-atlas-body{grid-template-columns:minmax(0,1fr);height:max(340px,calc(100svh - var(--ae-atlas-above)))}
+  .ae-atlas-panel{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:min(70svh,560px);padding:0 16px;
+    border-width:1px 0 0;border-radius:18px 18px 0 0;background:var(--ae-panel-solid);box-shadow:0 -10px 30px rgba(0,0,0,.55)}
+  .ae-atlas-panel::before{display:none}
+  .ae-atlas-panel-title{display:none}
+  .aetherium-page .ae-atlas-sheet-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:var(--ae-atlas-sheet);
+    padding:14px 4px 10px;background:none;border:0;box-shadow:none;color:var(--ae-text);font:700 1rem/1 var(--ae-font-ui)}
+  .ae-atlas-sheet-toggle::before{content:"";position:absolute;top:7px;left:50%;width:44px;height:4px;margin-left:-22px;border-radius:2px;background:var(--ae-hairline-strong)}
+  .ae-atlas-total{font:600 .875rem/1 var(--ae-font-ui);color:var(--ae-text-muted)}
+  .ae-atlas-panel:not(.is-open) .ae-atlas-panel-body{display:none}
+  .ae-atlas-panel.is-open .ae-atlas-panel-body{padding-bottom:16px}
+  .aetherium-page .ae-atlas-zone{flex:1 1 auto;justify-content:center}
+}

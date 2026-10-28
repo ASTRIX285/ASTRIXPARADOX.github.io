@@ -84,6 +84,8 @@
 
   "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "4838047019",
 
+  "/astrix-app/games/aion2/engine/atlas-data.mjs": "28a97ec385",
+
   "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "009d0b5160",
 
   "/astrix-app/games/aion2/engine/dungeon-guide.mjs": "a1766efdee",
@@ -132,6 +134,12 @@
 
   "/astrix-app/pages/aetherium/ascent-plan.mjs": "5f250dd633",
 
+  "/astrix-app/pages/aetherium/atlas-card.mjs": "c6e5edb9d7",
+
+  "/astrix-app/pages/aetherium/atlas-page.mjs": "1f3cc237f0",
+
+  "/astrix-app/pages/aetherium/atlas-view.mjs": "6196a84520",
+
   "/astrix-app/pages/aetherium/character-menu.mjs": "59326b7ac3",
 
   "/astrix-app/pages/aetherium/character-page.mjs": "044c99a2d9",
@@ -150,7 +158,7 @@
 
   "/astrix-app/pages/aetherium/guide-crafting.mjs": "8d128f983a",
 
-  "/astrix-app/pages/aetherium/guide-dungeons.mjs": "d1a4eb0d91",
+  "/astrix-app/pages/aetherium/guide-dungeons.mjs": "91f8ebeba3",
 
   "/astrix-app/pages/aetherium/guide-equipment.mjs": "9fcfd16677",
 
