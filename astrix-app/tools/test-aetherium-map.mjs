@@ -3,8 +3,10 @@
 // static server:
 //   - data: zones.json, layers.json and markers.json pass the Atlas checks; the checks reject a marker with a bad zone, a bad
 //     layer, x or y outside 0 to 1, or no provenance (engine/atlas-data.mjs, and the JSON schema when ajv is installed);
-//   - the page draws both zones from the picker, remembers the pick on the device, and loads the base map after it is ready;
-//   - pan and zoom by mouse (drag, wheel), by keyboard (arrows, + and -) and by the zoom buttons;
+//   - the page draws both zones from the picker and remembers the pick on the device; a zone with no capture yet (both, on
+//     28 Oct 2026) says so in the map area, asks for no map image and keeps the zoom buttons off;
+//   - with a test-only zones fixture that has a drawn image: the base map loads after the page is ready, and pan and zoom work
+//     by mouse (drag, wheel), by keyboard (arrows, + and -) and by the zoom buttons;
 //   - the layer panel: one toggle per layer in order with its icon and a count of 0, the empty state in the panel, no marker
 //     drawn on the map;
 //   - the marker card renders from a test-only fixture (title, layer, note, level, the Reported tag only when reported);
@@ -38,6 +40,9 @@ assert.deepEqual(zones.records.map(zone=>zone.id).sort(),['altgard','verteron'],
 assert.deepEqual(layers.layers.map(layer=>layer.id),LAYERS,'Layer order');
 assert.deepEqual(markers.records,[],'No markers yet');
 assert.deepEqual(atlasProblems({zones,layers,markers:fixture}),[],'The fixture is valid');
+const zonesFixture=await json('astrix-app/tools/fixtures/aion2/atlas-zones.json');
+assert.deepEqual(atlasProblems({zones:zonesFixture,layers,markers}),[],'The zones fixture is valid');
+assert.ok(atlasProblems({zones:{records:[{id:'half',name:'Half',faction:'elyos',image:'/x.webp'}]},layers,markers}).length>0,'A capture without its size and provenance is rejected');
 const good=fixture.records[0];
 const bad={
   zone:{...good,id:'bad-zone',zone:'atlantis'},
@@ -75,42 +80,67 @@ await new Promise(done=>server.listen(0,'127.0.0.1',done));
 const base=`http://127.0.0.1:${server.address().port}`;
 const browser=await chromium.launch();
 let failed=false;
-const open=async({width=1600,height=900,context=null,query=''}={})=>{
-  const own=!context;
-  context??=await browser.newContext({viewport:{width,height}});
-  const outside=[];
+const open=async({width=1600,height=900,fixtureZones=false}={})=>{
+  const context=await browser.newContext({viewport:{width,height}});
+  const outside=[],mapRequests=[];
   await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>{outside.push(new URL(route.request().url()).hostname);route.fulfill({status:204,body:''});});
+  if(fixtureZones)await context.route(/\/data\/map\/zones\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(zonesFixture)}));
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
-  await page.goto(base+PAGE+query);
+  page.on('request',request=>{if(/\/images\/map\/|section-heroes\/world\.jpg/.test(request.url()))mapRequests.push(request.url());});
+  await page.goto(base+PAGE);
   await page.waitForSelector('html[data-aetherium-ready="true"]');
-  return {context,page,errors,outside,own};
+  return {context,page,errors,outside,mapRequests};
 };
 const view=page=>page.$eval('#aeAtlasView',el=>({scale:Number(el.dataset.scale),zoom:Number(el.dataset.zoom),tx:Number(el.dataset.tx),ty:Number(el.dataset.ty)}));
 const mapLoaded=page=>page.waitForFunction(()=>{const img=document.querySelector('#aeAtlasImage');return img.getAttribute('src')&&img.complete&&img.naturalWidth>0;});
 
 try {
+  /* The real data: both zones, each with its map shown as not captured yet (or drawn, once a capture is in). */
   await (async()=>{
-    const {context,page,errors,outside}=await open();
-    /* Both zones, picked from the Elyos and Asmodian groups. */
+    const {context,page,errors,outside,mapRequests}=await open();
     const groups=await page.$$eval('.ae-atlas-group',nodes=>nodes.map(node=>({name:node.querySelector('.ae-atlas-group-name').textContent,zones:[...node.querySelectorAll('button.ae-atlas-zone')].map(b=>b.textContent)})));
     assert.deepEqual(groups,[{name:'Elyos',zones:['Verteron']},{name:'Asmodian',zones:['Altgard']}],'Zone picker groups');
     for(const zone of zones.records){
       await page.click(`.ae-atlas-zone[data-zone="${zone.id}"]`);
-      await mapLoaded(page);
-      const shown=await page.evaluate(()=>({zone:document.body.dataset.zone,title:document.querySelector('#aeAtlasTitle').textContent,src:document.querySelector('#aeAtlasImage').getAttribute('src'),pressed:document.querySelector('.ae-atlas-zone[aria-pressed="true"]').dataset.zone,stage:document.querySelector('#aeAtlasStage').style.width}));
+      const shown=await page.evaluate(()=>({zone:document.body.dataset.zone,title:document.querySelector('#aeAtlasTitle').textContent,pressed:document.querySelector('.ae-atlas-zone[aria-pressed="true"]').dataset.zone,
+        pending:document.querySelector('#aeAtlasPending').hidden?null:document.querySelector('#aeAtlasPending').textContent,pendingInMap:Boolean(document.querySelector('#aeAtlasPending').closest('#aeAtlasView')),
+        src:document.querySelector('#aeAtlasImage').getAttribute('src'),tools:[...document.querySelectorAll('.ae-atlas-tool')].map(b=>b.disabled)}));
       assert.equal(shown.zone,zone.id);assert.equal(shown.title,zone.name);assert.equal(shown.pressed,zone.id);
-      assert.ok([zone.image,zone.imageSmall].includes(shown.src),`${zone.id}: its own base map (${shown.src})`);
-      assert.equal(shown.stage,`${zone.width}px`,`${zone.id}: stage is the base map size`);
-      const box=await page.$eval('#aeAtlasImage',img=>{const r=img.getBoundingClientRect();return {w:r.width,h:r.height};});
-      assert.ok(box.w>300&&box.h>200,`${zone.id}: the map is drawn (${Math.round(box.w)}x${Math.round(box.h)})`);
+      if(zone.image){
+        await mapLoaded(page);
+        assert.equal(shown.pending,null,`${zone.id}: no pending line once captured`);
+      }else{
+        assert.equal(shown.pending,`The map of ${zone.name} is not captured yet. It goes up here as soon as we have it from in game.`,`${zone.id}: says its map is not captured yet`);
+        assert.ok(shown.pendingInMap,`${zone.id}: the pending line sits in the map area`);
+        assert.equal(shown.src,null,`${zone.id}: no image drawn`);
+        assert.deepEqual(shown.tools,[true,true,true],`${zone.id}: zoom buttons off`);
+      }
     }
-    /* The pick is remembered on the device. */
     await page.reload();
     await page.waitForSelector('html[data-aetherium-ready="true"]');
     assert.equal(await page.evaluate(()=>document.body.dataset.zone),zones.records.at(-1).id,'The last zone is remembered');
+    await page.waitForTimeout(400);
+    if(!zones.records.some(zone=>zone.image))assert.deepEqual(mapRequests,[],'No map image asked for while no zone is captured');
+    assert.deepEqual(errors,[],'No page errors');
+    assert.deepEqual([...new Set(outside)].filter(host=>!FONT_HOSTS.has(host)),[],`No request to another host (${[...new Set(outside)].join(', ')})`);
+    await context.close();
+    console.log('ok zones from the real data');
+  })();
+
+  /* A drawn map, from the test-only zones fixture. */
+  await (async()=>{
+    const {context,page,errors,outside}=await open({fixtureZones:true});
+    const drawn=zonesFixture.records.find(zone=>zone.image);
+    await page.click(`.ae-atlas-zone[data-zone="${drawn.id}"]`);
     await mapLoaded(page);
+    const shown=await page.evaluate(()=>({src:document.querySelector('#aeAtlasImage').getAttribute('src'),stage:document.querySelector('#aeAtlasStage').style.width,pending:document.querySelector('#aeAtlasPending').hidden}));
+    assert.equal(shown.src,drawn.image,'The fixture zone draws its image');
+    assert.equal(shown.stage,`${drawn.width}px`,'The stage is the base map size');
+    assert.equal(shown.pending,true,'No pending line on a drawn zone');
+    const box=await page.$eval('#aeAtlasImage',img=>{const r=img.getBoundingClientRect();return {w:r.width,h:r.height};});
+    assert.ok(box.w>300&&box.h>100,`The map is drawn (${Math.round(box.w)}x${Math.round(box.h)})`);
 
     /* Pan and zoom. */
     const fit=await view(page);
@@ -195,7 +225,7 @@ try {
     assert.deepEqual(errors,[],'No page errors');
     assert.deepEqual([...new Set(outside)].filter(host=>!FONT_HOSTS.has(host)),[],`No request to another host (${[...new Set(outside)].join(', ')})`);
     await context.close();
-    console.log('ok zones, pan and zoom, layers, empty state, marker card, hosts');
+    console.log('ok drawn map, pan and zoom, layers, empty state, marker card, hosts');
   })();
 
   /* The base map waits for the page to be ready. */
@@ -203,10 +233,11 @@ try {
     const context=await browser.newContext({viewport:{width:1600,height:900}});
     let readyAt=null,mapAt=null;
     await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
+    await context.route(/\/data\/map\/zones\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(zonesFixture)}));
     const page=await context.newPage();
-    page.on('request',request=>{if(request.url().includes('/images/map/')&&mapAt===null)mapAt=Date.now();});
+    page.on('request',request=>{if(/\/images\/map\/|section-heroes\/world\.jpg/.test(request.url())&&mapAt===null)mapAt=Date.now();});
     await page.exposeFunction('__aeTestReady',()=>{readyAt??=Date.now();});
-    await page.addInitScript(()=>document.addEventListener('forge:portal-ready',()=>window.__aeTestReady()));
+    await page.addInitScript(()=>{try{localStorage.setItem('ae-atlas-zone','verteron');}catch{}document.addEventListener('forge:portal-ready',()=>window.__aeTestReady());});
     await page.goto(base+PAGE);
     await mapLoaded(page);
     assert.ok(readyAt!==null&&mapAt!==null&&mapAt>=readyAt,'The base map is asked for after the page is ready');
@@ -217,7 +248,7 @@ try {
   /* Layout at three widths. */
   for(const [width,height] of [[1600,900],[820,1180],[390,844]]){
     const {context,page,errors}=await open({width,height});
-    await mapLoaded(page);
+    if(zones.records.some(zone=>zone.id===zones.records.at(-1).id&&zone.image))await mapLoaded(page);
     const layout=await page.evaluate(()=>{
       const doc=document.documentElement;
       const box=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {top:r.top+scrollY,bottom:r.bottom+scrollY,left:r.left,right:r.right,height:r.height,width:r.width};};

@@ -32,6 +32,13 @@
 @keyframes ae-atlas-spin{to{transform:rotate(1turn)}}
 @media (prefers-reduced-motion:reduce){.ae-atlas-view.is-loading::after{animation:none}}
 
+/* A zone whose map is not captured yet: one plain line in the middle of the map area, nothing drawn. */
+.ae-atlas-view.is-pending{cursor:default}
+.ae-atlas-pending{position:absolute;top:50%;left:50%;width:min(420px,calc(100% - 48px));margin:0;transform:translate(-50%,-50%);box-sizing:border-box;
+  padding:16px 20px;text-align:center;font:600 1rem/1.5 var(--ae-font-ui);color:var(--ae-text);
+  background:color-mix(in srgb,var(--ae-panel-solid) 88%,transparent);border:1px solid var(--ae-hairline-strong);box-shadow:var(--ae-top-light),var(--ae-shadow-tight)}
+.ae-atlas-pending[hidden]{display:none}
+
 .ae-atlas-tools{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:2}
 .aetherium-page .ae-atlas-tool{width:48px;min-height:48px;padding:0;justify-content:center}
 

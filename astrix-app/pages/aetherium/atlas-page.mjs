@@ -69,6 +69,7 @@ function start({ zones, layers, markers }) {
   let wantsFull = false;
   /** The small WebP when it covers the screen at the current zoom, else the full one. */
   function pickImage() {
+    if (!zone.image) return;
     const need = viewEl.clientWidth * (window.devicePixelRatio || 1) * (view.state.scale / view.state.fit);
     const small = zone.imageSmall && zone.smallWidth && need <= zone.smallWidth;
     const src = small && !wantsFull ? zone.imageSmall : zone.image;
@@ -98,8 +99,14 @@ function start({ zones, layers, markers }) {
     imageEl.alt = `In-game map of ${zone.name}`;
     imageEl.removeAttribute('src');
     wantsFull = false;
-    viewEl.classList.add('is-loading');
-    view.load(zone.width, zone.height);
+    /* No capture yet: say so in the map area, draw nothing and keep the zoom buttons off. */
+    const pendingMap = !zone.image;
+    viewEl.classList.toggle('is-pending', pendingMap);
+    viewEl.classList.toggle('is-loading', !pendingMap);
+    $('#aeAtlasPending').hidden = !pendingMap;
+    $('#aeAtlasPending').textContent = pendingMap ? `The map of ${zone.name} is not captured yet. It goes up here as soon as we have it from in game.` : '';
+    for (const tool of document.querySelectorAll('.ae-atlas-tool')) tool.disabled = pendingMap;
+    if (!pendingMap) view.load(zone.width, zone.height);
     counts();
     if (load) pickImage();
   }

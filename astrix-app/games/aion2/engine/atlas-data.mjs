@@ -29,6 +29,11 @@ export function atlasProblems({ zones, layers, markers }) {
   const zoneIds = new Set((zones?.records ?? []).map(zone => zone.id));
   const layerIds = new Set((layers?.layers ?? []).map(layer => layer.id));
   for (const zone of zones?.records ?? []) {
+    if (!['elyos', 'asmodian', 'abyss'].includes(zone.faction)) out.push(`${zone.id}: faction must be elyos, asmodian or abyss`);
+    /* A zone with no capture yet has no image, size or provenance; one with a capture has all of them. */
+    const captured = ['image', 'width', 'height', 'provenance'].filter(key => zone[key] !== undefined);
+    if (captured.length && captured.length < 4) out.push(`${zone.id}: image, width, height and provenance go in together`);
+    if (!zone.image) continue;
     if (!(zone.width > 0 && zone.height > 0)) out.push(`${zone.id}: width and height`);
     if (zone.provenance?.kind !== 'in-game-capture') out.push(`${zone.id}: base map must be an in-game capture`);
   }

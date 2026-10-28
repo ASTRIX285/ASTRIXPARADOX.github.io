@@ -1,0 +1,7 @@
+{
+  "description": "Atreia Atlas zones. A zone's base map is an in-game capture by Miguel: image, width, height and provenance go in together when the capture exists. Until then the zone has no image and the page says its map is not captured yet. Schema: schema/atlas-zones.schema.json.",
+  "records": [
+    { "id": "verteron", "name": "Verteron", "faction": "elyos" },
+    { "id": "altgard", "name": "Altgard", "faction": "asmodian" }
+  ]
+}

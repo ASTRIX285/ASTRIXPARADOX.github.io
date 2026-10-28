@@ -30,7 +30,7 @@ function webpSize(buffer){
   if(chunk==='VP8L'){const b=buffer.readUInt32LE(21);return {width:(b&0x3fff)+1,height:((b>>14)&0x3fff)+1};}
   throw new Error(`Unknown WebP chunk ${chunk}`);
 }
-for(const zone of zones.records){
+for(const zone of zones.records.filter(zone=>zone.image)){
   const full=resolve(root,`.${zone.image}`);
   const bytes=statSync(full).size;
   assert.ok(bytes<400*1024,`${zone.id}: ${zone.image} is ${Math.round(bytes/1024)} KB, keep it under 400 KB`);
@@ -54,4 +54,4 @@ if(Ajv2020){
     assert.ok(validate(data),`${schema}: ${ajv.errorsText(validate.errors)}`);
   }
 }
-console.log(`AETHERIUM_MAP=ok zones=${zones.records.length} layers=${layers.layers.length} markers=${markers.records.length}`);
+console.log(`AETHERIUM_MAP=ok zones=${zones.records.length} captured=${zones.records.filter(zone=>zone.image).length} layers=${layers.layers.length} markers=${markers.records.length}`);
