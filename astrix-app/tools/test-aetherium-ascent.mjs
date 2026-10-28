@@ -1034,7 +1034,10 @@ for(const [width,height] of [[390,844],[1600,1000]]){
 /* ---------- Walkthrough fix (fix/aetherium-walkthrough-logic, 11 Oct 2026): Lv 12 and Lv 41 Gladiator walks ---------- */
 const goldCount=page=>page.$$eval('main .ae-primary',els=>els.filter(el=>{const r=el.getBoundingClientRect();return r.height>0&&/linear-gradient/.test(getComputedStyle(el).backgroundImage);}).length);
 const noSideScroll=page=>page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
-const rectIn=(page,selector)=>page.$eval(selector,el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height,display:getComputedStyle(el).display,size:parseFloat(getComputedStyle(el).fontSize)};});
+/* Finds and measures in one step (28 Oct 2026). page.$eval finds the element, then measures it in a second round trip:
+   a screen that draws itself again after it reports ready (the Skills screen does, once a Daevanion board is read) could
+   swap the element out in between, and the measure then read a removed element as 0 by 0. A missing element still fails. */
+const rectIn=(page,selector)=>page.evaluate(selector=>{const el=document.querySelector(selector);if(!el)throw new Error(`No element matches ${selector}`);const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height,display:getComputedStyle(el).display,size:parseFloat(getComputedStyle(el).fontSize)};},selector);
 
 await check('Lv 12 walk: the main line in place with Rage Burst greyed, Ruinous Blow on its own key, what the main line fires now; one gold action',async()=>{
   const {page,context,errors}=await open(ascent(ref,'skill-bar'),{live:true});
