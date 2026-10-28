@@ -1,5 +1,6 @@
 astrix-app/tools/aion2-bar-rules.mjs
 astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-aetherium-ascent.mjs
 astrix-app/tools/test-aetherium-level-assassin.mjs
 astrix-app/tools/test-aetherium-level-chanter.mjs
 astrix-app/tools/test-aetherium-level-cleric.mjs
