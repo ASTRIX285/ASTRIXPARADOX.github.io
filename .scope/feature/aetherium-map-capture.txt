@@ -1,0 +1,16 @@
+# feature/aetherium-map-capture: Atreia Atlas capture mode at ?capture=1, markers on the map with clusters, card, counts, deep link, Places layer (brief 2).
+astrix-app/games/aion2/data/map/layers.json
+astrix-app/games/aion2/data/map/markers.json
+astrix-app/games/aion2/engine/atlas-data.mjs
+astrix-app/games/aion2/schema/atlas-markers.schema.json
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/atlas-capture.mjs
+astrix-app/pages/aetherium/atlas-markers.mjs
+astrix-app/pages/aetherium/atlas-page.mjs
+astrix-app/pages/aetherium/atlas-view.mjs
+astrix-app/pages/aetherium/atlas.css
+astrix-app/pages/aetherium/icons/atlas-layers.svg
+astrix-app/tools/fixtures/aion2/atlas-markers.json
+astrix-app/tools/test-aetherium-map.mjs
+astrix-app/tools/validate-aetherium-map.mjs
+hub/aetherium/map/index.html

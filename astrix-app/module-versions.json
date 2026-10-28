@@ -84,7 +84,7 @@
 
   "/astrix-app/games/aion2/engine/ascent-advisor.mjs": "4838047019",
 
-  "/astrix-app/games/aion2/engine/atlas-data.mjs": "aede990c70",
+  "/astrix-app/games/aion2/engine/atlas-data.mjs": "58d5797624",
 
   "/astrix-app/games/aion2/engine/daevanion-planner.mjs": "009d0b5160",
 
@@ -134,11 +134,15 @@
 
   "/astrix-app/pages/aetherium/ascent-plan.mjs": "5f250dd633",
 
+  "/astrix-app/pages/aetherium/atlas-capture.mjs": "c923407501",
+
   "/astrix-app/pages/aetherium/atlas-card.mjs": "c6e5edb9d7",
 
-  "/astrix-app/pages/aetherium/atlas-page.mjs": "c493183a45",
+  "/astrix-app/pages/aetherium/atlas-markers.mjs": "82dc06a943",
 
-  "/astrix-app/pages/aetherium/atlas-view.mjs": "6196a84520",
+  "/astrix-app/pages/aetherium/atlas-page.mjs": "860f3c10a3",
+
+  "/astrix-app/pages/aetherium/atlas-view.mjs": "8b9b6ff452",
 
   "/astrix-app/pages/aetherium/character-menu.mjs": "59326b7ac3",
 

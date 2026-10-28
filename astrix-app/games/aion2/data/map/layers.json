@@ -1,5 +1,5 @@
 {
-  "description": "Atreia Atlas layers: the page's own set of toggles, in the order the layer panel lists them (Miguel's brief, 28 Oct 2026). Each line says what the layer shows on our map, not a fact about the game. Each layer has our own icon (pages/aetherium/icons/atlas-layers.svg).",
+  "description": "Atreia Atlas layers: the page's own set of toggles, in the order the layer panel lists them (Miguel's brief, 28 Oct 2026; Places added for named spots with capture mode). Each line says what the layer shows on our map, not a fact about the game. Each layer has our own icon (pages/aetherium/icons/atlas-layers.svg).",
   "layers": [
     { "id": "hidden-cube", "label": "Hidden Cubes", "icon": "hidden-cube", "text": "Hidden Cubes we have found in this zone." },
     { "id": "empyrean-trace", "label": "Empyrean Traces", "icon": "empyrean-trace", "text": "Empyrean Traces we have found in this zone." },
@@ -7,6 +7,7 @@
     { "id": "gathering", "label": "Gathering", "icon": "gathering", "text": "Gathering spots we have found in this zone." },
     { "id": "named-monster", "label": "Named monsters", "icon": "named-monster", "text": "Named monsters and where we saw them spawn." },
     { "id": "dungeon-entrance", "label": "Dungeon entrances", "icon": "dungeon-entrance", "text": "Where you walk in to each dungeon." },
-    { "id": "rift", "label": "Rifts", "icon": "rift", "text": "Where we have seen the Spacetime Rift open." }
+    { "id": "rift", "label": "Rifts", "icon": "rift", "text": "Where we have seen the Spacetime Rift open." },
+    { "id": "place", "label": "Places", "icon": "place", "text": "Towns, camps and landmarks, named as the game names them." }
   ]
 }

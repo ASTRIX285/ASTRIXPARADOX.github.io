@@ -5,10 +5,14 @@
  *
  * Speed: the shell, the zone picker and the layer panel draw from three small JSON files and the page reports ready; the
  * base map loads after that, at the size the screen needs (the small WebP on a phone, the full one when zoomed in).
+ *
+ * Markers (feature/aetherium-map-capture): drawn by atlas-markers.mjs, the card opens in the panel, ?zone=<id>&marker=<id>
+ * opens the zone centred on the marker with its card. ?capture=1 loads atlas-capture.mjs, never linked from the site.
  */
 import { $, esc, markReady, showNotice, wireDrawer } from './aetherium-ui.mjs';
 import { createAtlasView } from './atlas-view.mjs';
-import { layerIcon } from './atlas-card.mjs';
+import { layerIcon, markerCardHtml } from './atlas-card.mjs';
+import { createMarkerLayer } from './atlas-markers.mjs';
 
 const DATA = '/astrix-app/games/aion2/data/map/';
 const ZONE_KEY = 'ae-atlas-zone';
@@ -41,6 +45,7 @@ function panelHtml(layers) {
       <h2 class="ae-atlas-panel-title">Layers</h2>
     </div>
     <div class="ae-atlas-panel-body" id="aeAtlasLayers">
+      <div class="ae-atlas-card-slot" id="aeAtlasCard" aria-live="polite"></div>
       <p class="ae-atlas-empty" id="aeAtlasEmpty" hidden>No markers captured for this zone yet.</p>
       <ul class="ae-atlas-layers">${layers.map(layer => `<li>
         <button class="ae-btn ae-atlas-layer" type="button" data-layer="${esc(layer.id)}" aria-pressed="true" title="${esc(layer.text)}">
@@ -49,20 +54,31 @@ function panelHtml(layers) {
           <span class="ae-atlas-count" data-count="${esc(layer.id)}">0</span>
         </button>
       </li>`).join('')}</ul>
-      <div class="ae-atlas-card-slot" id="aeAtlasCard" aria-live="polite"></div>
     </div>`;
 }
 
-function start({ zones, layers, markers }) {
+function clusterHtml(members, byLayer) {
+  return `<article class="ae-atlas-card ae-atlas-card-list"><h3>${members.length} markers here</h3><ul>${members.map(marker => `<li>
+    <button class="ae-btn ae-atlas-card-pick" type="button" data-pick="${esc(marker.id)}">${layerIcon(byLayer.get(marker.layer)?.icon ?? marker.layer, 28)}<span>${esc(marker.name)}</span></button>
+  </li>`).join('')}</ul></article>`;
+}
+
+function start({ zones, layers, markers, captureModule }) {
   const list = zones.records ?? [];
   const params = new URLSearchParams(location.search);
-  const wanted = [params.get('zone'), remembered()].find(id => list.some(zone => zone.id === id));
+  const linked = params.get('marker');
+  const linkedMarker = linked ? (markers.records ?? []).find(marker => marker.id === linked) : null;
+  const wanted = [linkedMarker?.zone, params.get('zone'), remembered()].find(id => list.some(zone => zone.id === id));
   let zone = list.find(item => item.id === wanted) ?? list[0];
   const stageEl = $('#aeAtlasStage');
   const imageEl = $('#aeAtlasImage');
   const viewEl = $('#aeAtlasView');
   const view = createAtlasView(viewEl, stageEl);
   const shown = new Set(layers.layers.map(layer => layer.id));
+  const byLayer = new Map(layers.layers.map(layer => [layer.id, layer]));
+  const pins = createMarkerLayer({ overlay: $('#aeAtlasMarkers'), view, layers: layers.layers });
+  let capture = null;
+  let selected = null;
 
   $('#aeAtlasZones').innerHTML = pickerHtml(list, zone.id);
   $('#aeAtlasPanel').innerHTML = panelHtml(layers.layers);
@@ -79,8 +95,56 @@ function start({ zones, layers, markers }) {
   }
   view.onChange(() => { if (imageEl.hasAttribute('src')) pickImage(); });
 
+  /** markers.json for this zone, plus this device's captures in capture mode. */
+  const zoneMarkers = () => [
+    ...(markers.records ?? []),
+    ...(capture ? capture.records().map(marker => ({ ...marker, captured: true })) : [])
+  ].filter(marker => marker.zone === zone.id);
+  /* Phone bottom sheet. A card opens it short, showing the card alone, so the marker stays in view above it. */
+  const sheetOpen = (open, { cardOnly = false } = {}) => {
+    const sheet = $('#aeAtlasSheet');
+    if (getComputedStyle(sheet).display === 'none') return;
+    sheet.setAttribute('aria-expanded', String(open));
+    $('#aeAtlasPanel').classList.toggle('is-open', open);
+    $('#aeAtlasPanel').classList.toggle('is-card', open && cardOnly);
+  };
+  const setUrl = id => {
+    const url = new URL(location.href);
+    url.searchParams.set('zone', zone.id);
+    if (id) url.searchParams.set('marker', id); else url.searchParams.delete('marker');
+    history.replaceState(history.state, '', url);
+  };
+  function openCard(id) {
+    const marker = zoneMarkers().find(item => item.id === id);
+    if (!marker) return;
+    selected = id;
+    pins.select(id);
+    $('#aeAtlasCard').innerHTML = markerCardHtml(marker, byLayer.get(marker.layer));
+    sheetOpen(true, { cardOnly: true });
+    $('#aeAtlasLayers').scrollTop = 0;
+    if (!capture) setUrl(id);
+  }
+  function closeCard() {
+    if (!selected && !$('#aeAtlasCard').childElementCount) return;
+    selected = null;
+    pins.select(null);
+    $('#aeAtlasCard').replaceChildren();
+    if ($('#aeAtlasPanel').classList.contains('is-card')) sheetOpen(false);
+    if (!capture) setUrl(null);
+  }
+  pins.onPick((id, members) => {
+    if (members) { selected = null; pins.select(null); $('#aeAtlasCard').innerHTML = clusterHtml(members, byLayer); sheetOpen(true, { cardOnly: true }); return; }
+    if (capture?.owns(id)) { closeCard(); capture.edit(id); return; }
+    openCard(id);
+  });
+  view.onTap(at => {
+    if (zone.image && capture) { closeCard(); capture.drop(at.fx, at.fy); return; }
+    closeCard();
+  });
+
   function counts() {
-    const here = (markers.records ?? []).filter(marker => marker.zone === zone.id);
+    const here = zoneMarkers();
+    pins.set(zone.image ? here : []);
     for (const layer of layers.layers) {
       const n = here.filter(marker => marker.layer === layer.id).length;
       const cell = document.querySelector(`[data-count="${CSS.escape(layer.id)}"]`);
@@ -88,7 +152,6 @@ function start({ zones, layers, markers }) {
     }
     $('#aeAtlasEmpty').hidden = here.length > 0;
     $('#aeAtlasTotal').textContent = `${here.length} marker${here.length === 1 ? '' : 's'}`;
-    $('#aeAtlasMarkers').replaceChildren();
   }
 
   function show(next, { load = true } = {}) {
@@ -100,6 +163,9 @@ function start({ zones, layers, markers }) {
     imageEl.alt = `In-game map of ${zone.name}`;
     imageEl.removeAttribute('src');
     wantsFull = false;
+    selected = null;
+    pins.select(null);
+    $('#aeAtlasCard').replaceChildren();
     /* No capture yet: say so in the map area, draw nothing and keep the zoom buttons off. */
     const pendingMap = !zone.image;
     viewEl.classList.toggle('is-pending', pendingMap);
@@ -109,6 +175,7 @@ function start({ zones, layers, markers }) {
     for (const tool of document.querySelectorAll('.ae-atlas-tool')) tool.disabled = pendingMap;
     if (!pendingMap) view.load(zone.width, zone.height);
     counts();
+    capture?.zoneChanged(zone);
     if (load) pickImage();
   }
   imageEl.addEventListener('load', () => viewEl.classList.remove('is-loading'));
@@ -127,20 +194,41 @@ function start({ zones, layers, markers }) {
       const on = toggle.getAttribute('aria-pressed') !== 'true';
       toggle.setAttribute('aria-pressed', String(on));
       if (on) shown.add(toggle.dataset.layer); else shown.delete(toggle.dataset.layer);
+      pins.setShown(shown);
       return;
     }
+    const pick = event.target.closest('[data-pick]');
+    if (pick) { openCard(pick.dataset.pick); return; }
     const sheet = event.target.closest('#aeAtlasSheet');
     if (sheet) {
-      const open = sheet.getAttribute('aria-expanded') !== 'true';
-      sheet.setAttribute('aria-expanded', String(open));
-      $('#aeAtlasPanel').classList.toggle('is-open', open);
+      /* From a card on its own, the handle opens the full list; otherwise it opens and closes the sheet. */
+      if ($('#aeAtlasPanel').classList.contains('is-card')) { sheetOpen(true); return; }
+      sheetOpen(sheet.getAttribute('aria-expanded') !== 'true');
     }
   });
   $('#aeAtlasZoomIn').addEventListener('click', view.zoomIn);
   $('#aeAtlasZoomOut').addEventListener('click', view.zoomOut);
   $('#aeAtlasFit').addEventListener('click', view.fit);
 
+  if (captureModule) {
+    capture = captureModule.startCapture({
+      panel: $('#aeAtlasPanel'), view, layers: layers.layers, zone,
+      takenIds: () => new Set((markers.records ?? []).map(marker => marker.id)),
+      onChange: () => counts()
+    });
+    pins.draggable(id => capture.owns(id));
+    pins.onMove((id, fx, fy) => capture.move(id, fx, fy));
+  }
+
   show(zone, { load: false });
+  /* Deep link: the zone centred on the marker, with its card open. */
+  if (linked) {
+    if (linkedMarker && linkedMarker.zone === zone.id && zone.image) {
+      view.focus(linkedMarker.x, linkedMarker.y, 3);
+      openCard(linkedMarker.id);
+      pins.flush();
+    } else showNotice('That marker is not on the map yet.', 'warn');
+  }
   markReady();
   /* The base map waits for the page to be usable, then loads at the size the screen needs. */
   const later = window.requestIdleCallback ?? (fn => setTimeout(fn, 1));
@@ -148,8 +236,11 @@ function start({ zones, layers, markers }) {
 }
 
 wireDrawer();
-Promise.all([getJson('zones.json'), getJson('layers.json'), getJson('markers.json')])
-  .then(([zones, layers, markers]) => start({ zones, layers, markers }))
+const wantsCapture = new URLSearchParams(location.search).get('capture') === '1';
+/* Capture mode and the checks it imports, fetched side by side rather than one after the other. */
+const loadCapture = () => Promise.all([import('./atlas-capture.mjs'), import('../../games/aion2/engine/atlas-data.mjs')]).then(([mode]) => mode);
+Promise.all([getJson('zones.json'), getJson('layers.json'), getJson('markers.json'), wantsCapture ? loadCapture() : null])
+  .then(([zones, layers, markers, captureModule]) => start({ zones, layers, markers, captureModule }))
   .catch(() => {
     showNotice('The map data did not load. Check your connection and try again.', 'error', { retry: () => location.reload() });
     markReady();

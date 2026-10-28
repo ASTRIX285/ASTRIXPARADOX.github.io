@@ -29,13 +29,15 @@
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
   <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261026-game-icons-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/atlas.css?v=20261028-atlas-2">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/atlas.css?v=20261028-atlas-3">
   <link rel="preload" href="/astrix-app/games/aion2/data/map/zones.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/games/aion2/data/map/layers.json" as="fetch" crossorigin>
   <link rel="preload" href="/astrix-app/games/aion2/data/map/markers.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d",
+
+"/astrix-app/games/aion2/engine/atlas-data.mjs":"/astrix-app/games/aion2/engine/atlas-data.mjs?v=58d5797624",
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
@@ -45,11 +47,15 @@
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5",
 
+"/astrix-app/pages/aetherium/atlas-capture.mjs":"/astrix-app/pages/aetherium/atlas-capture.mjs?v=c923407501",
+
 "/astrix-app/pages/aetherium/atlas-card.mjs":"/astrix-app/pages/aetherium/atlas-card.mjs?v=c6e5edb9d7",
 
-"/astrix-app/pages/aetherium/atlas-page.mjs":"/astrix-app/pages/aetherium/atlas-page.mjs?v=c493183a45",
+"/astrix-app/pages/aetherium/atlas-markers.mjs":"/astrix-app/pages/aetherium/atlas-markers.mjs?v=82dc06a943",
 
-"/astrix-app/pages/aetherium/atlas-view.mjs":"/astrix-app/pages/aetherium/atlas-view.mjs?v=6196a84520"
+"/astrix-app/pages/aetherium/atlas-page.mjs":"/astrix-app/pages/aetherium/atlas-page.mjs?v=860f3c10a3",
+
+"/astrix-app/pages/aetherium/atlas-view.mjs":"/astrix-app/pages/aetherium/atlas-view.mjs?v=8b9b6ff452"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d" data-head-hint>
@@ -64,10 +70,12 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/atlas-card.mjs?v=c6e5edb9d7" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/atlas-page.mjs?v=c493183a45" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/atlas-markers.mjs?v=82dc06a943" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/atlas-view.mjs?v=6196a84520" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/atlas-page.mjs?v=c493183a45"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/atlas-page.mjs?v=860f3c10a3" data-head-hint>
+
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/atlas-view.mjs?v=8b9b6ff452" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/atlas-page.mjs?v=860f3c10a3"></script>
 </head>
 <body class="aetherium-page ae-atlas-page" data-faction="astrix" data-apx-button-system data-ae-page="map">
   <a class="ae-skip" href="#aeAtlasView">Skip to the map</a>
@@ -122,8 +130,8 @@
         <div class="ae-atlas-view is-loading" id="aeAtlasView" tabindex="0" role="region" aria-label="Map">
           <div class="ae-atlas-stage" id="aeAtlasStage">
             <img class="ae-atlas-image" id="aeAtlasImage" alt="" decoding="async" draggable="false">
-            <div class="ae-atlas-markers" id="aeAtlasMarkers"></div>
           </div>
+          <div class="ae-atlas-markers" id="aeAtlasMarkers"></div>
           <p class="ae-atlas-pending" id="aeAtlasPending" role="status" hidden></p>
         </div>
         <div class="ae-atlas-tools" role="group" aria-label="Zoom">

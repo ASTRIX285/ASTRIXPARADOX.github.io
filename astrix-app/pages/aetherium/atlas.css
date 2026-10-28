@@ -66,7 +66,7 @@ html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-
 
 /* The marker card. */
 .ae-atlas-card-slot:empty{display:none}
-.ae-atlas-card-slot{margin-top:14px}
+.ae-atlas-card-slot{margin-bottom:14px}
 .ae-atlas-card{position:relative;padding:14px 16px;background:var(--ae-raised);border:1px solid var(--ae-hairline-strong);
   box-shadow:var(--ae-top-light),var(--ae-shadow-tight);color:var(--ae-text)}
 .ae-atlas-card-head{display:flex;align-items:center;gap:12px}
@@ -98,5 +98,107 @@ html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-
   .ae-atlas-total{font:600 .875rem/1 var(--ae-font-ui);color:var(--ae-text-muted)}
   .ae-atlas-panel:not(.is-open) .ae-atlas-panel-body{display:none}
   .ae-atlas-panel.is-open .ae-atlas-panel-body{padding-bottom:16px}
+  .ae-atlas-panel.is-card .ae-atlas-panel-body>:not(.ae-atlas-card-slot){display:none}
   .aetherium-page .ae-atlas-zone{flex:1 1 auto;justify-content:center}
+}
+
+/* Markers (feature/aetherium-map-capture). The overlay sits over the base map in screen pixels, so pins keep their size at
+   every zoom. Pins, clusters and place names are buttons; the page-wide button frame is taken off them here. */
+.ae-atlas-markers{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+.ae-atlas-pins{position:absolute;inset:0}
+html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-height:0;padding:0;margin:0;cursor:pointer;
+  clip-path:none!important;border:0!important;background:transparent!important;box-shadow:none!important;transition:filter var(--ae-ease),transform var(--ae-ease)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  width:44px;height:44px;border-radius:50%!important;touch-action:none}
+.ae-atlas-pin .ae-atlas-icon{width:34px;height:34px;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin:hover:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){transform:translate(-50%,-50%) scale(1.12)}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-selected:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  box-shadow:0 0 0 3px var(--ae-strobe),0 0 18px 4px color-mix(in srgb,var(--ae-strobe) 55%,transparent)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-reported:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  box-shadow:0 0 0 2px var(--ae-gold)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  cursor:grab;box-shadow:0 0 0 2px var(--ae-ice),0 0 0 4px color-mix(in srgb,var(--ae-ice) 30%,transparent)!important}
+.ae-atlas-pin.is-dragging{cursor:grabbing;z-index:2;opacity:.85}
+.ae-atlas-markers .ae-atlas-pin.is-selected{z-index:2}
+.ae-atlas-pin:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:2px}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  display:grid;place-items:center;width:46px;height:46px;z-index:1;border-radius:50%!important;font:700 1rem/1 var(--ae-font-ui);color:var(--ae-gold-ink)!important;
+  background:radial-gradient(circle at 50% 35%,var(--ae-gold-top),var(--ae-gold-bottom) 70%)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--ae-panel-solid) 85%,transparent),0 0 0 5px color-mix(in srgb,var(--ae-gold) 45%,transparent),0 4px 10px rgba(0,0,0,.6)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:hover:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){transform:translate(-50%,-50%) scale(1.08)}
+/* Place names: the game's name for the spot, set like a map label. */
+html body.aetherium-page .ae-atlas-markers .ae-atlas-place:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  max-width:180px;min-height:32px;padding:4px 8px;font:700 .8125rem/1.15 var(--ae-font-ui);letter-spacing:.06em;text-transform:uppercase;text-align:center;
+  color:var(--ae-text)!important;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 2px #000;white-space:normal;touch-action:none}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-selected:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){color:var(--ae-strobe-hi)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){cursor:grab;color:var(--ae-ice)!important}
+
+/* A cluster at full zoom lists its markers in the card. */
+.ae-atlas-card-list h3{margin:0 0 10px}
+.ae-atlas-card-list ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.aetherium-page .ae-atlas-card-pick{width:100%;justify-content:flex-start;gap:10px;text-align:left}
+
+/* Capture mode (?capture=1 only). Big targets, and the form lives in the panel so it never covers the spot being marked. */
+.is-atlas-capture .ae-atlas-view{cursor:crosshair}
+.is-atlas-capture .ae-atlas-view.is-dragging{cursor:grabbing}
+.ae-atlas-ghost{position:absolute;box-sizing:border-box;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;pointer-events:none;
+  border:3px solid var(--ae-strobe-hi);box-shadow:0 0 0 3px rgba(0,0,0,.55),0 0 16px 4px color-mix(in srgb,var(--ae-strobe) 70%,transparent);animation:ae-atlas-ghost 1.2s ease-in-out infinite}
+@keyframes ae-atlas-ghost{50%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){.ae-atlas-ghost{animation:none}}
+.ae-atlas-capture{display:grid;gap:12px;margin:0 0 16px;padding:14px;border:1px solid color-mix(in srgb,var(--ae-strobe) 45%,var(--ae-hairline));
+  background:color-mix(in srgb,var(--ae-strobe) 6%,var(--ae-panel-solid));box-shadow:var(--ae-top-light)}
+.ae-atlas-capture-title{margin:0;font:700 1.0625rem/1.2 var(--ae-font-ui);color:var(--ae-strobe-hi)}
+.ae-atlas-capture-help,.ae-atlas-capture-status{margin:0;font-size:.875rem;line-height:1.45;color:var(--ae-text-muted)}
+.ae-atlas-capture-status:empty{display:none}
+.ae-atlas-capture-error{margin:0;padding:8px 12px;font:600 .875rem/1.4 var(--ae-font-ui);color:var(--ae-text);border-left:3px solid var(--ae-gold);background:color-mix(in srgb,var(--ae-gold) 12%,var(--ae-panel))}
+.ae-atlas-capture-actions{display:flex;flex-wrap:wrap;gap:8px}
+.aetherium-page .ae-atlas-capture-actions .ae-btn{flex:1 1 auto;min-height:48px}
+.ae-atlas-capture-form{display:grid;gap:12px;padding-top:12px;border-top:1px solid var(--ae-hairline)}
+.ae-atlas-capture-form[hidden],.ae-atlas-capture-out[hidden],.ae-atlas-capture-error[hidden]{display:none}
+.ae-atlas-capture-form h3{margin:0;font:700 1rem/1.2 var(--ae-font-ui);color:var(--ae-text)}
+.ae-atlas-field{display:grid;gap:4px;min-width:0;font:600 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-atlas-field :is(input,textarea),.ae-atlas-capture-out{width:100%;box-sizing:border-box;min-height:44px;padding:8px 12px;font:500 1rem/1.3 var(--ae-font-ui);color:var(--ae-text);
+  background:var(--ae-well);border:1px solid var(--ae-hairline-strong);border-radius:8px}
+.ae-atlas-field textarea{min-height:64px;resize:vertical}
+.ae-atlas-capture-out{min-height:120px;font:500 .75rem/1.4 ui-monospace,Consolas,monospace;resize:vertical}
+.ae-atlas-field :is(input,textarea):focus-visible,.ae-atlas-capture-out:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:1px}
+.ae-atlas-field-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ae-atlas-cap-layers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0;padding:0;border:0;min-width:0}
+.ae-atlas-cap-layers legend{margin:0 0 6px;padding:0;font:600 .8125rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-atlas-cap-layer{position:relative;display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 10px;box-sizing:border-box;cursor:pointer;
+  font:700 .875rem/1.15 var(--ae-font-ui);color:var(--ae-text);border:1px solid var(--ae-hairline-strong);border-radius:10px;background:var(--ae-well)}
+.ae-atlas-cap-layer input{position:absolute;opacity:0;pointer-events:none}
+.ae-atlas-cap-layer:has(input:checked){border-color:var(--ae-strobe);background:color-mix(in srgb,var(--ae-strobe) 16%,var(--ae-well));box-shadow:inset 0 0 0 1px var(--ae-strobe)}
+.ae-atlas-cap-layer:has(input:focus-visible){outline:2px solid var(--ae-strobe);outline-offset:2px}
+.ae-atlas-cap-layer .ae-atlas-icon{width:28px;height:28px}
+/* No strobe stroke on map pins: they are markers on the map, not buttons in the page. */
+html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10)::before,
+html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10)::after{content:none!important;display:none!important}
+
+/* The site's button frame and strobe sit in the astrix-brand cascade layer, where !important outranks anything outside a
+   layer. The pin overrides above go in the same layer so they win there too. */
+@layer astrix-brand{
+html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-height:0;padding:0;margin:0;cursor:pointer;
+  clip-path:none!important;border:0!important;background:transparent!important;box-shadow:none!important;transition:filter var(--ae-ease),transform var(--ae-ease)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  width:44px;height:44px;border-radius:50%!important;touch-action:none}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-selected:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  box-shadow:0 0 0 3px var(--ae-strobe),0 0 18px 4px color-mix(in srgb,var(--ae-strobe) 55%,transparent)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-reported:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  box-shadow:0 0 0 2px var(--ae-gold)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  cursor:grab;box-shadow:0 0 0 2px var(--ae-ice),0 0 0 4px color-mix(in srgb,var(--ae-ice) 30%,transparent)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  display:grid;place-items:center;width:46px;height:46px;z-index:1;border-radius:50%!important;font:700 1rem/1 var(--ae-font-ui);color:var(--ae-gold-ink)!important;
+  background:radial-gradient(circle at 50% 35%,var(--ae-gold-top),var(--ae-gold-bottom) 70%)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--ae-panel-solid) 85%,transparent),0 0 0 5px color-mix(in srgb,var(--ae-gold) 45%,transparent),0 4px 10px rgba(0,0,0,.6)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-place:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
+  max-width:180px;min-height:32px;padding:4px 8px;font:700 .8125rem/1.15 var(--ae-font-ui);letter-spacing:.06em;text-transform:uppercase;text-align:center;
+  color:var(--ae-text)!important;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 2px #000;white-space:normal;touch-action:none}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-selected:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){color:var(--ae-strobe-hi)!important}
+html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){cursor:grab;color:var(--ae-ice)!important}
+html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10)::before,
+html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10)::after{content:none!important;display:none!important}
 }

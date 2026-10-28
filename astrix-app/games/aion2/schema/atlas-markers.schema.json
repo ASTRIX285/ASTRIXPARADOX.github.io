@@ -28,13 +28,17 @@
         "level": { "type": "integer", "minimum": 1 },
         "status": { "enum": ["confirmed", "reported"] },
         "provenance": {
+          "description": "An in-game-capture source in the shape of platform/contracts/provenance.schema.json.",
           "type": "object",
-          "required": ["capturedBy", "capturedOn", "where"],
+          "required": ["kind", "capturedBy", "capturedOn", "gameVersion", "where", "note"],
           "additionalProperties": false,
           "properties": {
+            "kind": { "const": "in-game-capture" },
             "capturedBy": { "type": "string", "minLength": 1 },
             "capturedOn": { "type": "string", "format": "date" },
-            "where": { "type": "string", "minLength": 1 }
+            "gameVersion": { "type": "string", "minLength": 1 },
+            "where": { "type": "string", "minLength": 1 },
+            "note": { "type": "string", "minLength": 1 }
           }
         }
       }
