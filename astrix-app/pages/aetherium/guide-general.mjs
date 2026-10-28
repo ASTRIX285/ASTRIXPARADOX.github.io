@@ -188,7 +188,7 @@ function marketPage(r) {
     ${fact(r['market-tip'], '', { cls: 'is-tip', icon: 'market' })}
     ${fact(r['shared-entries'])}`;
 }
-/** The bar as the game lays it out: 1 to 8, Q, E, then the mouse and the second stack, with the order own keys fill in. The
+/** The bar as the game lays it out: 1 to 8, Q, E, then the mouse (the bar ends at right click), with the order keys fill in. The
  * numbered steps beside it light the keys they talk about while hovered, focused or pressed. */
 function barPicture(layout) {
   const fill = new Map(layout.value.fill.map((key, index) => [key, index + 1]));
@@ -198,13 +198,12 @@ function barPicture(layout) {
   return `<div class="ae-gg-barwrap">
     <figure class="ae-gg-bar" id="aeGuideBar">
       <div class="ae-gg-keyscroll"><ol class="ae-gg-keys" aria-label="Keys 1 to 8, Q and E, numbered in the order you fill them">${keys.map(cap).join('')}</ol></div>
-      <ol class="ae-gg-keys is-mouse" aria-label="Then the mouse and the second stack">
+      <ol class="ae-gg-keys is-mouse" aria-label="Then the mouse">
         <li class="ae-gg-key is-wide" data-bar-key="LMB"><b>Left click</b><small>Main attack</small></li>
         <li class="ae-gg-key is-wide is-macro" data-bar-key="RMB"><b>Right click</b><small>Main line</small></li>
-        <li class="ae-gg-key is-wide is-macro" data-bar-key="B"><b>Stack</b><small>Second macro stack</small></li>
       </ol>
       <p class="ae-gg-key is-space" data-bar-key="Space"><b>Space bar</b><small>Defiance</small></p>
-      <figcaption>Small gold numbers: the order own keys fill in.</figcaption>
+      <figcaption>Small gold numbers: the order keys fill in. Q and E first, the stacks of short cooldowns.</figcaption>
     </figure>
     <ol class="ae-gg-barsteps" id="aeBarSteps" aria-label="How to read the bar">${layout.steps.map(step).join('')}</ol>
   </div>`;

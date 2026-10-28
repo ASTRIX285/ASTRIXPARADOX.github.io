@@ -123,9 +123,9 @@ check('the main line grows from the first level: Savage Roar, then Heart Gore, I
   assert.match(plan(5).skillBar.stacks.B.skills[0].condition,/critical hit/);
 });
 
-/* The 25 Oct 2026 Skill Bar rules (Miguel, in game) replace the 17 Oct "own keys never move as the Daeva levels": every
+/* The bar by cooldown (Miguel, in game, 28 Oct 2026; it replaces the 25 Oct key groups and the 17 Oct "own keys never move"): every
    level is held to the game's bar instead (aion2-bar-rules.mjs). */
-check('the game\'s bar at every level: 1 to 4 cooldowns and stigmas, Q and E cover, nothing on 5 to 8 while a reachable key is free',()=>{
+check('the bar by cooldown at every level: Q and E stack the shortest, 1 to 4 the long cooldowns, 5 to 8 one skill each',()=>{
   for(const level of LEVELS)assertKeyGroups(plan(level).skillBar,`${label(level)}`);
 });
 

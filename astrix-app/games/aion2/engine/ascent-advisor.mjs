@@ -936,6 +936,10 @@ export function planChains({ catalogue, className, mechanics }) {
 export const chainsOf = (chains, name) => (chains?.chains ?? []).filter(chain => chain.leadIns.includes(name) || chain.followUp === name);
 
 const cooldownOf = info => (info && typeof info.cooldownSeconds === 'number' ? info.cooldownSeconds : null);
+/** Where a long cooldown starts (mechanics.json skill-bar, Miguel, in game, 28 Oct 2026): at or over it a skill takes a key of
+    its own on 1 to 4; under it, it stacks on Q or E. 45 s when the rule is not loaded. */
+export const LONG_COOLDOWN = 45;
+const longCooldownOf = mechanics => { const value = mechanics?.['skill-bar']?.value?.longCooldownSeconds; return Number.isFinite(value) && value > 0 ? value : LONG_COOLDOWN; };
 
 /** The skills a build calls its filler, in the build's order: the rotation's filler line, key skills whose reason says filler, then a captured 0 s cooldown. */
 export function buildFillers(build, names, catalogue = new Map()) {
@@ -1020,7 +1024,8 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   const put = (key, entries, extra = {}) => { stacks[key] = { ...stacks[key], skills: entries, ...extra }; entries.forEach(item => placed.add(item.name)); };
 
   const notOnBar = [];
-  let secondStack = null, mainStack = null;
+  let secondStack = null, mainStack = null, secondStackKey = null;
+  const macroStacks = {};
   if (block) {
     // The right-hand block: stack A, the main attack on left click, stack B, each row as the block lists it.
     for (const [id, key] of MACRO_STACKS) {
@@ -1037,7 +1042,7 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
         fillerMissing: rows.length > 1 && !(top.noCooldown && !top.conditional) ? 'No filler on top: when every skill here is on cooldown, the macro skips this entry and your held main attack fills the gap.' : null
       });
     }
-    // Right click holds the main line (the stack the build names "Main line", else stack A); the other stack is on key 1.
+    // Right click holds the main line (the stack the build names "Main line", else stack A).
     const withSkills = MACRO_STACKS.map(([, key]) => key).filter(key => stacks[key].skills.length);
     const mainLine = withSkills.find(key => stacks[key].name === 'Main line') ?? withSkills[0] ?? null;
     secondStack = withSkills.find(key => key !== mainLine) ?? null;
@@ -1057,49 +1062,93 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
     const rank = item => (first(item) >= 0 ? first(item) - 100 : OWN_KEY_ORDER.indexOf(item.reason) === -1 ? OWN_KEY_ORDER.length : OWN_KEY_ORDER.indexOf(item.reason));
     // The build's own order when it gives one (the keys a published bar uses), else the opener first, then by reason.
     const ordered = own.map((item, index) => ({ ...item, index })).sort((a, b) => (block.ownKeysOrder === 'listed' ? a.index - b.index : rank(a) - rank(b) || a.index - b.index));
-    // Keys as the game's bar is set (KEY_GROUPS): cover on Q and E, cooldown skills and stigmas on 1 to 4, the rest on
-    // 5 to 8. Key 1 is the second stack's when the build has one. A group that runs out takes the next free key.
-    const free = KEY_FILL.filter(key => key !== 'RMB' && !(secondStack && key === SECOND_STACK_KEY));
-    const keyOf = new Map();
-    const take = key => { free.splice(free.indexOf(key), 1); return key; };
-    const isStigmaKey = item => namesOf(item).some(name => byName.get(name)?.category === 'Stigma') || (item.reserved ?? []).some(name => byName.get(name)?.category === 'Stigma');
-    // 1. Skills the Daeva has now: cooldown skills and stigmas claim 1 to 4, cover claims Q and E.
-    // 2. Everything else it has now (toggles, dashes, movement, and what did not fit) takes the next free key in reach
-    //    order: what is left of 1 to 4, Q and E first, then 5 to 8.
-    // 3. Keys kept for skills that come later take what is left, so they never hold a reachable key empty.
-    // A key with two or more skills (open now or still to come) only goes where the game stacks: 1 to 4, Q or E.
-    const fullSize = item => (item.reserved ?? [...(Array.isArray(item.stack) ? item.stack : [item.name]), ...(item.waiting ?? [])]).filter(name => name !== SPACE_SKILL).length;
-    const stackedKey = item => fullSize(item) > 1;
-    const nextFree = item => (stackedKey(item) ? free.find(name => STACKABLE_KEYS.includes(name)) : free[0]) ?? null;
-    const now = ordered.filter(entry => !entry.reserved);
-    const later = ordered.filter(entry => entry.reserved);
-    const groupOf = item => keyGroupOf(item.reason, isStigmaKey(item));
-    const deferred = [];
-    // Stacked keys first, so they still find a key that holds a stack.
-    now.sort((a, b) => Number(stackedKey(b)) - Number(stackedKey(a)));
-    for (const item of now) {
-      const group = groupOf(item);
-      const key = group === 'rest' ? null : KEY_GROUPS[group].find(name => free.includes(name));
-      if (key) keyOf.set(item, take(key)); else deferred.push(item);
+    // Keys by cooldown (Miguel, in game, 28 Oct 2026; mechanics.json skill-bar). Right click keeps the build's main line.
+    // Every other skill the Daeva has now goes by its cooldown:
+    //   - short (under the long line, 45 s): stacked on Q, then E, up to four rows each, shortest first, so the keys
+    //     you press most cycle through what is ready. Heals and staggers stack by cooldown like the rest.
+    //   - long (45 s and over): the power skills and stigmas, one per key on 1 to 4, so you choose when they go.
+    //   - toggles, dashes, movement, charged skills and a skill whose cooldown is not captured: a key of their own.
+    // What 1 to 4, Q and E cannot hold goes on 5 to 8, one skill each. A key for a skill that comes later is not kept:
+    // it waits in Comes later.
+    const long = longCooldownOf(mechanics);
+    const OWN_ONLY = ['toggle', 'dash', 'movement', 'charged'];
+    const cdOf = name => (fillers.includes(name) ? 0 : cooldownOf(catalogue.get(name) ?? null));
+    const unitOf = (names, item) => {
+      const cds = names.map(cdOf);
+      const own = OWN_ONLY.includes(item.reason) || names.some(name => ['toggle', 'charged'].includes(macroUseOf(catalogue.get(name))?.reason));
+      const cd = cds.some(value => value === null) ? null : Math.max(...cds);
+      return { item, names, cd, zero: cds.filter(value => value === 0).length, kind: own || cd === null ? 'own' : cd >= long ? 'long' : 'short' };
+    };
+    // The build's second stack is entry 2 of the macro, and a macro entry is a stack on a key, so it stays together in the
+    // build's order and takes Q or E. Its long cooldowns (45 s and over) come out to keys of their own on 1 to 4.
+    const secondUnits = [];
+    if (secondStack) {
+      macroStacks[secondStack] = { ...stacks[secondStack] };
+      const keep = stacks[secondStack].skills.filter(item => !((cdOf(item.name) ?? 0) >= long));
+      for (const item of stacks[secondStack].skills.filter(entry => !keep.includes(entry))) {
+        secondUnits.push({ item: { name: item.name, reason: 'other', why: item.why ?? null, label: null }, names: [item.name] });
+        placed.delete(item.name);
+      }
+      keep.forEach((item, row) => { item.row = row; });
+      stacks[secondStack] = { ...stacks[secondStack], skills: keep };
+      macroStacks[secondStack] = stacks[secondStack];
     }
-    for (const item of deferred) { const key = nextFree(item); keyOf.set(item, key ? take(key) : null); }
-    for (const item of later) {
-      // The rest group has no keys of its own to claim: like everything else it takes the next free key in reach order.
-      const key = (groupOf(item) === 'rest' ? null : KEY_GROUPS[groupOf(item)].find(name => free.includes(name))) ?? nextFree(item);
-      keyOf.set(item, key ? take(key) : null);
+    const units = [
+      ...secondUnits.map(unit => unitOf(unit.names, unit.item)),
+      ...ordered.filter(item => !item.reserved).map(item => unitOf(namesOf(item), item))
+    ].filter(unit => unit.names.length);
+    const rows = Object.fromEntries(['Q', 'E', '1', '2', '3', '4', '5', '6', '7', '8'].map(key => [key, []]));
+    // The second stack holds its key alone, so the macro entry is exactly the build's stack: Q when its longest cooldown
+    // is no longer than the longest of the other short skills (they then stack on E), else E. Q stays the shorter stack.
+    const secondCd = secondStack ? Math.max(0, ...stacks[secondStack].skills.map(item => cdOf(item.name) ?? 0)) : null;
+    const shortCds = ordered.filter(item => !item.reserved).map(item => unitOf(namesOf(item), item)).filter(unit => unit.kind === 'short').map(unit => unit.cd);
+    if (secondStack && stacks[secondStack].skills.length) secondStackKey = shortCds.length && secondCd > Math.max(...shortCds) ? 'E' : 'Q';
+    const free = key => rows[key].length === 0 && key !== secondStackKey;
+    // Short skills, shortest first: Q fills before E. A stack holds four rows and one always-ready skill at most.
+    const size = key => rows[key].reduce((sum, entry) => sum + entry.names.length, 0);
+    const roomFor = (key, unit) => size(key) + unit.names.length <= STACK_ROWS;
+    const zeroOk = (key, unit) => rows[key].reduce((sum, entry) => sum + entry.zero, 0) + unit.zero <= 1;
+    // Once Q is full, nothing longer goes back to it: Q is always the shorter stack. A second always-ready skill skips
+    // to E without closing Q for the skills after it.
+    const stackKeys = ['Q', 'E'].filter(key => key !== secondStackKey);
+    let at = 0;
+    const overflow = [];
+    for (const unit of units.filter(item => item.kind === 'short').sort((a, b) => a.cd - b.cd)) {
+      while (at < stackKeys.length && !roomFor(stackKeys[at], unit)) at += 1;
+      const key = stackKeys.slice(at).find(name => roomFor(name, unit) && zeroOk(name, unit));
+      if (key) rows[key].push(unit); else overflow.push(unit);
     }
-    // Keys keep the build's own order inside the bar: assignment above only decides where, not what fires first.
-    for (const item of ordered) {
-      const key = keyOf.get(item);
-      if (item.reserved) { if (key) stacks[key].reserved = item.reserved.filter(name => byName.has(name) && name !== SPACE_SKILL); continue; }
-      const why = item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other;
-      const names = namesOf(item);
-      if (!key) { for (const name of names) notOnBar.push({ name, icon: byName.get(name).icon, unlockLevel: byName.get(name).needLevel, reason: 'No key left on the left-hand block.' }); continue; }
-      const cells = names.slice(0, STACK_ROWS).map((name, index) => cell(name, { key, index, role: opener.includes(name) ? 'opener' : 'own', reason: item.reason, why }));
+    // Long cooldowns, then own-key skills, in the build's order: 1 to 4 first, then 5 to 8 (a key there holds one skill).
+    // Short skills Q and E could not hold come last: a key of 1 to 4 the long cooldowns leave free, then 5 to 8. So at
+    // Lv 45 the long cooldowns own 1 to 4, and at a low level the easy keys are never left empty.
+    for (const kind of ['long', 'own', 'overflow']) {
+      for (const unit of kind === 'overflow' ? overflow : units.filter(item => item.kind === kind)) {
+        const key = ['1', '2', '3', '4'].find(free) ?? (unit.names.length === 1 ? ['5', '6', '7', '8'].find(free) : null) ?? (unit.names.length > 1 ? ['Q', 'E'].find(free) : null);
+        if (key) rows[key].push(unit); else unit.key = null;
+      }
+    }
+    for (const unit of units) if (unit.key === null) for (const name of unit.names) notOnBar.push({ name, icon: byName.get(name).icon, unlockLevel: byName.get(name).needLevel, reason: 'No key left on the left-hand block.' });
+    for (const [key, list] of Object.entries(rows)) {
+      if (!list.length) continue;
+      // Inside a stack the longest cooldown sits on row 0 and fires the moment it is ready; an always-ready skill goes on top.
+      const named = list.flatMap(unit => unit.names.map(name => ({ name, unit })));
+      const ordered = list.length > 1 ? named.map((entry, index) => ({ ...entry, index })).sort((a, b) => {
+        const ca = cdOf(a.name), cb = cdOf(b.name);
+        if ((ca === 0) !== (cb === 0)) return ca === 0 ? 1 : -1;
+        return (cb ?? 0) - (ca ?? 0) || a.index - b.index;
+      }) : named;
+      const cells = ordered.slice(0, STACK_ROWS).map((entry, index) => {
+        const item = entry.unit.item;
+        const why = list.length > 1 ? (item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other) : item.why ?? OWN_KEY_WHY[item.reason] ?? OWN_KEY_WHY.other;
+        return cell(entry.name, { key, index, role: opener.includes(entry.name) ? 'opener' : 'own', reason: item.reason, why });
+      });
       const stacked = cells.length > 1;
       const top = cells.at(-1);
+      const kind = list[0].kind;
       put(key, cells, {
-        solo: !stacked, ownStack: stacked, label: item.label ?? null, reason: why, reserved: item.waiting?.length ? item.waiting.filter(name => byName.has(name)) : null, opener: !stacked && opener.includes(names[0]) ? opener.indexOf(names[0]) + 1 : null,
+        solo: !stacked, ownStack: stacked, label: list.length === 1 ? list[0].item.label ?? null : null,
+        reason: stacked ? `Short cooldowns stacked: the longest on row 0 fires as soon as it is ready, the rest fill in.` : kind === 'long' ? `A long cooldown (${list[0].cd} s): its own key, so you choose when it goes.` : list[0].item.why ?? OWN_KEY_WHY[list[0].item.reason] ?? OWN_KEY_WHY.other,
+        opener: !stacked && opener.includes(cells[0].name) ? opener.indexOf(cells[0].name) + 1 : null,
         fillerMissing: stacked && !(top.noCooldown && !top.conditional) ? 'Its own key, not a macro entry: it fires the lowest ready skill when you press it.' : null
       });
     }
@@ -1145,8 +1194,8 @@ function planSkillStacks({ build, stigmas, gameIcons, catalogue, level, facts, m
   const stackFillers = MACRO_STACKS.map(([, key]) => stacks[key].skills.at(-1)).filter(skill => skill && skill.noCooldown && !skill.conditional).map(skill => skill.name);
   const result = {
     keys: SKILL_BAR_KEYS, left: LEFT_KEYS, right: RIGHT_KEYS, rows: STACK_ROWS, stacks, bars,
-    // Where the build's stacks sit on the game's bar: the main line on right click, the second stack on key 1.
-    mainStack, secondStack, secondStackKey: secondStack ? SECOND_STACK_KEY : null, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
+    // The main line on right click, the second stack on Q or E (secondStackKey), its long cooldowns on keys of their own.
+    mainStack, secondStack, secondStackKey, macroStacks, longCooldown: block ? longCooldownOf(mechanics) : LONG_COOLDOWN, basic: basic.name, mainAttack: stacks.LMB.skills[0]?.name ?? basic.name,
     notOnBar, stigmas: slotted.map(slot => slot.name), fillers, stackFillers, fromBlock: Boolean(block), status: block?.status ?? null, space,
     // Skills the plan puts on the bar once the Daeva can place them (the Comes later strip), soonest first.
     later: later.map(item => ({ ...item, ...(item.name === SPACE_SKILL ? { where: 'Space bar', reason: `${item.reason ?? ''} It goes on Space bar.`.trim() } : {}), icon: byName.get(item.name)?.icon ?? null })),
@@ -1220,12 +1269,20 @@ export function fillerProblems(skillBar) {
   return problems;
 }
 
-/** Stigma rule check: a stigma sits in a stack only on stack A or B (the macro block puts it there); every other key holds one skill. */
+/**
+ * Stack rule check (Miguel, in game, 28 Oct 2026): the game stacks on 1 to 4, Q, E and right click; 5 to 8 hold one skill.
+ * Stigmas cycle in a stack like any short cooldown (this replaces the 17 Oct "a stigma only in stack A or B" rule), but a
+ * long cooldown (45 s and over) is never stacked: it keeps a key of its own so the player chooses when it goes.
+ */
 export function stigmaKeyProblems(skillBar) {
   const problems = [];
+  const long = skillBar?.longCooldown ?? LONG_COOLDOWN;
   for (const stack of Object.values(skillBar?.stacks ?? {})) {
-    if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key) && !stack.ownStack) problems.push(`key ${stack.key}: ${stack.skills.length} skills, only stack A and stack B are stacks`);
-    if (stack.skills.length > 1 && !['A', 'B'].includes(stack.key) && stack.skills.some(skill => skill.stigma)) problems.push(`key ${stack.key}: a stigma in a stack (${stack.skills.filter(skill => skill.stigma).map(skill => skill.name).join(', ')})`);
+    if (stack.skills.length < 2) continue;
+    if (['5', '6', '7', '8'].includes(stack.key)) problems.push(`key ${stack.key}: ${stack.skills.length} skills, keys 5 to 8 hold one each`);
+    if (!['A', 'B'].includes(stack.key) && !stack.ownStack) problems.push(`key ${stack.key}: ${stack.skills.length} skills but not marked as a stack`);
+    const longOnes = stack.skills.filter(skill => (skill.cooldownSeconds ?? 0) >= long);
+    if (!['A', 'B'].includes(stack.key) && longOnes.length) problems.push(`key ${stack.key}: a long cooldown in a stack (${longOnes.map(skill => skill.name).join(', ')})`);
   }
   return problems;
 }
@@ -1277,7 +1334,8 @@ function planMacro({ build, skillBar, mechanics, facts, level, later: waiting = 
   const empty = { entries: [], keys: [], used: 0, ownKeys: [], opener: [], later: [], extras: [], mainAttack: null, levelNotes: [] };
   if (!skillBar || !skillBar.fromBlock) return { ...base, ...empty, pending: { pending: true, reason: 'No macro line is sourced for this build yet.' } };
   const block = build.macro;
-  const entries = MACRO_STACKS.map(([, key]) => skillBar.stacks[key]).filter(stack => stack.skills.length).slice(0, 2).map((stack, index) => {
+  // The macro reads the build's stacks as it lists them: a second stack whose skills went on the bar by cooldown is kept in macroStacks.
+  const entries = MACRO_STACKS.map(([, key]) => skillBar.macroStacks?.[key] ?? skillBar.stacks[key]).filter(stack => stack.skills.length).slice(0, 2).map((stack, index) => {
     const skills = stack.skills.map(skill => ({ name: skill.name, row: skill.row, icon: skill.icon, why: skill.why, locked: skill.locked, needsSlot: skill.needsSlot, unlockLevel: skill.unlockLevel, condition: skill.condition, triggers: skill.triggers, out: outOfMacro(skill, level), inMacro: outOfMacro(skill, level) === null }));
     const live = skills.filter(skill => skill.inMacro);
     const waiting = skills.filter(skill => skill.locked);

@@ -46,8 +46,10 @@ assert.deepEqual(Object.keys(data.groups),['controls','ui','items','social','tro
 for(const group of Object.keys(data.groups))assert.ok(faq.some(item=>item.group===group),`FAQ group ${group} has questions`);
 assert.deepEqual(byId['reset-times'].value,{daily:{hourUtc:7,minuteUtc:0},weekly:{weekdayUtc:3,weekdayName:'Wednesday',hourUtc:7,minuteUtc:0}},'Resets at 07:00 UTC and Wednesday 07:00 UTC');
 assert.deepEqual(byId['space-defiance'].value,{key:'Space',skill:'Defiance'},'Defiance on Space bar');
-assert.deepEqual(byId['bar-layout'].value.fill,['1','2','3','4','Q','E','5','6','7','8'],'Own keys fill 1 to 4, Q and E, then 5 to 8');
-assert.deepEqual(byId['bar-layout'].value.stackKeys,['Q','E'],'Stacks go on Q and E');
+// The bar by cooldown (Miguel, in game, 28 Oct 2026): Q and E stack the shortest cooldowns first, then 1 to 4 take the long ones, then 5 to 8.
+assert.deepEqual(byId['bar-layout'].value.fill,['Q','E','1','2','3','4','5','6','7','8'],'Q and E fill first, then 1 to 4, then 5 to 8');
+assert.deepEqual(byId['bar-layout'].value.stackKeys,['Q','E'],'Stacks of short cooldowns go on Q and E');
+assert.equal(byId['bar-layout'].value.longCooldownSeconds,45,'Long cooldowns start at 45 s');
 assert.deepEqual([byId['macro-presets'].value.keys,byId['macro-presets'].value.presets],[1,3],'One macro key, 3 presets');
 assert.deepEqual(byId.loadouts.value,{looks:3,armour:3,skills:3},'3 loadouts each');
 assert.equal(byId['season-1'].value.levelCap,45,'Global cap Lv 45');
@@ -228,9 +230,11 @@ try {
     assert.equal(await page.locator('a[data-guide-link="skill-bar"]').getAttribute('href'),'/hub/aetherium/ascent/skill-bar/','Links to the Skill Bar screen');
     assert.equal((await page.locator('[data-bar-key="Space"] small').textContent()).trim(),'Defiance','Space bar holds Defiance');
     const keys=await page.locator('.ae-gg-keys [data-bar-key]').evaluateAll(nodes=>nodes.map(node=>node.dataset.barKey));
-    assert.deepEqual(keys,['1','2','3','4','5','6','7','8','Q','E','LMB','RMB','B'],'Bar reads 1 to 8, Q, E, left click, right click, second stack');
+    // The game's bar ends at right click (Miguel, 25 Oct 2026); the second stack sits on Q or E (28 Oct 2026), not after it.
+    assert.deepEqual(keys,['1','2','3','4','5','6','7','8','Q','E','LMB','RMB'],'Bar reads 1 to 8, Q, E, left click, right click');
     const fills=await page.locator('.ae-gg-keys:not(.is-mouse) [data-bar-key] small').allTextContents();
-    assert.deepEqual(fills,['1','2','3','4','7','8','9','10','5','6'],'Fill order numbers');
+    // Q and E fill first (the short cooldown stacks), then 1 to 4, then 5 to 8 (Miguel, in game, 28 Oct 2026).
+    assert.deepEqual(fills,['3','4','5','6','7','8','9','10','1','2'],'Fill order numbers');
     assert.ok(!(await page.locator('#aeDefaultKeys').textContent()).includes('Space'),'Space row held until Miguel rules');
     /* Steps beside the bar, each lighting the keys it names. */
     const steps=byId['bar-layout'].steps;

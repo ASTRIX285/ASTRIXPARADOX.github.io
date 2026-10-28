@@ -567,16 +567,15 @@
           "Q",
           "E",
           "Left click",
-          "Right click",
-          "Second macro stack"
+          "Right click"
         ],
         "fill": [
+          "Q",
+          "E",
           "1",
           "2",
           "3",
           "4",
-          "Q",
-          "E",
           "5",
           "6",
           "7",
@@ -588,7 +587,8 @@
         ],
         "mainAttack": "Left click",
         "mainLine": "Right click",
-        "rows": 4
+        "rows": 4,
+        "longCooldownSeconds": 45
       },
       "steps": [
         {
@@ -604,10 +604,22 @@
             "Q",
             "E",
             "LMB",
-            "RMB",
-            "B"
+            "RMB"
           ],
-          "text": "Read it left to right: 1 to 8, Q, E, then left click (your main attack), right click (your main line) and the second macro stack."
+          "text": "Read it left to right: 1 to 8, Q, E, then left click (your main attack) and right click (your main line). The bar ends at right click."
+        },
+        {
+          "keys": [
+            "RMB"
+          ],
+          "text": "Right click holds your main line: the instant skills you spam, stacked up to four."
+        },
+        {
+          "keys": [
+            "Q",
+            "E"
+          ],
+          "text": "Q and E stack your shortest cooldowns, up to four each, Q the very shortest. Heals and staggers stack here by cooldown too."
         },
         {
           "keys": [
@@ -616,39 +628,35 @@
             "3",
             "4"
           ],
-          "text": "Fill 1 to 4 first. They sit right above Q and E, where your fingers rest. Then Q and E, then 5 to 8."
+          "text": "1 to 4 hold the long cooldown power skills and stigmas, 45 s and over, one per key, so you choose when they go."
         },
         {
           "keys": [
-            "Q",
-            "E"
-          ],
-          "text": "A key that holds a stack of skills goes on Q or E. They are easier to reach on the move than 5 to 8."
-        },
-        {
-          "keys": [
-            "1",
-            "2",
-            "3",
-            "4",
             "5",
             "6",
             "7",
-            "8",
-            "Q",
-            "E"
+            "8"
           ],
-          "text": "Each key holds up to four skills in rows 0 to 3. Press it and the lowest ready skill fires, row 0 first."
+          "text": "Toggles, dashes and movement keep a key of their own. 5 to 8 take what is left, one skill each."
         },
         {
           "keys": [
-            "RMB",
-            "B"
+            "Q",
+            "E",
+            "RMB"
           ],
-          "text": "The two stacks either side of your main attack are the only entries in your macro."
+          "text": "In a stack, press the key and the lowest ready skill fires, row 0 first. The longest cooldown sits on row 0 so it goes the moment it is ready."
         }
       ],
       "provenance": [
+        {
+          "kind": "in-game-capture",
+          "capturedBy": "Miguel",
+          "capturedOn": "2026-10-28",
+          "gameVersion": "global launch (Oct 2026)",
+          "where": "Skill bar",
+          "note": "Q and E: stacks of the shortest cooldowns. Right click: instant spammable skills. 1 to 4: long cooldown power stigmas or skills only (45 s and over). Toggles keep their own key; heals and staggers stack by cooldown. Replaces the 17 Oct fill order."
+        },
         {
           "kind": "in-game-capture",
           "capturedBy": "Miguel",
