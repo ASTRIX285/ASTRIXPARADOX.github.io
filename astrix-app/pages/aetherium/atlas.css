@@ -47,7 +47,8 @@
 .ae-atlas-panel::before{content:"";position:absolute;top:-1px;right:-1px;width:14px;height:14px;z-index:1;pointer-events:none;
   background:linear-gradient(to bottom left,var(--ae-page) 0 50%,var(--ae-hairline) 50% calc(50% + 1.5px),transparent calc(50% + 1.5px))}
 .ae-atlas-panel-title{margin:0 0 12px;font:700 1.0625rem/1.2 var(--ae-font-ui);letter-spacing:.02em;color:var(--ae-text)}
-.ae-atlas-sheet-toggle{display:none}
+/* The sheet handle is for phones only; .aetherium-page button would show it otherwise. */
+.aetherium-page .ae-atlas-sheet-toggle{display:none}
 .ae-atlas-panel-body{min-height:0;overflow:auto;overscroll-behavior:contain}
 .ae-atlas-empty{margin:0 0 12px;padding:10px 14px;font-size:.875rem;line-height:1.45;color:var(--ae-text);border:1px solid var(--ae-hairline);
   border-left:3px solid var(--ae-accent-2);background:color-mix(in srgb,var(--ae-ice) 6%,var(--ae-panel))}
@@ -83,7 +84,7 @@ html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-
 
 /* Phone: one column, and the layer panel is a bottom sheet with a handle that opens it. */
 @media (max-width:819px){
-  .ae-atlas-page{--ae-atlas-sheet:64px;--ae-atlas-above:calc(var(--ax-shell-top,72px) + 20px + 150px + var(--ae-atlas-sheet))}
+  .ae-atlas-page{--ae-atlas-sheet:74px;--ae-atlas-above:calc(var(--ax-shell-top,72px) + 20px + 150px + var(--ae-atlas-sheet))}
   .ae-atlas-page .ae-footer{padding-bottom:calc(28px + var(--ae-atlas-sheet))}
   .ae-atlas-bar{flex-direction:column;align-items:stretch}
   .ae-atlas-body{grid-template-columns:minmax(0,1fr);height:max(340px,calc(100svh - var(--ae-atlas-above)))}
@@ -91,9 +92,9 @@ html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-
     border-width:1px 0 0;border-radius:18px 18px 0 0;background:var(--ae-panel-solid);box-shadow:0 -10px 30px rgba(0,0,0,.55)}
   .ae-atlas-panel::before{display:none}
   .ae-atlas-panel-title{display:none}
-  .aetherium-page .ae-atlas-sheet-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:var(--ae-atlas-sheet);
-    padding:14px 4px 10px;background:none;border:0;box-shadow:none;color:var(--ae-text);font:700 1rem/1 var(--ae-font-ui)}
-  .ae-atlas-sheet-toggle::before{content:"";position:absolute;top:7px;left:50%;width:44px;height:4px;margin-left:-22px;border-radius:2px;background:var(--ae-hairline-strong)}
+  .ae-atlas-panel-head{padding:14px 0 10px}
+  .aetherium-page .ae-atlas-sheet-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 1.25rem;font-size:1rem}
+  .ae-atlas-panel::after{content:"";position:absolute;top:5px;left:50%;width:44px;height:4px;margin-left:-22px;border-radius:2px;background:var(--ae-hairline-strong)}
   .ae-atlas-total{font:600 .875rem/1 var(--ae-font-ui);color:var(--ae-text-muted)}
   .ae-atlas-panel:not(.is-open) .ae-atlas-panel-body{display:none}
   .ae-atlas-panel.is-open .ae-atlas-panel-body{padding-bottom:16px}

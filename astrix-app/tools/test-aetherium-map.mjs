@@ -266,6 +266,7 @@ try {
       const sheet=await page.evaluate(()=>{const r=document.querySelector('#aeAtlasPanel').getBoundingClientRect();return {bottom:r.bottom,height:r.height,vh:innerHeight,body:getComputedStyle(document.querySelector('.ae-atlas-panel-body')).display};});
       assert.ok(Math.abs(sheet.bottom-sheet.vh)<=1,'390: the sheet sits on the bottom edge');
       assert.ok(sheet.height<=80,'390: the sheet starts closed');
+      if(process.env.AE_SHOTS)await page.screenshot({path:resolve(process.env.AE_SHOTS,'atlas-390-closed.png')});
       await page.click('#aeAtlasSheet');
       const opened=await page.evaluate(()=>{const r=document.querySelector('#aeAtlasPanel').getBoundingClientRect();const empty=document.querySelector('#aeAtlasEmpty').getBoundingClientRect();return {height:r.height,expanded:document.querySelector('#aeAtlasSheet').getAttribute('aria-expanded'),empty:empty.height>0};});
       assert.equal(opened.expanded,'true');

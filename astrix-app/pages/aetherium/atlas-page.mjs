@@ -14,7 +14,8 @@ const DATA = '/astrix-app/games/aion2/data/map/';
 const ZONE_KEY = 'ae-atlas-zone';
 const FACTIONS = [['elyos', 'Elyos'], ['asmodian', 'Asmodian'], ['abyss', 'Abyss']];
 
-const getJson = name => fetch(`${DATA}${name}`, { credentials: 'omit' }).then(response => {
+/* Same mode as the <link rel="preload" crossorigin> in the page head, so the browser reuses the preloaded response. */
+const getJson = name => fetch(`${DATA}${name}`, { mode: 'cors', credentials: 'same-origin' }).then(response => {
   if (!response.ok) throw new Error(`${name} ${response.status}`);
   return response.json();
 });
@@ -34,7 +35,7 @@ function pickerHtml(zones, current) {
 
 function panelHtml(layers) {
   return `<div class="ae-atlas-panel-head">
-      <button class="ae-atlas-sheet-toggle" type="button" id="aeAtlasSheet" aria-expanded="false" aria-controls="aeAtlasLayers">
+      <button class="ae-btn ae-atlas-sheet-toggle" type="button" id="aeAtlasSheet" aria-expanded="false" aria-controls="aeAtlasLayers">
         <span>Layers</span><span class="ae-atlas-total" id="aeAtlasTotal">0 markers</span>
       </button>
       <h2 class="ae-atlas-panel-title">Layers</h2>
