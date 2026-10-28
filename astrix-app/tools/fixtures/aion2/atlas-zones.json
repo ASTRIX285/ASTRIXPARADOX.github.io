@@ -1,7 +1,7 @@
 {
   "description": "Test only. Stands in for zones.json so test-aetherium-map.mjs can try pan and zoom on a drawn map before Miguel's captures exist. The image is the Guide's World photo, not a map. Never loaded by a page.",
   "records": [
-    { "id": "verteron", "name": "Verteron", "faction": "elyos", "image": "/astrix-app/pages/aetherium/images/section-heroes/world.jpg", "width": 2400, "height": 923, "provenance": { "kind": "in-game-capture", "capturedBy": "test", "capturedOn": "2026-10-28", "gameVersion": "test" } },
-    { "id": "altgard", "name": "Altgard", "faction": "asmodian" }
+    { "id": "verteron", "name": "Verteron", "faction": "elyos", "image": "/astrix-app/pages/aetherium/images/section-heroes/world.jpg", "width": 2400, "height": 923, "provenance": [{ "kind": "in-game-capture", "capturedBy": "test", "capturedOn": "2026-10-28", "gameVersion": "test", "where": "test fixture", "note": "test fixture" }] },
+    { "id": "altgard", "name": "Altgard", "faction": "asmodian", "provenance": [{ "kind": "in-game-capture", "capturedBy": "test", "capturedOn": "2026-10-28", "gameVersion": "test", "where": "test fixture", "note": "test fixture" }] }
   ]
 }

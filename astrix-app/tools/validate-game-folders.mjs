@@ -19,6 +19,7 @@ export const EXEMPTIONS=Object.freeze([
   {game:'destiny-2',check:'file:README.md',reason:'No Destiny README in the game folder yet.'},
   {game:'destiny-2',check:'module',reason:'index.mjs is a facade (DESTINY_GAME_MODULE metadata plus domain re-exports), not a contract implementation. Importing it would load Destiny domains.'},
   {game:'destiny-2',check:'data-location',reason:'Destiny data lives in astrix-app/data/ and the manifest workers, outside the game folder, so it has no record checks here.'},
+  {game:'aion2',check:'record:data/map/layers.json',reason:'The Atreia Atlas layer list is the map page\'s own set of toggles (Miguel\'s brief, 28 Oct 2026), not game data; each marker carries its own provenance.'},
   {game:'wow-forever',check:'record:data/stat-types.json',reason:'stat-types.json is an empty id map with source null, not a sourced record yet.'}
 ]);
 

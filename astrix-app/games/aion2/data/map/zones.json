@@ -1,7 +1,21 @@
 {
-  "description": "Atreia Atlas zones. A zone's base map is an in-game capture by Miguel: image, width, height and provenance go in together when the capture exists. Until then the zone has no image and the page says its map is not captured yet. Schema: schema/atlas-zones.schema.json.",
+  "description": "Atreia Atlas zones. provenance lists where the zone and its faction come from. A zone's base map is Miguel's in-game capture: image, width and height go in together with an in-game-capture entry in provenance. Until then the zone has no image and the page says its map is not captured yet. Schema: schema/atlas-zones.schema.json.",
   "records": [
-    { "id": "verteron", "name": "Verteron", "faction": "elyos" },
-    { "id": "altgard", "name": "Altgard", "faction": "asmodian" }
+    {
+      "id": "verteron",
+      "name": "Verteron",
+      "faction": "elyos",
+      "provenance": [
+        { "kind": "community-guide", "ref": "keengamer-training-dummies", "title": "AION 2 all training dummy locations", "publisher": "KeenGamer", "url": "https://www.keengamer.com/articles/guides/aion-2-all-training-dummy-locations/", "retrievedOn": "2026-10-28", "publishedOn": "2026-10-06", "region": "not-stated", "reliability": "medium" }
+      ]
+    },
+    {
+      "id": "altgard",
+      "name": "Altgard",
+      "faction": "asmodian",
+      "provenance": [
+        { "kind": "community-guide", "ref": "keengamer-training-dummies", "title": "AION 2 all training dummy locations", "publisher": "KeenGamer", "url": "https://www.keengamer.com/articles/guides/aion-2-all-training-dummy-locations/", "retrievedOn": "2026-10-28", "publishedOn": "2026-10-06", "region": "not-stated", "reliability": "medium" }
+      ]
+    }
   ]
 }

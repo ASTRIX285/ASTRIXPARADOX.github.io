@@ -613,7 +613,7 @@ const OVERVIEWS=[
   ['skills','/hub/aetherium/guide/skills/',['by-class','mastery','specialty','skill-bar'],{'by-class':'game',mastery:'game',specialty:'game','skill-bar':'game'}],
   ['equipment','/hub/aetherium/guide/equipment/',['slots','enhancement','manastones','theostones','arcana','pets-wings','titles','where-to-get'],{slots:'game',manastones:'game','pets-wings':'game'}],
   ['crafting','/hub/aetherium/guide/crafting/',['professions','gathering','crafted-gear'],{}],
-  ['world','/hub/aetherium/guide/world/',['zones','sealed','abyss','rift','events'],{}],
+  ['world','/hub/aetherium/guide/world/',['zones','atlas','sealed','abyss','rift','events'],{}],
   ['guides','/hub/aetherium/guide/guides/',['path','dungeons','weekly'],{}]
 ];
 for(const width of [1600,390]){
