@@ -66,7 +66,7 @@ html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-
 
 /* The marker card. */
 .ae-atlas-card-slot:empty{display:none}
-.ae-atlas-card-slot{margin-top:14px}
+.ae-atlas-card-slot{margin-bottom:14px}
 .ae-atlas-card{position:relative;padding:14px 16px;background:var(--ae-raised);border:1px solid var(--ae-hairline-strong);
   box-shadow:var(--ae-top-light),var(--ae-shadow-tight);color:var(--ae-text)}
 .ae-atlas-card-head{display:flex;align-items:center;gap:12px}
@@ -98,6 +98,7 @@ html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-
   .ae-atlas-total{font:600 .875rem/1 var(--ae-font-ui);color:var(--ae-text-muted)}
   .ae-atlas-panel:not(.is-open) .ae-atlas-panel-body{display:none}
   .ae-atlas-panel.is-open .ae-atlas-panel-body{padding-bottom:16px}
+  .ae-atlas-panel.is-card .ae-atlas-panel-body>:not(.ae-atlas-card-slot){display:none}
   .aetherium-page .ae-atlas-zone{flex:1 1 auto;justify-content:center}
 }
 
@@ -119,9 +120,10 @@ html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-reported:not(#ae-c1)
 html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
   cursor:grab;box-shadow:0 0 0 2px var(--ae-ice),0 0 0 4px color-mix(in srgb,var(--ae-ice) 30%,transparent)!important}
 .ae-atlas-pin.is-dragging{cursor:grabbing;z-index:2;opacity:.85}
+.ae-atlas-markers .ae-atlas-pin.is-selected{z-index:2}
 .ae-atlas-pin:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:2px}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
-  display:grid;place-items:center;width:46px;height:46px;border-radius:50%!important;font:700 1rem/1 var(--ae-font-ui);color:var(--ae-gold-ink)!important;
+  display:grid;place-items:center;width:46px;height:46px;z-index:1;border-radius:50%!important;font:700 1rem/1 var(--ae-font-ui);color:var(--ae-gold-ink)!important;
   background:radial-gradient(circle at 50% 35%,var(--ae-gold-top),var(--ae-gold-bottom) 70%)!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--ae-panel-solid) 85%,transparent),0 0 0 5px color-mix(in srgb,var(--ae-gold) 45%,transparent),0 4px 10px rgba(0,0,0,.6)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:hover:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){transform:translate(-50%,-50%) scale(1.08)}
@@ -189,7 +191,7 @@ html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-reported:not(#ae-c1)
 html body.aetherium-page .ae-atlas-markers .ae-atlas-pin.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
   cursor:grab;box-shadow:0 0 0 2px var(--ae-ice),0 0 0 4px color-mix(in srgb,var(--ae-ice) 30%,transparent)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
-  display:grid;place-items:center;width:46px;height:46px;border-radius:50%!important;font:700 1rem/1 var(--ae-font-ui);color:var(--ae-gold-ink)!important;
+  display:grid;place-items:center;width:46px;height:46px;z-index:1;border-radius:50%!important;font:700 1rem/1 var(--ae-font-ui);color:var(--ae-gold-ink)!important;
   background:radial-gradient(circle at 50% 35%,var(--ae-gold-top),var(--ae-gold-bottom) 70%)!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--ae-panel-solid) 85%,transparent),0 0 0 5px color-mix(in srgb,var(--ae-gold) 45%,transparent),0 4px 10px rgba(0,0,0,.6)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){

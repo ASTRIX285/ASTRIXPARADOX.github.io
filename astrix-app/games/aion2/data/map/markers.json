@@ -1,4 +1,736 @@
 {
   "description": "Atreia Atlas markers. Every marker comes from an in-game capture. x and y are fractions of the zone's base map (0 to 1), so a marker stays put at any drawn size. Schema: schema/atlas-markers.schema.json.",
-  "records": []
+  "records": [
+    {
+      "id": "verteron-kibelisk-01",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.5994,
+      "y": 0.2351,
+      "name": "Crimson Isle Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-02",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.6683,
+      "y": 0.3145,
+      "name": "Nahid Disposal Plant",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-03",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.2948,
+      "y": 0.3472,
+      "name": "Dawn Legion Base",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-04",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.379,
+      "y": 0.367,
+      "name": "Cantas Valley Mushroom Tree Peak",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-05",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4546,
+      "y": 0.349,
+      "name": "Collapsed Verteron Barrier Tower",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 3 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-06",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.5103,
+      "y": 0.3524,
+      "name": "Spirit's Rest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-07",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.578,
+      "y": 0.3497,
+      "name": "Scarlet Forest Observation Site",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-08",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.229,
+      "y": 0.4145,
+      "name": "Cantas Valley Sky Island",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-09",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3216,
+      "y": 0.3912,
+      "name": "Valley Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 5 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-10",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3543,
+      "y": 0.396,
+      "name": "Eastern Cantas Valley Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 5 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-11",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3869,
+      "y": 0.4128,
+      "name": "Cantas Valley Mushroom Tree Peak",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 5 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-12",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4081,
+      "y": 0.3684,
+      "name": "Ellun River Marsh Cliff",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-13",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4274,
+      "y": 0.3993,
+      "name": "Marsh Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 5 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-14",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4886,
+      "y": 0.398,
+      "name": "Kraka Footpath Wastewater Downstream",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-16",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.2953,
+      "y": 0.4241,
+      "name": "Western Cantas Valley Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 3 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-17",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3194,
+      "y": 0.4485,
+      "name": "Coastal Camp",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-18",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3637,
+      "y": 0.4632,
+      "name": "Pamos Farm",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-19",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4334,
+      "y": 0.4349,
+      "name": "Illusion Cavaliers' Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-20",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.5144,
+      "y": 0.4465,
+      "name": "Kraka Uphill Path",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-21",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.588,
+      "y": 0.4208,
+      "name": "Laborer's Rest Stop",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-22",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.6319,
+      "y": 0.433,
+      "name": "Notos Legion Outpost",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-23",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.729,
+      "y": 0.4496,
+      "name": "Nahid Brigade Fortress Hill",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-24",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3151,
+      "y": 0.5066,
+      "name": "Ellun River Midstream Pond",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-25",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3633,
+      "y": 0.4915,
+      "name": "Ruin Exploration Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-26",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3985,
+      "y": 0.4727,
+      "name": "Hideout in Front of the Ruins",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-27",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4271,
+      "y": 0.5073,
+      "name": "Illusion Oratory Entrance",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 3 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-28",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4478,
+      "y": 0.4933,
+      "name": "Collapsed Pillar",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-29",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4823,
+      "y": 0.4836,
+      "name": "Verteron Fortress Valley",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-30",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.6115,
+      "y": 0.4918,
+      "name": "Kraka Footpath Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-31",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.2976,
+      "y": 0.5395,
+      "name": "Ellun River Midstream Highland",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-32",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3328,
+      "y": 0.5498,
+      "name": "Wind Breeze Merchants HQ",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-33",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.2708,
+      "y": 0.5859,
+      "name": "Aullaeu Funeral Island",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-34",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3078,
+      "y": 0.5819,
+      "name": "Tolbas Forest Outskirts",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 3 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-35",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3556,
+      "y": 0.5742,
+      "name": "Southern Shugo Station",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-36",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4094,
+      "y": 0.5719,
+      "name": "Eastern Shugo Station",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 3 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-37",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4259,
+      "y": 0.5946,
+      "name": "Aullaeu Village Border",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-38",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.3646,
+      "y": 0.6121,
+      "name": "Astin Mercenaries Base",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-39",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.4659,
+      "y": 0.6148,
+      "name": "Zumion Temple Pilgrimage Path",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-40",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.5806,
+      "y": 0.6958,
+      "name": "Pilgrim's Rest",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 2 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-41",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.6514,
+      "y": 0.6895,
+      "name": "Garden of the Illusion God East",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-42",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.5276,
+      "y": 0.7287,
+      "name": "Southern Altamia Coastal Cliffs",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-43",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.5516,
+      "y": 0.7158,
+      "name": "Highland's End Campsite",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 4 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    },
+    {
+      "id": "verteron-kibelisk-44",
+      "zone": "verteron",
+      "layer": "kibelisk",
+      "x": 0.6004,
+      "y": 0.744,
+      "name": "Garden of the Illusion God West",
+      "status": "confirmed",
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "Miguel (ASTRIX285)",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "global launch (Oct 2026)",
+        "where": "in game, Verteron map, Kibelisk tab, seen in 1 screenshot(s)",
+        "note": "Position read from the in-game Verteron map (Kibelisk tab) and placed on our Verteron base map."
+      }
+    }
+  ]
 }

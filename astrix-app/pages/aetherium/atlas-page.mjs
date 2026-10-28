@@ -45,6 +45,7 @@ function panelHtml(layers) {
       <h2 class="ae-atlas-panel-title">Layers</h2>
     </div>
     <div class="ae-atlas-panel-body" id="aeAtlasLayers">
+      <div class="ae-atlas-card-slot" id="aeAtlasCard" aria-live="polite"></div>
       <p class="ae-atlas-empty" id="aeAtlasEmpty" hidden>No markers captured for this zone yet.</p>
       <ul class="ae-atlas-layers">${layers.map(layer => `<li>
         <button class="ae-btn ae-atlas-layer" type="button" data-layer="${esc(layer.id)}" aria-pressed="true" title="${esc(layer.text)}">
@@ -53,7 +54,6 @@ function panelHtml(layers) {
           <span class="ae-atlas-count" data-count="${esc(layer.id)}">0</span>
         </button>
       </li>`).join('')}</ul>
-      <div class="ae-atlas-card-slot" id="aeAtlasCard" aria-live="polite"></div>
     </div>`;
 }
 
@@ -100,11 +100,13 @@ function start({ zones, layers, markers, captureModule }) {
     ...(markers.records ?? []),
     ...(capture ? capture.records().map(marker => ({ ...marker, captured: true })) : [])
   ].filter(marker => marker.zone === zone.id);
-  const sheetOpen = open => {
+  /* Phone bottom sheet. A card opens it short, showing the card alone, so the marker stays in view above it. */
+  const sheetOpen = (open, { cardOnly = false } = {}) => {
     const sheet = $('#aeAtlasSheet');
     if (getComputedStyle(sheet).display === 'none') return;
     sheet.setAttribute('aria-expanded', String(open));
     $('#aeAtlasPanel').classList.toggle('is-open', open);
+    $('#aeAtlasPanel').classList.toggle('is-card', open && cardOnly);
   };
   const setUrl = id => {
     const url = new URL(location.href);
@@ -118,7 +120,8 @@ function start({ zones, layers, markers, captureModule }) {
     selected = id;
     pins.select(id);
     $('#aeAtlasCard').innerHTML = markerCardHtml(marker, byLayer.get(marker.layer));
-    sheetOpen(true);
+    sheetOpen(true, { cardOnly: true });
+    $('#aeAtlasLayers').scrollTop = 0;
     if (!capture) setUrl(id);
   }
   function closeCard() {
@@ -126,10 +129,11 @@ function start({ zones, layers, markers, captureModule }) {
     selected = null;
     pins.select(null);
     $('#aeAtlasCard').replaceChildren();
+    if ($('#aeAtlasPanel').classList.contains('is-card')) sheetOpen(false);
     if (!capture) setUrl(null);
   }
   pins.onPick((id, members) => {
-    if (members) { selected = null; pins.select(null); $('#aeAtlasCard').innerHTML = clusterHtml(members, byLayer); sheetOpen(true); return; }
+    if (members) { selected = null; pins.select(null); $('#aeAtlasCard').innerHTML = clusterHtml(members, byLayer); sheetOpen(true, { cardOnly: true }); return; }
     if (capture?.owns(id)) { closeCard(); capture.edit(id); return; }
     openCard(id);
   });
@@ -197,9 +201,9 @@ function start({ zones, layers, markers, captureModule }) {
     if (pick) { openCard(pick.dataset.pick); return; }
     const sheet = event.target.closest('#aeAtlasSheet');
     if (sheet) {
-      const open = sheet.getAttribute('aria-expanded') !== 'true';
-      sheet.setAttribute('aria-expanded', String(open));
-      $('#aeAtlasPanel').classList.toggle('is-open', open);
+      /* From a card on its own, the handle opens the full list; otherwise it opens and closes the sheet. */
+      if ($('#aeAtlasPanel').classList.contains('is-card')) { sheetOpen(true); return; }
+      sheetOpen(sheet.getAttribute('aria-expanded') !== 'true');
     }
   });
   $('#aeAtlasZoomIn').addEventListener('click', view.zoomIn);

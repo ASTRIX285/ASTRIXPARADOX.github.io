@@ -31,7 +31,9 @@ export function createMarkerLayer({ overlay, view, layers }) {
       if (!shown.has(marker.layer)) continue;
       const at = view.toView(marker.x, marker.y);
       if (marker.layer === 'place') { out.push({ place: true, at, members: [marker] }); continue; }
-      const near = out.find(group => !group.place && Math.hypot(group.at.x - at.x, group.at.y - at.y) < CLUSTER_PX);
+      /* The selected marker always stands alone, so the one you picked or linked to is never hidden in a cluster. */
+      if (marker.id === selected) { out.push({ solo: true, at, members: [marker] }); continue; }
+      const near = out.find(group => !group.place && !group.solo && Math.hypot(group.at.x - at.x, group.at.y - at.y) < CLUSTER_PX);
       if (near) {
         near.members.push(marker);
         const n = near.members.length;
@@ -125,13 +127,11 @@ export function createMarkerLayer({ overlay, view, layers }) {
     /** The markers to draw (already filtered to the zone). */
     set(next) { list = next; flushNow(); },
     setShown(next) { shown = new Set(next); flushNow(); },
-    /** Lights one pin now; the grouping does not change. */
+    /** Lights one pin and draws again at once (it leaves any cluster it was in). */
     select(id) {
+      if (id === selected) return;
       selected = id;
-      for (const pin of pins.querySelectorAll('[data-marker]')) {
-        pin.classList.toggle('is-selected', pin.dataset.marker === id);
-        pin.setAttribute('aria-pressed', String(pin.dataset.marker === id));
-      }
+      flushNow();
     },
     draggable(fn) { canDrag = fn; },
     onPick: fn => pickListeners.add(fn),

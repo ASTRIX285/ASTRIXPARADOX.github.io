@@ -10,6 +10,8 @@ import { markerProblems } from '../../games/aion2/engine/atlas-data.mjs';
 
 const STORE_KEY = 'ae-atlas-capture';
 const NAME_KEY = 'ae-atlas-captured-by';
+const VERSION_KEY = 'ae-atlas-game-version';
+const SOURCE_NOTE = 'Position read from the in-game map and placed on our base map of the zone.';
 const LAYER_KEY = 'ae-atlas-capture-layer';
 const UNDO_LIMIT = 50;
 
@@ -28,7 +30,7 @@ function record({ id, zone, layer, x, y, gameX, gameY, name, note, level, proven
   if (note) out.note = note;
   if (Number.isInteger(level)) out.level = level;
   out.status = 'confirmed';
-  out.provenance = { capturedBy: provenance.capturedBy, capturedOn: provenance.capturedOn, where: provenance.where };
+  out.provenance = { kind: 'in-game-capture', capturedBy: provenance.capturedBy, capturedOn: provenance.capturedOn, gameVersion: provenance.gameVersion, where: provenance.where, note: provenance.note };
   return out;
 }
 
@@ -37,6 +39,7 @@ function sectionHtml(layers) {
     <h2 class="ae-atlas-capture-title" id="aeCapTitle">Capture mode</h2>
     <p class="ae-atlas-capture-help">Click the map where it is in game. Drag one of your markers to move it, click it to edit it.</p>
     <label class="ae-atlas-field"><span>Your name</span><input id="aeCapBy" type="text" maxlength="40" autocomplete="nickname" spellcheck="false"></label>
+    <label class="ae-atlas-field"><span>Game version (as the game or patch notes name it)</span><input id="aeCapVersion" type="text" maxlength="60" autocomplete="off" spellcheck="false"></label>
     <div class="ae-atlas-capture-actions">
       <button class="ae-btn" type="button" id="aeCapUndo" disabled>Undo</button>
       <button class="ae-btn" type="button" id="aeCapCopy">Copy export</button>
@@ -80,6 +83,9 @@ export function startCapture({ panel, view, layers, zone: firstZone, takenIds, o
   const byInput = $('#aeCapBy');
   byInput.value = read(NAME_KEY) ?? '';
   byInput.addEventListener('change', () => { byInput.value = byInput.value.trim(); write(NAME_KEY, byInput.value); });
+  const versionInput = $('#aeCapVersion');
+  versionInput.value = read(VERSION_KEY) ?? '';
+  versionInput.addEventListener('change', () => { versionInput.value = versionInput.value.trim(); write(VERSION_KEY, versionInput.value); });
 
   /* The spot being marked: a ghost pin on the map until the form is saved or cancelled. */
   const ghost = document.createElement('span');
@@ -156,17 +162,20 @@ export function startCapture({ panel, view, layers, zone: firstZone, takenIds, o
     const note = form.elements.note.value.trim();
     const num = key => { const raw = form.elements[key].value.trim(); return raw === '' ? undefined : Number(raw); };
     const level = num('level'), gameX = num('gameX'), gameY = num('gameY');
+    const gameVersion = versionInput.value.trim();
     if (!capturedBy) { fail('Type your name at the top first.'); byInput.focus(); return; }
+    if (!gameVersion) { fail('Type the game version at the top first.'); versionInput.focus(); return; }
     if (!layer) { fail('Pick a layer.'); return; }
     if (!name) { fail('Give it a name, as the game shows it.'); form.elements.name.focus(); return; }
     if (level !== undefined && !(Number.isInteger(level) && level >= 1)) { fail('Level is a whole number from 1.'); return; }
     if ([gameX, gameY].some(value => value !== undefined && !Number.isFinite(value))) { fail('Game X and Y are numbers.'); return; }
     write(NAME_KEY, capturedBy);
+    write(VERSION_KEY, gameVersion);
     write(LAYER_KEY, layer);
     const editing = draft.id;
     const next = record({
       id: editing || freeId(name, layer), zone: draft.zone, layer, x: draft.x, y: draft.y, gameX, gameY, name, note, level,
-      provenance: { capturedBy, capturedOn: draft.provenance?.capturedOn ?? today(), where: `in game, ${zone.name}` }
+      provenance: { capturedBy, capturedOn: draft.provenance?.capturedOn ?? today(), gameVersion: draft.provenance?.gameVersion ?? gameVersion, where: draft.provenance?.where ?? `in game, ${zone.name}`, note: draft.provenance?.note ?? SOURCE_NOTE }
     });
     change(() => {
       if (editing) records = records.map(marker => marker.id === editing ? next : marker);

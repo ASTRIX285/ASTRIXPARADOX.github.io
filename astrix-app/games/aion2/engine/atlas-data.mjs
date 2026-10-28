@@ -19,7 +19,9 @@ export function markerProblems(marker, zoneIds, layerIds) {
   if (!filled(marker?.name)) out.push(`${id}: no name`);
   if (!['confirmed', 'reported'].includes(marker?.status)) out.push(`${id}: status must be confirmed or reported`);
   const p = marker?.provenance;
-  if (!p || !filled(p.capturedBy) || !DATE.test(p.capturedOn ?? '') || !filled(p.where)) out.push(`${id}: provenance needs capturedBy, capturedOn and where`);
+  if (!p || p.kind !== 'in-game-capture' || !filled(p.capturedBy) || !DATE.test(p.capturedOn ?? '') || !filled(p.gameVersion) || !filled(p.where) || !filled(p.note)) {
+    out.push(`${id}: provenance needs kind in-game-capture, capturedBy, capturedOn, gameVersion, where and note`);
+  }
   return out;
 }
 

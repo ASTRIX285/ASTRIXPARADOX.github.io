@@ -45,7 +45,8 @@ const {atlasProblems}=await import(pathToFileURL(resolve(root,'astrix-app/games/
 assert.deepEqual(atlasProblems({zones,layers,markers}),[],'The real Atlas data passes');
 assert.deepEqual(zones.records.map(zone=>zone.id).sort(),['altgard','verteron'],'Verteron and Altgard only');
 assert.deepEqual(layers.layers.map(layer=>layer.id),LAYERS,'Layer order');
-assert.deepEqual(markers.records,[],'No markers yet');
+assert.ok(markers.records.every(marker=>zones.records.find(zone=>zone.id===marker.zone)?.image),'Every marker sits on a captured base map');
+assert.ok(markers.records.every(marker=>marker.provenance.kind==='in-game-capture'),'Every marker is an in-game capture');
 assert.deepEqual(atlasProblems({zones,layers,markers:fixture}),[],'The fixture is valid');
 const zonesFixture=await json('astrix-app/tools/fixtures/aion2/atlas-zones.json');
 assert.deepEqual(atlasProblems({zones:zonesFixture,layers,markers}),[],'The zones fixture is valid');
@@ -57,7 +58,9 @@ const bad={
   x:{...good,id:'bad-x',x:1.2},
   y:{...good,id:'bad-y',y:-0.1},
   provenance:(({provenance,...rest})=>({...rest,id:'no-provenance'}))(good),
-  where:{...good,id:'no-where',provenance:{capturedBy:'test',capturedOn:'2026-10-28'}}
+  where:{...good,id:'no-where',provenance:(({where,...rest})=>rest)(good.provenance)},
+  version:{...good,id:'no-version',provenance:(({gameVersion,...rest})=>rest)(good.provenance)},
+  kind:{...good,id:'bad-kind',provenance:{...good.provenance,kind:'community-guide'}}
 };
 for(const [what,marker] of Object.entries(bad)){
   const problems=atlasProblems({zones,layers,markers:{records:[marker]}});
@@ -70,7 +73,7 @@ if(Ajv2020){
   (addFormats.default??addFormats)(ajv);
   const validate=ajv.compile(await json('astrix-app/games/aion2/schema/atlas-markers.schema.json'));
   assert.ok(validate(fixture),`Fixture matches the schema: ${ajv.errorsText(validate.errors)}`);
-  for(const what of ['x','y','provenance','where'])assert.equal(validate({records:[bad[what]]}),false,`The schema rejects a marker with a bad ${what}`);
+  for(const what of ['x','y','provenance','where','version','kind'])assert.equal(validate({records:[bad[what]]}),false,`The schema rejects a marker with a bad ${what}`);
 }
 console.log('ok data and the marker checks');
 
@@ -92,6 +95,8 @@ const open=async({width=1600,height=900,fixtureZones=false}={})=>{
   const outside=[],mapRequests=[];
   await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>{outside.push(new URL(route.request().url()).hostname);route.fulfill({status:204,body:''});});
   if(fixtureZones)await context.route(/\/data\/map\/zones\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(zonesFixture)}));
+  /* The fixture zone stands in for Verteron: no markers on it, so the panel shows its empty state. */
+  if(fixtureZones)await context.route(/\/data\/map\/markers\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({records:[]})}));
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
@@ -237,7 +242,7 @@ try {
 
   /* Markers on the real Verteron map, from test-only records served in place of markers.json. */
   const drawnZone=zones.records.find(zone=>zone.image);
-  const testMarker=(id,layer,x,y,extra={})=>({id,zone:drawnZone.id,layer,x,y,name:`Test ${id}`,status:'confirmed',provenance:{capturedBy:'test',capturedOn:'2026-10-28',where:'test'},...extra});
+  const testMarker=(id,layer,x,y,extra={})=>({id,zone:drawnZone.id,layer,x,y,name:`Test ${id}`,status:'confirmed',provenance:{kind:'in-game-capture',capturedBy:'test',capturedOn:'2026-10-28',gameVersion:'test',where:'test',note:'test'},...extra});
   const spread=LAYERS.filter(layer=>layer!=='place').map((layer,i)=>testMarker(`t-${layer}`,layer,0.2+0.1*i,0.3));
   const near=[0,1,2].map(i=>testMarker(`t-near-${i}`,'gathering',0.5+0.012*i,0.6+0.012*i));
   const testMarkers={records:[...spread,...near,testMarker('t-place','place',0.45,0.8,{name:'Test Village'})]};
@@ -311,6 +316,15 @@ try {
     assert.ok(state.zoom>2,'The deep link zooms in');
     assert.ok(pin&&Math.abs(pin.box.x-state.cx)<60&&Math.abs(pin.box.y-state.cy)<60,'The deep link centres on the marker');
     assert.ok(pin.cls.includes('is-selected'),'The linked marker is lit');
+    /* The card is on screen without scrolling, on desktop and on a phone. */
+    for(const [width,height] of [[1600,900],[390,844]]){
+      await page.setViewportSize({width,height});
+      await page.goto(`${base}${PAGE}?zone=${drawnZone.id}&marker=${target.id}`);
+      await page.waitForSelector('html[data-aetherium-ready="true"]');
+      const seen=await page.$eval('#aeAtlasCard .ae-atlas-card',card=>{const r=card.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&r.height>40;});
+      assert.ok(seen,`${width}: the linked card is on screen`);
+    }
+    await page.setViewportSize({width:1600,height:900});
     await page.goto(`${base}${PAGE}?zone=${drawnZone.id}&marker=nowhere`);
     await page.waitForSelector('html[data-aetherium-ready="true"]');
     assert.equal(await page.$eval('#aeNotice',el=>el.hidden?null:el.textContent.trim()),'That marker is not on the map yet.','An unknown marker says so');
@@ -323,6 +337,8 @@ try {
   await (async()=>{
     const context=await browser.newContext({viewport:{width:1600,height:900}});
     await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
+    /* An empty markers.json, so the clicks land on open map and not on a real marker. */
+    await context.route(/\/data\/map\/markers\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({records:[]})}));
     const page=await context.newPage();
     const errors=[];
     page.on('pageerror',error=>errors.push(error.message));
@@ -336,6 +352,8 @@ try {
     const stored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('ae-atlas-capture')||'[]'));
     await page.fill('#aeCapBy','Miguel');
     await page.dispatchEvent('#aeCapBy','change');
+    await page.fill('#aeCapVersion','test version');
+    await page.dispatchEvent('#aeCapVersion','change');
     assert.equal(await page.isVisible('#aeCapForm'),false,'The form waits for a click on the map');
     let spot=await at(0.4,0.4);
     await page.mouse.click(spot.x,spot.y);
@@ -406,7 +424,7 @@ try {
     assert.deepEqual(Object.keys(exported),['records'],'Export is a markers.json body');
     assert.deepEqual(Object.keys(exported.records[0]),['id','zone','layer','x','y','gameX','gameY','name','note','level','status','provenance'],'Export keys in the markers.json order');
     assert.deepEqual(exported.records[0],{id:first.id,zone:drawnZone.id,layer:'hidden-cube',x:first.x,y:first.y,gameX:1234.5,gameY:678,name:'Cube by the bridge',note:'Behind the rocks.',level:9,status:'confirmed',
-      provenance:{capturedBy:'Miguel',capturedOn:todayIs,where:`in game, ${drawnZone.name}`}},'Export record');
+      provenance:{kind:'in-game-capture',capturedBy:'Miguel',capturedOn:todayIs,gameVersion:'test version',where:`in game, ${drawnZone.name}`,note:'Position read from the in-game map and placed on our base map of the zone.'}},'Export record');
     assert.deepEqual(atlasProblems({zones,layers,markers:exported}),[],'The export passes the Atlas checks');
     if(Ajv2020){
       const ajv=new (Ajv2020.default??Ajv2020)({allErrors:true,strict:true});
@@ -445,6 +463,22 @@ try {
     assert.deepEqual(hits,[],'Nothing on the site links to capture mode');
   })();
   console.log('ok capture mode not linked');
+
+  /* The real markers.json: every marker on a captured zone is drawn, alone or inside a cluster. */
+  await (async()=>{
+    const {context,page,errors}=await open();
+    for(const zone of zones.records.filter(item=>item.image)){
+      await page.click(`.ae-atlas-zone[data-zone="${zone.id}"]`);
+      await mapLoaded(page);
+      const ids=(await pinsShown(page)).flatMap(item=>item.cluster?item.cluster.split(' '):[item.id]).sort();
+      assert.deepEqual(ids,markers.records.filter(marker=>marker.zone===zone.id).map(marker=>marker.id).sort(),`${zone.id}: every captured marker is on the map`);
+      const counts=await page.$$eval('.ae-atlas-layer',nodes=>Object.fromEntries(nodes.map(node=>[node.dataset.layer,Number(node.querySelector('.ae-atlas-count').textContent)])));
+      for(const layer of LAYERS)assert.equal(counts[layer],markers.records.filter(marker=>marker.zone===zone.id&&marker.layer===layer).length,`${zone.id} ${layer}: count`);
+    }
+    assert.deepEqual(errors,[],'No page errors with the real markers');
+    await context.close();
+  })();
+  console.log(`ok real markers (${markers.records.length})`);
 
   /* The base map waits for the page to be ready. */
   await (async()=>{
@@ -489,7 +523,8 @@ try {
       await page.click('#aeAtlasSheet');
       const opened=await page.evaluate(()=>{const r=document.querySelector('#aeAtlasPanel').getBoundingClientRect();const empty=document.querySelector('#aeAtlasEmpty').getBoundingClientRect();return {height:r.height,expanded:document.querySelector('#aeAtlasSheet').getAttribute('aria-expanded'),empty:empty.height>0};});
       assert.equal(opened.expanded,'true');
-      assert.ok(opened.height>200&&opened.empty,'390: the sheet opens to the layers and the empty state');
+      const hasMarkers=markers.records.some(marker=>marker.zone===layout.zone);
+      assert.ok(opened.height>200&&opened.empty===!hasMarkers,'390: the sheet opens to the layers (and the empty state when the zone has no markers)');
       const zone=zones.records.find(item=>item.id===layout.zone);
       if(zone?.imageSmall)assert.equal(layout.src,zone.imageSmall,'390: the phone gets the small base map');
     }else{

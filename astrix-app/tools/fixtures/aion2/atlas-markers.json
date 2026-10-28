@@ -13,7 +13,14 @@
       "note": "Test note for the card.",
       "level": 12,
       "status": "confirmed",
-      "provenance": { "capturedBy": "test", "capturedOn": "2026-10-28", "where": "test fixture" }
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "test",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "test",
+        "where": "test fixture",
+        "note": "test"
+      }
     },
     {
       "id": "fixture-reported",
@@ -23,7 +30,14 @@
       "y": 0.1,
       "name": "Fixture Hidden Cube",
       "status": "reported",
-      "provenance": { "capturedBy": "test", "capturedOn": "2026-10-28", "where": "test fixture" }
+      "provenance": {
+        "kind": "in-game-capture",
+        "capturedBy": "test",
+        "capturedOn": "2026-10-28",
+        "gameVersion": "test",
+        "where": "test fixture",
+        "note": "test"
+      }
     }
   ]
 }
