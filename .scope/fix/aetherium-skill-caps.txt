@@ -40,5 +40,6 @@ hub/aetherium/guide/equipment/slots/index.html
 hub/aetherium/guide/equipment/theostones/index.html
 hub/aetherium/guide/equipment/titles/index.html
 hub/aetherium/guide/equipment/where-to-get/index.html
+hub/aetherium/guide/skills/index.html
 hub/aetherium/index.html
 hub/aetherium/skills/index.html
