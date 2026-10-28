@@ -6,7 +6,16 @@
 import { esc } from './aetherium-ui.mjs';
 
 export const LAYER_ICONS = '/astrix-app/pages/aetherium/icons/atlas-layers.svg';
-export const layerIcon = (icon, size = 32) => `<img class="ae-atlas-icon" src="${LAYER_ICONS}#${esc(icon)}" alt="" width="${size}" height="${size}" decoding="async">`;
+const GAME_ICONS = new Map();
+/** Registers the in-game icons from layers.json, keyed by the layer's icon id. */
+export function useLayerImages(layers) {
+  for (const layer of layers ?? []) if (layer.image) GAME_ICONS.set(layer.icon, layer.image);
+}
+export const layerIcon = (icon, size = 32) => {
+  const game = GAME_ICONS.get(icon);
+  const src = game ?? `${LAYER_ICONS}#${icon}`;
+  return `<img class="ae-atlas-icon${game ? ' is-game' : ''}" src="${esc(src)}" alt="" width="${size}" height="${size}" decoding="async">`;
+};
 
 export function markerCardHtml(marker, layer) {
   const level = Number.isInteger(marker.level) ? `<p class="ae-atlas-card-level">Lv ${marker.level}</p>` : '';

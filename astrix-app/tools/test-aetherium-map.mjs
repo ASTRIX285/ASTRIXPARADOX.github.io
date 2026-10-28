@@ -35,7 +35,9 @@ const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript
 const json=async path=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const DATA='astrix-app/games/aion2/data/map/';
 const PAGE='/hub/aetherium/map/';
-const LAYERS=['hidden-cube','empyrean-trace','kibelisk','gathering','named-monster','dungeon-entrance','rift','place'];
+const LAYERS=['hidden-cube','empyrean-trace','kibelisk','gathering','named-monster','dungeon-entrance','rift','place','area'];
+/* Layers drawn with the in-game icon cut from Miguel's captures (Miguel, 28 Oct 2026). */
+const GAME_ICON_LAYERS=['kibelisk','dungeon-entrance','place','area'];
 const FONT_HOSTS=new Set(['use.typekit.net','p.typekit.net']);
 
 /* Data. */
@@ -194,7 +196,10 @@ try {
     assert.deepEqual(panel.map(item=>item.layer),LAYERS,'One toggle per layer, in order');
     for(const item of panel){
       assert.equal(item.tag,'BUTTON');assert.equal(item.pressed,'true');assert.equal(item.count,'0',`${item.layer}: count 0`);
-      assert.ok(item.icon.endsWith(`atlas-layers.svg#${item.layer}`),`${item.layer}: its own icon`);
+      const def=layers.layers.find(layer=>layer.id===item.layer);
+      if(GAME_ICON_LAYERS.includes(item.layer))assert.equal(item.icon,`/astrix-app/pages/aetherium/icons/game/${{'dungeon-entrance':'dungeon',place:'settlement'}[item.layer]??item.layer}.webp`,`${item.layer}: the in-game icon`);
+      else assert.ok(item.icon.endsWith(`atlas-layers.svg#${item.layer}`),`${item.layer}: its own icon until the in-game one is confirmed`);
+      assert.equal(item.icon,def.image??`/astrix-app/pages/aetherium/icons/atlas-layers.svg#${def.icon}`,`${item.layer}: the icon layers.json gives`);
       assert.ok(item.iconW>=30,`${item.layer}: icon drawn`);
     }
     const iconsLoaded=await page.$$eval('.ae-atlas-layer img',imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0));
@@ -270,7 +275,8 @@ try {
     for(const marker of spread){
       const pin=shown.find(item=>item.id===marker.id);
       assert.ok(pin,`${marker.id}: drawn`);
-      assert.ok(pin.icon.endsWith(`atlas-layers.svg#${marker.layer}`),`${marker.id}: its layer's icon`);
+      const def=layers.layers.find(layer=>layer.id===marker.layer);
+      assert.equal(pin.icon,def.image??`/astrix-app/pages/aetherium/icons/atlas-layers.svg#${def.icon}`,`${marker.id}: its layer's icon`);
       assert.ok(pin.box.w>=40,`${marker.id}: a big enough target (${pin.box.w})`);
     }
     const iconsOk=await page.$$eval('#aeAtlasMarkers img',imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0));
@@ -279,7 +285,7 @@ try {
     assert.ok(cluster&&cluster.text==='3'&&cluster.cluster.split(' ').sort().join()===near.map(m=>m.id).join(),'Three close markers cluster when zoomed out');
     assert.ok(!shown.some(item=>near.some(m=>m.id===item.id)),'Clustered markers are not drawn alone');
     const place=shown.find(item=>item.id==='t-place');
-    assert.ok(place&&place.text==='Test Village'&&!place.icon,'A place is drawn as its name');
+    assert.ok(place&&place.text==='Test Village'&&place.icon==='/astrix-app/pages/aetherium/icons/game/settlement.webp','A place is drawn as its in-game icon with its name');
     const counts=await page.$$eval('.ae-atlas-layer',nodes=>Object.fromEntries(nodes.map(node=>[node.dataset.layer,node.querySelector('.ae-atlas-count').textContent])));
     assert.deepEqual(counts,Object.fromEntries(LAYERS.map(layer=>[layer,String(testMarkers.records.filter(m=>m.layer===layer).length)])),'Counts in the layer panel');
     assert.equal(await page.$eval('#aeAtlasEmpty',el=>el.hidden),true,'No empty state when there are markers');
@@ -305,6 +311,60 @@ try {
     await context.close();
   })();
   console.log('ok markers, icons, clusters, places, counts, card');
+
+  /* Drill down and search (Miguel, 28 Oct 2026): a layer row lists its markers A to Z, the search finds one by name, and
+     picking either centres the map on it, turns its layer on and opens its card. Desktop and phone. */
+  for(const [width,height] of [[1600,900],[390,844]]){
+    const {context,page,errors}=await openMarkers('',{width,height});
+    const phone=width<820;
+    if(phone)await page.click('#aeAtlasSheet');
+    const drills=await page.$$eval('[data-drill]',nodes=>nodes.map(node=>({layer:node.dataset.drill,disabled:node.disabled,expanded:node.getAttribute('aria-expanded'),w:node.getBoundingClientRect().width,h:node.getBoundingClientRect().height})));
+    assert.deepEqual(drills.map(d=>d.layer),LAYERS,`${width}: one drill button per layer`);
+    for(const d of drills){
+      const n=testMarkers.records.filter(m=>m.layer===d.layer).length;
+      assert.equal(d.disabled,n===0,`${width}: ${d.layer} drill is off only with no markers`);
+      assert.equal(d.expanded,'false');
+      assert.ok(d.w>=44&&d.h>=44,`${width}: ${d.layer} drill is a big enough target`);
+    }
+    /* Turn gathering off first: picking one from its list turns it back on. */
+    await page.click('.ae-atlas-layer[data-layer="gathering"]');
+    await page.click('[data-drill="gathering"]');
+    assert.equal(await page.getAttribute('[data-drill="gathering"]','aria-expanded'),'true',`${width}: the drill opens`);
+    const listed=await page.$$eval('#aeAtlasList-gathering [data-goto]',nodes=>nodes.map(node=>({id:node.dataset.goto,name:node.querySelector('b').textContent,h:node.getBoundingClientRect().height,icon:node.querySelector('img')?.getAttribute('src')})));
+    const want=testMarkers.records.filter(m=>m.layer==='gathering').map(m=>m.name).sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));
+    assert.deepEqual(listed.map(item=>item.name),want,`${width}: the list holds the layer's markers, A to Z`);
+    assert.ok(listed.every(item=>item.h>=44&&item.icon),`${width}: list entries are big enough and carry the icon`);
+    const target=testMarkers.records.find(m=>m.id==='t-near-2');
+    await page.click(`#aeAtlasList-gathering [data-goto="${target.id}"]`);
+    await pinsDrawn(page);
+    const went=await page.evaluate(()=>({card:document.querySelector('#aeAtlasCard .ae-atlas-card')?.dataset.marker,selected:document.querySelector('#aeAtlasMarkers .is-selected')?.dataset.marker,
+      on:document.querySelector('.ae-atlas-layer[data-layer="gathering"]').getAttribute('aria-pressed'),url:location.search}));
+    assert.deepEqual(went,{card:target.id,selected:target.id,on:'true',url:`?zone=${drawnZone.id}&marker=${target.id}`},`${width}: picking from the list opens its card and turns its layer on`);
+    const centred=await page.evaluate(()=>{const pin=document.querySelector('#aeAtlasMarkers .is-selected').getBoundingClientRect(),view=document.querySelector('#aeAtlasView').getBoundingClientRect();
+      return {dx:Math.abs(pin.left+pin.width/2-(view.left+view.width/2)),dy:Math.abs(pin.top+pin.height/2-(view.top+view.height/2)),inView:pin.top>=view.top&&pin.bottom<=view.bottom&&pin.left>=view.left&&pin.right<=view.right};});
+    assert.ok(centred.inView&&centred.dx<40&&centred.dy<40,`${width}: the map centres on the pick (${centred.dx}, ${centred.dy})`);
+    if(phone){
+      const sheet=await page.evaluate(()=>({card:document.querySelector('#aeAtlasPanel').classList.contains('is-card'),pin:document.querySelector('#aeAtlasMarkers .is-selected').getBoundingClientRect().bottom,top:document.querySelector('#aeAtlasPanel').getBoundingClientRect().top}));
+      assert.ok(sheet.card&&sheet.pin<sheet.top,`${width}: the sheet shows the card alone and the pick stays in view above it`);
+      await page.click('#aeAtlasSheet');
+    }
+    /* Search, any layer, any case, apostrophes ignored. */
+    await page.fill('#aeAtlasFind','TEST t-NEAR 1');
+    const found=await page.$$eval('#aeAtlasFound [data-goto]',nodes=>nodes.map(node=>({id:node.dataset.goto,layer:node.querySelector('small')?.textContent})));
+    assert.deepEqual(found,[{id:'t-near-1',layer:'Gathering'}],`${width}: search finds the marker and names its layer`);
+    await page.press('#aeAtlasFind','Enter');
+    assert.equal(await page.$eval('#aeAtlasCard .ae-atlas-card',el=>el.dataset.marker),'t-near-1',`${width}: Enter goes to the first hit`);
+    if(phone)await page.click('#aeAtlasSheet');
+    await page.fill('#aeAtlasFind','nothing like this');
+    assert.equal(await page.$eval('#aeAtlasFound',el=>el.textContent.trim()),`Nothing called that on the ${drawnZone.name} map yet.`,`${width}: an honest no-match line`);
+    await page.fill('#aeAtlasFind','');
+    assert.equal(await page.$eval('#aeAtlasFound',el=>el.hidden),true,`${width}: an empty search hides the results`);
+    const sideways=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    assert.ok(sideways<=0,`${width}: no sideways scroll (${sideways})`);
+    assert.deepEqual(errors,[],`${width}: no page errors in drill down`);
+    await context.close();
+  }
+  console.log('ok drill down and search, desktop and phone');
 
   /* Deep link: the zone, centred on the marker, with its card. */
   await (async()=>{

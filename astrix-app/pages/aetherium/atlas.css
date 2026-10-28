@@ -127,10 +127,10 @@ html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:not(#ae-c1):not(#ae
   background:radial-gradient(circle at 50% 35%,var(--ae-gold-top),var(--ae-gold-bottom) 70%)!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--ae-panel-solid) 85%,transparent),0 0 0 5px color-mix(in srgb,var(--ae-gold) 45%,transparent),0 4px 10px rgba(0,0,0,.6)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:hover:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){transform:translate(-50%,-50%) scale(1.08)}
-/* Place names: the game's name for the spot, set like a map label. */
+/* Landmarks (camps and villages, areas, dungeon entrances): the in-game icon with the game's name under it, like the in-game map. */
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
-  max-width:180px;min-height:32px;padding:4px 8px;font:700 .8125rem/1.15 var(--ae-font-ui);letter-spacing:.06em;text-transform:uppercase;text-align:center;
-  color:var(--ae-text)!important;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 2px #000;white-space:normal;touch-action:none}
+  display:flex;flex-direction:column;align-items:center;gap:2px;width:44px;min-height:44px;padding:0;overflow:visible;
+  color:var(--ae-text)!important;touch-action:none}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-selected:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){color:var(--ae-strobe-hi)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){cursor:grab;color:var(--ae-ice)!important}
 
@@ -195,10 +195,48 @@ html body.aetherium-page .ae-atlas-markers .ae-atlas-cluster:not(#ae-c1):not(#ae
   background:radial-gradient(circle at 50% 35%,var(--ae-gold-top),var(--ae-gold-bottom) 70%)!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--ae-panel-solid) 85%,transparent),0 0 0 5px color-mix(in srgb,var(--ae-gold) 45%,transparent),0 4px 10px rgba(0,0,0,.6)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){
-  max-width:180px;min-height:32px;padding:4px 8px;font:700 .8125rem/1.15 var(--ae-font-ui);letter-spacing:.06em;text-transform:uppercase;text-align:center;
-  color:var(--ae-text)!important;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 2px #000;white-space:normal;touch-action:none}
+  display:flex;flex-direction:column;align-items:center;gap:2px;width:44px;min-height:44px;padding:0;overflow:visible;
+  color:var(--ae-text)!important;touch-action:none}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-selected:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){color:var(--ae-strobe-hi)!important}
 html body.aetherium-page .ae-atlas-markers .ae-atlas-place.is-captured:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){cursor:grab;color:var(--ae-ice)!important}
 html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10)::before,
 html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.ae-atlas-place):not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10)::after{content:none!important;display:none!important}
+}
+
+/* In-game icons and drill down (28 Oct 2026, Miguel). */
+.ae-atlas-icon.is-game{object-fit:contain}
+.ae-atlas-place .ae-atlas-icon{width:32px;height:32px;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+.ae-atlas-markers:not(.is-named) .ae-atlas-place .ae-atlas-icon{width:26px;height:26px}
+.ae-atlas-place-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:170px;margin-top:-4px;pointer-events:none;
+  font:700 .75rem/1.15 var(--ae-font-ui);letter-spacing:.02em;text-align:center;white-space:normal;color:#f4f1e8;
+  text-shadow:0 0 2px #000,0 0 4px #000,0 1px 2px #000,0 0 8px rgba(0,0,0,.8)}
+.ae-atlas-markers:not(.is-named) .ae-atlas-place:not(.is-selected) .ae-atlas-place-name{display:none}
+.ae-atlas-place.is-selected .ae-atlas-place-name{color:var(--ae-strobe-hi)}
+.ae-atlas-place.is-selected .ae-atlas-icon{filter:drop-shadow(0 0 6px var(--ae-strobe)) drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+.ae-atlas-place:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:2px}
+
+.ae-atlas-find{display:grid;gap:6px;margin:0 0 14px}
+.ae-atlas-find-label{font:700 .75rem/1 var(--ae-font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--ae-text-dim)}
+.ae-atlas-find-input{width:100%;box-sizing:border-box;min-height:48px;padding:0 14px;font:500 1rem/1.2 var(--ae-font-ui);color:var(--ae-text);
+  background:var(--ae-well);border:1px solid var(--ae-hairline-strong);border-radius:10px}
+.ae-atlas-find-input::placeholder{color:var(--ae-text-dim)}
+.ae-atlas-find-input:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:1px;border-color:var(--ae-strobe)}
+.ae-atlas-found,.ae-atlas-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.ae-atlas-found[hidden],.ae-atlas-list[hidden]{display:none}
+.ae-atlas-found-none{padding:10px 12px;font-size:.875rem;line-height:1.4;color:var(--ae-text-muted);border:1px dashed var(--ae-hairline-strong);border-radius:10px}
+.ae-atlas-layer-item{display:grid;gap:6px}
+.ae-atlas-layer-row{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:6px;align-items:stretch}
+.aetherium-page .ae-atlas-drill{width:48px;min-height:60px;padding:0;justify-content:center}
+.ae-atlas-drill svg{transition:transform var(--ae-ease)}
+.ae-atlas-drill[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ae-atlas-drill:disabled{opacity:.35;cursor:default}
+.ae-atlas-list{padding:2px 0 6px 12px;border-left:2px solid color-mix(in srgb,var(--ae-strobe) 40%,var(--ae-hairline));margin-left:18px;max-height:min(46svh,420px);overflow:auto;overscroll-behavior:contain}
+.aetherium-page .ae-atlas-goto{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;min-height:48px;padding:6px 12px;text-align:left}
+.ae-atlas-goto .ae-atlas-icon{width:26px;height:26px}
+.ae-atlas-goto-text{display:grid;gap:2px;min-width:0}
+.ae-atlas-goto-text b{font:700 .9375rem/1.2 var(--ae-font-ui);overflow-wrap:anywhere}
+.ae-atlas-goto-text small{font:600 .75rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+@media (max-width:819px){
+  .ae-atlas-list{max-height:none}
+  .ae-atlas-find{margin-top:2px}
 }

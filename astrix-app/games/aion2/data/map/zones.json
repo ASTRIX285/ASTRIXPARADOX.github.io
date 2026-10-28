@@ -6,12 +6,12 @@
       "name": "Verteron",
       "faction": "elyos",
       "image": "/astrix-app/pages/aetherium/images/map/verteron.webp",
-      "width": 1815,
-      "height": 2000,
+      "width": 3000,
+      "height": 3306,
       "imageSmall": "/astrix-app/pages/aetherium/images/map/verteron-small.webp",
       "smallWidth": 1200,
       "provenance": [
-        { "kind": "in-game-capture", "capturedBy": "Miguel", "capturedOn": "2026-10-28", "gameVersion": "global launch (Oct 2026)", "where": "World map, Verteron", "note": "Miguel's own screenshot of the in-game Verteron map, saved as WebP at full size (1815 by 2000) and a 1200 wide copy for phones." },
+        { "kind": "in-game-capture", "capturedBy": "Miguel", "capturedOn": "2026-10-28", "gameVersion": "global launch (Oct 2026)", "where": "World map, Verteron, 37 screenshots stitched", "note": "Miguel's own screenshots of the in-game Verteron map, stitched into one map with the icons, labels and screen shading taken out, saved as WebP at 3000 by 3306 and a 1200 wide copy for phones." },
         { "kind": "community-guide", "ref": "keengamer-training-dummies", "title": "AION 2 all training dummy locations", "publisher": "KeenGamer", "url": "https://www.keengamer.com/articles/guides/aion-2-all-training-dummy-locations/", "retrievedOn": "2026-10-28", "publishedOn": "2026-10-06", "region": "not-stated", "reliability": "medium" }
       ]
     },
