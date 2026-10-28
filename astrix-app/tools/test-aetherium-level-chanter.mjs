@@ -15,6 +15,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildAscentPlan,rolesFor,stackProblems} from '../games/aion2/engine/ascent-advisor.mjs';
+import {assertKeyGroups} from './aion2-bar-rules.mjs';
 import {weightsFor} from '../games/aion2/engine/level-planner.mjs';
 import {createAion2Module} from '../games/aion2/index.mjs';
 import {adaptDaevanionBoard} from '../games/aion2/engine/armory-adapter.mjs';
@@ -112,23 +113,23 @@ check('the main line grows with the level; Onslaught stays on left click',()=>{
     for(const level of LEVELS)assert.equal(plan(level,role).skillBar.mainAttack,'Onslaught');
   }
   // Tremor Crush and Wave Blow share a key: the stun first, then Wave Blow on the stunned target.
-  const stun=level=>{const bar=plan(level,'support').skillBar;const key=bar.left.find(item=>bar.stacks[item].skills.some(cell=>cell.name==='Tremor Crush')||bar.stacks[item].reserved?.includes('Tremor Crush'));return [bar.stacks[key].skills.map(cell=>cell.name),bar.stacks[key].reserved??null];};
-  assert.deepEqual(stun(5),[[],['Tremor Crush','Wave Blow']]);
-  assert.deepEqual(stun(12)[0],['Tremor Crush','Wave Blow']);
+  const stun=level=>{const bar=plan(level,'support').skillBar;const key=bar.left.find(item=>bar.stacks[item].skills.some(cell=>cell.name==='Tremor Crush')||bar.stacks[item].reserved?.includes('Tremor Crush'));return key?[key,bar.stacks[key].skills.map(cell=>cell.name),bar.stacks[key].reserved??null]:null;};
+  // Lv 5: the stun is not out yet. 5 to 8 cannot hold a stack (25 Oct 2026), so no key is held for it: it waits in Comes later.
+  assert.equal(stun(5),null,'No key held for the stun stack before it arrives');
+  assert.ok(plan(5,'support').skillBar.later.some(item=>item.name==='Tremor Crush'),'Tremor Crush is listed in Comes later');
+  // Once it arrives the pair is one stack on a key that can hold it (1 to 4, Q or E).
+  const [key,skills]=stun(12);
+  assert.deepEqual(skills,['Tremor Crush','Wave Blow']);
+  assert.ok(['1','2','3','4','Q','E'].includes(key),`The stun stack sits on a key that stacks: ${key}`);
   const wave=cells(plan(12,'support').skillBar).find(cell=>cell.name==='Wave Blow');
   assert.equal(wave.conditional,true,'Wave Blow fires only on a stunned target');
   assert.ok(chanter.find(item=>item.name==='Tremor Crush').synergies.some(link=>link.type==='opens'&&link.target==='Wave Blow'),'Tremor Crush opens Wave Blow');
 });
 
-check('own keys never move as the Daeva levels: a skill still to come keeps its key free',()=>{
-  for(const role of ROLES){
-    const keyOf=(p,name)=>p.skillBar.left.find(key=>p.skillBar.stacks[key].skills.some(cell=>cell.name===name)||p.skillBar.stacks[key].reserved?.includes(name));
-    const top=plan(45,role);
-    for(const level of LEVELS){
-      const p=plan(level,role);
-      for(const key of top.skillBar.left)for(const cell of top.skillBar.stacks[key].skills)assert.equal(keyOf(p,cell.name),key,`${at(level,role)}: ${cell.name} on key ${key}`);
-    }
-  }
+/* The 25 Oct 2026 Skill Bar rules (Miguel, in game) replace the 17 Oct "own keys never move as the Daeva levels": every
+   level is held to the game's bar instead (aion2-bar-rules.mjs). */
+check('the game\'s bar at every level: 1 to 4 cooldowns and stigmas, Q and E cover, nothing on 5 to 8 while a reachable key is free',()=>{
+  for(const role of ROLES)for(const level of LEVELS)assertKeyGroups(plan(level,role).skillBar,at(level,role));
 });
 
 check('Mastery never past the cap; a step the trainer cannot sell yet says from which level',()=>{
