@@ -1,0 +1,5 @@
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/test-aetherium-guide-dungeons.mjs
+astrix-app/tools/test-aetherium-guide-equipment.mjs
+astrix-app/tools/test-aetherium-guide-path.mjs
+astrix-app/tools/validator-areas.json

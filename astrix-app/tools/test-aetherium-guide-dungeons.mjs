@@ -24,6 +24,11 @@ const world=JSON.parse(readFileSync(resolve(root,'astrix-app/games/aion2/data/ad
 const DASH=/[–—]/;
 let checks=0;
 const ok=(name,fn)=>{fn();checks++;console.log(`ok ${name}`);};
+/* The Guide's side menu (it replaced the top section bar and the breadcrumbs): this page's section is the one the menu
+   lists its pages for (so it is not under More), and exactly one item is lit. */
+const sectionLit=(page,section)=>page.evaluate(id=>({side:Boolean(document.querySelector('[data-guide-side]')),inMore:Boolean(document.querySelector(`[data-guide-side-more] [data-guide-section="${id}"]`)),lit:document.querySelectorAll('.ae-gd-side a[aria-current="page"]').length}),section);
+const assertSectionLit=async(page,section,message)=>{const s=await sectionLit(page,section);if(!(s.side&&!s.inMore&&s.lit===1))throw new Error(`${message}: side ${s.side}, ${section} under More ${s.inMore}, lit ${s.lit}`);};
+
 
 /* ---------- Data ---------- */
 const IDS=['krao-cave','draupnir','urugugu-canyon','vakron-sky-island','fire-temple','ferocious-horn-den','deus-research-base','shattered-arkanis','nightmare','ascension-trial','daily-dungeon','sealed-dungeons','shugo-festival','sanctuary'];
@@ -162,7 +167,7 @@ try {
     assert.deepEqual(await krao.locator('td').allTextContents(),['1 to 5','Spend Odyle Energy on the reward','Unique weapons and accessories (item Lv 54)','20 / 45','200 / 700']);
     assert.equal(await krao.locator('a').getAttribute('href'),'/hub/aetherium/guide/dungeons/krao-cave/');
     assert.match(await page.locator('[data-dungeon-row="sanctuary"]').textContent(),/Not listed/);
-    assert.equal(await page.locator('[data-guide-section="guides"][aria-current="page"]').count(),1,'Guides lit in the section nav');
+    await assertSectionLit(page,'guides','Guides is the side menu\'s section');
     const reward=await page.locator('[data-dungeon-row="krao-cave"] .ae-gd-reward').evaluate(n=>getComputedStyle(n).color);
     assert.equal(reward,'rgb(226, 181, 79)','the reward is highlighted in gold');
     assert.deepEqual(page.errors,[]);
@@ -242,7 +247,7 @@ try {
   }
   {
     const page=await open('/hub/aetherium/guide/world/');
-    assert.equal(await page.locator('[data-guide-section="world"][aria-current="page"]').count(),1);
+    await assertSectionLit(page,'world','World is the side menu\'s section');
     for(const id of ['base-of-dawn','cantas-valley','abyss','spacetime-rift','sealed-dungeons','shugo-festival'])assert.equal(await page.locator(`[data-world="${id}"]`).count(),1,id);
     assert.equal(await page.locator('[data-world="abyss"] a[href="/hub/aetherium/guide/dungeons/draupnir/"]').count(),1);
     assert.match(await page.locator('[data-world="dimensional-invasion"]').textContent(),/Pending/);

@@ -39,6 +39,11 @@ export const validators=[
   browser('test-aetherium-level-spiritmaster.mjs'), // Spiritmaster level planner.
   browser('test-aetherium-level-templar.mjs'), // Templar level planner.
   browser('test-aetherium-guide-crafting.mjs'), // The Aetherium Guide, Crafting section.
+  // 28 Oct 2026: these three were in no list either; their checks still looked for the Guide's old top section bar and
+  // breadcrumbs, which the side menu replaced. Now they check the side menu.
+  browser('test-aetherium-guide-path.mjs'), // The Aetherium Guide, Your path by level.
+  browser('test-aetherium-guide-dungeons.mjs'), // The Aetherium Guide, Dungeons, the weekly loop and the World page.
+  browser('test-aetherium-guide-equipment.mjs'), // The Aetherium Guide, Equipment section.
   'test-aion2-guide.mjs', // AION 2 Guide data.
   'test-aion2-gear-sources.mjs', // AION 2 gear sources data.
   'test-aion2-eu-fixtures.mjs', // AION 2 EU fixture contract.

@@ -104,13 +104,18 @@ const noSideScroll=page=>page.evaluate(()=>{
   return {scroll:document.documentElement.scrollWidth-width,wide};
 });
 
+
+/* The Guide's side menu (it replaced the top section bar and the breadcrumbs): this page's section is the one the menu
+   lists its pages for (so it is not under More), and exactly one item is lit. */
+const sectionLit=(page,section)=>page.evaluate(id=>({side:Boolean(document.querySelector('[data-guide-side]')),inMore:Boolean(document.querySelector(`[data-guide-side-more] [data-guide-section="${id}"]`)),lit:document.querySelectorAll('.ae-gd-side a[aria-current="page"]').length}),section);
+const assertSectionLit=async(page,section,message)=>{const s=await sectionLit(page,section);if(!(s.side&&!s.inMore&&s.lit===1))throw new Error(`${message}: side ${s.side}, ${section} under More ${s.inMore}, lit ${s.lit}`);};
 for(const [section,id,path,title] of PAGES){
   for(const width of [1600,390]){
     await check(`${path} at ${width}: shell, section lit, tags, no sideways scroll, no Worker call, no errors`,async()=>{
       const {page,context,calls,errors}=await open(path,{viewport:{width,height:width===390?844:1000}});
       try{
         assert.equal(await page.textContent('#aeScreenTitle'),title);
-        assert.equal(await page.getAttribute(`.ae-gd-nav [data-guide-section="${section}"]`,'aria-current'),'page');
+        await assertSectionLit(page,section,`${path}: ${section} is the side menu's section, one item lit`);
         if(id!=='home'){
           assert.equal(await page.getAttribute(`[data-guide-topic-link="${id}"]`,'aria-current'),'page','Topic pill lit');
           const colour=await page.$eval(`[data-guide-topic-link="${id}"]`,node=>getComputedStyle(node).color);

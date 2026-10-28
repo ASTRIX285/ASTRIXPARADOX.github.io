@@ -84,7 +84,9 @@ await check('Lv 1 by default: crafting and saving now, Nezekan coming up, no wee
   assert.deepEqual(await ids(page,'now'),['crafting-start','save-stones']);
   assert.equal((await ids(page,'next'))[0],'board-nezekan');
   assert.equal(await page.$('.ae-gp-weekly'),null);
-  assert.match(await page.$eval('.ae-gd-crumbs',el=>el.innerText),/Guides[\s\S]*Your path by level/);
+  // The side menu replaced the breadcrumbs: this page sits in the Guides section, and it is the one item lit.
+  assert.equal(await page.$eval('.ae-gd-side-label',el=>el.textContent),'Guides','The side menu is the Guides section');
+  assert.deepEqual(await page.$$eval('.ae-gd-side a[aria-current="page"]',links=>links.map(a=>a.textContent.trim())),['Your path by level'],'This page is lit');
   assert.deepEqual(errors,[]);
   await context.close();
 });
@@ -261,10 +263,12 @@ await check('two columns at 1600, one at 390; the tick button is a cylinder that
 });
 
 console.log('Links');
-await check('the Guide home\'s "Your path by level" row opens this page',async()=>{
-  const {page,context}=await open('/hub/aetherium/guide/');
-  const href=await page.$eval('[data-guide-start="4"]',el=>el.getAttribute('href'));
-  assert.equal(href,PATH);
+// The Guide home's start rows became "New to AION 2? Go in this order" (About, Controls, Enhancement, Daevanion); Your
+// path by level is the first card of the Guides overview, the page the Guide home's Guides section opens.
+await check('the Guides overview\'s first card, "Your path by level", opens this page',async()=>{
+  const {page,context}=await open('/hub/aetherium/guide/guides/');
+  assert.equal(await page.$eval('[data-guide-overview="guides"] [data-guide-topic="path"] a',el=>el.getAttribute('href')),PATH);
+  assert.equal(await page.$eval('[data-guide-overview="guides"] .ae-gd-ocard',el=>el.dataset.guideTopic),'path','It is the first card');
   await context.close();
 });
 
