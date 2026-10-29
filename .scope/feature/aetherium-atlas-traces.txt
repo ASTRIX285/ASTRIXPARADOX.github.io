@@ -1,0 +1,27 @@
+# feature/aetherium-atlas-traces: Empyrean Traces, the Verteron Monolith, field bosses with loot, Dawn Legion Base services, Mark as found and deeper zoom on the Atreia Atlas, from Miguel's captures (28 and 29 Oct 2026).
+astrix-app/games/aion2/data/map/layers.json
+astrix-app/games/aion2/data/map/markers.json
+astrix-app/pages/aetherium/icons/game/empyrean-trace.webp
+astrix-app/pages/aetherium/icons/game/monolith.webp
+astrix-app/tools/test-aetherium-map.mjs
+astrix-app/tools/validate-aetherium-map.mjs
+astrix-app/module-versions.json
+astrix-app/pages/aetherium/atlas-card.mjs
+astrix-app/pages/aetherium/atlas-markers.mjs
+astrix-app/pages/aetherium/atlas-page.mjs
+astrix-app/pages/aetherium/atlas.css
+hub/aetherium/map/index.html
+astrix-app/pages/aetherium/atlas-view.mjs
+astrix-app/games/aion2/schema/atlas-markers.schema.json
+astrix-app/games/aion2/engine/atlas-data.mjs
+astrix-app/pages/aetherium/icons/game/storage.webp
+astrix-app/pages/aetherium/icons/game/merchant.webp
+astrix-app/pages/aetherium/icons/game/blacksmithing-table.webp
+astrix-app/pages/aetherium/icons/game/handicrafting-table.webp
+astrix-app/pages/aetherium/icons/game/command-merchant.webp
+astrix-app/pages/aetherium/icons/game/general-goods.webp
+astrix-app/pages/aetherium/icons/game/alchemy-table.webp
+astrix-app/pages/aetherium/icons/game/cooking-table.webp
+astrix-app/pages/aetherium/icons/game/field-boss.webp
+astrix-app/tools/fixtures/aion2/atlas-markers.json
+astrix-app/games/aion2/schema/atlas-layers.schema.json

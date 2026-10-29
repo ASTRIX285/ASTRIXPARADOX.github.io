@@ -8,16 +8,19 @@
 const KEY_STEP = 80;
 const ZOOM_STEP = 1.4;
 const MAX_ZOOM = 6;
+/** And never less than three screen pixels per map pixel, so a phone can zoom in as far as a desktop (Miguel, 28 Oct 2026). */
+const MAX_NATIVE = 3;
 
 export function createAtlasView(viewport, stage) {
   const state = { width: 1, height: 1, scale: 1, tx: 0, ty: 0, fit: 1 };
+  const maxScale = () => Math.max(state.fit * MAX_ZOOM, MAX_NATIVE);
   const listeners = new Set();
   const tapListeners = new Set();
   const size = () => ({ w: viewport.clientWidth, h: viewport.clientHeight });
 
   function clamp() {
     const { w, h } = size();
-    state.scale = Math.min(Math.max(state.scale, state.fit), state.fit * MAX_ZOOM);
+    state.scale = Math.min(Math.max(state.scale, state.fit), maxScale());
     const sw = state.width * state.scale, sh = state.height * state.scale;
     state.tx = sw <= w ? (w - sw) / 2 : Math.min(0, Math.max(w - sw, state.tx));
     state.ty = sh <= h ? (h - sh) / 2 : Math.min(0, Math.max(h - sh, state.ty));
@@ -41,7 +44,7 @@ export function createAtlasView(viewport, stage) {
   /** Zooms by factor, keeping the point (cx, cy) in viewport pixels where it is. */
   function zoomAt(factor, cx = size().w / 2, cy = size().h / 2) {
     const before = state.scale;
-    state.scale = Math.min(Math.max(before * factor, state.fit), state.fit * MAX_ZOOM);
+    state.scale = Math.min(Math.max(before * factor, state.fit), maxScale());
     const k = state.scale / before;
     state.tx = cx - (cx - state.tx) * k;
     state.ty = cy - (cy - state.ty) * k;
@@ -142,7 +145,7 @@ export function createAtlasView(viewport, stage) {
     focus,
     toMap,
     toView,
-    maxZoom: MAX_ZOOM,
+    get maxZoom() { return maxScale() / state.fit; },
     zoomOut: () => zoomAt(1 / ZOOM_STEP),
     fit: fitAll,
     panBy,

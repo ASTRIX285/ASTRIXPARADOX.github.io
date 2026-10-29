@@ -53,14 +53,24 @@
 .ae-atlas-empty{margin:0 0 12px;padding:10px 14px;font-size:.875rem;line-height:1.45;color:var(--ae-text);border:1px solid var(--ae-hairline);
   border-left:3px solid var(--ae-accent-2);background:color-mix(in srgb,var(--ae-ice) 6%,var(--ae-panel))}
 .ae-atlas-layers{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-.aetherium-page .ae-atlas-layer{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;min-height:60px;
+.aetherium-page .ae-atlas-layer{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;min-height:52px;
   padding:8px 14px 8px 10px;text-align:left}
 html body.aetherium-page .ae-atlas-layer.ae-btn:not(#ae-c1):not(#ae-c2):not(#ae-c3):not(#ae-c4):not(#ae-c5):not(#ae-c6):not(#ae-c7):not(#ae-c8):not(#ae-c9):not(#ae-c10){border-radius:var(--ae-btn-card-radius)!important}
 .ae-atlas-icon{display:block;flex:0 0 auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 .ae-atlas-layer[aria-pressed="false"] .ae-atlas-icon{opacity:.4;filter:grayscale(.7)}
 .ae-atlas-layer-text{display:grid;gap:2px;min-width:0}
 .ae-atlas-layer-text b{font:700 .9375rem/1.2 var(--ae-font-ui)}
-.ae-atlas-layer-text small{font:500 .75rem/1.3 var(--ae-font-ui);color:var(--ae-text-muted);overflow-wrap:anywhere}
+.ae-atlas-layer-text b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* The layer's line is a hover card (Miguel, 29 Oct 2026): hidden in the row, shown when the mouse is on the layer's icon, and on keyboard focus. */
+.ae-atlas-layer-item{position:relative}
+.ae-atlas-layer-tip{position:absolute;left:8px;right:64px;top:calc(100% - 4px);z-index:5;box-sizing:border-box;padding:8px 12px;pointer-events:none;
+  font:500 .8125rem/1.4 var(--ae-font-ui);color:var(--ae-text);text-align:left;white-space:normal;
+  background:var(--ae-panel-solid);border:1px solid var(--ae-hairline-strong);border-radius:10px;box-shadow:var(--ae-shadow-tight);
+  opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity 120ms ease,transform 120ms ease,visibility 0s linear 120ms}
+@media (hover:hover){.ae-atlas-layer:has(>.ae-atlas-icon:hover) .ae-atlas-layer-tip{opacity:1;visibility:visible;transform:none;transition-delay:200ms,200ms,0s}}
+.ae-atlas-layer>.ae-atlas-icon{cursor:help}
+.ae-atlas-layer:focus-visible .ae-atlas-layer-tip{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+@media (prefers-reduced-motion:reduce){.ae-atlas-layer-tip{transition:none}}
 .ae-atlas-count{min-width:2rem;padding:4px 8px;box-sizing:border-box;text-align:center;font:700 .8125rem/1 var(--ae-font-ui);color:var(--ae-text);
   border-radius:999px;background:var(--ae-well);box-shadow:inset 0 0 0 1px var(--ae-hairline-strong)}
 
@@ -226,7 +236,7 @@ html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.
 .ae-atlas-found-none{padding:10px 12px;font-size:.875rem;line-height:1.4;color:var(--ae-text-muted);border:1px dashed var(--ae-hairline-strong);border-radius:10px}
 .ae-atlas-layer-item{display:grid;gap:6px}
 .ae-atlas-layer-row{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:6px;align-items:stretch}
-.aetherium-page .ae-atlas-drill{width:48px;min-height:60px;padding:0;justify-content:center}
+.aetherium-page .ae-atlas-drill{width:48px;min-height:52px;padding:0;justify-content:center}
 .ae-atlas-drill svg{transition:transform var(--ae-ease)}
 .ae-atlas-drill[aria-expanded="true"] svg{transform:rotate(180deg)}
 .ae-atlas-drill:disabled{opacity:.35;cursor:default}
@@ -240,3 +250,51 @@ html body.aetherium-page .ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-cluster,.
   .ae-atlas-list{max-height:none}
   .ae-atlas-find{margin-top:2px}
 }
+
+/* Found (28 Oct 2026, Miguel): marked on this device, drawn faded with a tick like the in-game map. */
+.ae-atlas-pin.is-found .ae-atlas-icon,.ae-atlas-place.is-found .ae-atlas-icon{opacity:.55;filter:grayscale(.6) drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+.ae-atlas-tick{position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-14px 0 0 -10px;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 13l5 5L20 6' fill='none' stroke='%23071a14' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M4 13l5 5L20 6' fill='none' stroke='%2366e0c0' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.aetherium-page .ae-atlas-found-toggle{width:100%;min-height:48px;margin-top:12px;justify-content:center}
+.ae-atlas-found-toggle[aria-pressed="true"]::before{content:"\2713\00a0";color:#66e0c0}
+.aetherium-page .ae-atlas-hide-found{width:100%;min-height:48px;margin:0 0 12px;justify-content:center}
+.ae-atlas-hide-found[hidden]{display:none}
+.ae-atlas-goto.is-found .ae-atlas-goto-text b::after{content:"\00a0\2713";color:#66e0c0}
+.ae-atlas-goto.is-found .ae-atlas-icon{opacity:.55}
+
+/* Loot (29 Oct 2026, Miguel): item names in the colours the game draws them. */
+.ae-atlas-card{--ae-loot-gold:#f2c94c;--ae-loot-blue:#4aa3ff;--ae-loot-green:#3ddc84;--ae-loot-white:#d6d6d6;--ae-loot-teal:#2fe0c8}
+.ae-atlas-loot{margin-top:12px;border-top:1px solid var(--ae-hairline);padding-top:10px}
+.ae-atlas-loot summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;cursor:pointer;font:700 .9375rem/1.2 var(--ae-font-ui);list-style:none}
+.ae-atlas-loot summary::-webkit-details-marker{display:none}
+.ae-atlas-loot summary::after{content:"\25BE";color:var(--ae-text-muted);margin-left:8px}
+.ae-atlas-loot[open] summary::after{content:"\25B4"}
+.ae-atlas-loot summary span{margin-left:auto;font:600 .8125rem/1 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-atlas-loot-note{margin:6px 0 8px;font-size:.8125rem;line-height:1.45;color:var(--ae-text-muted)}
+.ae-atlas-loot-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;margin:0;padding:0;list-style:none;max-height:min(40svh,320px);overflow:auto;overscroll-behavior:contain}
+.ae-atlas-loot-list li,.ae-atlas-chest li{font:600 .8125rem/1.35 var(--ae-font-ui)}
+.ae-atlas-card [data-colour="gold"]{color:var(--ae-loot-gold)}
+.ae-atlas-card [data-colour="blue"]{color:var(--ae-loot-blue)}
+.ae-atlas-card [data-colour="green"]{color:var(--ae-loot-green)}
+.ae-atlas-card [data-colour="white"]{color:var(--ae-loot-white)}
+.ae-atlas-card [data-colour="teal"]{color:var(--ae-loot-teal)}
+.ae-atlas-chest{margin-top:12px;padding:10px 12px;border:1px solid var(--ae-hairline-strong);background:var(--ae-well)}
+.ae-atlas-chest h4{margin:0 0 8px;font:700 .9375rem/1.2 var(--ae-font-ui);color:var(--ae-loot-teal)}
+.ae-atlas-pool+.ae-atlas-pool{margin-top:8px;padding-top:8px;border-top:1px solid var(--ae-hairline)}
+.ae-atlas-pool-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;margin:0 0 4px;font-size:.8125rem}
+.ae-atlas-pool-head span{color:var(--ae-text-muted)}
+.ae-atlas-chest ul{display:grid;gap:3px;margin:0;padding:0;list-style:none}
+.ae-atlas-chest li{display:flex;justify-content:space-between;gap:10px}
+.ae-atlas-chest small{color:var(--ae-text-muted);font-weight:600}
+.ae-atlas-odds{color:#e6d3a3;font-variant-numeric:tabular-nums}
+
+/* A dense layer's row while the map is too far out to show it (Miguel, 29 Oct 2026). */
+.ae-atlas-zoomhint{font:600 .75rem/1.2 var(--ae-font-ui);color:var(--ae-text-muted)}
+.ae-atlas-zoomhint[hidden]{display:none}
+
+/* Pins shrink on the whole-zone view so the island stays readable; names and landmarks sit above the feathers. */
+.ae-atlas-markers:not(.is-named) .ae-atlas-pin .ae-atlas-icon{width:22px;height:22px}
+.ae-atlas-markers:not(.is-named) .ae-atlas-place .ae-atlas-icon{width:22px;height:22px}
+.ae-atlas-pin[data-layer="empyrean-trace"] .ae-atlas-icon{width:24px;height:24px}
+.ae-atlas-markers .ae-atlas-place{z-index:1}
+.ae-atlas-markers :is(.ae-atlas-pin,.ae-atlas-place):is(.is-selected,:hover,:focus-visible){z-index:3}

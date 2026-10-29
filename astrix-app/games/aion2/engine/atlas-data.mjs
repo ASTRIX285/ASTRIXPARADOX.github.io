@@ -41,11 +41,14 @@ export function atlasProblems({ zones, layers, markers }) {
     if (!(zone.width > 0 && zone.height > 0)) out.push(`${zone.id}: width and height`);
     if (!sources.some(source => source.kind === 'in-game-capture')) out.push(`${zone.id}: base map must be an in-game capture`);
   }
+  const tables = markers?.lootTables ?? {};
   const seen = new Set();
   for (const marker of markers?.records ?? []) {
     if (seen.has(marker?.id)) out.push(`${marker.id}: duplicate id`);
     seen.add(marker?.id);
     out.push(...markerProblems(marker, zoneIds, layerIds));
+    const table = marker?.loot?.table;
+    if (table !== undefined && !tables[table]) out.push(`${marker.id}: loot table "${table}" is not in lootTables`);
   }
   return out;
 }

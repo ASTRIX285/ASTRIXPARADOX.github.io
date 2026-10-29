@@ -14,7 +14,7 @@
 //     sheet at 390;
 //   - no request leaves the site except the site's font host (use.typekit.net, as every page): none to NCSOFT or any other.
 // Markers and capture mode (feature/aetherium-map-capture, 28 Oct 2026), on the real Verteron capture with test-only markers:
-//   - pins with their layer's icon, close ones clustered when zoomed out and split when zoomed in, places drawn as names,
+//   - pins with their layer's icon, each on its own with no number bubbles (Miguel, 29 Oct 2026), a dense layer only once zoomed in, places drawn as names,
 //     counts in the panel, the card on click, a layer turned off hides its pins;
 //   - the deep link ?zone=&marker= opens the zone centred on the marker with its card; an unknown marker says so;
 //   - capture mode (?capture=1): a click drops a marker with the form in the panel (never over the spot), drag moves it,
@@ -35,9 +35,11 @@ const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript
 const json=async path=>JSON.parse(await readFile(resolve(root,path),'utf8'));
 const DATA='astrix-app/games/aion2/data/map/';
 const PAGE='/hub/aetherium/map/';
-const LAYERS=['hidden-cube','empyrean-trace','kibelisk','gathering','named-monster','dungeon-entrance','rift','place','area'];
+const LAYERS=['empyrean-trace','monolith','field-boss','kibelisk','merchant','crafting','storage','gathering','named-monster','dungeon-entrance','rift','place','area'];
+/* Hidden Cubes are left off on purpose (Miguel, 29 Oct 2026): their spots only come from the game client. */
+
 /* Layers drawn with the in-game icon cut from Miguel's captures (Miguel, 28 Oct 2026). */
-const GAME_ICON_LAYERS=['kibelisk','dungeon-entrance','place','area'];
+const GAME_ICON_LAYERS=['empyrean-trace','monolith','field-boss','kibelisk','merchant','crafting','storage','dungeon-entrance','place','area'];
 const FONT_HOSTS=new Set(['use.typekit.net','p.typekit.net']);
 
 /* Data. */
@@ -197,7 +199,7 @@ try {
     for(const item of panel){
       assert.equal(item.tag,'BUTTON');assert.equal(item.pressed,'true');assert.equal(item.count,'0',`${item.layer}: count 0`);
       const def=layers.layers.find(layer=>layer.id===item.layer);
-      if(GAME_ICON_LAYERS.includes(item.layer))assert.equal(item.icon,`/astrix-app/pages/aetherium/icons/game/${{'dungeon-entrance':'dungeon',place:'settlement'}[item.layer]??item.layer}.webp`,`${item.layer}: the in-game icon`);
+      if(GAME_ICON_LAYERS.includes(item.layer))assert.equal(item.icon,`/astrix-app/pages/aetherium/icons/game/${{'dungeon-entrance':'dungeon',place:'settlement',crafting:'blacksmithing-table'}[item.layer]??item.layer}.webp`,`${item.layer}: the in-game icon`);
       else assert.ok(item.icon.endsWith(`atlas-layers.svg#${item.layer}`),`${item.layer}: its own icon until the in-game one is confirmed`);
       assert.equal(item.icon,def.image??`/astrix-app/pages/aetherium/icons/atlas-layers.svg#${def.icon}`,`${item.layer}: the icon layers.json gives`);
       assert.ok(item.iconW>=30,`${item.layer}: icon drawn`);
@@ -233,7 +235,7 @@ try {
     },{fixture,layers:layers.layers});
     assert.deepEqual(cards.map(({tagBg,inside,height,...rest})=>rest),[
       {id:'fixture-confirmed',title:'Fixture Named Monster',layer:'Named monsters',icon:'/astrix-app/pages/aetherium/icons/atlas-layers.svg#named-monster',note:'Test note for the card.',level:'Lv 12',where:'1234, 568',tag:null},
-      {id:'fixture-reported',title:'Fixture Hidden Cube',layer:'Hidden Cubes',icon:'/astrix-app/pages/aetherium/icons/atlas-layers.svg#hidden-cube',note:null,level:null,where:null,tag:'Reported'}
+      {id:'fixture-reported',title:'Fixture Gathering Spot',layer:'Gathering',icon:'/astrix-app/pages/aetherium/icons/atlas-layers.svg#gathering',note:null,level:null,where:null,tag:'Reported'}
     ],'Marker card from the fixture');
     assert.ok(cards[1].tagBg.includes('gradient'),'The Reported tag is drawn as a tag');
     assert.ok(cards.every(card=>card.inside&&card.height>40),'The card sits inside the panel');
@@ -248,7 +250,7 @@ try {
   /* Markers on the real Verteron map, from test-only records served in place of markers.json. */
   const drawnZone=zones.records.find(zone=>zone.image);
   const testMarker=(id,layer,x,y,extra={})=>({id,zone:drawnZone.id,layer,x,y,name:`Test ${id}`,status:'confirmed',provenance:{kind:'in-game-capture',capturedBy:'test',capturedOn:'2026-10-28',gameVersion:'test',where:'test',note:'test'},...extra});
-  const spread=LAYERS.filter(layer=>layer!=='place').map((layer,i)=>testMarker(`t-${layer}`,layer,0.2+0.1*i,0.3));
+  const spread=LAYERS.filter(layer=>layer!=='place').map((layer,i)=>testMarker(`t-${layer}`,layer,0.15+0.1*(i%7),0.25+0.15*Math.floor(i/7)));
   const near=[0,1,2].map(i=>testMarker(`t-near-${i}`,'gathering',0.5+0.012*i,0.6+0.012*i));
   const testMarkers={records:[...spread,...near,testMarker('t-place','place',0.45,0.8,{name:'Test Village'})]};
   assert.deepEqual(atlasProblems({zones,layers,markers:testMarkers}),[],'The test markers are valid');
@@ -272,7 +274,8 @@ try {
   await (async()=>{
     const {context,page,errors}=await openMarkers();
     let shown=await pinsShown(page);
-    for(const marker of spread){
+    const dense=new Set(layers.layers.filter(layer=>layer.minZoomPx).map(layer=>layer.id));
+    for(const marker of spread.filter(marker=>!dense.has(marker.layer))){
       const pin=shown.find(item=>item.id===marker.id);
       assert.ok(pin,`${marker.id}: drawn`);
       const def=layers.layers.find(layer=>layer.id===marker.layer);
@@ -281,25 +284,34 @@ try {
     }
     const iconsOk=await page.$$eval('#aeAtlasMarkers img',imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0));
     assert.ok(iconsOk,'Pin icons load');
-    const cluster=shown.find(item=>item.cluster);
-    assert.ok(cluster&&cluster.text==='3'&&cluster.cluster.split(' ').sort().join()===near.map(m=>m.id).join(),'Three close markers cluster when zoomed out');
-    assert.ok(!shown.some(item=>near.some(m=>m.id===item.id)),'Clustered markers are not drawn alone');
+    /* No number bubbles (Miguel, 29 Oct 2026): close markers are each drawn as their own icon, as the in-game map does.
+       This replaces the 28 Oct check that three close markers join into a numbered cluster. */
+    assert.equal(await page.locator('#aeAtlasMarkers .ae-atlas-cluster').count(),0,'No number bubbles');
+    assert.ok(near.every(m=>shown.some(item=>item.id===m.id&&item.icon)),'Close markers are each drawn as their own icon');
     const place=shown.find(item=>item.id==='t-place');
     assert.ok(place&&place.text==='Test Village'&&place.icon==='/astrix-app/pages/aetherium/icons/game/settlement.webp','A place is drawn as its in-game icon with its name');
     const counts=await page.$$eval('.ae-atlas-layer',nodes=>Object.fromEntries(nodes.map(node=>[node.dataset.layer,node.querySelector('.ae-atlas-count').textContent])));
     assert.deepEqual(counts,Object.fromEntries(LAYERS.map(layer=>[layer,String(testMarkers.records.filter(m=>m.layer===layer).length)])),'Counts in the layer panel');
     assert.equal(await page.$eval('#aeAtlasEmpty',el=>el.hidden),true,'No empty state when there are markers');
-    /* Zooming in splits the cluster. */
-    for(let i=0;i<4&&(await pinsShown(page)).some(item=>item.cluster);i++){
-      const c=(await pinsShown(page)).find(item=>item.cluster);
-      await page.mouse.click(c.box.x,c.box.y);
-      await page.waitForTimeout(80);
+    /* A dense layer (minZoomPx) waits for a closer zoom, and its row says so. */
+    for(const id of dense){
+      assert.ok(!shown.some(item=>item.layer===id),`${id}: not drawn on the whole-zone view`);
+      assert.equal(await page.$eval(`[data-zoomhint="${id}"]`,el=>el.hidden),false,`${id}: its row says Zoom in`);
     }
-    shown=await pinsShown(page);
-    assert.ok(near.every(m=>shown.some(item=>item.id===m.id)),'Zoomed in, the cluster splits into its markers');
+    if(dense.size){
+      const id=[...dense][0];
+      await page.click(`.ae-atlas-layer[data-layer="${id}"]`);
+      await page.click(`.ae-atlas-layer[data-layer="${id}"]`);
+      await pinsDrawn(page);
+      shown=await pinsShown(page);
+      assert.ok(shown.some(item=>item.layer===id),`${id}: turning it on zooms in until it shows`);
+      assert.equal(await page.$eval(`[data-zoomhint="${id}"]`,el=>el.hidden),true,`${id}: the Zoom in note goes once it shows`);
+      await page.click('#aeAtlasFit');
+      await pinsDrawn(page);
+      assert.ok(!(await pinsShown(page)).some(item=>item.layer===id),`${id}: gone again on the whole-zone view`);
+    }
     /* A click opens the card in the panel and puts the marker in the link. */
-    const one=shown.find(item=>item.id===near[1].id);
-    await page.mouse.click(one.box.x,one.box.y);
+    await page.$eval(`#aeAtlasMarkers [data-marker="${near[1].id}"]`,el=>el.click());
     const card=await page.evaluate(()=>({id:document.querySelector('#aeAtlasCard .ae-atlas-card')?.dataset.marker,title:document.querySelector('#aeAtlasCard h3')?.textContent,
       selected:document.querySelector('#aeAtlasMarkers .is-selected')?.dataset.marker,url:location.search}));
     assert.deepEqual(card,{id:near[1].id,title:near[1].name,selected:near[1].id,url:`?zone=${drawnZone.id}&marker=${near[1].id}`},'Click opens the card');
@@ -310,7 +322,7 @@ try {
     assert.deepEqual(errors,[],'No page errors with markers');
     await context.close();
   })();
-  console.log('ok markers, icons, clusters, places, counts, card');
+  console.log('ok markers, icons, no number bubbles, dense layers on zoom, places, counts, card');
 
   /* Drill down and search (Miguel, 28 Oct 2026): a layer row lists its markers A to Z, the search finds one by name, and
      picking either centres the map on it, turns its layer on and opens its card. Desktop and phone. */
@@ -365,6 +377,84 @@ try {
     await context.close();
   }
   console.log('ok drill down and search, desktop and phone');
+
+  /* Found (Miguel, 28 Oct 2026): any marker can be marked found from its card, on this device only. Found ones get a tick,
+     count as found of total, can be hidden, and stay found after a reload. Desktop and phone. */
+  for(const [width,height] of [[1600,900],[390,844]]){
+    const {context,page,errors}=await openMarkers('',{width,height});
+    const phone=width<820;
+    const total=testMarkers.records.filter(m=>m.layer==='gathering').length;
+    if(phone)await page.click('#aeAtlasSheet');
+    assert.equal(await page.$eval('#aeAtlasHideFound',el=>el.hidden),true,`${width}: Hide found waits until something is found`);
+    await page.fill('#aeAtlasFind','test t-near-1');await page.press('#aeAtlasFind','Enter');
+    const toggle='#aeAtlasCard [data-found="t-near-1"]';
+    const before=await page.$eval(toggle,el=>({pressed:el.getAttribute('aria-pressed'),text:el.textContent.trim(),h:el.getBoundingClientRect().height}));
+    assert.deepEqual({pressed:before.pressed,text:before.text},{pressed:'false',text:'Mark as found'},`${width}: the card offers Mark as found`);
+    assert.ok(before.h>=44,`${width}: the found toggle is a big enough target`);
+    await page.click(toggle);
+    await pinsDrawn(page);
+    const after=await page.evaluate(()=>({pressed:document.querySelector('#aeAtlasCard [data-found]').getAttribute('aria-pressed'),text:document.querySelector('#aeAtlasCard [data-found]').textContent.trim(),
+      pin:document.querySelector('#aeAtlasMarkers [data-marker="t-near-1"]')?.className,tick:Boolean(document.querySelector('#aeAtlasMarkers [data-marker="t-near-1"] .ae-atlas-tick')),
+      count:document.querySelector('[data-count="gathering"]').textContent,stored:JSON.parse(localStorage.getItem('ae-atlas-found')||'[]'),hideShown:!document.querySelector('#aeAtlasHideFound').hidden,
+      listed:document.querySelector('#aeAtlasList-gathering [data-goto="t-near-1"]').classList.contains('is-found')}));
+    assert.deepEqual(after,{pressed:'true',text:'Found',pin:after.pin,tick:true,count:`1/${total}`,stored:['t-near-1'],hideShown:true,listed:true},`${width}: marking found ticks the pin, the count, the list and is kept`);
+    assert.ok(after.pin.includes('is-found'),`${width}: the pin is drawn as found`);
+    /* Hide found: the found one goes once it is no longer the picked one. */
+    if(phone)await page.click('#aeAtlasSheet');
+    await page.click('#aeAtlasHideFound');
+    assert.equal(await page.getAttribute('#aeAtlasHideFound','aria-pressed'),'true',`${width}: Hide found is on`);
+    await page.fill('#aeAtlasFind','test t-near-0');await page.press('#aeAtlasFind','Enter');
+    await pinsDrawn(page);
+    assert.equal(await page.locator('#aeAtlasMarkers [data-marker="t-near-1"]').count(),0,`${width}: a found marker hides with Hide found`);
+    /* Reload: still found and still hidden. */
+    await page.reload();await page.waitForSelector('html[data-aetherium-ready="true"]');
+    if(phone)await page.click('#aeAtlasSheet');
+    assert.equal(await page.$eval('[data-count="gathering"]',el=>el.textContent),`1/${total}`,`${width}: found survives a reload`);
+    assert.equal(await page.getAttribute('#aeAtlasHideFound','aria-pressed'),'true',`${width}: Hide found survives a reload`);
+    /* And back: picking it from the list shows it, and the card turns it off. */
+    await page.click('#aeAtlasHideFound');
+    await page.fill('#aeAtlasFind','test t-near-1');await page.press('#aeAtlasFind','Enter');
+    await page.click(toggle);
+    assert.equal(await page.$eval('[data-count="gathering"]',el=>el.textContent),String(total),`${width}: unmarking takes it off the count`);
+    assert.equal(await page.$eval('#aeAtlasHideFound',el=>el.hidden),true,`${width}: Hide found goes when nothing is found`);
+    assert.deepEqual(errors,[],`${width}: no page errors in found`);
+    await context.close();
+  }
+  console.log('ok found: mark, tick, count, hide, reload, unmark');
+
+  /* Real data (Miguel, 29 Oct 2026): a field boss card shows the game's loot in the game's colours and Taulo's chest odds;
+     a Command Merchant draws its own in-game icon, not the layer's. */
+  await (async()=>{
+    const context=await browser.newContext({viewport:{width:1600,height:900}});
+    await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
+    const page=await context.newPage();
+    const errors=[];page.on('pageerror',error=>errors.push(error.message));
+    await page.goto(base+PAGE+'?zone=verteron&marker=verteron-boss-chaser-taulo');
+    await page.waitForSelector('#aeAtlasCard .ae-atlas-card');
+    const table=markers.lootTables['verteron-field-boss'];
+    const want=table.groups.reduce((n,g)=>n+g.items.length,0)+1;
+    const card=await page.evaluate(()=>{const c=document.querySelector('#aeAtlasCard');return {title:c.querySelector('h3').textContent,
+      count:c.querySelectorAll('.ae-atlas-loot-list li').length,first:c.querySelector('.ae-atlas-loot-list li')?.textContent,
+      gold:getComputedStyle(c.querySelector('.ae-atlas-loot-list li[data-colour="gold"]')).color,
+      chest:c.querySelector('.ae-atlas-chest h4')?.textContent,odds:[...c.querySelectorAll('.ae-atlas-odds')].map(o=>o.textContent),
+      pool:[...c.querySelectorAll('.ae-atlas-pool-head')].map(h=>h.textContent.replace(/\s+/g,' ').trim())};});
+    assert.equal(card.title,'Chaser Taulo');
+    assert.equal(card.count,want,'The shared loot table plus Taulo\'s own chest');
+    assert.equal(card.first,'Holy Spirit Greatsword','The list starts where the game starts it');
+    assert.equal(card.gold,'rgb(242, 201, 76)','Gold items in gold');
+    assert.equal(card.chest,"Taulo's Loot Chest (Bound)");
+    assert.equal(card.odds.filter(o=>o.startsWith('14.2857')).length,7,'Seven Taulo pieces at one in seven');
+    assert.ok(card.pool.some(p=>p.startsWith('Reward Pool 1')&&p.includes('25.00% chance, 1 roll')),'Pool 1 odds as the game prints them');
+    const others=markers.records.filter(m=>m.layer==='field-boss'&&!m.loot.extra);
+    assert.ok(others.length>0&&others.every(m=>m.loot.more&&!m.loot.chest),'Bosses without a seen chest say so and invent no chest');
+    await page.goto(base+PAGE+'?zone=verteron&marker=verteron-dawn-legion-base-command-merchant');
+    await page.waitForSelector('#aeAtlasCard .ae-atlas-card');
+    const icon=await page.$eval('#aeAtlasCard .ae-atlas-card-head img',img=>img.getAttribute('src'));
+    assert.equal(icon,'/astrix-app/pages/aetherium/icons/game/command-merchant.webp','A marker with its own icon draws it');
+    assert.deepEqual(errors,[],'No page errors on real cards');
+    await context.close();
+  })();
+  console.log('ok boss loot, chest odds, own icons');
 
   /* Deep link: the zone, centred on the marker, with its card. */
   await (async()=>{
@@ -424,7 +514,7 @@ try {
     assert.ok(cover.ghost<4,`The spot is marked while the form is open (${cover.ghost})`);
     const layerTargets=await page.$$eval('.ae-atlas-cap-layer',nodes=>nodes.map(n=>n.getBoundingClientRect().height));
     assert.ok(layerTargets.length===LAYERS.length&&layerTargets.every(h=>h>=44),'Layer picks are big targets');
-    await page.click('.ae-atlas-cap-layer:has(input[value="hidden-cube"])');
+    await page.click('.ae-atlas-cap-layer:has(input[value="gathering"])');
     await page.fill('#aeCapForm [name="name"]','Cube by the bridge');
     await page.fill('#aeCapForm [name="note"]','Behind the rocks.');
     await page.fill('#aeCapForm [name="level"]','9');
@@ -434,10 +524,10 @@ try {
     let records=await stored();
     assert.equal(records.length,1,'Saved on this device');
     const first=records[0];
-    assert.equal(first.id,`${drawnZone.id}-hidden-cube-cube-by-the-bridge`);
+    assert.equal(first.id,`${drawnZone.id}-gathering-cube-by-the-bridge`);
     assert.ok(Math.abs(first.x-0.4)<0.002&&Math.abs(first.y-0.4)<0.002,'Saved where it was clicked');
     let pin=(await pinsShown(page)).find(item=>item.id===first.id);
-    assert.ok(pin&&pin.cls.includes('is-captured')&&pin.icon.endsWith('#hidden-cube'),'The new marker is drawn');
+    assert.ok(pin&&pin.cls.includes('is-captured')&&pin.icon.endsWith('#gathering'),'The new marker is drawn');
     /* Move by dragging. */
     await page.mouse.move(pin.box.x,pin.box.y);
     await page.mouse.down();
@@ -483,7 +573,7 @@ try {
     const now=new Date(),todayIs=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     assert.deepEqual(Object.keys(exported),['records'],'Export is a markers.json body');
     assert.deepEqual(Object.keys(exported.records[0]),['id','zone','layer','x','y','gameX','gameY','name','note','level','status','provenance'],'Export keys in the markers.json order');
-    assert.deepEqual(exported.records[0],{id:first.id,zone:drawnZone.id,layer:'hidden-cube',x:first.x,y:first.y,gameX:1234.5,gameY:678,name:'Cube by the bridge',note:'Behind the rocks.',level:9,status:'confirmed',
+    assert.deepEqual(exported.records[0],{id:first.id,zone:drawnZone.id,layer:'gathering',x:first.x,y:first.y,gameX:1234.5,gameY:678,name:'Cube by the bridge',note:'Behind the rocks.',level:9,status:'confirmed',
       provenance:{kind:'in-game-capture',capturedBy:'Miguel',capturedOn:todayIs,gameVersion:'test version',where:`in game, ${drawnZone.name}`,note:'Position read from the in-game map and placed on our base map of the zone.'}},'Export record');
     assert.deepEqual(atlasProblems({zones,layers,markers:exported}),[],'The export passes the Atlas checks');
     if(Ajv2020){
@@ -524,14 +614,20 @@ try {
   })();
   console.log('ok capture mode not linked');
 
-  /* The real markers.json: every marker on a captured zone is drawn, alone or inside a cluster. */
+  /* The real markers.json: every marker on a captured zone is drawn, dense layers once zoomed in. */
   await (async()=>{
     const {context,page,errors}=await open();
     for(const zone of zones.records.filter(item=>item.image)){
       await page.click(`.ae-atlas-zone[data-zone="${zone.id}"]`);
       await mapLoaded(page);
-      const ids=(await pinsShown(page)).flatMap(item=>item.cluster?item.cluster.split(' '):[item.id]).sort();
-      assert.deepEqual(ids,markers.records.filter(marker=>marker.zone===zone.id).map(marker=>marker.id).sort(),`${zone.id}: every captured marker is on the map`);
+      const dense=new Set(layers.layers.filter(layer=>layer.minZoomPx).map(layer=>layer.id));
+      const here=markers.records.filter(marker=>marker.zone===zone.id);
+      let ids=(await pinsShown(page)).map(item=>item.id).sort();
+      assert.deepEqual(ids,here.filter(marker=>!dense.has(marker.layer)).map(marker=>marker.id).sort(),`${zone.id}: every captured marker is on the whole-zone view, dense layers aside`);
+      for(let i=0;i<30&&(await page.$$eval('[data-zoomhint]',els=>els.some(el=>!el.hidden)));i++)await page.click('#aeAtlasZoomIn');
+      ids=(await pinsShown(page)).map(item=>item.id).sort();
+      assert.deepEqual(ids,here.map(marker=>marker.id).sort(),`${zone.id}: zoomed in, every captured marker is on the map`);
+      await page.click('#aeAtlasFit');
       const counts=await page.$$eval('.ae-atlas-layer',nodes=>Object.fromEntries(nodes.map(node=>[node.dataset.layer,Number(node.querySelector('.ae-atlas-count').textContent)])));
       for(const layer of LAYERS)assert.equal(counts[layer],markers.records.filter(marker=>marker.zone===zone.id&&marker.layer===layer).length,`${zone.id} ${layer}: count`);
     }

@@ -1,15 +1,17 @@
 /**
  * Atreia Atlas markers on the map (feature/aetherium-map-capture, 28 Oct 2026). Pins sit in an overlay above the base map,
- * placed in screen pixels, so an icon keeps its size at every zoom. Pins closer than CLUSTER_PX on screen join into one
- * numbered cluster; zooming in splits them. Landmark layers (camps and villages, areas, dungeon entrances: landmark in
- * layers.json) are drawn as their in-game icon with the name under it, like the in-game map, and never clustered; the names
+ * placed in screen pixels, so an icon keeps its size at every zoom. Landmark layers (camps and villages, areas, dungeon
+ * entrances: landmark in layers.json) are drawn as their in-game icon with the name under it, like the in-game map; the names
  * show once the map is drawn at least NAMES_AT_PX wide, so the whole-zone view stays readable on a phone. Only the markers it is
  * given are drawn: markers.json, plus this device's captures in capture mode.
+ *
+ * No number bubbles (Miguel, 29 Oct 2026): every marker is drawn as its own icon, as the in-game map does. A layer that comes
+ * in big numbers (minZoomPx in layers.json, the Empyrean Traces) only shows once the map is drawn at least that wide; until
+ * then its row in the panel says to zoom in. The picked marker always shows.
  */
 import { esc } from './aetherium-ui.mjs';
-import { layerIcon } from './atlas-card.mjs';
+import { markerIcon } from './atlas-card.mjs';
 
-const CLUSTER_PX = 44;
 const DRAG_PX = 4;
 /** Landmark names show under their icons once the map is drawn at least this wide, in CSS pixels, so they never pile up. */
 export const NAMES_AT_PX = 1800;
@@ -22,27 +24,28 @@ export function createMarkerLayer({ overlay, view, layers }) {
   let list = [];
   let shown = new Set(layers.map(layer => layer.id));
   let selected = null;
+  let found = new Set();
+  let hideFound = false;
   let base = null;
   let frame = 0;
   let canDrag = () => false;
   const pickListeners = new Set();
   const moveListeners = new Set();
+  const zoomListeners = new Set();
 
-  /** Groups the visible markers by distance on screen at the current zoom. */
+  /** The map's drawn width in CSS pixels. */
+  const drawnWidth = () => view.state.width * view.state.scale;
+  /** Whether a layer is too dense to show at the current zoom. */
+  const tooFar = layerId => { const min = byLayer.get(layerId)?.minZoomPx; return Boolean(min) && drawnWidth() < min - 0.5; };
+  /** The markers to draw at the current zoom, each on its own. */
   function groups() {
     const out = [];
     for (const marker of list) {
       if (!shown.has(marker.layer)) continue;
+      if (hideFound && found.has(marker.id) && marker.id !== selected) continue;
+      if (marker.id !== selected && tooFar(marker.layer)) continue;
       const at = view.toView(marker.x, marker.y);
-      if (byLayer.get(marker.layer)?.landmark) { out.push({ place: true, at, members: [marker] }); continue; }
-      /* The selected marker always stands alone, so the one you picked or linked to is never hidden in a cluster. */
-      if (marker.id === selected) { out.push({ solo: true, at, members: [marker] }); continue; }
-      const near = out.find(group => !group.place && !group.solo && Math.hypot(group.at.x - at.x, group.at.y - at.y) < CLUSTER_PX);
-      if (near) {
-        near.members.push(marker);
-        const n = near.members.length;
-        near.at = { x: near.at.x + (at.x - near.at.x) / n, y: near.at.y + (at.y - near.at.y) / n };
-      } else out.push({ at, members: [marker] });
+      out.push({ place: Boolean(byLayer.get(marker.layer)?.landmark), at, members: [marker] });
     }
     return out;
   }
@@ -53,19 +56,17 @@ export function createMarkerLayer({ overlay, view, layers }) {
     base = { tx, ty, scale };
     overlay.dataset.scale = scale.toFixed(4);
     overlay.classList.toggle('is-named', view.state.width * scale >= NAMES_AT_PX);
+    for (const fn of zoomListeners) fn(tooFar);
     pins.style.transform = '';
     pins.innerHTML = groups().map(group => {
       const pos = `left:${group.at.x.toFixed(1)}px;top:${group.at.y.toFixed(1)}px`;
-      if (group.members.length > 1) {
-        const ids = group.members.map(marker => marker.id).join(' ');
-        return `<button class="ae-atlas-cluster" type="button" data-atlas-pin data-cluster="${esc(ids)}" style="${pos}" aria-label="${group.members.length} markers here, zoom in">${group.members.length}</button>`;
-      }
       const marker = group.members[0];
       const layer = byLayer.get(marker.layer);
-      const flags = `${marker.id === selected ? ' is-selected' : ''}${marker.captured ? ' is-captured' : ''}${marker.status === 'reported' ? ' is-reported' : ''}`;
+      const flags = `${marker.id === selected ? ' is-selected' : ''}${marker.captured ? ' is-captured' : ''}${marker.status === 'reported' ? ' is-reported' : ''}${found.has(marker.id) ? ' is-found' : ''}`;
+      const tick = found.has(marker.id) ? '<span class="ae-atlas-tick" aria-hidden="true"></span>' : '';
       const attrs = `type="button" data-atlas-pin data-marker="${esc(marker.id)}" data-layer="${esc(marker.layer)}" style="${pos}" aria-pressed="${marker.id === selected}"`;
-      if (group.place) return `<button class="ae-atlas-place${flags}" ${attrs} aria-label="${esc(marker.name)}, ${esc(layer?.label ?? marker.layer)}">${layerIcon(layer?.icon ?? marker.layer, 32)}<span class="ae-atlas-place-name">${esc(marker.name)}</span></button>`;
-      return `<button class="ae-atlas-pin${flags}" ${attrs} aria-label="${esc(marker.name)}, ${esc(layer?.label ?? marker.layer)}">${layerIcon(layer?.icon ?? marker.layer, 34)}</button>`;
+      if (group.place) return `<button class="ae-atlas-place${flags}" ${attrs} aria-label="${esc(marker.name)}, ${esc(layer?.label ?? marker.layer)}">${markerIcon(marker, layer, 32)}${tick}<span class="ae-atlas-place-name">${esc(marker.name)}</span></button>`;
+      return `<button class="ae-atlas-pin${flags}" ${attrs} aria-label="${esc(marker.name)}, ${esc(layer?.label ?? marker.layer)}${found.has(marker.id) ? ', found' : ''}">${markerIcon(marker, layer, 34)}${tick}</button>`;
     }).join('');
   }
   const redraw = () => { if (!frame) frame = requestAnimationFrame(draw); };
@@ -116,15 +117,6 @@ export function createMarkerLayer({ overlay, view, layers }) {
     const pin = event.target.closest('[data-atlas-pin]');
     if (!pin) return;
     if (justDragged) return;
-    if (pin.dataset.cluster) {
-      const members = pin.dataset.cluster.split(' ').map(id => list.find(marker => marker.id === id)).filter(Boolean);
-      const zoom = view.state.scale / view.state.fit;
-      if (zoom < view.maxZoom - 0.01) {
-        const box = overlay.getBoundingClientRect(), r = pin.getBoundingClientRect();
-        view.zoomAt(2.2, r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top);
-      } else for (const fn of pickListeners) fn(null, members);
-      return;
-    }
     for (const fn of pickListeners) fn(pin.dataset.marker);
   });
 
@@ -132,7 +124,9 @@ export function createMarkerLayer({ overlay, view, layers }) {
     /** The markers to draw (already filtered to the zone). */
     set(next) { list = next; flushNow(); },
     setShown(next) { shown = new Set(next); flushNow(); },
-    /** Lights one pin and draws again at once (it leaves any cluster it was in). */
+    /** The markers this player has found, and whether to hide them. */
+    setFound(next, hide) { found = new Set(next); hideFound = Boolean(hide); flushNow(); },
+    /** Lights one pin and draws again at once (it shows even when its layer needs a closer zoom). */
     select(id) {
       if (id === selected) return;
       selected = id;
@@ -141,6 +135,9 @@ export function createMarkerLayer({ overlay, view, layers }) {
     draggable(fn) { canDrag = fn; },
     onPick: fn => pickListeners.add(fn),
     onMove: fn => moveListeners.add(fn),
+    /** Called after each redraw with tooFar(layerId), so the panel can say which layers need a closer zoom. */
+    onZoom: fn => zoomListeners.add(fn),
+    tooFar: layerId => tooFar(layerId),
     /** Draws now (tests and the deep link wait on it). */
     flush: () => flushNow()
   };
