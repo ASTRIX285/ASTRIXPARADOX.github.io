@@ -17,7 +17,8 @@ const {atlasProblems}=await import(pathToFileURL(resolve(root,'astrix-app/games/
 
 const problems=atlasProblems({zones,layers,markers});
 assert.deepEqual(problems,[],`Atlas data:\n${problems.join('\n')}`);
-assert.deepEqual(layers.layers.map(layer=>layer.id),['hidden-cube','empyrean-trace','kibelisk','gathering','named-monster','dungeon-entrance','rift','place','area'],'Layer order');
+assert.deepEqual(layers.layers.map(layer=>layer.id),['empyrean-trace','monolith','field-boss','kibelisk','merchant','crafting','storage','gathering','named-monster','dungeon-entrance','rift','place','area'],'Layer order');
+assert.ok(!layers.layers.some(layer=>layer.id==='hidden-cube'),'No Hidden Cubes layer: their spots only come from the game client (Miguel, 29 Oct 2026)');
 const DASH=/[–—]/;
 for(const [name,data] of [['zones',zones],['layers',layers],['markers',markers]])assert.ok(!DASH.test(JSON.stringify(data)),`No en or em dash in ${name}.json`);
 

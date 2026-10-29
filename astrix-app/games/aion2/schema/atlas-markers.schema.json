@@ -4,41 +4,252 @@
   "title": "Atreia Atlas markers",
   "description": "data/map/markers.json. x and y are fractions of the zone's base map, 0 to 1. Zone and layer must exist in zones.json and layers.json (engine/atlas-data.mjs checks that).",
   "type": "object",
-  "required": ["records"],
+  "required": [
+    "records"
+  ],
   "additionalProperties": false,
   "properties": {
-    "description": { "type": "string" },
-    "records": { "type": "array", "items": { "$ref": "#/$defs/marker" } }
+    "description": {
+      "type": "string"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/marker"
+      }
+    },
+    "lootTables": {
+      "type": "object",
+      "description": "Loot lists shared by several markers, keyed by id.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "groups"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "groups": {
+            "$ref": "#/$defs/lootGroups"
+          }
+        }
+      }
+    }
   },
   "$defs": {
     "marker": {
       "type": "object",
-      "required": ["id", "zone", "layer", "x", "y", "name", "status", "provenance"],
+      "required": [
+        "id",
+        "zone",
+        "layer",
+        "x",
+        "y",
+        "name",
+        "status",
+        "provenance"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-        "zone": { "type": "string", "minLength": 1 },
-        "layer": { "type": "string", "minLength": 1 },
-        "x": { "type": "number", "minimum": 0, "maximum": 1 },
-        "y": { "type": "number", "minimum": 0, "maximum": 1 },
-        "gameX": { "type": "number" },
-        "gameY": { "type": "number" },
-        "name": { "type": "string", "minLength": 1 },
-        "note": { "type": "string" },
-        "level": { "type": "integer", "minimum": 1 },
-        "status": { "enum": ["confirmed", "reported"] },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "zone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "gameX": {
+          "type": "number"
+        },
+        "gameY": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "confirmed",
+            "reported"
+          ]
+        },
         "provenance": {
           "description": "An in-game-capture source in the shape of platform/contracts/provenance.schema.json.",
           "type": "object",
-          "required": ["kind", "capturedBy", "capturedOn", "gameVersion", "where", "note"],
+          "required": [
+            "kind",
+            "capturedBy",
+            "capturedOn",
+            "gameVersion",
+            "where",
+            "note"
+          ],
           "additionalProperties": false,
           "properties": {
-            "kind": { "const": "in-game-capture" },
-            "capturedBy": { "type": "string", "minLength": 1 },
-            "capturedOn": { "type": "string", "format": "date" },
-            "gameVersion": { "type": "string", "minLength": 1 },
-            "where": { "type": "string", "minLength": 1 },
-            "note": { "type": "string", "minLength": 1 }
+            "kind": {
+              "const": "in-game-capture"
+            },
+            "capturedBy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "capturedOn": {
+              "type": "string",
+              "format": "date"
+            },
+            "gameVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "where": {
+              "type": "string",
+              "minLength": 1
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^/astrix-app/pages/aetherium/icons/game/[a-z0-9-]+\\.webp$",
+          "description": "This marker's own in-game icon, when it differs from its layer's."
+        },
+        "loot": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "table": {
+              "type": "string",
+              "description": "An id in lootTables."
+            },
+            "extra": {
+              "$ref": "#/$defs/lootGroups"
+            },
+            "more": {
+              "type": "string"
+            },
+            "chest": {
+              "type": "object",
+              "required": [
+                "name",
+                "pools"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pools": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "label",
+                      "items"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "chance": {
+                        "type": "string"
+                      },
+                      "rolls": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "qty"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "qty": {
+                              "type": "string"
+                            },
+                            "chance": {
+                              "type": "string"
+                            },
+                            "colour": {
+                              "$ref": "#/$defs/lootColour"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "lootColour": {
+      "enum": [
+        "gold",
+        "blue",
+        "green",
+        "white",
+        "teal"
+      ],
+      "description": "The colour the game draws the item name in."
+    },
+    "lootGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "colour",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "colour": {
+            "$ref": "#/$defs/lootColour"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
           }
         }
       }

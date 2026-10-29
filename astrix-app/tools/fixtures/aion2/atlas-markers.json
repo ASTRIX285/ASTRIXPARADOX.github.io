@@ -25,10 +25,10 @@
     {
       "id": "fixture-reported",
       "zone": "altgard",
-      "layer": "hidden-cube",
+      "layer": "gathering",
       "x": 0.75,
       "y": 0.1,
-      "name": "Fixture Hidden Cube",
+      "name": "Fixture Gathering Spot",
       "status": "reported",
       "provenance": {
         "kind": "in-game-capture",

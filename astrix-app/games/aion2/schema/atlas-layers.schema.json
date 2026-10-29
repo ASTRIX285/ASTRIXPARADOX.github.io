@@ -21,7 +21,8 @@
           "icon": { "type": "string", "pattern": "^[a-z0-9-]+$" },
           "text": { "type": "string", "minLength": 1 },
           "image": { "type": "string", "pattern": "^/astrix-app/pages/aetherium/icons/game/[a-z0-9-]+\\.webp$", "description": "The in-game icon, cut from our own map captures." },
-          "landmark": { "type": "boolean", "description": "Drawn with its name under the icon and never clustered." }
+          "landmark": { "type": "boolean", "description": "Drawn with its name under the icon." },
+          "minZoomPx": { "type": "integer", "minimum": 1, "description": "Shows only once the map is drawn at least this wide, in CSS pixels." }
         }
       }
     }
