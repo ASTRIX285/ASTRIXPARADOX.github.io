@@ -1,0 +1,3 @@
+# fix/seo-hub-sitemap: The Hub search and share text names AION 2 and The Aetherium first; sitemap lastmod dates match each page's last change.
+hub/index.html
+sitemap.xml

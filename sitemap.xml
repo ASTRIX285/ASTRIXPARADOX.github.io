@@ -4,7 +4,7 @@
   <!-- Home -->
   <url>
     <loc>https://astrixparadox.com/</loc>
-    <lastmod>2025-05-26</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,7 +12,7 @@
   <!-- Reviews -->
   <url>
     <loc>https://astrixparadox.com/pages/reviews.html</loc>
-    <lastmod>2025-05-26</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -20,7 +20,7 @@
   <!-- News -->
   <url>
     <loc>https://astrixparadox.com/pages/news.html</loc>
-    <lastmod>2025-05-26</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -28,7 +28,7 @@
   <!-- Universes / Games -->
   <url>
     <loc>https://astrixparadox.com/pages/games.html</loc>
-    <lastmod>2025-05-26</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -36,7 +36,7 @@
   <!-- Join Us -->
   <url>
     <loc>https://astrixparadox.com/pages/join.html</loc>
-    <lastmod>2025-05-26</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -44,7 +44,7 @@
   <!-- The Hub: every tool -->
   <url>
     <loc>https://astrixparadox.com/hub/</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-30</lastmod>
   </url>
 
   <!-- The Aetherium (AION 2) -->
@@ -106,7 +106,7 @@
   </url>
   <url>
     <loc>https://astrixparadox.com/hub/aetherium/map/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://astrixparadox.com/hub/aetherium/guide/</loc>
@@ -316,15 +316,15 @@
   <!-- Destiny 2 tools -->
   <url>
     <loc>https://astrixparadox.com/tools/destiny-2/</loc>
-    <lastmod>2026-09-28</lastmod>
+    <lastmod>2026-10-22</lastmod>
   </url>
   <url>
     <loc>https://astrixparadox.com/tools/destiny-2/dim-loadout-viewer/</loc>
-    <lastmod>2026-09-28</lastmod>
+    <lastmod>2026-10-22</lastmod>
   </url>
   <url>
     <loc>https://astrixparadox.com/tools/destiny-2/dim-companion/</loc>
-    <lastmod>2026-09-28</lastmod>
+    <lastmod>2026-10-22</lastmod>
   </url>
 
 </urlset>
