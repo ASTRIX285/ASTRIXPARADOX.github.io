@@ -140,42 +140,31 @@ try{
    // Miguel's own welcome text came back on 2 Nov 2026 (his sign-off), so "Welcome to the Paradox" is allowed again.
    assert.doesNotMatch(r.text,/Multi-Game Operations Hub|Years in the Field|YOUR ONE-LINE/i,`${label}: template copy gone`);
 
-   // The hero carries Miguel's original welcome text word for word under the line (2 Nov 2026), then the
-   // flagship tool as a lit panel, all on the first screen above the actions. Sections run hero, tools, live,
-   // universes, crew.
+   // The hero carries Miguel's original welcome text under the line (2 Nov 2026), names no game, and sits on the
+   // first screen above the actions. Sections run hero, tools, live, universes, crew.
    const w=await page.evaluate(()=>{
     const box=e=>{const b=e.getBoundingClientRect();return {top:b.top,bottom:b.bottom,left:b.left,right:b.right}};
-    const beacon=document.querySelector('#axHero a.ax-xhero-beacon');const intro=document.querySelector('#axHero #axWelcome');
+    const intro=document.querySelector('#axHero #axWelcome');
     return {order:[...document.querySelectorAll('body>section')].map(s=>s.id),
-     intro:intro&&{text:intro.textContent.replace(/\s+/g,' ').trim(),box:box(intro),
-      body:parseFloat(getComputedStyle(intro.querySelector('p')).fontSize),line:box(document.querySelector('#axHero .ax-xhero-line')),
+     intro:intro&&{text:intro.textContent.replace(/\s+/g,' ').trim(),box:box(intro),body:parseFloat(getComputedStyle(intro.querySelector('p')).fontSize),
       links:[...intro.querySelectorAll('a')].map(a=>a.getAttribute('href'))},
-     beacon:beacon&&{href:beacon.getAttribute('href'),box:box(beacon),text:beacon.textContent,
-      strobe:getComputedStyle(beacon,'::before').animationName,edge:getComputedStyle(beacon,'::before').backgroundImage,
-      clip:getComputedStyle(beacon).clipPath},
-     tab:box(document.querySelector('#axHero .ax-xhero-tab')),hero:box(document.getElementById('axHero'))};
+     line:box(document.querySelector('#axHero .ax-xhero-line')),
+     tab:box(document.querySelector('#axHero .ax-xhero-tab')),hero:box(document.getElementById('axHero')),
+     extras:document.querySelectorAll('#axHero .ax-xhero-beacon,#axHero .ax-xhero-sign').length};
    });
    assert.deepEqual(w.order,['axHero','axTools','streamSection','axUniverses','axCrew'],`${label}: hero, tools, live, universes, crew`);
    assert.ok(w.intro,`${label}: the welcome text is in the hero`);
    for(const line of ['If you are here, you are already part of something bigger than just a website.',
     'ASTRIX PARADOX is a gaming and community platform built from years grinding through digital worlds.',
-    'Drop in on Twitch to watch it live, catch highlights on YouTube, or join the crew on Discord.',
-    'Welcome to the Paradox. Welcome to ASTRIX PARADOX.'])assert.ok(w.intro.text.includes(line),`${label}: Miguel's words, unchanged: ${line}`);
+    'Drop in on Twitch to watch it live, catch highlights on YouTube, or join the crew on Discord.'])assert.ok(w.intro.text.includes(line),`${label}: Miguel's words, unchanged: ${line}`);
    assert.doesNotMatch(w.intro.text,/AION|Destiny|has taken over/,`${label}: the welcome names no game, so it holds whatever is being played`);
    assert.deepEqual(w.intro.links,['https://twitch.tv/astrix285x','https://youtube.com/c/ASTRIX285Gaming','https://discord.com/invite/6dcyrbpdzN']);
+   assert.equal(w.extras,0,`${label}: no tool panel or sign-off repeated in the hero`);
    assert.ok(w.intro.body>=16,`${label}: welcome text readable (${w.intro.body}px)`);
    assert.ok(w.intro.box.left>=0&&w.intro.box.right<=width,`${label}: welcome inside the screen`);
-   assert.ok(w.beacon,`${label}: the flagship panel is in the welcome`);
-   assert.equal(w.beacon.href,'/hub/aetherium/',`${label}: the flagship panel leads into The Aetherium`);
-   assert.match(w.beacon.text,/THE AETHERIUM/);
-   assert.ok(w.beacon.box.top>=w.hero.top&&w.beacon.box.bottom<=height,`${label}: flagship panel on the first screen (${Math.round(w.beacon.box.bottom)})`);
-   assert.ok(w.beacon.box.bottom<=w.tab.top,`${label}: flagship panel clears the actions (${Math.round(w.beacon.box.bottom)} vs ${Math.round(w.tab.top)})`);
-   assert.ok(w.beacon.box.left>=0&&w.beacon.box.right<=width,`${label}: flagship panel inside the screen`);
-   assert.ok(w.intro.box.top>=w.intro.line.bottom&&w.intro.box.bottom<=w.beacon.box.top,`${label}: welcome sits between the line and the panel`);
+   assert.ok(w.intro.box.top>=w.line.bottom,`${label}: welcome sits under the line`);
+   assert.ok(w.intro.box.bottom<=w.tab.top,`${label}: welcome clears the actions (${Math.round(w.intro.box.bottom)} vs ${Math.round(w.tab.top)})`);
    assert.ok(w.intro.box.top>=w.hero.top+40,`${label}: welcome clears the nav (${Math.round(w.intro.box.top)})`);
-   assert.match(w.beacon.clip,/polygon/,`${label}: notched top right corner`);
-   assert.match(w.beacon.edge,/rgb\(191, 230, 255\)/,`${label}: AION 2 blue strobe on the panel edge`);
-   assert.equal(w.beacon.strobe,reducedMotion==='reduce'?'none':'ax-home-pulse',`${label}: panel strobe ${reducedMotion==='reduce'?'still':'pulses'}`);
 
    // Clicking another slice opens it and closes the lead one.
    await page.locator('#axUniRow .ax-slice[data-game="warframe"] .ax-slice-hit').click();
