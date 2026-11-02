@@ -1,0 +1,2 @@
+# fix/twitch-vod-fallback: the Twitch status job picks the newest VOD a viewer can watch, skipping processing or private ones; a deleted one never appears.
+.github/workflows/twitch-status.yml

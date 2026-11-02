@@ -79,16 +79,33 @@ jobs:
               result['viewers'] = s.get('viewer_count', 0)
               print(f'LIVE: {result["title"]} | Game: {result["game"]} | Viewers: {result["viewers"]}')
           else:
-              # Step 4 — Fetch latest VOD
-              vods = api(f'https://api.twitch.tv/helix/videos?user_id={user_id}&type=archive&first=1', token)
-              if vods.get('data'):
-                  v = vods['data'][0]
-                  result['vod_id']    = v.get('id', '')
-                  result['vod_title'] = v.get('title', '')
-                  result['vod_url']   = v.get('url', '')
+              # Step 4 — The newest VOD a viewer can actually watch (Miguel, 2 Nov 2026).
+              # Twitch leaves a deleted VOD out of this list. A VOD that is still processing, or set to
+              # private, is skipped for the one before it, and so on down the last 20.
+              def watchable(v):
+                  if v.get('viewable', 'public') != 'public':
+                      return False, 'not public'
+                  if '404_processing' in (v.get('thumbnail_url') or '') or not v.get('duration'):
+                      return False, 'still processing'
+                  return True, ''
+
+              vods = api(f'https://api.twitch.tv/helix/videos?user_id={user_id}&type=archive&first=20', token)
+              chosen = None
+              for v in vods.get('data', []):
+                  ok, why = watchable(v)
+                  if ok:
+                      chosen = v
+                      break
+                  print(f'Skipping VOD {v.get("id")} ({v.get("title", "")}): {why}')
+
+              if chosen:
+                  result['vod_id']    = chosen.get('id', '')
+                  result['vod_title'] = chosen.get('title', '')
+                  result['vod_url']   = chosen.get('url', '')
                   print(f'VOD: {result["vod_title"]}')
               else:
-                  print('No VODs found')
+                  # No watchable VOD: write none, so the site never embeds a deleted or unpublished one.
+                  print('No watchable VODs found')
 
           with open('twitch-status.json', 'w') as f:
               json.dump(result, f)
