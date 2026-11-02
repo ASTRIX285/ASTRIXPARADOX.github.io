@@ -66,7 +66,7 @@ body.ax-brand #axHero :is(.btn-primary,.btn-secondary):active{transform:scale(.9
 
 /* The welcome (Miguel, 2 Nov 2026): one plain line on what the site is, then the flagship tool as a
    lit panel so a first visit lands on The Aetherium. No game art in the hero; AION 2 blue on the strobe. */
-#axHero p.ax-xhero-intro{margin:0!important;max-width:44ch;font:400 clamp(15px,1.1vw,17px)/1.55 var(--ax-font-body)!important;color:var(--ax-muted)!important;text-wrap:balance;text-shadow:0 1px 10px rgb(11,11,12),0 0 2px rgb(11,11,12)}
+#axHero p.ax-xhero-intro{margin:0!important;max-width:58ch;font:400 clamp(15px,1.1vw,17px)/1.55 var(--ax-font-body)!important;color:var(--ax-muted)!important;text-wrap:balance;text-shadow:0 1px 10px rgb(11,11,12),0 0 2px rgb(11,11,12)}
 #axHero a.ax-xhero-beacon{--beacon:var(--ax-home-aion);--beacon-hi:var(--ax-home-aion-hi);
   position:relative;isolation:isolate;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:20px;
   width:min(640px,100%);box-sizing:border-box;margin-top:14px;padding:18px 22px 18px 24px;text-align:left;text-decoration:none;color:inherit;
@@ -110,6 +110,62 @@ body.ax-brand #axHero a.ax-xhero-beacon:active{transform:scale(.985)}
 body.ax-brand .ax-home-h2{margin:0!important;font-family:var(--ax-home-display)!important;font-weight:700!important;
   font-size:clamp(40px,5vw,72px)!important;line-height:.95!important;letter-spacing:.01em!important;text-transform:uppercase!important;color:var(--ax-ink)!important}
 
+/* ---------- The journey (Miguel, 2 Nov 2026) ----------
+   Who is behind the site and what it took. A lit route runs down the middle with a light travelling along
+   it; stops alternate left and right. Wins wear a crimson diamond, the grind a cracked steel one on a
+   scored card, and the last stop pings because the work is still going. On phones the route runs down
+   the left edge. No scroll reveals: everything is there at rest. */
+body.ax-brand.ax-map>section#axJourney{padding:120px clamp(16px,5vw,80px) 120px!important;background:transparent!important}
+#axJourney .ax-journey-head{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+#axJourney p.ax-journey-lede{margin:0!important;max-width:58ch;font:400 clamp(18px,1.4vw,21px)/1.55 var(--ax-font-body)!important;color:#dcdcda!important}
+#axJourney ol.ax-journey-route{position:relative;list-style:none;margin:64px auto 0!important;padding:0!important;max-width:1200px;display:flex;flex-direction:column;gap:28px}
+/* Stops interleave: each one starts before the last one on the other side ends. */
+#axJourney li.ax-stop+li.ax-stop{margin-top:-64px}
+/* The route itself, and a light running down it. */
+#axJourney ol.ax-journey-route::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);
+  background:linear-gradient(180deg,var(--ax-ember) 0%,var(--ax-deep) 40%,var(--ax-line-strong) 70%,var(--ax-ember) 100%);
+  box-shadow:0 0 10px rgba(186,31,18,.35)}
+#axJourney ol.ax-journey-route::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;transform:translateX(-50%);pointer-events:none;
+  background:linear-gradient(180deg,transparent 0%,var(--ax-stroke-hi-primary) 50%,transparent 100%) 0 -20%/100% 180px no-repeat;
+  filter:drop-shadow(0 0 6px rgba(230,57,31,.95));animation:ax-journey-run 6s linear infinite}
+
+#axJourney li.ax-stop{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:start;
+  filter:drop-shadow(0 14px 28px rgba(0,0,0,.55))}
+#axJourney li.ax-stop:nth-child(odd) .ax-stop-card{grid-column:1;grid-row:1}
+#axJourney li.ax-stop:nth-child(even) .ax-stop-card{grid-column:3;grid-row:1}
+#axJourney .ax-stop-node{grid-column:2;grid-row:1;justify-self:center;position:relative;z-index:1;width:16px;height:16px;margin-top:30px;transform:rotate(45deg);
+  background:var(--ax-ember);box-shadow:0 0 0 4px var(--ax-black),0 0 14px rgba(230,57,31,.75)}
+/* The arm from the route to the card. */
+#axJourney li.ax-stop::before{content:"";position:absolute;top:37px;height:1.5px;width:32px;background:var(--ax-ember);opacity:.7}
+#axJourney li.ax-stop:nth-child(odd)::before{right:50%}
+#axJourney li.ax-stop:nth-child(even)::before{left:50%}
+
+/* The card: raised bevel, notched top right corner. */
+#axJourney .ax-stop-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:26px 30px 28px;box-sizing:border-box;
+  background:linear-gradient(180deg,rgba(29,29,32,.94) 0%,rgba(19,19,21,.96) 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.08),inset -1px -1px 0 rgba(0,0,0,.7),inset 0 0 0 1px var(--ax-hairline);
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%)}
+#axJourney p.ax-stop-when{margin:0!important;font:400 12px/1 var(--ax-home-label)!important;letter-spacing:.22em!important;text-transform:uppercase!important;color:var(--ax-ember-hi)!important}
+#axJourney h3.ax-stop-title{margin:0!important;font-family:var(--ax-home-display)!important;font-weight:700!important;font-size:clamp(30px,2.6vw,40px)!important;
+  line-height:1!important;letter-spacing:.01em!important;text-transform:uppercase!important;color:#ffffff!important}
+#axJourney p.ax-stop-text{margin:0!important;font:400 17px/1.6 var(--ax-font-body)!important;color:#c9c9c8!important}
+
+/* Where it started: a bigger, brighter diamond. */
+#axJourney li.ax-stop[data-kind="start"] .ax-stop-node{width:22px;height:22px;margin-top:27px;background:var(--ax-ember-hi);
+  box-shadow:0 0 0 5px var(--ax-black),0 0 0 6px var(--ax-ember),0 0 24px rgba(230,57,31,.9)}
+/* The grind: a cracked steel diamond and a scored card with a crimson edge. */
+#axJourney li.ax-stop[data-kind="grind"] .ax-stop-node{background:var(--ax-black);border:1.5px solid var(--ax-steel);box-sizing:border-box;
+  box-shadow:0 0 0 4px var(--ax-black);background-image:linear-gradient(135deg,transparent 46%,var(--ax-ember-hi) 47%,var(--ax-ember-hi) 53%,transparent 54%)}
+#axJourney li.ax-stop[data-kind="grind"]::before{background:var(--ax-steel);opacity:.5}
+#axJourney li.ax-stop[data-kind="grind"] .ax-stop-card{
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 2px,transparent 2px 11px),linear-gradient(180deg,rgba(23,23,25,.96) 0%,rgba(13,13,14,.97) 100%);
+  box-shadow:inset 3px 0 0 var(--ax-ember),inset 1px 1px 0 rgba(255,255,255,.06),inset -1px -1px 0 rgba(0,0,0,.7),inset 0 0 0 1px var(--ax-hairline)}
+#axJourney li.ax-stop[data-kind="grind"] p.ax-stop-when{color:var(--ax-steel)!important}
+#axJourney li.ax-stop[data-kind="grind"] h3.ax-stop-title{color:var(--ax-ember-hi)!important}
+/* Now: still going, so it pings. */
+#axJourney li.ax-stop[data-kind="now"] .ax-stop-node{background:#ffffff;box-shadow:0 0 0 4px var(--ax-black),0 0 18px rgba(255,255,255,.6),0 0 30px rgba(230,57,31,.8)}
+#axJourney li.ax-stop[data-kind="now"] .ax-stop-node::after{content:"";position:absolute;inset:-10px;border:1.5px solid var(--ax-ember-hi);animation:ax-home-ping 2.8s cubic-bezier(.23,1,.32,1) infinite}
+
 /* ---------- The Universes ---------- */
 body.ax-brand.ax-map>section#axUniverses{padding:120px clamp(16px,3vw,40px) 0!important;background:transparent!important}
 #axUniverses .ax-uni-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;max-width:1520px;margin:0 auto 40px;padding:0 clamp(0px,3vw,40px);box-sizing:border-box}
@@ -147,7 +203,7 @@ body.ax-brand.ax-map>section#axUniverses{padding:120px clamp(16px,3vw,40px) 0!im
 #axUniverses .ax-slice-body .btn-secondary{margin-top:8px}
 
 /* ---------- The Tools ---------- */
-body.ax-brand.ax-map>section#axTools{padding:120px clamp(16px,5vw,80px) 120px!important;background:transparent!important}
+body.ax-brand.ax-map>section#axTools{padding:120px clamp(16px,5vw,80px) 0!important;background:transparent!important}
 #axTools .ax-home-h2{max-width:1440px;margin:0 auto 40px!important}
 #axTools .ax-tools-split{position:relative;height:clamp(440px,38vw,540px);max-width:1440px;margin:0 auto}
 #axTools a.ax-tool{position:absolute;inset:0;display:block;overflow:hidden;color:inherit;text-decoration:none}
@@ -216,7 +272,7 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
 
   body.ax-brand.ax-map>section#axUniverses{padding:72px 0 0!important}
 
-  body.ax-brand.ax-map>section#axTools{padding:72px 16px 72px!important}
+  body.ax-brand.ax-map>section#axTools{padding:72px 16px 0!important}
   #axTools .ax-tools-split{height:auto;display:flex;flex-direction:column}
   #axTools a.ax-tool{position:relative;inset:auto;height:340px}
   #axTools a.ax-tool:nth-child(1){clip-path:polygon(0 0,100% 0,100% 86%,0 100%)}
@@ -227,6 +283,16 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   #axTools .ax-tool-line{font-size:16px}
   #axTools .ax-tools-cut{display:none}
 
+  body.ax-brand.ax-map>section#axJourney{padding:72px 16px 72px!important}
+  #axJourney ol.ax-journey-route{margin-top:40px!important;gap:20px}
+  #axJourney li.ax-stop+li.ax-stop{margin-top:0}
+  #axJourney ol.ax-journey-route::before,#axJourney ol.ax-journey-route::after{left:11px}
+  #axJourney li.ax-stop{grid-template-columns:22px minmax(0,1fr);column-gap:18px}
+  #axJourney li.ax-stop .ax-stop-card{grid-column:2!important}
+  #axJourney .ax-stop-node{grid-column:1}
+  #axJourney li.ax-stop::before{left:22px!important;right:auto!important;width:18px}
+  #axJourney .ax-stop-card{padding:22px 20px 24px}
+  #axJourney p.ax-stop-text{font-size:16px!important}
   body.ax-brand.ax-map>section#axCrew{margin-top:80px!important;padding:72px 16px!important}
   #axCrew .ax-crew-cta{flex-direction:column;align-self:stretch}
   #axCrew .ax-crew-cta>a{justify-content:center!important}
@@ -241,6 +307,8 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   #axUniverses .ax-slice,#axUniverses .ax-slice-art,#axTools .ax-tool-art{transition:none!important}
   #axUniverses .ax-slice.is-open::before{animation:none}
   #axHero a.ax-xhero-beacon::before{animation:none}
+  #axJourney ol.ax-journey-route::after{animation:none;display:none}
+  #axJourney li.ax-stop[data-kind="now"] .ax-stop-node::after{animation:none;display:none}
   #axHero .ax-xhero-beacon-mark::after{animation:none;display:none}
   #axHero a.ax-xhero-beacon,#axHero a.ax-xhero-beacon::after,#axHero .ax-xhero-beacon-go svg{transition:none}
 }
@@ -248,7 +316,8 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
 @layer astrix-brand{
   body.ax-brand.ax-map>section#axHero{padding:0!important;margin:0!important;background:var(--ax-black)!important}
   body.ax-brand.ax-map>section#axUniverses{padding:120px clamp(16px,3vw,40px) 0!important;background:transparent!important}
-  body.ax-brand.ax-map>section#axTools{padding:120px clamp(16px,5vw,80px) 120px!important;background:transparent!important}
+  body.ax-brand.ax-map>section#axTools{padding:120px clamp(16px,5vw,80px) 0!important;background:transparent!important}
+  body.ax-brand.ax-map>section#axJourney{padding:120px clamp(16px,5vw,80px) 120px!important;background:transparent!important}
   body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16px!important;
     background:radial-gradient(700px 320px at 50% 100%,rgba(115,32,34,.35),transparent),rgba(11,11,12,.72)!important}
   body.ax-brand #axHero h1.ax-xhero-title{font-family:var(--ax-font-brand)!important;letter-spacing:0!important}
@@ -258,7 +327,8 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
   body.ax-brand #axCrew :is(.btn-primary,.btn-secondary):active{transform:scale(.97)!important}
   @media (max-width:768px){
     body.ax-brand.ax-map>section#axUniverses{padding:72px 0 0!important}
-    body.ax-brand.ax-map>section#axTools{padding:72px 16px 72px!important}
+    body.ax-brand.ax-map>section#axTools{padding:72px 16px 0!important}
+    body.ax-brand.ax-map>section#axJourney{padding:72px 16px 72px!important}
     body.ax-brand.ax-map>section#axCrew{margin-top:80px!important;padding:72px 16px!important}
   }
 }
@@ -270,4 +340,5 @@ body.ax-brand.ax-map>section#axCrew{margin:140px 0 0!important;padding:110px 16p
 @keyframes ax-home-run{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
 @keyframes ax-home-sheen{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
 @keyframes ax-home-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes ax-journey-run{from{background-position:0 -20%}to{background-position:0 120%}}
 @keyframes ax-home-ping{0%{opacity:.7;transform:scale(.6)}70%,100%{opacity:0;transform:scale(1.5)}}

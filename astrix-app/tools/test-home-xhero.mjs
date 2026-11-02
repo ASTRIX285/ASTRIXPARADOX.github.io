@@ -139,8 +139,8 @@ try{
    assert.doesNotMatch(r.text,/[–—]/,`${label}: no dashes`);
    assert.doesNotMatch(r.text,/Welcome to the Paradox|Multi-Game Operations Hub|Years in the Field|YOUR ONE-LINE/i,`${label}: template copy gone`);
 
-   // The welcome (Miguel, 2 Nov 2026): a plain line on what the site is, then the flagship tool as a lit
-   // panel, all in the first screen above the actions. Sections run welcome, tools, live, universes, crew.
+   // The welcome (Miguel, 2 Nov 2026): who is behind the site, then the flagship tool as a lit panel,
+   // all in the first screen above the actions. Sections run welcome, journey, live, tools, universes, crew.
    const w=await page.evaluate(()=>{
     const box=e=>{const b=e.getBoundingClientRect();return {top:b.top,bottom:b.bottom,left:b.left,right:b.right}};
     const beacon=document.querySelector('#axHero a.ax-xhero-beacon');const intro=document.querySelector('#axHero .ax-xhero-intro');
@@ -151,8 +151,8 @@ try{
       clip:getComputedStyle(beacon).clipPath},
      tab:box(document.querySelector('#axHero .ax-xhero-tab')),hero:box(document.getElementById('axHero'))};
    });
-   assert.deepEqual(w.order,['axHero','axTools','streamSection','axUniverses','axCrew'],`${label}: welcome, tools, live, universes, crew`);
-   assert.ok(w.intro&&/real game data/.test(w.intro.text),`${label}: the welcome says what the site is`);
+   assert.deepEqual(w.order,['axHero','axJourney','streamSection','axTools','axUniverses','axCrew'],`${label}: welcome, journey, live, tools, universes, crew`);
+   assert.ok(w.intro&&/ASTRIX285/.test(w.intro.text),`${label}: the welcome says who is behind the site`);
    assert.ok(w.beacon,`${label}: the flagship panel is in the welcome`);
    assert.equal(w.beacon.href,'/hub/aetherium/',`${label}: the flagship panel leads into The Aetherium`);
    assert.match(w.beacon.text,/THE AETHERIUM/);
@@ -163,6 +163,38 @@ try{
    assert.match(w.beacon.clip,/polygon/,`${label}: notched top right corner`);
    assert.match(w.beacon.edge,/rgb\(191, 230, 255\)/,`${label}: AION 2 blue strobe on the panel edge`);
    assert.equal(w.beacon.strobe,reducedMotion==='reduce'?'none':'ax-home-pulse',`${label}: panel strobe ${reducedMotion==='reduce'?'still':'pulses'}`);
+
+   // The journey (Miguel, 2 Nov 2026): a lit route with every stop on it, cards that never leave the screen,
+   // the grind marked apart from the wins, and the last stop still going.
+   const j=await page.evaluate(()=>{
+    const route=document.querySelector('#axJourney .ax-journey-route');const rb=route.getBoundingClientRect();const cs=(e,p)=>getComputedStyle(e,p);
+    const spine=cs(route,'::before');const spineLeft=rb.left+parseFloat(spine.left);
+    return {spineW:parseFloat(spine.width),spineLeft,run:cs(route,'::after').animationName,
+     stops:[...route.querySelectorAll('.ax-stop')].map(li=>{const n=li.querySelector('.ax-stop-node').getBoundingClientRect(),c=li.querySelector('.ax-stop-card').getBoundingClientRect();
+      return {kind:li.dataset.kind,node:(n.left+n.right)/2,cardL:c.left,cardR:c.right,cardTop:c.top,clip:cs(li.querySelector('.ax-stop-card')).clipPath,
+       title:li.querySelector('.ax-stop-title').textContent.trim(),titleColor:cs(li.querySelector('.ax-stop-title')).color,
+       nodeBorder:cs(li.querySelector('.ax-stop-node')).borderTopStyle,ping:cs(li.querySelector('.ax-stop-node'),'::after').animationName}})};
+   });
+   assert.ok(j.spineW>=2,`${label}: the route is drawn`);
+   assert.ok(j.stops.length>=6,`${label}: the journey has its stops`);
+   assert.equal(j.stops[0].kind,'start');assert.equal(j.stops.at(-1).kind,'now');
+   assert.ok(j.stops.some(s=>s.kind==='grind'),`${label}: the grind is on the route`);
+   for(const s of j.stops){
+    assert.ok(Math.abs(s.node-j.spineLeft-1)<=3,`${label}: ${s.title} sits on the route (${Math.round(s.node)} vs ${Math.round(j.spineLeft)})`);
+    assert.ok(s.cardL>=0&&s.cardR<=width,`${label}: ${s.title} card inside the screen`);
+    assert.match(s.clip,/polygon/,`${label}: ${s.title} card has the notched corner`);
+   }
+   const tops=j.stops.map(s=>s.cardTop);assert.deepEqual(tops,[...tops].sort((a,b)=>a-b),`${label}: stops run in order down the page`);
+   if(width>768){
+    assert.ok(j.stops.every((s,i)=>i%2?s.cardL>j.spineLeft:s.cardR<j.spineLeft),`${label}: stops alternate either side of the route`);
+   }else{
+    assert.ok(j.stops.every(s=>s.cardL>j.spineLeft),`${label}: on phones every stop sits right of the route`);
+   }
+   const grind=j.stops.find(s=>s.kind==='grind'),win=j.stops.find(s=>s.kind==='win');
+   assert.notEqual(grind.titleColor,win.titleColor,`${label}: the grind reads differently from the wins`);
+   assert.equal(grind.nodeBorder,'solid',`${label}: the grind has the cracked steel diamond`);
+   assert.equal(j.run,reducedMotion==='reduce'?'none':'ax-journey-run',`${label}: light along the route ${reducedMotion==='reduce'?'still':'runs'}`);
+   assert.equal(j.stops.at(-1).ping,reducedMotion==='reduce'?'none':'ax-home-ping',`${label}: the last stop ${reducedMotion==='reduce'?'is still':'pings'}`);
 
    // Clicking another slice opens it and closes the lead one.
    await page.locator('#axUniRow .ax-slice[data-game="warframe"] .ax-slice-hit').click();
