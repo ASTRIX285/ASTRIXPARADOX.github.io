@@ -140,31 +140,29 @@ try{
    // Miguel's own welcome text came back on 2 Nov 2026 (his sign-off), so "Welcome to the Paradox" is allowed again.
    assert.doesNotMatch(r.text,/Multi-Game Operations Hub|Years in the Field|YOUR ONE-LINE/i,`${label}: template copy gone`);
 
-   // The hero carries the flagship tool as a lit panel in the first screen above the actions. Straight after
-   // it, Miguel's original welcome text, word for word (2 Nov 2026). Sections run hero, welcome, tools, live,
+   // The hero carries Miguel's original welcome text word for word under the line (2 Nov 2026), then the
+   // flagship tool as a lit panel, all on the first screen above the actions. Sections run hero, tools, live,
    // universes, crew.
    const w=await page.evaluate(()=>{
     const box=e=>{const b=e.getBoundingClientRect();return {top:b.top,bottom:b.bottom,left:b.left,right:b.right}};
-    const beacon=document.querySelector('#axHero a.ax-xhero-beacon');const intro=document.querySelector('#axWelcome');
+    const beacon=document.querySelector('#axHero a.ax-xhero-beacon');const intro=document.querySelector('#axHero #axWelcome');
     return {order:[...document.querySelectorAll('body>section')].map(s=>s.id),
-     intro:intro&&{text:intro.textContent.replace(/\s+/g,' ').trim(),box:box(intro),game:intro.querySelector('#heroGameName').textContent.trim(),
-      h2:getComputedStyle(intro.querySelector('h2')).fontFamily,body:parseFloat(getComputedStyle(intro.querySelector('.ax-welcome-body')).fontSize),
+     intro:intro&&{text:intro.textContent.replace(/\s+/g,' ').trim(),box:box(intro),
+      body:parseFloat(getComputedStyle(intro.querySelector('p')).fontSize),line:box(document.querySelector('#axHero .ax-xhero-line')),
       links:[...intro.querySelectorAll('a')].map(a=>a.getAttribute('href'))},
      beacon:beacon&&{href:beacon.getAttribute('href'),box:box(beacon),text:beacon.textContent,
       strobe:getComputedStyle(beacon,'::before').animationName,edge:getComputedStyle(beacon,'::before').backgroundImage,
       clip:getComputedStyle(beacon).clipPath},
      tab:box(document.querySelector('#axHero .ax-xhero-tab')),hero:box(document.getElementById('axHero'))};
    });
-   assert.deepEqual(w.order,['axHero','axWelcome','axTools','streamSection','axUniverses','axCrew'],`${label}: hero, welcome, tools, live, universes, crew`);
-   assert.ok(w.intro,`${label}: the welcome section is back`);
-   for(const line of ['Welcome to the Paradox','If you are here, you are already part of something bigger than just a website.',
+   assert.deepEqual(w.order,['axHero','axTools','streamSection','axUniverses','axCrew'],`${label}: hero, tools, live, universes, crew`);
+   assert.ok(w.intro,`${label}: the welcome text is in the hero`);
+   for(const line of ['If you are here, you are already part of something bigger than just a website.',
     'ASTRIX PARADOX is a gaming and community platform built from years grinding through digital worlds.',
-    'Right now, there is only one world that matters.','AION 2 has taken over.',
     'Drop in on Twitch to watch it live, catch highlights on YouTube, or join the crew on Discord.',
     'Welcome to the Paradox. Welcome to ASTRIX PARADOX.'])assert.ok(w.intro.text.includes(line),`${label}: Miguel's words, unchanged: ${line}`);
-   assert.equal(w.intro.game,'AION 2',`${label}: the game that has taken over is the active game`);
+   assert.doesNotMatch(w.intro.text,/AION|Destiny|has taken over/,`${label}: the welcome names no game, so it holds whatever is being played`);
    assert.deepEqual(w.intro.links,['https://twitch.tv/astrix285x','https://youtube.com/c/ASTRIX285Gaming','https://discord.com/invite/6dcyrbpdzN']);
-   assert.match(w.intro.h2,/acumin-pro-extra-condensed/,`${label}: welcome heading in the home heading face`);
    assert.ok(w.intro.body>=16,`${label}: welcome text readable (${w.intro.body}px)`);
    assert.ok(w.intro.box.left>=0&&w.intro.box.right<=width,`${label}: welcome inside the screen`);
    assert.ok(w.beacon,`${label}: the flagship panel is in the welcome`);
@@ -173,7 +171,8 @@ try{
    assert.ok(w.beacon.box.top>=w.hero.top&&w.beacon.box.bottom<=height,`${label}: flagship panel on the first screen (${Math.round(w.beacon.box.bottom)})`);
    assert.ok(w.beacon.box.bottom<=w.tab.top,`${label}: flagship panel clears the actions (${Math.round(w.beacon.box.bottom)} vs ${Math.round(w.tab.top)})`);
    assert.ok(w.beacon.box.left>=0&&w.beacon.box.right<=width,`${label}: flagship panel inside the screen`);
-   assert.ok(w.intro.box.top>=w.hero.bottom-1,`${label}: welcome sits below the hero`);
+   assert.ok(w.intro.box.top>=w.intro.line.bottom&&w.intro.box.bottom<=w.beacon.box.top,`${label}: welcome sits between the line and the panel`);
+   assert.ok(w.intro.box.top>=w.hero.top+40,`${label}: welcome clears the nav (${Math.round(w.intro.box.top)})`);
    assert.match(w.beacon.clip,/polygon/,`${label}: notched top right corner`);
    assert.match(w.beacon.edge,/rgb\(191, 230, 255\)/,`${label}: AION 2 blue strobe on the panel edge`);
    assert.equal(w.beacon.strobe,reducedMotion==='reduce'?'none':'ax-home-pulse',`${label}: panel strobe ${reducedMotion==='reduce'?'still':'pulses'}`);
@@ -193,11 +192,9 @@ try{
   const {context,page}=await openHome({width:1600,height:900,active:'destiny2'});
   const r=await page.evaluate(()=>({
    slices:[...document.querySelectorAll('#axUniRow .ax-slice')].map(s=>[s.dataset.game,s.classList.contains('is-open'),s.querySelector('.ax-slice-status').textContent.trim()]),
-   tools:[...document.querySelectorAll('#axToolsSplit .ax-tool')].map(t=>[t.dataset.game,t.querySelector('.ax-tool-btn').classList.contains('btn-primary')]),
-   game:document.getElementById('heroGameName').textContent.trim()
+   tools:[...document.querySelectorAll('#axToolsSplit .ax-tool')].map(t=>[t.dataset.game,t.querySelector('.ax-tool-btn').classList.contains('btn-primary')])
   }));
   assert.deepEqual(r.slices[0],['destiny2',true,'Playing now'],'Destiny 2 leads when it is the active game');
-  assert.equal(r.game,'Destiny 2','The welcome names the active game');
   assert.equal(r.slices.find(s=>s[0]==='aion2')[2],'','AION 2 drops its Playing now label');
   assert.deepEqual(r.tools,[['destiny2',true],['aion2',false]],'The Forge leads when Destiny 2 is the active game');
   await context.close();

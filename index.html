@@ -135,6 +135,16 @@
   <div class="ax-xhero-inner">
     <h1 class="ax-xhero-title" id="axHeroTitle"><span class="ax-xhero-word"><span class="ax-xhero-chrome">ASTRI</span><b>X</b></span> <span class="ax-xhero-sub">PARADOX</span></h1>
     <p class="ax-xhero-line">If you play it, we can build it.</p>
+    <!-- Miguel's original welcome text, word for word from the first home page (restored 2 Nov 2026) -->
+    <div class="ax-xhero-welcome" id="axWelcome">
+      <p>If you are here, you are already part of something bigger than just a website.
+        ASTRIX PARADOX is a gaming and community platform built from years
+        grinding through digital worlds.</p>
+      <p>Drop in on <a href="https://twitch.tv/astrix285x" target="_blank" rel="noopener">Twitch</a> to watch it live,
+        catch highlights on <a href="https://youtube.com/c/ASTRIX285Gaming" target="_blank" rel="noopener">YouTube</a>,
+        or join the crew on <a href="https://discord.com/invite/6dcyrbpdzN" target="_blank" rel="noopener">Discord</a>.</p>
+      <p class="ax-xhero-sign">Welcome to the Paradox. Welcome to ASTRIX PARADOX.</p>
+    </div>
     <a class="ax-xhero-beacon" href="/hub/aetherium/" aria-label="Enter The Aetherium, the AION 2 character tool">
       <span class="ax-xhero-beacon-mark" aria-hidden="true"></span>
       <span class="ax-xhero-beacon-text">
@@ -151,24 +161,7 @@
   </div>
 </section>
 
-<!-- 2. WELCOME: Miguel's original welcome text, restored word for word from the first home page (Miguel, 2 Nov 2026) ── -->
-<section class="ax-welcome" id="axWelcome" aria-labelledby="axWelcomeTitle">
-  <h2 class="ax-home-h2" id="axWelcomeTitle">Welcome to the <span class="accent">Paradox</span></h2>
-  <p class="ax-welcome-body">
-    If you are here, you are already part of something bigger than just a website.
-    ASTRIX PARADOX is a gaming and community platform built from years
-    grinding through digital worlds. Right now, there is only one world that matters.
-  </p>
-  <p class="ax-welcome-body">
-    <strong id="heroGameName">AION 2</strong> has taken over.
-    Drop in on <a href="https://twitch.tv/astrix285x" target="_blank" rel="noopener">Twitch</a> to watch it live,
-    catch highlights on <a href="https://youtube.com/c/ASTRIX285Gaming" target="_blank" rel="noopener">YouTube</a>,
-    or join the crew on <a href="https://discord.com/invite/6dcyrbpdzN" target="_blank" rel="noopener">Discord</a>.
-  </p>
-  <p class="ax-welcome-sign">Welcome to the Paradox. Welcome to ASTRIX PARADOX.</p>
-</section>
-
-<!-- 3. THE TOOLS: the lead game's tool first, straight after the welcome ── -->
+<!-- 2. THE TOOLS: the lead game's tool first, straight after the welcome ── -->
 <section class="ax-tools" id="axTools" aria-labelledby="axToolsTitle">
   <h2 class="ax-home-h2" id="axToolsTitle">The tools</h2>
   <div class="ax-tools-split" id="axToolsSplit">
@@ -192,7 +185,7 @@
   </div>
 </section>
 
-<!-- 4. STREAM SECTION ── -->
+<!-- 3. STREAM SECTION ── -->
 <section class="stream-section" id="streamSection">
 
   <!-- OFFLINE STATE -->
@@ -265,7 +258,7 @@
 
 <div class="gold-line"></div>
 
-<!-- 5. THE UNIVERSES: the lead game first, from window.ACTIVE_GAME (js/game-presets.js) ── -->
+<!-- 4. THE UNIVERSES: the lead game first, from window.ACTIVE_GAME (js/game-presets.js) ── -->
 <section class="ax-uni" id="axUniverses" aria-labelledby="axUniTitle">
   <div class="ax-uni-head">
     <h2 class="ax-home-h2" id="axUniTitle">The universes</h2>
@@ -355,7 +348,7 @@
   </div>
 </section>
 
-<!-- 6. CLOSING ── -->
+<!-- 5. CLOSING ── -->
 <section class="ax-crew" id="axCrew" aria-label="Join the crew">
   <p class="ax-crew-title">Twenty-five years in. Still playing.</p>
   <p class="ax-crew-line">Pick the universes you follow on Discord and only those channels show up.</p>
@@ -384,9 +377,6 @@
 <script>
   (function () {
     var active = window.ACTIVE_GAME;
-    var gameName = document.getElementById('heroGameName');
-    var preset = window.GAME_PRESETS && window.GAME_PRESETS[active];
-    if (gameName && preset && preset.heroName) gameName.textContent = preset.heroName;
     var row = document.getElementById('axUniRow');
     if (row) {
       var slices = [].slice.call(row.querySelectorAll('.ax-slice'));
