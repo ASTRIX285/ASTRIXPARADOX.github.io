@@ -139,6 +139,31 @@ try{
    assert.doesNotMatch(r.text,/[–—]/,`${label}: no dashes`);
    assert.doesNotMatch(r.text,/Welcome to the Paradox|Multi-Game Operations Hub|Years in the Field|YOUR ONE-LINE/i,`${label}: template copy gone`);
 
+   // The welcome (Miguel, 2 Nov 2026): a plain line on what the site is, then the flagship tool as a lit
+   // panel, all in the first screen above the actions. Sections run welcome, tools, live, universes, crew.
+   const w=await page.evaluate(()=>{
+    const box=e=>{const b=e.getBoundingClientRect();return {top:b.top,bottom:b.bottom,left:b.left,right:b.right}};
+    const beacon=document.querySelector('#axHero a.ax-xhero-beacon');const intro=document.querySelector('#axHero .ax-xhero-intro');
+    return {order:[...document.querySelectorAll('body>section')].map(s=>s.id),
+     intro:intro&&{text:intro.textContent.trim(),box:box(intro)},
+     beacon:beacon&&{href:beacon.getAttribute('href'),box:box(beacon),text:beacon.textContent,
+      strobe:getComputedStyle(beacon,'::before').animationName,edge:getComputedStyle(beacon,'::before').backgroundImage,
+      clip:getComputedStyle(beacon).clipPath},
+     tab:box(document.querySelector('#axHero .ax-xhero-tab')),hero:box(document.getElementById('axHero'))};
+   });
+   assert.deepEqual(w.order,['axHero','axTools','streamSection','axUniverses','axCrew'],`${label}: welcome, tools, live, universes, crew`);
+   assert.ok(w.intro&&/real game data/.test(w.intro.text),`${label}: the welcome says what the site is`);
+   assert.ok(w.beacon,`${label}: the flagship panel is in the welcome`);
+   assert.equal(w.beacon.href,'/hub/aetherium/',`${label}: the flagship panel leads into The Aetherium`);
+   assert.match(w.beacon.text,/THE AETHERIUM/);
+   assert.ok(w.beacon.box.top>=w.hero.top&&w.beacon.box.bottom<=height,`${label}: flagship panel on the first screen (${Math.round(w.beacon.box.bottom)})`);
+   assert.ok(w.beacon.box.bottom<=w.tab.top,`${label}: flagship panel clears the actions (${Math.round(w.beacon.box.bottom)} vs ${Math.round(w.tab.top)})`);
+   assert.ok(w.beacon.box.left>=0&&w.beacon.box.right<=width,`${label}: flagship panel inside the screen`);
+   assert.ok(w.intro.box.bottom<=w.beacon.box.top,`${label}: intro sits above the panel`);
+   assert.match(w.beacon.clip,/polygon/,`${label}: notched top right corner`);
+   assert.match(w.beacon.edge,/rgb\(191, 230, 255\)/,`${label}: AION 2 blue strobe on the panel edge`);
+   assert.equal(w.beacon.strobe,reducedMotion==='reduce'?'none':'ax-home-pulse',`${label}: panel strobe ${reducedMotion==='reduce'?'still':'pulses'}`);
+
    // Clicking another slice opens it and closes the lead one.
    await page.locator('#axUniRow .ax-slice[data-game="warframe"] .ax-slice-hit').click();
    await page.waitForTimeout(reducedMotion==='reduce'?50:600);
