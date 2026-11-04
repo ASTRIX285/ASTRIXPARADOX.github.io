@@ -233,7 +233,7 @@ await check('level change re-plans and clamps to the cap',async()=>{
   // Level planner, Cleric (17 Oct 2026): the Cleric's stacks are named now (Next at Lv N says which stack a skill joins).
   assert.match(await plain(page,'.ae-menu-card[data-view="macro"] .ae-menu-status'),/^Thunder stack and torment stack in Macro 1$/);
   await page.click('.ae-menu-card[data-view="macro"]');
-  await page.waitForFunction(()=>document.body.dataset.aeView==='macro'&&document.documentElement.dataset.aetheriumReady==='true');
+  await page.waitForFunction(()=>document.body?.dataset.aeView==='macro'&&document.documentElement.dataset.aetheriumReady==='true');
   assert.match(page.url(),/\/ascent\/macro\/\?class=cleric&role=healer&level=45$/,'The card opens its own page and keeps the level');
   assert.equal(await page.locator('.ae-macro-entry').count(),2,'Two Cleric entries at 45: stack A and stack B');
   assert.equal(await page.locator('.ae-macro-delay').count(),2,'A delay after each entry, like the game');
