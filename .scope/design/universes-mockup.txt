@@ -1,3 +1,2 @@
-.scope/design/universes-mockup.txt
 previews/universes/index.html
 previews/universes/universes-preview.css
