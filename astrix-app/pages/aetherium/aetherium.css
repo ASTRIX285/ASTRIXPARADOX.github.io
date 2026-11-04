@@ -3450,3 +3450,24 @@ body.aetherium-page[data-ae-page="guide"] .ae-gd .ae-gd-body .ae-ab-h{margin:0}
 @media (prefers-reduced-motion:reduce){.ae-ab-faction-img{transition:none}.ae-ab-faction:hover .ae-ab-faction-img{transform:none}}
 .ae-ab-emblem{display:block;width:7.5rem;height:7.5rem;margin:0 0 10px -6px;object-fit:contain;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--ae-f) 70%,transparent)) drop-shadow(0 2px 6px rgba(0,0,0,.8))}
 @media (max-width:520px){.ae-ab-emblem{width:5.5rem;height:5.5rem}}
+
+/* Layout shift (perf/aetherium-layout-shift, 4 Nov 2026). Cloudflare's real-visitor data had only 59% of Aetherium visits
+   "good" on Cumulative Layout Shift, with #aeMain the source.
+   1. The page fills at least one screen, so the footer never sits in the first view and then jumps away as the content
+      under it arrives. The Atreia Atlas keeps its own map-sized layout.
+   2. The Daeva Card knows before first paint whether a Daeva is coming (link or saved active Daeva: html.ae-has-daeva,
+      set by a small script in the page head), so the welcome or the character card shows from the start and never swaps. The card's loading skeleton stays in
+      the page as before (it shows straight away, before any script) */
+body.aetherium-page:not(.ae-atlas-page) .ae-main{min-height:100svh}
+html.ae-has-daeva #aeIntro,html.ae-has-daeva #aeClasses{display:none}
+/* 3. On the pages with the step bar the same head script runs, so with a Daeva coming the bar starts in its final shape
+      (no "Find your Daeva first" notes), the source line keeps its one-line place, and the Gear Ledger's header keeps
+      room for the character line while it reads. */
+html.ae-has-daeva .ae-step-note{display:none}
+html.ae-has-daeva #aeMain>#aeSource[hidden]{display:block;visibility:hidden;min-height:1.45em}
+html.ae-has-daeva #aeHeader.ae-ledger-head:has(>.ae-muted:only-child){min-height:120px;box-sizing:border-box}
+@media (max-width:719px){html.ae-has-daeva #aeHeader.ae-ledger-head:has(>.ae-muted:only-child){min-height:191px}}
+/* The Daeva Card and the Ascent Plan add "How this works" to the step bar once the Daeva is in; on a phone that is a second
+   row, kept from the start. The Ascent Plan's setup panel also gains its line about the Daeva's class and level. */
+@media (max-width:719px){html.ae-has-daeva body:has(#aeIntro,.ae-ascent-setup) #aeSteps:not(:has(.ae-steps-help))::after{content:"";flex:1 0 100%;height:44px}
+  html.ae-has-daeva .ae-main>.ae-ascent-setup{min-height:399px;box-sizing:border-box}}

@@ -403,6 +403,8 @@ function renderResults(rows) {
    art (class render, NPC guide, class tiles) is added once the art data is in, so it never holds up first paint. */
 let introArtWanted = false;
 function showIntro(on) {
+  /* The page head guessed from the link or the saved Daeva; from here on the page knows. */
+  document.documentElement.classList.toggle('ae-has-daeva', !on);
   $('#aeIntro').hidden = !on;
   $('#aeClasses').hidden = !on;
   // The intro shows nobody: the page's loading skeleton (a portrait and stat tile shapes) leaves the page until a read starts.

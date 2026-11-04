@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261026-game-icons-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261104-layout-shift-1">
   <link rel="preload" href="/astrix-app/games/aion2/data/gear-slots.json" as="fetch" crossorigin>
   <script type="importmap" data-module-versions>
 {"imports":{
@@ -81,6 +81,7 @@
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/character-page.mjs?v=044c99a2d9" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/skills-page.mjs?v=a60c345bed" data-head-hint>
+  <script>/* Layout shift: show the welcome or the character card from the first paint, never swap them (4 Nov 2026). */try{var q=new URLSearchParams(location.search),d=/^\d+$/.test(q.get('serverId')||'')&&q.get('characterId');if(!d){var r=JSON.parse(localStorage.getItem('aetherium.roster.v2')||'null'),o=JSON.parse(localStorage.getItem('aetherium.roster.v1')||'null');d=(r&&r.active&&r.active.key)||(o&&o.active);}if(d)document.documentElement.classList.add('ae-has-daeva');}catch(e){}</script>
   <script type="module" src="/astrix-app/pages/aetherium/skills-page.mjs?v=a60c345bed"></script>
 </head>
 <body class="aetherium-page ae-backdrop" style="--ae-backdrop:url('/astrix-app/pages/aetherium/images/page-backgrounds/skills.jpg')" data-faction="astrix" data-apx-button-system data-ae-page="skills">
