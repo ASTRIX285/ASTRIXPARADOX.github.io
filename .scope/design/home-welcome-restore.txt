@@ -1,0 +1,3 @@
+index.html
+css/home-xhero.css
+astrix-app/tools/test-home-xhero.mjs
