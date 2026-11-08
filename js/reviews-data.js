@@ -181,7 +181,7 @@ const REVIEWS_DATA = [
     "trailerId": "tfxxuVVGjPM",
     "studioLink": "https://www.pathofexile.com",
     "description": "A dark, complex ARPG featuring deep skill trees, brutal combat, and endless replayability.",
-    "image": "../img/share/astrix-paradox-share-1200x630.jpg",
+    "image": "../img/games/pathofexile.jpg",
     "slug": "path-of-exile"
   }
 ];
