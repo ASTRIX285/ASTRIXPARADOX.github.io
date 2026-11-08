@@ -46,14 +46,29 @@ jobs:
           fi
           python3 astrix-app/tools/refresh-bungie-derived-data.py "${args[@]}"
 
+      # The shared backend manifest (refresh-backend-manifest.yml) refuses to publish while the
+      # Journey index is on an older Bungie version, so rebuild it here whenever Bungie moves on
+      # (fix/journey-index-manifest, 8 Nov 2026). The script exits at once when it is current.
+      - name: Rebuild the Journey index for the current manifest
+        id: journey
+        env:
+          BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
+        run: |
+          python3 astrix-app/tools/build-journey-index.py --download
+          if [ -n "$(git status --porcelain -- astrix-app/data/journey-index)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Show generated diff
-        if: steps.refresh.outputs.refreshed == 'true'
+        if: steps.refresh.outputs.refreshed == 'true' || steps.journey.outputs.changed == 'true'
         run: |
           git status --short
           git diff --stat
 
       - name: Commit refreshed Bungie data
-        if: steps.refresh.outputs.refreshed == 'true'
+        if: steps.refresh.outputs.refreshed == 'true' || steps.journey.outputs.changed == 'true'
         env:
           MANIFEST_VERSION: ${{ steps.refresh.outputs.manifest_version }}
         run: |
@@ -63,12 +78,13 @@ jobs:
             astrix-app/data/bungie-manifest-state.json \
             astrix-app/data/component-icons.json \
             astrix-app/data/paradox-forge/beta/beta-bungie-manifest-cache.json \
-            astrix-app/pages/guardian-workspace-v2/guardian-loadout-definitions.mjs
+            astrix-app/pages/guardian-workspace-v2/guardian-loadout-definitions.mjs \
+            astrix-app/data/journey-index
           if git diff --cached --quiet; then
             echo "No generated file changes to commit."
             exit 0
           fi
-          git commit -m "Refresh Bungie data for manifest ${MANIFEST_VERSION}"
+          git commit -m "Refresh Bungie data for manifest ${MANIFEST_VERSION:-current}"
           git push origin HEAD:main
 
       - name: Write workflow summary
