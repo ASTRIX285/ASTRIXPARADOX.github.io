@@ -1,0 +1,190 @@
+/* ASTRIX PARADOX Universes page mockup (Stage 1, preview only).
+   Hero comes from css/universes.css. Games sit in split bands: two games per band, cut on a
+   strobing diagonal like the home page tools panel. Trending uses a three-way cut. On phones
+   every game gets its own band. */
+
+/* ---------- Hero additions ---------- */
+#axUniHero p.uv-eyebrow{margin:0;font:400 13px/1 var(--ax-home-label);letter-spacing:.32em;text-transform:uppercase;color:var(--ax-ember-hi)}
+
+/* ---------- Sections ---------- */
+.uv-main{display:flex;flex-direction:column;gap:clamp(56px,6vw,96px);padding:clamp(48px,5vw,80px) 0 clamp(56px,6vw,96px)}
+.uv-section{display:flex;flex-direction:column;gap:12px;scroll-margin-top:84px}
+.uv-head{width:100%;max-width:1440px;margin:0 auto 16px;padding:0 clamp(16px,3vw,48px);box-sizing:border-box}
+.uv-h2{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(40px,4.4vw,64px);line-height:.95;
+  letter-spacing:.005em;text-transform:uppercase;color:#ffffff}
+.uv-h2::after{content:"";display:block;width:72px;height:2px;margin-top:14px;background:linear-gradient(90deg,var(--ax-stroke-hi),var(--ax-stroke) 30%,transparent);
+  filter:drop-shadow(0 0 3px var(--ax-stroke-glow))}
+.uv-sub{margin:12px 0 0;max-width:60ch;font:400 17px/1.5 var(--ax-font-body);color:var(--ax-muted)}
+
+/* ---------- Split bands ---------- */
+/* Band height keeps each half's art box at 16:9, so the whole key art (baked logo included) shows. */
+.uv-split{position:relative;height:max(380px,calc(min(100vw,1440px) * .58 * 9 / 16));width:100%;max-width:1440px;margin:0 auto;background:var(--ax-black)}
+.uv-half{position:absolute;inset:0;display:block;overflow:hidden;color:inherit;text-decoration:none}
+.uv-split .uv-half:nth-child(1){clip-path:polygon(0 0,58% 0,42% 100%,0 100%)}
+.uv-split .uv-half:nth-child(2){clip-path:polygon(59% 0,100% 0,100% 100%,43% 100%)}
+.uv-split--flip .uv-half:nth-child(1){clip-path:polygon(0 0,42% 0,58% 100%,0 100%)}
+.uv-split--flip .uv-half:nth-child(2){clip-path:polygon(43% 0,100% 0,100% 100%,59% 100%)}
+.uv-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ax-ease)}
+/* Each art box covers only its own half's bounding box, not the whole band. */
+.uv-split .uv-half:nth-child(1) .uv-art{right:auto;width:58%}
+.uv-split .uv-half:nth-child(2) .uv-art{left:auto;width:57%}
+.uv-half::after{content:"";position:absolute;inset:0;pointer-events:none}
+/* Shade from the bottom up, where the text sits, so the logos at the top of the art stay clear. */
+.uv-split .uv-half::after{background:linear-gradient(0deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.72) 32%,rgba(11,11,12,0) 62%)}
+.uv-body{position:absolute;bottom:clamp(28px,3.4vw,48px);z-index:2;display:flex;flex-direction:column;gap:12px;max-width:min(440px,34%)}
+.uv-split .uv-half:nth-child(1) .uv-body{left:clamp(24px,3.4vw,48px);align-items:flex-start}
+.uv-split .uv-half:nth-child(2) .uv-body{right:clamp(24px,3.4vw,48px);align-items:flex-end;text-align:right}
+.uv-cut{position:absolute;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}
+.uv-cut line{stroke:var(--ax-ember-hi);stroke-width:1.5;filter:drop-shadow(0 0 4px rgba(230,57,31,.8));animation:ax-uni-strobe 5.2s linear infinite;animation-delay:-1.8s}
+.uv-split:nth-of-type(even) .uv-cut line{animation-delay:-3.6s}
+
+/* Three-way cut (Trending now) */
+.uv-split--three .uv-half:nth-child(1){clip-path:polygon(0 0,36% 0,30% 100%,0 100%)}
+.uv-split--three .uv-half:nth-child(2){clip-path:polygon(37% 0,70% 0,64% 100%,31% 100%)}
+.uv-split--three .uv-half:nth-child(3){clip-path:polygon(71% 0,100% 0,100% 100%,65% 100%)}
+.uv-split--three .uv-half:nth-child(1) .uv-art{left:0;right:auto;width:36%}
+.uv-split--three .uv-half:nth-child(2) .uv-art{left:31%;right:auto;width:39%}
+.uv-split--three .uv-half:nth-child(3) .uv-art{left:65%;right:auto;width:35%}
+.uv-split--three .uv-half::after{background:linear-gradient(0deg,rgba(11,11,12,.96) 0%,rgba(11,11,12,.7) 40%,rgba(11,11,12,.15) 80%)!important}
+.uv-split--three .uv-body{max-width:none;text-align:left!important;align-items:flex-start!important}
+.uv-split--three .uv-half:nth-child(1) .uv-body{left:clamp(24px,2.6vw,40px);right:auto;width:24%}
+.uv-split--three .uv-half:nth-child(2) .uv-body{left:calc(31% + clamp(24px,2.6vw,40px));right:auto;width:28%}
+.uv-split--three .uv-half:nth-child(3) .uv-body{left:calc(65% + clamp(24px,2.6vw,40px));right:auto;width:28%}
+
+/* Text inside a band */
+.uv-title{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:clamp(38px,3.6vw,60px);line-height:.92;
+  letter-spacing:.005em;text-transform:uppercase;color:#ffffff;text-wrap:balance}
+.uv-title a{color:inherit;text-decoration:none}
+.uv-title a:hover{color:var(--ax-ink)}
+.uv-title a:focus-visible{outline:2px solid var(--ax-steel-light);outline-offset:4px}
+.uv-status{margin:0;font:400 13px/1 var(--ax-home-label);letter-spacing:.22em;text-transform:uppercase;color:var(--ax-muted);text-shadow:0 1px 8px rgba(11,11,12,.9)}
+.uv-status.is-live{color:var(--ax-ember-hi)}
+.uv-line{margin:0;font:400 17px/1.5 var(--ax-font-body);color:#c9c9c8;text-shadow:0 1px 8px rgba(11,11,12,.9)}
+.uv-facts{margin:0;font:600 15px/1.4 var(--ax-font-head);letter-spacing:.02em;color:var(--ax-ink)}
+.uv-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.uv-split .uv-half:nth-child(2) .uv-cta{justify-content:flex-end}
+.uv-split--three .uv-cta{justify-content:flex-start!important}
+
+/* Status chips: Playing, Reviewed, Guides Available, Upcoming. Notched, hairline, steel caps. */
+.uv-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
+.uv-chip{display:inline-flex;align-items:center;min-height:26px;padding:0 12px;box-sizing:border-box;
+  font:600 11px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ax-steel-light);
+  border:1px solid var(--ax-chip-line);background:linear-gradient(to bottom left,transparent calc(50% - .75px),var(--ax-chip-line) calc(50% - .75px),var(--ax-chip-line) calc(50% + .75px),transparent calc(50% + .75px)) top right/8px 8px no-repeat border-box,rgba(19,19,21,.85);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
+.uv-chip.is-live{color:#ffffff;border-color:var(--ax-ember);background:linear-gradient(to bottom left,transparent calc(50% - .75px),var(--ax-ember) calc(50% - .75px),var(--ax-ember) calc(50% + .75px),transparent calc(50% + .75px)) top right/8px 8px no-repeat border-box,rgba(115,32,34,.55)}
+.uv-score{font:700 15px/1 var(--ax-font-head);letter-spacing:.06em;color:#ffffff}
+
+/* Lead game: strobe stroke on the left and bottom edges with a pulse */
+.uv-half.is-lead::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/100% 1.5px no-repeat,
+    linear-gradient(0deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/1.5px 100% no-repeat;
+  filter:drop-shadow(0 0 2px var(--ax-stroke-glow));animation:ax-uni-pulse 2.8s ease-in-out infinite}
+
+/* Key art pending: map art under a dark wash, clearly stamped */
+.uv-art--pending{background:linear-gradient(180deg,rgba(11,11,12,.55),rgba(11,11,12,.85)),var(--forge-paradox-map-art) center/cover no-repeat;display:flex;align-items:flex-start;justify-content:center;padding-top:clamp(32px,5vw,72px);box-sizing:border-box}
+.uv-pending-tag{display:inline-flex;align-items:center;min-height:30px;padding:0 14px;font:600 12px/1 var(--ax-font-head);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ax-steel-light);border:1px dashed var(--ax-chip-line);background:rgba(11,11,12,.7)}
+
+/* Tool halves (Guides & builds) */
+.uv-tool-name{font:400 clamp(26px,2.4vw,34px)/1 var(--ax-font-brand);color:#ffffff}
+a.uv-tool:focus-visible{outline:none}
+a.uv-tool:focus-visible .uv-cta>*{outline:2px solid var(--ax-steel-light)!important;outline-offset:3px!important}
+
+@media (hover:hover) and (pointer:fine){
+  .uv-half:hover .uv-art{transform:scale(1.03)}
+}
+
+/* ---------- Explore by category: notched raised tiles ---------- */
+.uv-cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(16px,3vw,48px);box-sizing:border-box}
+.uv-cat{position:relative;display:flex;flex-direction:column;gap:8px;min-height:150px;padding:22px 22px 24px;box-sizing:border-box;text-decoration:none;color:inherit;
+  background:linear-gradient(to bottom left,transparent calc(50% - .75px),var(--ax-chip-line) calc(50% - .75px),var(--ax-chip-line) calc(50% + .75px),transparent calc(50% + .75px)) top right/18px 18px no-repeat,
+    linear-gradient(180deg,var(--ax-raised),var(--ax-panel));
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.09),inset -1px -1px 0 rgba(0,0,0,.65);
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);filter:drop-shadow(0 10px 18px rgba(0,0,0,.5));
+  transition:transform .25s var(--ax-ease)}
+.uv-cat::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/100% 1.5px no-repeat,
+    linear-gradient(0deg,var(--ax-stroke-hi),var(--ax-stroke) 12px,var(--ax-stroke-fade) 45%,transparent 100%) left bottom/1.5px 100% no-repeat;
+  opacity:.55}
+.uv-cat:hover{transform:translateY(-3px)}
+.uv-cat:hover::after,.uv-cat:focus-visible::after{opacity:1;animation:ax-uni-pulse 2.8s ease-in-out infinite}
+.uv-cat:focus-visible{outline:2px solid var(--ax-steel-light);outline-offset:4px}
+.uv-cat-count{font:400 30px/1 var(--ax-font-brand);color:var(--ax-ember-hi)}
+.uv-cat-name{font-family:var(--ax-home-display);font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;color:#ffffff}
+.uv-cat-line{font:400 15px/1.4 var(--ax-font-body);color:var(--ax-muted)}
+
+/* ---------- Coming soon: release timeline ---------- */
+.uv-timeline{list-style:none;display:flex;flex-direction:column;gap:10px;width:100%;max-width:1440px;margin:0 auto;padding:0 clamp(16px,3vw,48px);box-sizing:border-box}
+.uv-rel{display:grid;grid-template-columns:120px minmax(0,1fr) auto;align-items:center;gap:24px;padding:18px 24px;
+  background:linear-gradient(to bottom left,transparent calc(50% - .75px),var(--ax-chip-line) calc(50% - .75px),var(--ax-chip-line) calc(50% + .75px),transparent calc(50% + .75px)) top right/14px 14px no-repeat,
+    linear-gradient(180deg,rgba(29,29,32,.92),rgba(19,19,21,.92));
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.08),inset -1px -1px 0 rgba(0,0,0,.6);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+.uv-rel-date{display:flex;flex-direction:column;gap:4px;padding-left:14px;border-left:2px solid var(--ax-ember)}
+.uv-rel-date b{font:400 32px/1 var(--ax-font-brand);color:#ffffff}
+.uv-rel-date span{font:600 12px/1 var(--ax-font-head);letter-spacing:.18em;text-transform:uppercase;color:var(--ax-muted)}
+.uv-rel-date.is-tbc{border-left-color:var(--ax-chip-line)}
+.uv-rel-date.is-tbc b{font-size:22px;color:var(--ax-steel-light)}
+.uv-rel-date.is-tbc span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.uv-rel-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+.uv-rel-title{font-family:var(--ax-home-display);font-weight:700;font-size:30px;line-height:1;text-transform:uppercase;color:#ffffff;text-decoration:none}
+a.uv-rel-title:hover{color:var(--ax-ember-hi)}
+a.uv-rel-title:focus-visible{outline:2px solid var(--ax-steel-light);outline-offset:4px}
+.uv-rel-facts{font:400 15px/1.4 var(--ax-font-body);color:var(--ax-muted)}
+
+/* ---------- Recently updated: designed empty state ---------- */
+.uv-recent{width:100%;max-width:1440px;margin:28px auto 0;padding:0 clamp(16px,3vw,48px);box-sizing:border-box}
+.uv-recent-title{margin:0 0 14px;font:600 13px/1 var(--ax-font-head);letter-spacing:.24em;text-transform:uppercase;color:var(--ax-steel-light)}
+.uv-recent-empty{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;padding:24px 28px;border:1px dashed var(--ax-chip-line);background:var(--ax-map-panel)}
+.uv-recent-lead{margin:0;font-family:var(--ax-home-display);font-weight:700;font-size:26px;line-height:1;text-transform:uppercase;color:#ffffff}
+.uv-recent-line{margin:0;flex:1 1 320px;font:400 16px/1.5 var(--ax-font-body);color:var(--ax-muted)}
+
+.uv-credits{max-width:980px;margin:12px auto 0;line-height:1.6}
+
+/* ---------- Tablet: three-way cut becomes stacked bands ---------- */
+@media (max-width:1100px){
+  .uv-cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* ---------- Tablet and phone: one game per band, the art at full 16:9 ---------- */
+@media (max-width:1024px){
+  .uv-split{height:auto;display:flex;flex-direction:column;gap:10px;background:transparent}
+  .uv-split .uv-half{position:relative;inset:auto;height:auto;clip-path:none!important;margin:0!important;background:var(--ax-black)}
+  .uv-split .uv-half .uv-art{position:relative;display:block;inset:auto;width:100%!important;height:auto;aspect-ratio:16/9}
+  .uv-split .uv-half .uv-art--pending{display:flex;align-items:center;justify-content:center;padding:0!important}
+  .uv-split .uv-half::after{background:linear-gradient(0deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.7) 30%,rgba(11,11,12,0) 55%)!important}
+  .uv-split .uv-half .uv-body{left:clamp(16px,4vw,32px)!important;right:auto!important;bottom:clamp(16px,3vw,28px);width:auto!important;max-width:62%;align-items:flex-start!important;text-align:left!important}
+  .uv-split .uv-cta{justify-content:flex-start!important}
+  .uv-cut{display:none}
+  .uv-title{font-size:clamp(32px,4.4vw,44px)}
+  .uv-line{font-size:15px}
+}
+
+/* ---------- Phone: the text sits under the art so nothing covers it ---------- */
+@media (max-width:768px){
+  .uv-split .uv-half::after{display:none}
+  .uv-split .uv-half .uv-body{position:relative;left:auto!important;bottom:auto;max-width:none;padding:16px 16px 24px}
+  .uv-split .uv-cta{flex-direction:column;align-self:stretch}
+  .uv-split .uv-cta>*{justify-content:center}
+  .uv-title{font-size:40px}
+  .uv-line{font-size:16px}
+  .uv-cats{grid-template-columns:minmax(0,1fr);gap:12px}
+  .uv-cat{min-height:0}
+  .uv-rel{grid-template-columns:76px minmax(0,1fr);gap:8px 16px;padding:16px}
+  .uv-rel>.uv-chip{grid-column:2;justify-self:start}
+  .uv-rel-date b{font-size:24px}
+  .uv-rel-date.is-tbc b{font-size:18px}
+  .uv-rel-title{font-size:24px}
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  .uv-cut line{animation:none;opacity:.6}
+  .uv-half.is-lead::before,.uv-cat:hover::after,.uv-cat:focus-visible::after{animation:none}
+  .uv-art,.uv-cat{transition:none}
+}
+
+@layer astrix-brand{
+  body.ax-brand.ax-map .uv-main>section.uv-section{background:transparent!important;padding:0!important;margin:0!important;border:0!important}
+  body.ax-brand .uv-h2,body.ax-brand .uv-title,body.ax-brand .uv-cat-name,body.ax-brand .uv-rel-title,body.ax-brand .uv-recent-lead{font-family:var(--ax-home-display)!important;letter-spacing:.005em!important}
+}
