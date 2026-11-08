@@ -55,7 +55,8 @@ These rules apply to every game, tool and page. Where DESIGN.md or an older brie
 - Never present cached data as live. Show its age.
 - Destiny 2: the current stats model is Armor 3.0: Weapons, Health, Class, Grenade, Super, Melee (1 to 200). Never the old Mobility/Resilience/Recovery/Discipline/Intellect/Strength.
 - Never sign in to any game, publisher or streaming platform as Miguel (Bungie, PlayStation, Xbox, Steam, Epic, Twitch, NCSOFT, Ubisoft, Battle.net or any other), and never script a browser through a sign-in. Miguel does every login in a normal Chrome window. End with a short manual QA checklist for him instead.
-- Never commit secrets. API keys live only in Cloudflare Worker secrets.
+- Never commit secrets. API keys live only in Cloudflare Worker secrets, with one approved exception below.
+- Blizzard API (The Caster, Miguel 8 Nov 2026): the client secret is stored in two places only. The Cloudflare Worker secret `BLIZZARD_CLIENT_SECRET` handles live character lookups. The GitHub Actions repository secret `BLIZZARD_CLIENT_SECRET` lets the WoW Forever data workflow pull game data from Blizzard's API into static files. The client ID is public and lives in the repository variable `BLIZZARD_CLIENT_ID` and the Worker config. Only that data workflow may read the secret: never echo it, write it to a file, pass it to another job or step that does not need it, or use it in any workflow that runs on pull requests from forks.
 
 ## Player data protection
 - Any action that overwrites, replaces or clears an in-game loadout needs an explicit final confirmation that says exactly what will change.
