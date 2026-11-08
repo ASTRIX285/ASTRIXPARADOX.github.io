@@ -1,0 +1,51 @@
+name: Update News Feed
+
+# Builds news-feed.json for pages/news.html from the IGN, GameSpot, PC Gamer and Polygon RSS feeds
+# (feature/news-live-feed, 8 Nov 2026). Every four hours, the site's default refresh (Miguel, 25 Oct 2026),
+# and by hand from the Actions tab.
+on:
+  schedule:
+    - cron: '17 */4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: news-feed
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Fetch the feeds and build news-feed.json
+        run: python3 scripts/build_news.py
+
+      - name: Commit the feed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add news-feed.json
+          if git diff --cached --quiet; then
+            echo "No news change, nothing to commit."
+            exit 0
+          fi
+          git commit -m "Update news feed [$(date -u '+%H:%M UTC')]"
+
+          # Other bots push to main often. If main moved while this job ran,
+          # pull the new commits, keep our feed file, and push again.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt). Rebasing onto latest main..."
+            git pull --rebase -X theirs origin main || { git rebase --abort; exit 1; }
+            sleep $(( attempt * 5 ))
+          done
+          echo "Could not push after 5 attempts." >&2
+          exit 1

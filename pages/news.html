@@ -21,39 +21,58 @@
   <link rel="icon" href="../img/favicon/favicon.ico">
 
   <style>
-    .news-filters { margin-bottom: 40px; }
-    .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2px; }
+    /* News (feature/news-live-feed, 8 Nov 2026): real stories from news-feed.json, drawn by js/news-feed.js. */
+    .news-filters { margin-bottom: 18px; }
+    .news-status { margin: 0 0 28px; font-size: 13px; line-height: 1.6; color: var(--grey); }
+    .news-status[data-kind="warn"] { color: var(--white); padding: 14px 18px; border: 1px solid rgba(139,0,0,0.35); border-left: 3px solid var(--crimson); background: rgba(19,19,21,0.85); }
+    .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+    .news-grid[aria-busy="true"] { min-height: 60vh; }
     .news-card {
+      display: flex; flex-direction: column; color: inherit; text-decoration: none;
       background: var(--dark-2); border: 1px solid rgba(139,0,0,0.15);
-      overflow: hidden; transition: border-color 0.3s; position: relative;
+      overflow: hidden; transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s; position: relative;
     }
-    .news-card:hover { border-color: rgba(139,0,0,0.4); }
+    .news-card:hover, .news-card:focus-visible { border-color: rgba(230,57,31,0.55); transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.55), 0 0 22px rgba(186,31,18,0.18); outline: none; }
     .news-card-img {
       aspect-ratio: 16/9; background: var(--dark-3);
       display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
     }
-    .news-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .news-card-img::after { content: ""; position: absolute; inset: auto 0 0 0; height: 45%; background: linear-gradient(180deg, transparent, rgba(11,11,12,0.75)); pointer-events: none; }
+    .news-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
     .news-card:hover .news-card-img img { transform: scale(1.05); }
+    .news-card-img.is-plain { background: radial-gradient(120% 90% at 50% 40%, rgba(186,31,18,0.22), transparent 70%), var(--dark-3); }
+    .news-card-plain { font-family: 'bahnschrift-semicondensed', monospace; font-size: 30px; font-weight: 700; letter-spacing: 3px; color: rgba(255,255,255,0.18); text-transform: uppercase; }
     .news-card-source {
-      position: absolute; top: 12px; left: 12px;
+      position: absolute; top: 12px; left: 12px; z-index: 1;
       font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       color: var(--white); background: var(--crimson); padding: 4px 10px; text-transform: uppercase;
     }
-    .news-card-body { padding: 24px; }
-    .news-card-date { font-size: 11px; color: var(--grey-dark); letter-spacing: 1px; margin-bottom: 8px; }
+    .news-card-body { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
+    .news-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 10px; }
+    .news-card-date { font-size: 11px; color: var(--grey-dark); letter-spacing: 1px; text-transform: uppercase; }
+    .news-card-game { font-family: 'bahnschrift-semicondensed', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(201,168,76,0.45); padding: 2px 8px; }
     .news-card-title {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 13px; font-weight: 600;
-      color: var(--white); line-height: 1.4; margin-bottom: 12px; letter-spacing: 0.5px;
+      font-family: 'bahnschrift-semicondensed', monospace; font-size: 17px; font-weight: 600;
+      color: var(--white); line-height: 1.3; margin: 0 0 10px; letter-spacing: 0.3px;
     }
-    .news-card-text { font-size: 13px; color: var(--grey); line-height: 1.7; margin-bottom: 16px; }
+    .news-card-text { font-size: 13px; color: var(--grey); line-height: 1.65; margin: 0 0 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .news-card-link {
-      font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
+      margin-top: auto; font-family: 'bahnschrift-semicondensed', monospace; font-size: 11px; letter-spacing: 2px;
       color: var(--gold); text-transform: uppercase; transition: color 0.2s;
     }
-    .news-card-link:hover { color: var(--gold-light); }
+    .news-card:hover .news-card-link { color: var(--gold-light); }
+    /* The newest story leads, twice the width, picture beside the words. */
+    @media (min-width: 900px) {
+      .news-card.is-lead { grid-column: span 2; flex-direction: row; }
+      .news-card.is-lead .news-card-img { flex: 0 0 58%; aspect-ratio: auto; min-height: 300px; }
+      .news-card.is-lead .news-card-title { font-size: 24px; }
+      .news-card.is-lead .news-card-text { -webkit-line-clamp: 5; font-size: 14px; }
+    }
+    .news-empty { grid-column: 1 / -1; padding: 30px; text-align: center; color: var(--grey); border: 1px dashed rgba(139,0,0,0.35); }
     @media (max-width: 768px) {
       .news-grid { grid-template-columns: 1fr; }
     }
+    @media (prefers-reduced-motion: reduce) { .news-card, .news-card-img img { transition: none; } .news-card:hover { transform: none; } }
   </style>
   <script src="../astrix-app/shared/astrix-embers.js?v=20260925-embers-1" defer></script>
   <link rel="stylesheet" href="/astrix-app/shared/astrix-paradox-background.css?v=20260830-global-map-background&amp;neutral=20261016-1">
@@ -118,74 +137,23 @@
   </svg>
   <div class="ax-ph-inner">
     <h1 class="ax-ph-title" id="axPageTitle">Stay in the <span class="accent">loop</span></h1>
-    <p class="ax-ph-line">Latest gaming news from IGN, GameSpot, PC Gamer and more, picked for the ASTRIX PARADOX community.</p>
+    <p class="ax-ph-line">The latest from IGN, GameSpot, PC Gamer and Polygon, with the games we play flagged so you can find them fast.</p>
   </div>
 </section>
 
 <section class="section">
   <div style="max-width:1100px;margin:0 auto;">
-    <div class="news-filters ax-chip-row">
-      <button class="ax-chip news-filter active" onclick="filterNews('all', this)">All</button>
-      <button class="ax-chip news-filter" onclick="filterNews('ign', this)">IGN</button>
-      <button class="ax-chip news-filter" onclick="filterNews('gamespot', this)">Gamespot</button>
-      <button class="ax-chip news-filter" onclick="filterNews('pcgamer', this)">PC Gamer</button>
-      <button class="ax-chip news-filter" onclick="filterNews('polygon', this)">Polygon</button>
+    <div class="news-filters ax-chip-row" role="group" aria-label="Filter the news">
+      <button class="ax-chip news-filter active" type="button" data-filter="all" aria-pressed="true">All</button>
+      <button class="ax-chip news-filter" type="button" data-filter="games" aria-pressed="false">Your games</button>
+      <button class="ax-chip news-filter" type="button" data-filter="ign" aria-pressed="false">IGN</button>
+      <button class="ax-chip news-filter" type="button" data-filter="gamespot" aria-pressed="false">GameSpot</button>
+      <button class="ax-chip news-filter" type="button" data-filter="pcgamer" aria-pressed="false">PC Gamer</button>
+      <button class="ax-chip news-filter" type="button" data-filter="polygon" aria-pressed="false">Polygon</button>
     </div>
-    <div class="news-grid" id="newsGrid">
-      <div class="news-card reveal" data-source="ign">
-        <div class="news-card-img"><img src="../img/news/ign-placeholder.jpg" alt="IGN News"><div class="news-card-source">IGN</div></div>
-        <div class="news-card-body">
-          <div class="news-card-date">May 21, 2026</div>
-          <div class="news-card-title">The Expanse: Osiris Reborn Is Recasting its Protagonist</div>
-          <p class="news-card-text">The Expanse: Osiris Reborn will be recasting its male protagonist and his twin brother, according to reports.</p>
-          <a href="https://ign.com" target="_blank" class="news-card-link">Read More ↗</a>
-        </div>
-      </div>
-      <div class="news-card reveal reveal-delay-1" data-source="ign">
-        <div class="news-card-img"><img src="../img/news/ign-placeholder.jpg" alt="IGN News"><div class="news-card-source">IGN</div></div>
-        <div class="news-card-body">
-          <div class="news-card-date">May 21, 2026</div>
-          <div class="news-card-title">Forza Horizon 6 Players Are Using Exploits to Farm Easy Credits</div>
-          <p class="news-card-text">Players are exploiting certain parts of the game so that they can quickly and easily farm credits without much effort.</p>
-          <a href="https://ign.com" target="_blank" class="news-card-link">Read More ↗</a>
-        </div>
-      </div>
-      <div class="news-card reveal reveal-delay-2" data-source="gamespot">
-        <div class="news-card-img"><img src="../img/news/gamespot-placeholder.jpg" alt="GAMESPOT News"><div class="news-card-source">GAMESPOT</div></div>
-        <div class="news-card-body">
-          <div class="news-card-date">May 20, 2026</div>
-          <div class="news-card-title">Crimson Desert Gets Massive New Update: What's Changed</div>
-          <p class="news-card-text">Pearl Abyss drops a major content patch for Crimson Desert, adding new regions, quests, and combat mechanics.</p>
-          <a href="https://gamespot.com" target="_blank" class="news-card-link">Read More ↗</a>
-        </div>
-      </div>
-      <div class="news-card reveal" data-source="pcgamer">
-        <div class="news-card-img"><img src="../img/news/pcgamer-placeholder.jpg" alt="PC GAMER News"><div class="news-card-source">PC GAMER</div></div>
-        <div class="news-card-body">
-          <div class="news-card-date">May 19, 2026</div>
-          <div class="news-card-title">Warframe's Next Big Update Teased at TennoCon</div>
-          <p class="news-card-text">Digital Extremes has given players a first look at what's coming next for the space ninja looter shooter.</p>
-          <a href="https://pcgamer.com" target="_blank" class="news-card-link">Read More ↗</a>
-        </div>
-      </div>
-      <div class="news-card reveal reveal-delay-1" data-source="polygon">
-        <div class="news-card-img"><img src="../img/news/polygon-placeholder.jpg" alt="POLYGON News"><div class="news-card-source">POLYGON</div></div>
-        <div class="news-card-body">
-          <div class="news-card-date">May 18, 2026</div>
-          <div class="news-card-title">Borderlands 4 Season Pass Details Revealed</div>
-          <p class="news-card-text">Gearbox reveals what's coming in the first year of post-launch content for Borderlands 4, including new vaults and characters.</p>
-          <a href="https://polygon.com" target="_blank" class="news-card-link">Read More ↗</a>
-        </div>
-      </div>
-      <div class="news-card reveal reveal-delay-2" data-source="gamespot">
-        <div class="news-card-img"><img src="../img/news/gamespot-placeholder.jpg" alt="GAMESPOT News"><div class="news-card-source">GAMESPOT</div></div>
-        <div class="news-card-body">
-          <div class="news-card-date">May 17, 2026</div>
-          <div class="news-card-title">Destiny 2's Final Shape: One Year On: Where Are We Now?</div>
-          <p class="news-card-text">A look back at how The Final Shape changed Destiny 2 and what the community thinks a year after its release.</p>
-          <a href="https://gamespot.com" target="_blank" class="news-card-link">Read More ↗</a>
-        </div>
-      </div>
+    <p class="news-status" id="newsStatus" role="status">Loading the latest stories.</p>
+    <div class="news-grid" id="newsGrid" aria-busy="true"></div>
+    <noscript><p class="news-status">The news needs JavaScript to load the latest stories.</p></noscript>
     </div>
   </div>
 </section>
@@ -203,15 +171,8 @@
 </footer>
 
 <script src="../js/main.js?v=20261005-source-quality-1"></script>
-<script>
-function filterNews(source, btn) {
-  document.querySelectorAll('.news-filter').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.news-card').forEach(card => {
-    card.style.display = (source === 'all' || card.dataset.source === source) ? 'block' : 'none';
-  });
-}
-</script>
+<script src="../js/game-presets.js"></script>
+<script src="../js/news-feed.js?v=20261108-news-1" defer></script>
 <footer class="apx-bungie-attribution" style="padding:20px 24px;color:#aab7cc;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere">Destiny 2 content and materials are trademarks and copyrights of Bungie, Inc. ASTRIX PARADOX is not affiliated with or endorsed by Bungie.</footer>
 <script src="/js/ax-brand.js?v=20260929-brand-1" defer></script>
 </body>

@@ -150,6 +150,9 @@
         "PRODUCT.md",
         "ARTWORK_PROVENANCE.md",
         "twitch-status.json",
+        "news-feed.json",
+        "js/news-feed.js",
+        ".github/workflows/news-feed.yml",
         "astrix-app/games/wow-forever/",
         "astrix-app/games/destiny-2/",
         "astrix-app/pages/home/",
@@ -186,6 +189,7 @@
         "test-hub-cards.mjs",
         "validate-bungie-footer.mjs",
         "test-clips-design.mjs",
+        "test-news-feed.mjs",
         "test-clips-cards.mjs",
         "test-forge-tint.mjs",
         "test-capsule-buttons.mjs",
@@ -242,6 +246,7 @@
         "validate-guardian-semantics.mjs",
         "validate-weapon-rolls.mjs",
         "test-clips-design.mjs",
+        "test-news-feed.mjs",
         "validate-bungie-footer.mjs"
       ]
     },

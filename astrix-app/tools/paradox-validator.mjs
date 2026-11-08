@@ -50,6 +50,7 @@ export const validators=[
   'test-game-footers.mjs',
   'validate-bungie-footer.mjs',
   'test-clips-design.mjs', // Clips: builder keeps the page design, no inline handlers or reveals.
+  browser('test-news-feed.mjs'), // News: real stories from the feeds, own links and pictures, filters, honest states.
   browser('test-clips-cards.mjs'), // Clips cards: visible at rest, clean picture, readable sizes, player, filters, thumbnail fallbacks.
   browser('test-forge-tint.mjs'), // The Forge: faint steel-blue background and edges, Ember actions, public pages neutral.
   browser('test-capsule-buttons.mjs'), // Buttons: reactor capsule with the dial on headline actions; locked stream buttons unchanged.

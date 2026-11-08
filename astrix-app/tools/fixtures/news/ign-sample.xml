@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>IGN</title>
+<item><title>Test story one: AION 2 adds a new region</title><link>https://ign.example.com/articles/aion-2-region?utm_source=rss</link><pubDate>Sat, 07 Nov 2026 18:00:00 +0000</pubDate><description>&lt;p&gt;A test summary about &lt;b&gt;AION 2&lt;/b&gt;.&lt;/p&gt;</description><media:content url="https://img.example.com/ign/small.jpg" medium="image" width="320"/><media:content url="https://img.example.com/ign/big.jpg" medium="image" width="1280"/></item>
+<item><title>Test story two: hardware round-up</title><link>https://ign.example.com/articles/hardware</link><pubDate>Sat, 07 Nov 2026 12:00:00 +0000</pubDate><description>Nothing about featured games.</description><media:thumbnail url="http://img.example.com/ign/hw.jpg"/></item>
+<item><title>Test story that is far too old</title><link>https://ign.example.com/articles/old</link><pubDate>Mon, 01 Sep 2026 12:00:00 +0000</pubDate><description>Old.</description></item>
+</channel></rss>

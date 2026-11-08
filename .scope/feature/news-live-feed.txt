@@ -1,0 +1,14 @@
+# feature/news-live-feed: the News page shows real stories from the IGN, GameSpot, PC Gamer and Polygon feeds (built every four hours by a GitHub workflow), each with its own picture and link, the site's games flagged.
+.github/workflows/news-feed.yml
+scripts/build_news.py
+news-feed.json
+js/news-feed.js
+pages/news.html
+astrix-app/tools/test-news-feed.mjs
+astrix-app/tools/fixtures/news/README.md
+astrix-app/tools/fixtures/news/ign-sample.xml
+astrix-app/tools/fixtures/news/gamespot-sample.xml
+astrix-app/tools/fixtures/news/pcgamer-sample.xml
+astrix-app/tools/fixtures/news/polygon-sample.xml
+astrix-app/tools/paradox-validator.mjs
+astrix-app/tools/validator-areas.json
