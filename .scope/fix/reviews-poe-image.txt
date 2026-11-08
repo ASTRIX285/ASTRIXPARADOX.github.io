@@ -1,0 +1,3 @@
+# fix/reviews-poe-image: restore the real Path of Exile art (deleted 16 Aug 2026) as img/games/pathofexile.jpg, used by the review and the Path of Exile preset.
+img/games/pathofexile.jpg
+js/reviews-data.js
