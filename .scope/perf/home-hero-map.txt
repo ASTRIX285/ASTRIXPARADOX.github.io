@@ -1,0 +1,2 @@
+# perf/home-hero-map: the home page map starts loading at once (preload, same files and keys as the CSS), Typekit preconnected.
+index.html
