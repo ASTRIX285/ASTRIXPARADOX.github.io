@@ -13,8 +13,6 @@
     ".scope/"
   ],
   "everything": [
-    "CLAUDE.md",
-    "DESIGN.md",
     "css/",
     "js/",
     "fonts/",
@@ -44,6 +42,16 @@
     ".github/workflows/validate-paradox.yml"
   ],
   "areas": {
+    "rules": {
+      "label": "Repo rule documents",
+      "paths": [
+        "CLAUDE.md",
+        "DESIGN.md"
+      ],
+      "suites": [
+        "test-paradox-validator-runner.mjs"
+      ]
+    },
     "aion2": {
       "label": "aion2 and Aetherium",
       "paths": [

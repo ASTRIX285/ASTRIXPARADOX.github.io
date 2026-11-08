@@ -1,0 +1,2 @@
+astrix-app/tools/validator-areas.json
+astrix-app/tools/test-paradox-validator-runner.mjs
