@@ -144,8 +144,8 @@
             2006149364,
             4038464106,
             2626834038,
-            2691200658,
-            3809788899
+            426976067,
+            3810297122
           ],
           "modifiers": [
             {
@@ -227,16 +227,16 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 2691200658,
-              "name": "Arc Surge",
-              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
-              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
+              "hash": 426976067,
+              "name": "Solar Surge",
+              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
+              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
             },
             {
-              "hash": 3809788899,
-              "name": "Stasis Surge",
-              "description": "{var:2189146210}% bonus to outgoing Stasis damage.",
-              "icon": "/common/destiny2_content/icons/d542fb1a1171b0270cd83b5aa79f3e0d.png"
+              "hash": 3810297122,
+              "name": "Strand Surge",
+              "description": "{var:2189146210}% bonus to outgoing Strand damage.",
+              "icon": "/common/destiny2_content/icons/e8ab8ba72b54125d2750e943ba6c824d.png"
             }
           ]
         },
@@ -366,8 +366,8 @@
               2006149364,
               4038464106,
               2626834038,
-              2691200658,
-              3809788899
+              426976067,
+              3810297122
             ],
             "phaseHashes": [
               2761002327,
@@ -420,8 +420,8 @@
             2006149364,
             4038464106,
             3132780533,
-            2691200658,
-            3809788899
+            426976067,
+            3810297122
           ],
           "modifiers": [
             {
@@ -491,16 +491,16 @@
               "icon": "/common/destiny2_content/icons/197fd9efad3fc9ffbc3337b07411a390.png"
             },
             {
-              "hash": 2691200658,
-              "name": "Arc Surge",
-              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
-              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
+              "hash": 426976067,
+              "name": "Solar Surge",
+              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
+              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
             },
             {
-              "hash": 3809788899,
-              "name": "Stasis Surge",
-              "description": "{var:2189146210}% bonus to outgoing Stasis damage.",
-              "icon": "/common/destiny2_content/icons/d542fb1a1171b0270cd83b5aa79f3e0d.png"
+              "hash": 3810297122,
+              "name": "Strand Surge",
+              "description": "{var:2189146210}% bonus to outgoing Strand damage.",
+              "icon": "/common/destiny2_content/icons/e8ab8ba72b54125d2750e943ba6c824d.png"
             }
           ]
         },
@@ -615,8 +615,8 @@
               2006149364,
               4038464106,
               3132780533,
-              2691200658,
-              3809788899
+              426976067,
+              3810297122
             ],
             "phaseHashes": [
               2890972472,
@@ -670,8 +670,8 @@
             1990363418,
             197794292,
             95459596,
-            2691200658,
-            3809788899
+            426976067,
+            3810297122
           ],
           "modifiers": [
             {
@@ -753,16 +753,16 @@
               "icon": "/common/destiny2_content/icons/dd28546b6d1b7824bcba8ab563f128b6.png"
             },
             {
-              "hash": 2691200658,
-              "name": "Arc Surge",
-              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
-              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
+              "hash": 426976067,
+              "name": "Solar Surge",
+              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
+              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
             },
             {
-              "hash": 3809788899,
-              "name": "Stasis Surge",
-              "description": "{var:2189146210}% bonus to outgoing Stasis damage.",
-              "icon": "/common/destiny2_content/icons/d542fb1a1171b0270cd83b5aa79f3e0d.png"
+              "hash": 3810297122,
+              "name": "Strand Surge",
+              "description": "{var:2189146210}% bonus to outgoing Strand damage.",
+              "icon": "/common/destiny2_content/icons/e8ab8ba72b54125d2750e943ba6c824d.png"
             }
           ]
         },
@@ -880,8 +880,8 @@
               1990363418,
               197794292,
               95459596,
-              2691200658,
-              3809788899
+              426976067,
+              3810297122
             ],
             "phaseHashes": [
               1327839050,
@@ -1144,8 +1144,8 @@
             3307318061,
             40182179,
             2626834038,
-            2691200658,
-            3809788899
+            426976067,
+            3810297122
           ],
           "modifiers": [
             {
@@ -1221,16 +1221,16 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 2691200658,
-              "name": "Arc Surge",
-              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
-              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
+              "hash": 426976067,
+              "name": "Solar Surge",
+              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
+              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
             },
             {
-              "hash": 3809788899,
-              "name": "Stasis Surge",
-              "description": "{var:2189146210}% bonus to outgoing Stasis damage.",
-              "icon": "/common/destiny2_content/icons/d542fb1a1171b0270cd83b5aa79f3e0d.png"
+              "hash": 3810297122,
+              "name": "Strand Surge",
+              "description": "{var:2189146210}% bonus to outgoing Strand damage.",
+              "icon": "/common/destiny2_content/icons/e8ab8ba72b54125d2750e943ba6c824d.png"
             }
           ]
         },
@@ -1334,8 +1334,8 @@
               3307318061,
               40182179,
               2626834038,
-              2691200658,
-              3809788899
+              426976067,
+              3810297122
             ],
             "phaseHashes": [
               580855089,
@@ -1652,5 +1652,5 @@
       }
     }
   ],
-  "generatedAt": "2026-11-03T22:22:31Z"
+  "generatedAt": "2026-11-10T00:44:12Z"
 }
