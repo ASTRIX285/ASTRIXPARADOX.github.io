@@ -144,7 +144,7 @@
             2006149364,
             4038464106,
             2626834038,
-            426976067,
+            3196075844,
             3810297122
           ],
           "modifiers": [
@@ -227,10 +227,10 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 426976067,
-              "name": "Solar Surge",
-              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
-              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
+              "hash": 3196075844,
+              "name": "Void Surge",
+              "description": "{var:2189146210}% bonus to outgoing Void damage.",
+              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
             },
             {
               "hash": 3810297122,
@@ -370,7 +370,7 @@
               2006149364,
               4038464106,
               2626834038,
-              426976067,
+              3196075844,
               3810297122
             ],
             "phaseHashes": [
@@ -851,7 +851,7 @@
             3307318061,
             40182179,
             2626834038,
-            426976067,
+            3196075844,
             3810297122
           ],
           "modifiers": [
@@ -928,10 +928,10 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 426976067,
-              "name": "Solar Surge",
-              "description": "{var:2189146210}% bonus to outgoing Solar damage.",
-              "icon": "/common/destiny2_content/icons/1f27bdc178bf645944119d6481f33656.png"
+              "hash": 3196075844,
+              "name": "Void Surge",
+              "description": "{var:2189146210}% bonus to outgoing Void damage.",
+              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
             },
             {
               "hash": 3810297122,
@@ -1045,7 +1045,7 @@
               3307318061,
               40182179,
               2626834038,
-              426976067,
+              3196075844,
               3810297122
             ],
             "phaseHashes": [
@@ -1363,5 +1363,5 @@
       }
     }
   ],
-  "generatedAt": "2026-11-10T22:25:43Z"
+  "generatedAt": "2026-11-17T00:51:56Z"
 }
