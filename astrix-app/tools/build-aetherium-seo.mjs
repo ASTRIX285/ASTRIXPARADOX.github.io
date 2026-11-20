@@ -49,13 +49,17 @@ export function imageFor(path) {
 
 const attr = value => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const decode = value => String(value).replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-const read = html => ({
+const read = (html, guide = false) => ({
+  name: guide ? heading(html) || shortName(decode(/<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '')).replace(/^AION 2 /, '').replace(/ (Class )?Guide$/, '') : '',
   title: decode(/<title>([^<]*)<\/title>/.exec(html)?.[1] ?? ''),
   description: decode(/<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? ''),
   canonical: /<link rel="canonical" href="([^"]+)"/.exec(html)?.[1] ?? ''
 });
 /** The page's own name: the first part of its title ("Theostones | Equipment | ..." gives "Theostones"). */
 const shortName = title => title.split(' | ')[0].trim();
+/** Guide pages lead their titles with the search words ("AION 2 Sanctuary Guide | ASTRIX PARADOX", chore/seo-titles-metadata,
+ *  20 Nov 2026), so their short name for breadcrumbs and share cards comes from the page heading instead. */
+const heading = html => decode((/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1] ?? '').replace(/<[^>]+>/g, '')).trim();
 
 function pages() {
   const walk = dir => readdirSync(dir).flatMap(name => {
@@ -77,9 +81,9 @@ function breadcrumb(path, names) {
   return items;
 }
 
-export function seoBlock({ path, title, description, canonical }, names) {
+export function seoBlock({ path, name: own, title, description, canonical }, names) {
   const image = imageFor(path);
-  const name = path === '' ? 'Daeva Card' : shortName(title);
+  const name = path === '' ? 'Daeva Card' : own || shortName(title);
   const ld = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: breadcrumb(path, names).map((item, n) => ({ '@type': 'ListItem', position: n + 1, name: item.name, item: item.url })) };
   return `<!-- seo:start -->
   <meta property="og:type" content="website">
@@ -108,8 +112,8 @@ const lastChange = file => {
 
 /** Every Aetherium page with its tags as they should be, and its sitemap date. */
 export function plan() {
-  const list = pages().map(page => ({ ...page, ...read(readFileSync(page.file, 'utf8')) }));
-  const names = new Map(list.map(page => [page.path, page.path === '' ? 'Daeva Card' : shortName(page.title)]));
+  const list = pages().map(page => ({ ...page, ...read(readFileSync(page.file, 'utf8'), page.path.startsWith('guide/')) }));
+  const names = new Map(list.map(page => [page.path, page.path === '' ? 'Daeva Card' : page.name || shortName(page.title)]));
   return list.map(page => ({ ...page, block: seoBlock(page, names), image: imageFor(page.path) }));
 }
 

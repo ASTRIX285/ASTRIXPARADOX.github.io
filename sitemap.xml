@@ -41,6 +41,14 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Clips -->
+  <url>
+    <loc>https://astrixparadox.com/pages/clips.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- The Hub: every tool -->
   <url>
     <loc>https://astrixparadox.com/hub/</loc>
