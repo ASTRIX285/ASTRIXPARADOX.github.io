@@ -184,7 +184,7 @@ try {
     const page=await open(`/hub/aetherium/guide/dungeons/${id}/`);
     const record=g.findDungeon(data,id);
     assert.equal(await page.locator('#aeScreenTitle').textContent(),record.name);
-    assert.equal(await page.title(),`${record.name} | Dungeons | Guide | The Aetherium | AION 2 | ASTRIX PARADOX`);
+    assert.equal(await page.title(),`AION 2 ${record.name} Guide | ASTRIX PARADOX`);
     assert.match(await page.locator('[data-reward-focus]').textContent(),/Why you go/);
     if(record.difficulties.length)assert.equal(await page.locator('#aeDiffTable tbody tr').count(),record.difficulties.length,`${id} difficulties`);
     else assert.equal(await page.locator('#aeDiffTable').count(),0);

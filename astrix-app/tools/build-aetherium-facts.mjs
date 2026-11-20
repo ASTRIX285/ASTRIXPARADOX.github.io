@@ -134,6 +134,13 @@ export function withBlock(html, block) {
 }
 
 const shortName = title => decode(title).split(' | ')[0].trim();
+/** The page's own name for the facts heading. Guide titles lead with the search words ("AION 2 Sanctuary Guide | ASTRIX PARADOX",
+ *  chore/seo-titles-metadata, 20 Nov 2026), so the name is the heading the page already carries, else the title without them. */
+const pageName = html => {
+  const heading = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1];
+  if (heading) return decode(heading.replace(/<[^>]+>/g, '')).trim();
+  return shortName(/<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '').replace(/^AION 2 /, '').replace(/ (Class )?Guide$/, '');
+};
 
 export async function plan({log = () => {}} = {}) {
   const server = createServer(async (req, res) => {
@@ -153,7 +160,7 @@ export async function plan({log = () => {}} = {}) {
     await context.route('**/*', route => (route.request().url().startsWith(base) ? route.continue() : route.abort()));
     for (const file of await guidePages()) {
       const html = await readFile(file, 'utf8');
-      const title = shortName(/<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '');
+      const title = pageName(html);
       const description = decode(/<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? '');
       let items = [];
       if (!SUMMARY_ONLY.has(innerOf(file))) {
