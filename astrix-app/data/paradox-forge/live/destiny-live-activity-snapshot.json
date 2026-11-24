@@ -144,7 +144,7 @@
             2006149364,
             4038464106,
             2626834038,
-            3196075844,
+            2691200658,
             3810297122
           ],
           "modifiers": [
@@ -227,10 +227,10 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 3196075844,
-              "name": "Void Surge",
-              "description": "{var:2189146210}% bonus to outgoing Void damage.",
-              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
+              "hash": 2691200658,
+              "name": "Arc Surge",
+              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
+              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
             },
             {
               "hash": 3810297122,
@@ -366,7 +366,7 @@
               2006149364,
               4038464106,
               2626834038,
-              3196075844,
+              2691200658,
               3810297122
             ],
             "phaseHashes": [
@@ -639,7 +639,7 @@
             2006149364,
             4038464106,
             1282934989,
-            3196075844,
+            2691200658,
             3810297122
           ],
           "modifiers": [
@@ -722,10 +722,10 @@
               "icon": "/common/destiny2_content/icons/42ee3b4d0e96fb29e45a17402d764cac.png"
             },
             {
-              "hash": 3196075844,
-              "name": "Void Surge",
-              "description": "{var:2189146210}% bonus to outgoing Void damage.",
-              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
+              "hash": 2691200658,
+              "name": "Arc Surge",
+              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
+              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
             },
             {
               "hash": 3810297122,
@@ -849,7 +849,7 @@
               2006149364,
               4038464106,
               1282934989,
-              3196075844,
+              2691200658,
               3810297122
             ],
             "phaseHashes": [
@@ -1004,7 +1004,7 @@
             3307318061,
             40182179,
             2626834038,
-            3196075844,
+            2691200658,
             3810297122
           ],
           "modifiers": [
@@ -1081,10 +1081,10 @@
               "icon": "/common/destiny2_content/icons/b1db6bd79264f6ed90647eec71146a63.png"
             },
             {
-              "hash": 3196075844,
-              "name": "Void Surge",
-              "description": "{var:2189146210}% bonus to outgoing Void damage.",
-              "icon": "/common/destiny2_content/icons/382ae8c952160e4272ffb0b852f55142.png"
+              "hash": 2691200658,
+              "name": "Arc Surge",
+              "description": "{var:2189146210}% bonus to outgoing Arc damage.",
+              "icon": "/common/destiny2_content/icons/226a64add0dbb3919e3f34ae778fd9b8.png"
             },
             {
               "hash": 3810297122,
@@ -1194,7 +1194,7 @@
               3307318061,
               40182179,
               2626834038,
-              3196075844,
+              2691200658,
               3810297122
             ],
             "phaseHashes": [
@@ -1514,5 +1514,5 @@
       }
     }
   ],
-  "generatedAt": "2026-11-17T23:52:56Z"
+  "generatedAt": "2026-11-24T03:22:17Z"
 }
