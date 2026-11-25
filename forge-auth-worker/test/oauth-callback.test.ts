@@ -217,3 +217,16 @@ test('recovery page preserves return via an input value, never injects markup or
   runInNewContext(source, { URL, location: { href: recovery + '?return=' + encodeURIComponent(returnUrl) + '&code=old&state=old' }, document: { getElementById: () => input } });
   assert.equal(input.value, returnUrl);
 });
+
+test('sign in with a live session returns to the page without visiting Bungie', async t => {
+  const f = fixture(); const { state } = await f.start();
+  t.mock.method(globalThis, 'fetch', successFetch);
+  const first = await f.request(`/bungie/callback?code=synthetic-code&state=${state}`);
+  const cookie = first.headers.get('set-cookie')!.split(';')[0];
+  const again = await f.request('/bungie/start?return=' + encodeURIComponent(returnUrl), cookie);
+  assert.equal(again.status, 302);
+  assert.equal(again.headers.get('location'), returnUrl + '?bungie=connected');
+  assert.match(again.headers.get('set-cookie')!, /^astrix_session=/);
+  const stale = await f.request('/bungie/start?continue=1&return=' + encodeURIComponent(returnUrl), 'astrix_session=missing');
+  assert.match(stale.headers.get('location')!, /^https:\/\/www\.bungie\.net\/en\/oauth\/authorize\?/);
+});
