@@ -70,7 +70,7 @@ let failures=0;
 const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
 async function open(path,{viewport={width:1600,height:1000},live=false,shell='[data-guide-shell]'}={}){
-  const context=await browser.newContext({viewport});
+  const context=await browser.newContext({serviceWorkers:'block',viewport});
   const calls=[];
   const errors=[];
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{

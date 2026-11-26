@@ -98,7 +98,7 @@ const REDESIGNED=new Set(['resets','market','controls','loadouts','faq']);
 const browser=await chromium.launch();
 let failed=false;
 const open=async(path,{width=1600,timezoneId='Europe/London',now=null}={})=>{
-  const context=await browser.newContext({viewport:{width,height:900},timezoneId});
+  const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height:900},timezoneId});
   await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
   const page=await context.newPage();
   const errors=[];

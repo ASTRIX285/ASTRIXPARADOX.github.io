@@ -96,7 +96,7 @@ body.aetherium-page.ae-backdrop{--ae-panel:var(--ae-panel-solid);background-colo
 body.aetherium-page.ae-backdrop::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
     linear-gradient(color-mix(in srgb,var(--ae-page) 65%,transparent),color-mix(in srgb,var(--ae-page) 65%,transparent)),
-    var(--ae-backdrop,none) center/cover no-repeat,
+    var(--ae-backdrop-use,var(--ae-backdrop,none)) center/cover no-repeat,
     var(--ae-page)}
 /* The Daeva Card's light and dark sides (design/aetherium-light-dark-card, Miguel, 25 Oct 2026): the AION 2 key art split
    in two, the Elyos Daeva standing in the left margin in light and the Asmodian in the right margin in shadow, facing each other
@@ -107,8 +107,8 @@ body.aetherium-page.ae-backdrop::before{content:"";position:fixed;inset:0;z-inde
 body.aetherium-page.ae-backdrop.ae-sides{--ae-max:1200px;--ae-side:max(0px,calc(50vw - (var(--ae-max) / 2) - var(--ae-gutter)));--ae-crest:clamp(8rem,10.5vw,13rem)}
 body.aetherium-page.ae-backdrop.ae-sides::before{
   background:
-    url('/astrix-app/pages/aetherium/images/faction-emblems/elyos-crest.png') left calc(var(--ae-side) / 2 - var(--ae-crest) / 2) bottom 4%/var(--ae-crest) auto no-repeat,
-    url('/astrix-app/pages/aetherium/images/faction-emblems/asmodian-crest.png') right calc(var(--ae-side) / 2 - var(--ae-crest) / 2) bottom 4%/var(--ae-crest) auto no-repeat,
+    image-set(url('/astrix-app/pages/aetherium/images/faction-emblems/elyos-crest.webp') type('image/webp'),url('/astrix-app/pages/aetherium/images/faction-emblems/elyos-crest.png') type('image/png')) left calc(var(--ae-side) / 2 - var(--ae-crest) / 2) bottom 4%/var(--ae-crest) auto no-repeat,
+    image-set(url('/astrix-app/pages/aetherium/images/faction-emblems/asmodian-crest.webp') type('image/webp'),url('/astrix-app/pages/aetherium/images/faction-emblems/asmodian-crest.png') type('image/png')) right calc(var(--ae-side) / 2 - var(--ae-crest) / 2) bottom 4%/var(--ae-crest) auto no-repeat,
     linear-gradient(180deg,transparent 0,transparent calc(5.5rem + var(--ae-side) * 1.9),color-mix(in srgb,var(--ae-page) 60%,transparent) calc(5.5rem + var(--ae-side) * 2.35),color-mix(in srgb,var(--ae-page) 60%,transparent) 100%),
     linear-gradient(90deg,color-mix(in srgb,var(--ae-page) 5%,transparent) 0,color-mix(in srgb,var(--ae-page) 20%,transparent) var(--ae-side),var(--ae-page) calc(var(--ae-side) + 2rem),var(--ae-page) calc(100% - var(--ae-side) - 2rem),color-mix(in srgb,var(--ae-page) 30%,transparent) calc(100% - var(--ae-side)),color-mix(in srgb,var(--ae-page) 20%,transparent) 100%),
     var(--ae-side-light,none) left top 5.5rem/var(--ae-side) auto no-repeat,
@@ -3471,3 +3471,50 @@ html.ae-has-daeva #aeHeader.ae-ledger-head:has(>.ae-muted:only-child){min-height
    row, kept from the start. The Ascent Plan's setup panel also gains its line about the Daeva's class and level. */
 @media (max-width:719px){html.ae-has-daeva body:has(#aeIntro,.ae-ascent-setup) #aeSteps:not(:has(.ae-steps-help))::after{content:"";flex:1 0 100%;height:44px}
   html.ae-has-daeva .ae-main>.ae-ascent-setup{min-height:399px;box-sizing:border-box}}
+
+/* Screen-sized backdrops (feature/aetherium-pwa, 26 Nov 2026): a page names its photo twice, --ae-backdrop at full size and
+   --ae-backdrop-sm at 1600 wide. Screens up to 1600 wide take the smaller one; wider screens keep the full photo. */
+@media (max-width:1600px){body.aetherium-page.ae-backdrop{--ae-backdrop-use:var(--ae-backdrop-sm,var(--ae-backdrop,none))}}
+
+/* The installed app (feature/aetherium-pwa, 26 Nov 2026). Every page asks for viewport-fit=cover, so on a phone with a notch
+   or a home bar the page runs edge to edge. These rules keep the header, the menu, the bottom of the page and every fixed or
+   sticky control clear of the notch and the home bar. env() is 0 on a desktop and in a normal browser tab with no insets,
+   so those look exactly as before. */
+@layer astrix-brand{
+@media (min-width:1200px){
+  html body.aetherium-page header.apx-destination-header{padding-top:env(safe-area-inset-top,0px)!important;
+    padding-left:max(clamp(16px,2.6vw,40px),env(safe-area-inset-left,0px))!important;padding-right:max(clamp(16px,2.6vw,40px),env(safe-area-inset-right,0px))!important}
+  html body.aetherium-page [data-forge-destination-ribbon]{padding-left:max(clamp(16px,2.6vw,40px),env(safe-area-inset-left,0px))!important;padding-right:max(clamp(16px,2.6vw,40px),env(safe-area-inset-right,0px))!important}
+}
+@media (max-width:1199px){
+  html body.aetherium-page header.apx-destination-header{padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))!important}
+}
+}
+/* Outside the layer: these sit over the page's own unlayered rules. The body pads the bottom and the sides, so the footer
+   and the page content clear the home bar and a landscape notch without changing their own spacing. */
+body.aetherium-page{padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);box-sizing:border-box}
+body.aetherium-page .ax-drawer-panel{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);box-sizing:border-box}
+body.aetherium-page .ae-guide{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+body.aetherium-page .ae-info{padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+@media (max-width:819px){body.aetherium-page .ae-atlas-panel{padding-bottom:env(safe-area-inset-bottom,0px)}}
+
+/* Update ready: a new version is waiting. Only shown then, beside the menu button; tapping it reloads into the new version. */
+.ae-update-btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid var(--ae-gold);border-radius:var(--ae-pill);
+  background:var(--ae-btn-cylinder);box-shadow:var(--ae-btn-shine);color:var(--ae-gold);font:700 .8125rem/1 var(--ae-font-ui);letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+.ae-update-btn[hidden]{display:none}
+.ae-update-btn:hover{color:var(--ae-gold-hi)}
+.ae-update-btn:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:2px}
+@media (max-width:1199px){html body.aetherium-page header.apx-destination-header .ax-shell-actions>.ae-update-btn{grid-column:4;grid-row:1;justify-self:end}}
+/* Install app in the menu: a plain row under the links, only when the browser says the app can be installed. On iPhone
+   Safari, one line on how to add it instead. */
+.ae-app-install{margin:0;padding:8px 20px 16px;border-top:1px solid var(--ax-line,var(--ae-hairline))}
+.ae-app-install[hidden]{display:none}
+.ae-app-install-btn{display:flex;align-items:center;width:100%;min-height:44px;padding:0;border:0;background:none;color:var(--ae-text-muted);
+  font:700 14px/1 var(--ax-font-head,var(--ae-font-ui));letter-spacing:.16em;text-transform:uppercase;cursor:pointer;text-align:left}
+.ae-app-install-btn:hover{color:var(--ae-text)}
+.ae-app-install-btn:focus-visible{outline:2px solid var(--ae-strobe);outline-offset:2px}
+.ae-app-hint{margin:8px 0 0;color:var(--ae-text-muted);font-size:.875rem;line-height:1.45}
+/* The offline page: shown only for a page never opened on this device. */
+.ae-offline{max-width:40rem;margin:0 auto}
+.ae-offline h1{margin:.25rem 0 .75rem}
+.ae-offline-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.25rem}

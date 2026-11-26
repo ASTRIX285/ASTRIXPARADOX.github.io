@@ -120,9 +120,11 @@
 
   "/astrix-app/games/wow-forever/pipeline/test-build-forever-db.mjs": "8eb89bb6d3",
 
+  "/astrix-app/pages/aetherium/aetherium-app.mjs": "e5f7a44a48",
+
   "/astrix-app/pages/aetherium/aetherium-config.mjs": "b3f9c96bd7",
 
-  "/astrix-app/pages/aetherium/aetherium-data.mjs": "8b6bdd5612",
+  "/astrix-app/pages/aetherium/aetherium-data.mjs": "39bcfad341",
 
   "/astrix-app/pages/aetherium/aetherium-flow.mjs": "d212e4f454",
 
@@ -130,7 +132,7 @@
 
   "/astrix-app/pages/aetherium/aetherium-memory.mjs": "a82fd351f5",
 
-  "/astrix-app/pages/aetherium/aetherium-ui.mjs": "aed77c45f5",
+  "/astrix-app/pages/aetherium/aetherium-ui.mjs": "7d775319a1",
 
   "/astrix-app/pages/aetherium/ascent-plan.mjs": "5f250dd633",
 
@@ -156,25 +158,25 @@
 
   "/astrix-app/pages/aetherium/daevanion-page.mjs": "9f06294d08",
 
-  "/astrix-app/pages/aetherium/gear-ledger.mjs": "d528c28e89",
+  "/astrix-app/pages/aetherium/gear-ledger.mjs": "d9f9c1c813",
 
-  "/astrix-app/pages/aetherium/guide-classes.mjs": "b71c17953f",
+  "/astrix-app/pages/aetherium/guide-classes.mjs": "d80633e456",
 
-  "/astrix-app/pages/aetherium/guide-crafting.mjs": "8d128f983a",
+  "/astrix-app/pages/aetherium/guide-crafting.mjs": "c6ca18356e",
 
   "/astrix-app/pages/aetherium/guide-dungeons.mjs": "91f8ebeba3",
 
-  "/astrix-app/pages/aetherium/guide-equipment.mjs": "9fcfd16677",
+  "/astrix-app/pages/aetherium/guide-equipment.mjs": "775b694521",
 
-  "/astrix-app/pages/aetherium/guide-general.mjs": "dce7e7fc65",
+  "/astrix-app/pages/aetherium/guide-general.mjs": "b9b4e714b3",
 
-  "/astrix-app/pages/aetherium/guide-page.mjs": "81ff95b1a7",
+  "/astrix-app/pages/aetherium/guide-page.mjs": "c495cb61f3",
 
   "/astrix-app/pages/aetherium/guide-path.mjs": "77c2852ecd",
 
   "/astrix-app/pages/aetherium/guide-resets.mjs": "afec4940cb",
 
-  "/astrix-app/pages/aetherium/guide-shell.mjs": "633c757174",
+  "/astrix-app/pages/aetherium/guide-shell.mjs": "99a104c9eb",
 
   "/astrix-app/pages/aetherium/skills-page.mjs": "a60c345bed",
 

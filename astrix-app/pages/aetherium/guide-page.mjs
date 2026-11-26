@@ -4,7 +4,7 @@
  * says which one it is on <body data-guide="home|section|soon" data-guide-section="<id>">. Static: no call to the official
  * site, no data file. Classes live in guide-classes.mjs.
  */
-import { esc } from './aetherium-ui.mjs';
+import { esc, webpSrcset } from './aetherium-ui.mjs';
 import { cardUrl } from './aetherium-data.mjs';
 import { GUIDE_CLASSES, GUIDE_ROOT, GUIDE_SECTIONS, classHref, classPickerHtml, comingSoonHtml, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 
@@ -17,7 +17,7 @@ const HOME = Object.freeze({ exampleShot: null });
 
 /* Each section's rendered icon, 256 px square, shown at 120 px (96 px on a phone). The tile title names it, so alt is empty. */
 const SECTION_ICONS = '/astrix-app/pages/aetherium/images/section-icons/';
-const sectionIcon = id => `<img class="ae-gd-tile-icon" src="${SECTION_ICONS}${esc(id)}.png" alt="" width="120" height="120" loading="lazy" decoding="async">`;
+const sectionIcon = id => `<img class="ae-gd-tile-icon" src="${SECTION_ICONS}${esc(id)}.png"${webpSrcset(`${SECTION_ICONS}${id}.png`)} alt="" width="120" height="120" loading="lazy" decoding="async">`;
 
 /** A gold diamond and the heading, as every section of the Guide opens. */
 const h2 = (id, text) => `<h2 class="ae-gd-h2" id="${esc(id)}">${esc(text)}</h2>`;
@@ -42,7 +42,7 @@ function exampleHtml(shot) {
       <div class="ae-gd-showcase">
         <figure class="ae-gd-shot">
           ${shot.label ? `<figcaption class="ae-gd-shot-label">${esc(shot.label)}</figcaption>` : ''}
-          <img src="${esc(shot.src)}" alt="${esc(shot.alt)}" width="${esc(shot.width)}" height="${esc(shot.height)}" loading="lazy" decoding="async">
+          <img src="${esc(shot.src)}"${webpSrcset(shot.src)} alt="${esc(shot.alt)}" width="${esc(shot.width)}" height="${esc(shot.height)}" loading="lazy" decoding="async">
         </figure>
         <ol class="ae-gd-shot-steps">${(shot.steps ?? []).map((step, index) => `<li><span class="ae-gd-num" aria-hidden="true">${index + 1}</span><div><h3>${esc(step.title)}</h3><p>${esc(step.text)}</p></div></li>`).join('')}</ol>
       </div>

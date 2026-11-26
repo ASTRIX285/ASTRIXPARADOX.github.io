@@ -137,7 +137,7 @@ let failures=0;
 const check=async(name,fn)=>{if(process.env.AE_ONLY&&!name.includes(process.env.AE_ONLY))return;try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
 async function open(path,{live=true,down=false,viewport={width:1600,height:1000},art=null}={}){
-  const context=await browser.newContext({viewport});
+  const context=await browser.newContext({serviceWorkers:'block',viewport});
   const calls=[];
   const urls=[];
   const state={down,inflight:0,maxInflight:0};
@@ -452,7 +452,7 @@ await check('Skills page: hover shows the game-style card; keyboard focus does t
   await page.waitForSelector('#aeHover:not([hidden])');
   assert.match(await plain(page,'#aeHover'),/Rending Blow Lv\. 9/);
   await context.close();
-  const phone=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  const phone=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   await phone.route(/aetherium-config\.mjs/,async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace(/export const AETHERIUM_WORKER_URL = [^;]+;/,`export const AETHERIUM_WORKER_URL = '${WORKER}';`)});});
   await phone.route(`${WORKER}/**`,route=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({info:richInfo,equipment:richEquipment,meta})}));
   await phone.route(/playnccdn\.com/,route=>route.fulfill({status:200,contentType:'image/png',body:PIXEL}));
@@ -1720,7 +1720,7 @@ for(const [width,height] of [[1600,1000],[1920,1080]]){
 
 await check('crisp loading: window and menu skeletons in the final shape with a shimmer, none under reduced motion',async()=>{
   for(const motion of ['no-preference','reduce']){
-    const context=await browser.newContext({viewport:{width:1600,height:1000},reducedMotion:motion});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1600,height:1000},reducedMotion:motion});
     await context.route(/\.mjs/,route=>route.abort());
     await context.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));
     const menu=await context.newPage();

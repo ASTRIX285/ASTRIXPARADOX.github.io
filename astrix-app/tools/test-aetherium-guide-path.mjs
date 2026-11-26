@@ -47,7 +47,7 @@ const realCalls=[];
 const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(error){failures++;console.error(`  FAIL ${name}\n${error.stack}`);}};
 
 async function open(path=PATH,{live=false,viewport={width:1600,height:1000},storage={},time=null}={}){
-  const context=await browser.newContext({viewport});
+  const context=await browser.newContext({serviceWorkers:'block',viewport});
   if(time)await context.clock.install({time:new Date(time)});
   await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
     const response=await route.fetch();

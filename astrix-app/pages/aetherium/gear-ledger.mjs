@@ -12,7 +12,7 @@
  * Old ?view=enhance links land on the build bar, and ?item=N opens that piece's card.
  */
 import { ArmoryUnavailable, ascentUrl, cardUrl, explain, loadBuilds, loadCatalogue, loadEnhancement, loadGearSources, loadGrades, loadItemDetail, loadMechanics, loadProgression, loadStats, preloadItemDetails, rolePick } from './aetherium-data.mjs';
-import { $, closeInfo, esc, gradeTile, infoCardHtml, isPending, openInfo, slotLabel } from './aetherium-ui.mjs';
+import { $, closeInfo, esc, gradeTile, infoCardHtml, isPending, openInfo, slotLabel, webpSrcset } from './aetherium-ui.mjs';
 import { renderStatsPanel } from './stats-panel.mjs';
 import { failPage, startCharacterPage, windowBar } from './character-page.mjs';
 import { ROLES, buildFor, enchantAdvice, enchantSteps, gearMoves, gradeInfo, indexGrades, indexMechanics, indexProgression, pickBuild, rolesFor, teamsFor } from '/astrix-app/games/aion2/engine/ascent-advisor.mjs';
@@ -264,7 +264,7 @@ const ENHANCE_ICONS = {
    game's art for them is captured. */
 const GAME_ENHANCE_ICONS = { growth: 'growth', manastone: 'manastone', 'soul-binding': 'soul-binding', transfer: 'transfer' };
 const enhanceIcon = id => (GAME_ENHANCE_ICONS[id]
-  ? `<img class="ae-eicon is-game" src="/astrix-app/pages/aetherium/images/enhance-icons/${GAME_ENHANCE_ICONS[id]}.png?v=20261026-1" alt="" width="40" height="40" aria-hidden="true" decoding="async">`
+  ? `<img class="ae-eicon is-game" src="/astrix-app/pages/aetherium/images/enhance-icons/${GAME_ENHANCE_ICONS[id]}.png?v=20261026-1"${webpSrcset(`/astrix-app/pages/aetherium/images/enhance-icons/${GAME_ENHANCE_ICONS[id]}.png?v=20261026-1`)} alt="" width="40" height="40" aria-hidden="true" decoding="async">`
   : `<svg class="ae-eicon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ENHANCE_ICONS[id] ?? ''}</svg>`);
 const statusTag = () => '';
 const enhanceRecords = () => (state.enhancement ? indexEnhancement(state.enhancement) : null);

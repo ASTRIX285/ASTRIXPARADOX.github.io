@@ -104,7 +104,7 @@ const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(
 
 // ready=false returns as soon as the page has loaded (to look at it while the site is still answering); slow holds the character call for 3.5 s.
 async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,extra={},metaAt=null,servers='ok',saved='ok',noTitle=false,art=null,ready=true,slow=false}={}){
-  const context=await browser.newContext({viewport});
+  const context=await browser.newContext({serviceWorkers:'block',viewport});
   const calls=[];
   // The server picker reads its live list on every page load (fix/aetherium-server-lists): those reads are kept apart
   // so the character and search call lists stay exact.
@@ -902,7 +902,7 @@ await check('Gear page: with no pet, wings or title the tall column collapses an
 });
 
 await check('ASTRIX crimson before a character loads',async()=>{
-  const context=await browser.newContext();
+  const context=await browser.newContext({serviceWorkers:'block'});
   const page=await context.newPage();
   await page.route(/\.mjs/,route=>route.abort());
   await page.goto(`${base}/hub/aetherium/`);
@@ -1229,7 +1229,7 @@ for(const width of [390,820,1280,1600,1920]){
 }
 
 await check('home page and The Hub lead to The Aetherium, with the new words',async()=>{
-  const context=await browser.newContext();
+  const context=await browser.newContext({serviceWorkers:'block'});
   // Public pages: nothing leaves the local server (fonts, streams, scripts on other hosts answer empty).
   await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.fulfill({status:204,body:''}));
   const page=await context.newPage();
@@ -1511,7 +1511,7 @@ await check('crisp ribbon: one raised bar, exactly one active tab as a dark gold
   const stray=selectors.filter(s=>!/^(html\b|:root|\.ae-|#ae|\.aetherium-page|body\.aetherium-page|html body\.aetherium-page)/.test(s));
   assert.deepEqual(stray,[],'Every selector starts with an Aetherium scope');
   // A Destiny page with the shared ribbon: the shell's own look, untouched (wide uppercase tabs with the underline bar, no Aetherium stylesheet).
-  const destiny=await browser.newContext({viewport:{width:1600,height:1000}});
+  const destiny=await browser.newContext({serviceWorkers:'block',viewport:{width:1600,height:1000}});
   await destiny.route('**/*',route=>(/^http:\/\/127\.0\.0\.1/.test(route.request().url())?route.continue():route.abort()));
   const forge=await destiny.newPage();
   await forge.goto(`${base}/hub/workbench/td2/`,{waitUntil:'domcontentloaded'});
@@ -1555,7 +1555,7 @@ for(const [width,height] of [[1600,1000],[1920,1080]]){
 
 await check('crisp loading: skeletons in the final shape (portrait, name bar, chips, four stat tiles) with a shimmer, none under reduced motion',async()=>{
   for(const motion of ['no-preference','reduce']){
-    const context=await browser.newContext({viewport:{width:1600,height:1000},reducedMotion:motion});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1600,height:1000},reducedMotion:motion});
     const page=await context.newPage();
     await page.route(/\.mjs/,route=>route.abort());
     await page.route(/playnccdn\.com|plaync\.com|typekit\.net/,route=>route.fulfill({status:204,body:''}));

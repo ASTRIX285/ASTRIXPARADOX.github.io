@@ -32,7 +32,7 @@
  *                         into the side menu, lights exactly one side menu item (this page) and reports the page ready
  *                         once, even on failure.
  */
-import { $, esc, gradeTile, markReady, setFaction, showNotice, wireDrawer } from './aetherium-ui.mjs';
+import { $, esc, gradeTile, markReady, setFaction, showNotice, webpSrcset, wireDrawer } from './aetherium-ui.mjs';
 import { linkedDaeva } from './aetherium-memory.mjs';
 
 export const GUIDE_ROOT = '/hub/aetherium/guide/';
@@ -95,7 +95,7 @@ export const classHref = className => `${GUIDE_ROOT}classes/${String(className).
 /** The class emblems as buttons in a row (they wrap on a phone). The current class is lit gold with a cyan glow. */
 export function classPickerHtml(current = null) {
   return `<ul class="ae-gd-picker" data-class-picker>${GUIDE_CLASSES.map(name => `<li><a class="ae-gd-btn ae-gd-pick" href="${esc(classHref(name))}" data-class="${esc(name)}"${name === current ? ' aria-current="page"' : ''}>
-        <img src="${EMBLEMS}${name.toLowerCase()}.png" alt="" width="128" height="128" loading="lazy" decoding="async"><span>${esc(name)}</span></a></li>`).join('')}</ul>`;
+        <img src="${EMBLEMS}${name.toLowerCase()}.png"${webpSrcset(`${EMBLEMS}${name.toLowerCase()}.png`)} alt="" width="128" height="128" loading="lazy" decoding="async"><span>${esc(name)}</span></a></li>`).join('')}</ul>`;
 }
 
 /** An address as the side menu compares it: path only, no index.html, always a trailing slash. */
@@ -110,7 +110,7 @@ const herePath = () => pathKey(location.pathname);
 function heroHtml(item, { title, lede, kicker, actions }) {
   const hero = PAGE_HEROES[herePath()] ?? item.hero;
   return `<header class="ae-gd-hero${item.id === 'home' ? ' is-home' : ''}">
-      <img class="ae-gd-hero-img" src="${esc(hero.src)}" alt="${esc(hero.alt)}" width="${hero.width}" height="${hero.height}"${hero.focus ? ` style="object-position:${esc(hero.focus)}"` : ''} loading="eager" fetchpriority="high" decoding="async">
+      <img class="ae-gd-hero-img" src="${esc(hero.src)}"${webpSrcset(hero.src, { width: hero.width })} alt="${esc(hero.alt)}" width="${hero.width}" height="${hero.height}"${hero.focus ? ` style="object-position:${esc(hero.focus)}"` : ''} loading="eager" fetchpriority="high" decoding="async">
       <div class="ae-gd-hero-copy">
         <p class="ae-gd-kicker">${esc(kicker ?? item.label)}</p>
         <h1 class="ae-gd-title" id="aeScreenTitle">${esc(title)}</h1>
@@ -253,7 +253,7 @@ export const TOPIC_ICONS = Object.freeze({
 });
 
 function cardIconHtml(icon, size) {
-  if (icon?.art) return `<span class="ae-gd-ocard-icon is-art"><img src="${esc(icon.art)}" alt="" width="${size}" height="${size}" loading="lazy" decoding="async"></span>`;
+  if (icon?.art) return `<span class="ae-gd-ocard-icon is-art"><img src="${esc(icon.art)}"${webpSrcset(icon.art)} alt="" width="${size}" height="${size}" loading="lazy" decoding="async"></span>`;
   if (icon?.game) return `<span class="ae-gd-ocard-icon is-game">${gradeTile({ icon: icon.game, grade: icon.grade ?? null, size })}</span>`;
   return '';
 }

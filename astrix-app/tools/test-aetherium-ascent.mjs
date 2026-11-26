@@ -118,7 +118,7 @@ const check=async(name,fn)=>{try{await fn();console.log(`  ok  ${name}`);}catch(
 
 // mechanics: a stand-in mechanics.json (a rule flipped to confirmed), so a test can show the tags follow the data.
 async function open(path,{live=false,down=false,viewport={width:1600,height:1000},storage=null,mechanics=null,visited=null,builds=null}={}){
-  const context=await browser.newContext({viewport});
+  const context=await browser.newContext({serviceWorkers:'block',viewport});
   const calls=[];
   // Every URL the page asks for, so a check can see which hosts were asked (stat icons: our sprite only, never NCSOFT).
   const requested=[];

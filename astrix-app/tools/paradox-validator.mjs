@@ -19,6 +19,7 @@ export const validators=[
   'validate-division.mjs',
   'test-division-build-format.mjs',
   'test-division-ubisoft-adapter.mjs',
+  browser('test-aetherium-pwa.mjs'), // The Aetherium installed app: manifest, service worker scope, offline, Update ready, install, safe area, image weight.
   browser('test-aetherium-pages.mjs'), // The Aetherium Daeva Card and Gear page: demo, live, roster, faction, Worker down, layout.
   {name:'test-aetherium-character.mjs',browser:true,serial:true}, // The Aetherium character menu, Gear, Skills and Daevanion pages: cards, tabs, hover card, board totals, layout. Serial: its Gear tile look check failed under load (18 Oct 2026).
   'test-aetherium-worker.mjs', // AION 2 armory Worker: whitelist, cache, rate limit, CORS, 502.

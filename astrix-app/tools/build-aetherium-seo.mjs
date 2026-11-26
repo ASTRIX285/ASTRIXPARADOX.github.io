@@ -67,7 +67,8 @@ function pages() {
     if (statSync(full).isDirectory()) return walk(full);
     return name === 'index.html' ? [full] : [];
   });
-  return walk(join(root, BASE)).map(file => ({ file, path: relative(join(root, BASE), file).split(sep).join('/').replace(/index\.html$/, '') })).sort((a, b) => a.path.localeCompare(b.path));
+  /* A noindex page (the offline page of the installed app, feature/aetherium-pwa) is never searched or shared: no tags. */
+  return walk(join(root, BASE)).filter(file => !/<meta name="robots" content="[^"]*noindex/i.test(readFileSync(file, 'utf8'))).map(file => ({ file, path: relative(join(root, BASE), file).split(sep).join('/').replace(/index\.html$/, '') })).sort((a, b) => a.path.localeCompare(b.path));
 }
 
 /** The breadcrumb from the site to this page: The Hub, The Aetherium, then each page above this one that exists. */

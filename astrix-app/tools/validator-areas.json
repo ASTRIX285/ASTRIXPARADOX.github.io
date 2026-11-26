@@ -69,6 +69,7 @@
       ],
       "suites": [
         "test-aetherium-pages.mjs",
+        "test-aetherium-pwa.mjs",
         "test-aetherium-character.mjs",
         "test-aetherium-worker.mjs",
         "test-aion2-adapter.mjs",
