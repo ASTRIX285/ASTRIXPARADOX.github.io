@@ -1,0 +1,3 @@
+# perf/forge-app-readiness-nov2026: phone speed report and Forge Loader WebKit stability test. Measure only.
+astrix-app/tools/perf/reports/2026-11-26-live-signed-in.md
+astrix-app/tools/test-forge-loader-webkit.mjs
