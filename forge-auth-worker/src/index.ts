@@ -577,6 +577,31 @@ function clearSessionCookie(): string {
   return `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`;
 }
 
+async function resumeLiveSession(request: Request, env: Env, returnUrl: string): Promise<Response | null> {
+  const sessionId = cookieValue(request, SESSION_COOKIE);
+  if (!sessionId) return null;
+  const storedSession = await getSession(env, sessionId);
+  if (!storedSession || storedSession.absoluteExpiresAt <= Date.now()) return null;
+  let session: SessionRecord;
+  try {
+    session = await refreshAccessToken(sessionId, storedSession, env);
+  } catch (error) {
+    if (error instanceof Error && error.message === "bungie_reauthentication_required") {
+      await revokeSession(env, sessionId, storedSession);
+    }
+    return null;
+  }
+  await renewSession(env, sessionId, session);
+  const target = new URL(returnUrl);
+  target.searchParams.set("bungie", "connected");
+  return new Response(null, { status: 302, headers: {
+    Location: target.toString(),
+    "Set-Cookie": sessionCookie(sessionId, Math.floor(SESSION_TTL_MS / 1000)),
+    "Cache-Control": "no-store",
+    "Referrer-Policy": "no-referrer"
+  } });
+}
+
 async function startOAuth(request: Request, env: Env, accessIdentityKey?: string): Promise<Response> {
   const url = new URL(request.url);
   const clientId = (env.BUNGIE_CLIENT_ID || "").trim();
@@ -585,6 +610,12 @@ async function startOAuth(request: Request, env: Env, accessIdentityKey?: string
   }
 
   const returnUrl = approvedReturnUrl(url.searchParams.get("return"), env);
+  // Sign in once and stay signed in (like DIM): a live ASTRIX session goes straight back
+  // to the page, so Bungie never asks for a platform sign-in it does not need.
+  if (!accessIdentityKey) {
+    const resumed = await resumeLiveSession(request, env, returnUrl);
+    if (resumed) return resumed;
+  }
   if (cookieValue(request, OAUTH_INTRO_COOKIE) !== "1" && url.searchParams.get("continue") !== "1") {
     return oauthIntro(returnUrl, Boolean(accessIdentityKey));
   }
