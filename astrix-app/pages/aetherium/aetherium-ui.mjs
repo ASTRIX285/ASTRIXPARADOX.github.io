@@ -6,6 +6,27 @@ export const $ = (selector, root = document) => root.querySelector(selector);
 
 export const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
+/*
+ * Our own images as WebP (feature/aetherium-pwa, 26 Nov 2026). Every JPG and PNG under the Aetherium images folder has a
+ * WebP copy beside it (build-aetherium-images.mjs). webpSrcset(src) gives the srcset attribute that points the browser at
+ * that copy; src stays the original. A photo given its full width also offers the 800 and 1600 wide copies, so a phone
+ * or a 1600 screen never pulls the full size. Anything else (NCSOFT CDN icons, other folders) gets no srcset.
+ */
+const OWN_IMAGES = '/astrix-app/pages/aetherium/images/';
+const PHOTO_DIRS = ['photos', 'section-heroes', 'page-heroes', 'page-backgrounds'];
+export function webpSrcset(src, { width = null, sizes = '100vw' } = {}) {
+  const [path, query] = String(src ?? '').split('?');
+  if (!path.startsWith(OWN_IMAGES) || !/\.(jpe?g|png)$/i.test(path)) return '';
+  const base = path.replace(/\.(jpe?g|png)$/i, '');
+  const photo = PHOTO_DIRS.includes(path.slice(OWN_IMAGES.length).split('/')[0]);
+  if (photo && Number(width) > 0) {
+    const set = [800, 1600].filter(size => size < width).map(size => `${base}-${size}w.webp ${size}w`);
+    set.push(`${base}.webp ${width}w`);
+    return ` srcset="${esc(set.join(', '))}" sizes="${esc(sizes)}"`;
+  }
+  return ` srcset="${esc(`${base}.webp${query ? `?${query}` : ''}`)}"`;
+}
+
 export const number = value => (Number.isFinite(value) ? value.toLocaleString('en-GB') : '-');
 
 /** The page's words for the official title categories (equipCategory Attack, Defense, Etc). */
@@ -125,8 +146,27 @@ function trackHeader() {
   if (typeof ResizeObserver === 'function') new ResizeObserver(apply).observe(header);
 }
 
+/*
+ * The installed app (feature/aetherium-pwa, 26 Nov 2026). The browser's install offer is kept for the menu's Install app
+ * control and never shown as its own popup. The app module (service worker, Update ready, Install app) loads once the page
+ * is up and the browser is idle, so it never adds to the first load.
+ */
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    window.__aeInstallPrompt = event;
+    document.dispatchEvent(new CustomEvent('aetherium:installable'));
+  });
+}
+function startApp() {
+  const go = () => import('./aetherium-app.mjs').then(app => app.start()).catch(() => { /* no app features: the page works as before */ });
+  const later = () => (typeof requestIdleCallback === 'function' ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 1500));
+  if (document.readyState === 'complete') later(); else window.addEventListener('load', later, { once: true });
+}
+
 export function wireDrawer() {
   trackHeader();
+  startApp();
   const menu = $('#aeMenu');
   const drawer = $('#aeDrawer');
   if (!menu || !drawer) return;

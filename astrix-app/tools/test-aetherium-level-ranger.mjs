@@ -297,7 +297,7 @@ if(process.env.AE_BROWSER!=='0'){
   const real=[];
   const bcheck=async(name,fn)=>{try{await fn();console.log(`  ok   ${name}`);}catch(error){failed++;console.log(`  FAIL ${name}\n${error.stack}`);}};
   async function open(path,{viewport={width:1600,height:1000}}={}){
-    const context=await browser.newContext({viewport});
+    const context=await browser.newContext({serviceWorkers:'block',viewport});
     await context.route(/\/astrix-app\/pages\/aetherium\/aetherium-config\.mjs/,async route=>{
       const response=await route.fetch();
       const body=(await response.text()).replace(/export const AETHERIUM_WORKER_URL = [^;]+;/,'export const AETHERIUM_WORKER_URL = null;');

@@ -168,5 +168,8 @@ if(process.argv[1]?.endsWith('build-module-versions.mjs')){
     if(current!==result.versionsJson)await writeFile(VERSIONS_FILE,result.versionsJson);
     console.log(`MODULE_VERSIONS=WRITTEN ${stale.length} file(s); ${Object.keys(result.versions).length} modules; worker-stamped ${result.workerGraph.length}`);
   }
+  // The Aetherium service worker's shell list carries the same ?v= keys, so it is written (or checked) with them.
+  const {buildShell}=await import('./build-aetherium-sw.mjs');
+  if(!(await buildShell({check})))process.exit(1);
   if(result.unresolved.length)console.log(`Unresolved references (left as written):\n${result.unresolved.map(row=>`  ${row}`).join('\n')}`);
 }

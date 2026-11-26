@@ -8,7 +8,7 @@
  * Screens: SHOTS holds the in-game screenshots this section can show, { src, alt, width, height, caption }. A slot draws
  * only when its entry is set, so an empty frame never shows on the site.
  */
-import { esc, gradeTile } from './aetherium-ui.mjs';
+import { esc, gradeTile, webpSrcset } from './aetherium-ui.mjs';
 import { GUIDE_ROOT } from './guide-shell.mjs';
 
 const IMAGES = '/astrix-app/pages/aetherium/images/';
@@ -30,7 +30,7 @@ const SHOTS = Object.freeze({
 
 const byId = list => Object.fromEntries((list ?? []).map(item => [item.id, item]));
 const block = (id, title, inner, cls = '') => `<section class="ae-gx-block ae-gc-block${cls ? ` ${cls}` : ''}" id="${esc(id)}" aria-labelledby="${esc(id)}Title"><h2 class="ae-gx-h2" id="${esc(id)}Title">${esc(title)}</h2>${inner}</section>`;
-const art = (item, size, alt = '') => (item?.src ? `<img class="ae-gc-art" src="${esc(item.src)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy" decoding="async">` : '');
+const art = (item, size, alt = '') => (item?.src ? `<img class="ae-gc-art" src="${esc(item.src)}"${webpSrcset(item.src)} alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy" decoding="async">` : '');
 /** A real game icon in its grade frame, or nothing. */
 const itemIcon = (entry, size = 48, grade = null) => (entry?.icon ? gradeTile({ icon: entry.icon, grade: entry.grade ?? grade, size, alt: '' }) : '');
 /** "62 (70)" or "18 (Splendent 22)": the item level and its Splendent version. */
@@ -40,7 +40,7 @@ function levels(value) {
 }
 /** A gold edged tip: its icon (if any), a short title and the fact. */
 const tipHtml = ({ id, icon = '', title, text, extra = '', gold = false }) => `<div class="ae-gc-tip${gold ? ' is-gold' : ''}" data-tip-id="${esc(id)}">${icon ? `<span class="ae-gc-tip-icon">${icon}</span>` : ''}<div class="ae-gc-tip-copy"><h4 class="ae-gc-tip-title">${esc(title)}</h4><p>${esc(text)}</p>${extra}</div></div>`;
-const shotHtml = (shot, cls) => (shot?.src ? `<figure class="ae-gc-shot ${cls}"><img src="${esc(shot.src)}" alt="${esc(shot.alt)}" width="${esc(shot.width)}" height="${esc(shot.height)}" loading="lazy" decoding="async">${shot.caption ? `<figcaption>${esc(shot.caption)}</figcaption>` : ''}</figure>` : '');
+const shotHtml = (shot, cls) => (shot?.src ? `<figure class="ae-gc-shot ${cls}"><img src="${esc(shot.src)}"${webpSrcset(shot.src)} alt="${esc(shot.alt)}" width="${esc(shot.width)}" height="${esc(shot.height)}" loading="lazy" decoding="async">${shot.caption ? `<figcaption>${esc(shot.caption)}</figcaption>` : ''}</figure>` : '');
 /** The steps of the ladder we can show: a step whose place in the global client is disputed stays off. */
 const shownSteps = ladder => (ladder?.steps ?? []).filter(step => step.status !== 'disputed');
 
@@ -172,7 +172,7 @@ function materialCard(type, names) {
 }
 
 const GATHER_TIPS = {
-  odyle: { title: 'Odyle needs wings', icon: () => `<img class="ae-gc-art is-game" src="${esc(ART.wings.src)}" alt="" title="${esc(ART.wings.name)}" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` },
+  odyle: { title: 'Odyle needs wings', icon: () => `<img class="ae-gc-art is-game" src="${esc(ART.wings.src)}"${webpSrcset(ART.wings.src)} alt="" title="${esc(ART.wings.name)}" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` },
   skills: { title: 'Gathering skills' },
   nodes: { title: 'Nodes' },
   where: { title: 'Where to look' },

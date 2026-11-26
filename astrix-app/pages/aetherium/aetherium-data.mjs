@@ -39,10 +39,13 @@ const reasonOfStatus = status => (status === 429 ? 'rate' : status === 502 || st
 
 /** The words for a failed read. Only a real "site did not answer" blames the official site; siteText is that case's own sentence. */
 export function explain(error, siteText = SITE_NOT_ANSWERING) {
+  if (error?.reason === 'offline') return YOU_ARE_OFFLINE;
   if (error?.reason === 'rate') return 'Too many searches in a minute. Try again shortly.';
   if (error?.reason === 'other') return 'Something went wrong on our side. Try again in a minute.';
   return siteText;
 }
+/** The plain sentence when this device has no connection (the installed app's service worker says so, or the browser does). */
+export const YOU_ARE_OFFLINE = "You're offline. Connect to the internet and try again.";
 /** The plain sentence for a read the official site did not answer. */
 export const SITE_NOT_ANSWERING = 'The official AION 2 site is not answering right now. Try again in a minute.';
 
@@ -55,10 +58,12 @@ async function getJson(url, { timeout = TIMEOUT_MS } = {}) {
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
+    if (!response.ok && response.headers.get('X-Aetherium-Offline')) throw new ArmoryUnavailable(YOU_ARE_OFFLINE, 'offline');
     if (!response.ok) throw new ArmoryUnavailable(`The official AION 2 site answered ${response.status}.`, reasonOfStatus(response.status));
     return await response.json();
   } catch (error) {
-    throw error instanceof ArmoryUnavailable ? error : new ArmoryUnavailable(error?.message);
+    if (error instanceof ArmoryUnavailable) throw error;
+    throw typeof navigator !== 'undefined' && navigator.onLine === false ? new ArmoryUnavailable(YOU_ARE_OFFLINE, 'offline') : new ArmoryUnavailable(error?.message);
   } finally {
     clearTimeout(timer);
   }
@@ -85,7 +90,8 @@ function worker(path, params, region) {
   return getJson(`${AETHERIUM_WORKER_URL}${path}?${query}`);
 }
 
-const liveSource = meta => ({ kind: 'live', fetchedAt: meta?.fetchedAt ?? null, cache: meta?.cache ?? null });
+/* A reply the installed app kept on this device and gave back while offline carries meta.cache 'stored': it is never live. */
+const liveSource = meta => ({ kind: meta?.cache === 'stored' ? 'stored' : 'live', fetchedAt: meta?.fetchedAt ?? null, cache: meta?.cache ?? null });
 
 let catalogue;
 export function loadCatalogue() {
@@ -268,6 +274,7 @@ export function sourceLabel(source) {
   if (!Number.isFinite(at)) return 'Read from the official AION 2 site.';
   const minutes = Math.max(0, Math.round((Date.now() - at) / 60000));
   const age = minutes < 1 ? 'just now' : minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
+  if (source.kind === 'stored') return `You're offline. Saved on this device: read from the official AION 2 site ${age}.`;
   return `Read from the official AION 2 site ${age}${source.cache === 'hit' ? ' (cached)' : ''}.`;
 }
 

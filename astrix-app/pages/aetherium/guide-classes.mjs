@@ -10,7 +10,7 @@
  * shows what our build data says. The setup check reuses the engine (ascent-advisor.mjs, item-assessor.mjs) and only
  * advises: it never blocks a choice. Character data shows its age; saved notes show theirs (aetherium-memory.mjs).
  */
-import { $, esc, iconImg, showNotice, slotLabel } from './aetherium-ui.mjs';
+import { $, esc, iconImg, showNotice, slotLabel, webpSrcset } from './aetherium-ui.mjs';
 import { ArmoryUnavailable, ascentUrl, explain, gearPageUrl, loadAdvisor, loadBuilds, loadCharacter, rolePick, sourceLabel } from './aetherium-data.mjs';
 import { getMemory, memoryAge, setMemory } from './aetherium-memory.mjs';
 import { GUIDE_CLASSES, GUIDE_ROOT, classHref, classPickerHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
@@ -162,7 +162,7 @@ function classHeroHtml(name, records, ratings, linked) {
   const mine = linked?.entry?.className === name ? linked.ref : null;
   const buildHref = main ? (mine ? ascentUrl(mine, name, { role: main.role }) : `/hub/aetherium/ascent/?class=${slug}&role=${main.role}`) : null;
   return `<header class="ae-gd-hero is-class" data-class="${esc(slug)}">
-      <div class="ae-gd-figure"><img class="ae-gd-figure-img" src="${FIGURES}${slug}.jpg" alt="The ${esc(name)} on the class select screen" width="${width}" height="${height}" loading="eager" fetchpriority="high" decoding="async"></div>
+      <div class="ae-gd-figure"><img class="ae-gd-figure-img" src="${FIGURES}${slug}.jpg"${webpSrcset(`${FIGURES}${slug}.jpg`)} alt="The ${esc(name)} on the class select screen" width="${width}" height="${height}" loading="eager" fetchpriority="high" decoding="async"></div>
       <div class="ae-gd-hero-copy">
         <p class="ae-gd-kicker">Class</p>
         <h1 class="ae-gd-title" id="aeScreenTitle">${esc(name)}</h1>

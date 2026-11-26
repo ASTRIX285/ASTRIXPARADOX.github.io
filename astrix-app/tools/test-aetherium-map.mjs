@@ -95,7 +95,7 @@ const base=`http://127.0.0.1:${server.address().port}`;
 const browser=await chromium.launch();
 let failed=false;
 const open=async({width=1600,height=900,fixtureZones=false}={})=>{
-  const context=await browser.newContext({viewport:{width,height}});
+  const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height}});
   const outside=[],mapRequests=[];
   await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>{outside.push(new URL(route.request().url()).hostname);route.fulfill({status:204,body:''});});
   if(fixtureZones)await context.route(/\/data\/map\/zones\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(zonesFixture)}));
@@ -255,7 +255,7 @@ try {
   const testMarkers={records:[...spread,...near,testMarker('t-place','place',0.45,0.8,{name:'Test Village'})]};
   assert.deepEqual(atlasProblems({zones,layers,markers:testMarkers}),[],'The test markers are valid');
   const openMarkers=async(query='',{width=1600,height=900}={})=>{
-    const context=await browser.newContext({viewport:{width,height}});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height}});
     await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
     await context.route(/\/data\/map\/markers\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(testMarkers)}));
     const page=await context.newPage();
@@ -425,7 +425,7 @@ try {
   /* Real data (Miguel, 29 Oct 2026): a field boss card shows the game's loot in the game's colours and Taulo's chest odds;
      a Command Merchant draws its own in-game icon, not the layer's. */
   await (async()=>{
-    const context=await browser.newContext({viewport:{width:1600,height:900}});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1600,height:900}});
     await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
     const page=await context.newPage();
     const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -485,7 +485,7 @@ try {
 
   /* Capture mode: drop, move, undo, edit, delete and export in the markers.json format. */
   await (async()=>{
-    const context=await browser.newContext({viewport:{width:1600,height:900}});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1600,height:900}});
     await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
     /* An empty markers.json, so the clicks land on open map and not on a real marker. */
     await context.route(/\/data\/map\/markers\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({records:[]})}));
@@ -638,7 +638,7 @@ try {
 
   /* The base map waits for the page to be ready. */
   await (async()=>{
-    const context=await browser.newContext({viewport:{width:1600,height:900}});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1600,height:900}});
     let readyAt=null,mapAt=null;
     await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.fulfill({status:204,body:''}));
     await context.route(/\/data\/map\/zones\.json$/,route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(zonesFixture)}));

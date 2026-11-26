@@ -139,7 +139,7 @@ const seed=({itemLevel=null}={})=>{
   return `localStorage.setItem('aetherium.roster.v2',${JSON.stringify(JSON.stringify(store))});localStorage.setItem('aetherium.memory.v1',${JSON.stringify(JSON.stringify(memory))});`;
 };
 async function open(path,{width=1600,height=1000,init=null}={}){
-  const context=await browser.newContext({viewport:{width,height}});
+  const context=await browser.newContext({serviceWorkers:'block',viewport:{width,height}});
   if(init)await context.addInitScript(init);
   await context.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
   const page=await context.newPage();

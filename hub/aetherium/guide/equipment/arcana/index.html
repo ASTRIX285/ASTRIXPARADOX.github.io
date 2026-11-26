@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="/astrix-app/shared/astrix-tool-shell.css?v=20260930-stroke-4&amp;shell=20261001-mobile-1&amp;mobile=20261002-1&amp;bf=20261002-1&amp;inv=20261002-1&amp;swr=20261002-1&amp;formation=20261003-1&amp;neutral=20261016-1&amp;capsule=20261016-1">
   <link rel="stylesheet" href="/css/astrix-palette.css?v=20260923-button-tiers-1&amp;gloss=20260926-1&amp;recovery=20261004-1&amp;neutral=20261016-1&amp;forge-tint=20261016-1">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="description" content="AION 2 Arcana: the five cards (Chalice, Parchment, Compass, Bell, Mirror), item level by grade, the Primal Vigor and Magic Armour sets, where each drops in Transcendence, and Extract and Transmute.">
   <link rel="canonical" href="https://astrixparadox.com/hub/aetherium/guide/equipment/arcana/">
   <!-- seo:start -->
@@ -23,13 +23,16 @@
   <title>AION 2 Arcana Guide | ASTRIX PARADOX</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/hub/aetherium/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/hub/aetherium/aetherium.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Aetherium">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="/img/favicon/favicon.ico">
   <link rel="preconnect" href="https://assets.playnccdn.com" crossorigin>
   <link rel="stylesheet" href="https://use.typekit.net/tnp6kbq.css">
   <link rel="stylesheet" href="/css/astrix-site-typography.css?v=20260903-bahnschrift-1">
-  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261104-layout-shift-1">
+  <link rel="stylesheet" href="/astrix-app/pages/aetherium/aetherium.css?v=20261126-pwa-1">
   <script type="importmap" data-module-versions>
 {"imports":{
 "/astrix-app/games/aion2/engine/armory-adapter.mjs":"/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d",
@@ -48,19 +51,21 @@
 
 "/astrix-app/games/aion2/index.mjs":"/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
+"/astrix-app/pages/aetherium/aetherium-app.mjs":"/astrix-app/pages/aetherium/aetherium-app.mjs?v=e5f7a44a48",
+
 "/astrix-app/pages/aetherium/aetherium-config.mjs":"/astrix-app/pages/aetherium/aetherium-config.mjs?v=b3f9c96bd7",
 
-"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=8b6bdd5612",
+"/astrix-app/pages/aetherium/aetherium-data.mjs":"/astrix-app/pages/aetherium/aetherium-data.mjs?v=39bcfad341",
 
 "/astrix-app/pages/aetherium/aetherium-memory.mjs":"/astrix-app/pages/aetherium/aetherium-memory.mjs?v=a82fd351f5",
 
-"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5",
+"/astrix-app/pages/aetherium/aetherium-ui.mjs":"/astrix-app/pages/aetherium/aetherium-ui.mjs?v=7d775319a1",
 
-"/astrix-app/pages/aetherium/guide-crafting.mjs":"/astrix-app/pages/aetherium/guide-crafting.mjs?v=8d128f983a",
+"/astrix-app/pages/aetherium/guide-crafting.mjs":"/astrix-app/pages/aetherium/guide-crafting.mjs?v=c6ca18356e",
 
-"/astrix-app/pages/aetherium/guide-equipment.mjs":"/astrix-app/pages/aetherium/guide-equipment.mjs?v=9fcfd16677",
+"/astrix-app/pages/aetherium/guide-equipment.mjs":"/astrix-app/pages/aetherium/guide-equipment.mjs?v=775b694521",
 
-"/astrix-app/pages/aetherium/guide-shell.mjs":"/astrix-app/pages/aetherium/guide-shell.mjs?v=633c757174"
+"/astrix-app/pages/aetherium/guide-shell.mjs":"/astrix-app/pages/aetherium/guide-shell.mjs?v=99a104c9eb"
 }}
   </script>
   <link rel="modulepreload" href="/astrix-app/games/aion2/engine/armory-adapter.mjs?v=655d894d8d" data-head-hint>
@@ -81,18 +86,18 @@
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-config.mjs?v=b3f9c96bd7" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=8b6bdd5612" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-data.mjs?v=39bcfad341" data-head-hint>
 
   <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-memory.mjs?v=a82fd351f5" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=aed77c45f5" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/aetherium-ui.mjs?v=7d775319a1" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-crafting.mjs?v=8d128f983a" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-crafting.mjs?v=c6ca18356e" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-equipment.mjs?v=9fcfd16677" data-head-hint>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-equipment.mjs?v=775b694521" data-head-hint>
 
-  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-shell.mjs?v=633c757174" data-head-hint>
-  <script type="module" src="/astrix-app/pages/aetherium/guide-equipment.mjs?v=9fcfd16677"></script>
+  <link rel="modulepreload" href="/astrix-app/pages/aetherium/guide-shell.mjs?v=99a104c9eb" data-head-hint>
+  <script type="module" src="/astrix-app/pages/aetherium/guide-equipment.mjs?v=775b694521"></script>
 </head>
 <body class="aetherium-page" data-faction="astrix" data-apx-button-system data-ae-page="guide" data-guide="page" data-guide-section="equipment" data-guide-page="arcana">
   <a class="ae-skip" href="#aeMain">Skip to the Guide</a>

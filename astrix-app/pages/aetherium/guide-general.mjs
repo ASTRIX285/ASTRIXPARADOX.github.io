@@ -4,7 +4,7 @@
  * fact with its status and sources; this file only lays them out. The page is named by body[data-guide-page].
  * Reset times are worked out from the UTC rule and shown in the player's own time zone, with a live countdown.
  */
-import { $, esc } from './aetherium-ui.mjs';
+import { $, esc, webpSrcset } from './aetherium-ui.mjs';
 import { GUIDE_CLASSES, GUIDE_ROOT, classHref, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 import { nextReset, countdownWords } from './guide-resets.mjs';
 
@@ -16,7 +16,7 @@ const ASCENT_URL = '/hub/aetherium/ascent/';
 const ICONS = '/astrix-app/pages/aetherium/images/topic-icons/';
 
 /** A rendered topic icon (images/topic-icons): decorative, the heading next to it names the topic. */
-const topicIcon = (name, size) => `<img class="ae-gg-icon" src="${ICONS}${name}.png" alt="" width="${size}" height="${size}" loading="lazy" decoding="async">`;
+const topicIcon = (name, size) => `<img class="ae-gg-icon" src="${ICONS}${name}.png"${webpSrcset(`${ICONS}${name}.png`)} alt="" width="${size}" height="${size}" loading="lazy" decoding="async">`;
 
 /** The General pages in reading order: slug ('' is the section home), title, one line for the section home. */
 export const GENERAL_PAGES = Object.freeze([
@@ -84,7 +84,7 @@ const RULE_TILES = Object.freeze([
   { key: 'crossFactionParty', on: false, big: 'No mixed parties', line: 'An Elyos and an Asmodian cannot party together.' },
   { key: 'legionSameFaction', on: true, big: 'One-faction Legions', line: 'A Legion only takes members of its own faction.' }
 ]);
-const photo = (src, alt, w, h, focus, cls, eager = false) => `<img class="${cls}" src="${src}" alt="${esc(alt)}" width="${w}" height="${h}" style="object-position:${focus}"${eager ? '' : ' loading="lazy"'} decoding="async">`;
+const photo = (src, alt, w, h, focus, cls, eager = false) => `<img class="${cls}" src="${src}"${webpSrcset(src, { width: w })} alt="${esc(alt)}" width="${w}" height="${h}" style="object-position:${focus}"${eager ? '' : ' loading="lazy"'} decoding="async">`;
 const shortDate = iso => new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
 
 function aboutPage(r) {
@@ -97,7 +97,7 @@ function aboutPage(r) {
     return `<section class="ae-ab-faction" data-fact="${esc(record.id)}" data-side="${look.id}" aria-labelledby="gd-${esc(record.id)}">
         ${photo(look.src, look.alt, look.w, look.h, look.focus, 'ae-ab-faction-img', true)}
         <div class="ae-ab-faction-text">
-          <img class="ae-ab-emblem" src="${look.emblem}" alt="${esc(record.label)} emblem" width="120" height="120" decoding="async">
+          <img class="ae-ab-emblem" src="${look.emblem}"${webpSrcset(look.emblem)} alt="${esc(record.label)} emblem" width="120" height="120" decoding="async">
           <p class="ae-ab-kicker">${esc(look.kicker)}</p>
           <h2 class="ae-ab-faction-name" id="gd-${esc(record.id)}">${esc(record.label)}</h2>
           <p class="ae-ab-realm">Home: <b>${esc(look.realm)}</b></p>

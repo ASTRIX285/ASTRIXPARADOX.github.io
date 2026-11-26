@@ -6,7 +6,7 @@
  * character call, then item details already kept or within the usual budget) and asks gear-sources.mjs what drops better
  * for each slot. It is a guide: a slot that strays is flagged with what it costs, never blocked.
  */
-import { $, esc, gradeTile, number, showNotice, showSource, slotLabel } from './aetherium-ui.mjs';
+import { $, esc, gradeTile, number, showNotice, showSource, slotLabel, webpSrcset } from './aetherium-ui.mjs';
 import { ArmoryUnavailable, cardUrl, explain, gearPageUrl, loadBuilds, loadCharacter, loadEnhancement, loadGrades, loadProgression, preloadItemDetails, refFromUrl, rolePick, titlesUrl } from './aetherium-data.mjs';
 import { GUIDE_ROOT, overviewHtml, renderGuideShell, startGuidePage } from './guide-shell.mjs';
 import { craftedGearHtml, craftingHomeHtml, gatheringHtml, professionsHtml } from './guide-crafting.mjs';
@@ -350,7 +350,7 @@ function theoCard(effect, grade, group) {
   const average = effect.damage && !effect.every ? Math.round(effect.damage[grade] * chance / 100) : null;
   return `<li class="ae-th-card" data-grade="${esc(g)}" data-effect="${esc(effect.id)}">
       <a class="ae-th-open" href="#theo-${esc(g)}-${esc(effect.id)}" data-theo-open="${esc(effect.id)}" data-theo-at="${esc(g)}" aria-haspopup="dialog" aria-label="${esc(`${grade} ${effect.label} Theostone, see the details`)}">
-      <img src="${THEO_ART}${esc(g)}-${esc(effect.id)}.jpg" alt="" width="120" height="120" loading="lazy" decoding="async">
+      <img src="${THEO_ART}${esc(g)}-${esc(effect.id)}.jpg"${webpSrcset(`${THEO_ART}${g}-${effect.id}.jpg`)} alt="" width="120" height="120" loading="lazy" decoding="async">
       <span class="ae-th-text"><span class="ae-th-name">${esc(effect.label)}</span>
         <span class="ae-th-big"><b>${esc(big)}</b> <span>${esc(unit)}</span></span>
         <span class="ae-th-chance">${esc(chance)}% chance on attack${average ? ` <em>${esc(fmt(average))} ${group.targets ? 'a target' : 'a hit'} on average</em>` : ''}</span></span>
@@ -382,7 +382,7 @@ export function theoDetailHtml(record, effectId, gradeId, who = null) {
   const ladder = cat.grades.map(g => `<li data-grade="${esc(g.toLowerCase())}"${g === grade ? ' aria-current="true"' : ''}><span>${esc(g)}</span><b>${esc(size(g))}</b>${average(g) ? `<em>${esc(fmt(average(g)))} avg</em>` : ''}</li>`).join('');
   const fit = who?.role ? theoFit(record, who.role, effect.id, group.id) : null;
   return `<div class="ae-th-detail" data-grade="${esc(grade.toLowerCase())}">
-      <header><img src="${THEO_ART}${esc(grade.toLowerCase())}-${esc(effect.id)}.jpg" alt="" width="120" height="120">
+      <header><img src="${THEO_ART}${esc(grade.toLowerCase())}-${esc(effect.id)}.jpg"${webpSrcset(`${THEO_ART}${grade.toLowerCase()}-${effect.id}.jpg`)} alt="" width="120" height="120">
         <div><p class="ae-th-kind">${esc(grade)} Theostone, ${esc(group.label)}</p><h2 id="aeTheoDetailTitle">${esc(effect.label)}</h2></div>
         <button type="button" class="ae-btn ae-th-close" data-detail-close aria-label="Close">Close</button></header>
       <p class="ae-th-what">${esc(what)}, ${esc(effect.chance[grade])}% chance on attack.</p>
@@ -487,7 +487,7 @@ async function renderTheostones(linked) {
 
 /* Arcana art cut from Miguel's own screens of the Arcana window (design/aetherium-arcana-page, 22 Oct 2026). */
 const ARCANA_ART = '/astrix-app/pages/aetherium/images/arcana/';
-const arcArt = (file, alt, width, height, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${ARCANA_ART}${file}" alt="${esc(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
+const arcArt = (file, alt, width, height, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${ARCANA_ART}${file}"${webpSrcset(`${ARCANA_ART}${file}`)} alt="${esc(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
 const medallion = (id, alt = '') => arcArt(`${id}.webp`, alt, 260, 260, 'ae-arc-med-img');
 const cardBack = (alt = '') => arcArt('card-back.jpg', alt, 273, 410);
 const unique = (alt = '') => arcArt('chalice-of-vigor.jpg', alt, 280, 418);
@@ -516,7 +516,7 @@ export function arcanaHtml(record, index, arcWindow = null) {
       <span class="ae-arc-gname">${esc(entry.grade)}</span>
     </li>`).join('');
   const lines = record.lines.map(line => `<li class="ae-arc-set" data-arcana-line="${esc(line.id)}">
-      <div class="ae-arc-set-art" style="--ae-arc-art:url('${ARCANA_ART}${esc(line.id)}.jpg')"><h3>${esc(line.name)}</h3></div>
+      <div class="ae-arc-set-art" style="--ae-arc-art:image-set(url('${ARCANA_ART}${esc(line.id)}.webp') type('image/webp'),url('${ARCANA_ART}${esc(line.id)}.jpg') type('image/jpeg'))"><h3>${esc(line.name)}</h3></div>
       <p class="ae-arc-tier">${pips(2, `2 of 4 ${line.name} cards`)}<span><b>2 cards</b> ${esc(line.set2)}</span></p>
       <p class="ae-arc-tier">${pips(4, `4 of 4 ${line.name} cards`)}<span><b>4 cards</b> ${esc(line.set4)}</span></p>
     </li>`).join('');
@@ -621,7 +621,7 @@ async function renderArcana() {
 
 /* Pets and wings art cut from Miguel's own Pets and Wings windows (design/aetherium-pets-wings-page, 22 Oct 2026). */
 const PW_ART = '/astrix-app/pages/aetherium/images/pets-wings/';
-const pwArt = (file, alt, width, height, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${PW_ART}${file}" alt="${esc(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
+const pwArt = (file, alt, width, height, cls = '') => `<img${cls ? ` class="${cls}"` : ''} src="${PW_ART}${file}"${webpSrcset(`${PW_ART}${file}`)} alt="${esc(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
 const PET_SHOTS = 14;
 const WING_SHOTS = [['superior', 'Superior Daeva Wings'], ['lesser', 'Lesser Daeva Wings'], ['intermediate', 'Intermediate Daeva Wings'], ['aullaeu', 'Aullaeu Wings']];
 const shown = facts => (facts ?? []).filter(item => item.status !== 'pending');
