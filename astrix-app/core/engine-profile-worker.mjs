@@ -1,6 +1,6 @@
 import {normalizePreparedPagePayload} from './prepared-page-client.mjs?v=847f187dca';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=a5fcd4c480';
-import {normaliseLiveProfile} from '../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?v=33ffce3326';
+import {normaliseLiveProfile} from '../pages/guardian-workspace-v2/guardian-bungie-profile.mjs?v=f55418d5d9';
 import {MAX_PREPARED_PAGE_BYTES,PayloadSizeError} from './bounded-json.mjs?v=3fb7642429';
 import {joinPreparedBundle} from './prepared-bundle-cache.mjs?v=843d26d6cd';
 export function handleProfileTask({id,type,text,page,payload,session,characterId,cachedPrepared,returnEnvelope},post){

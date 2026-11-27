@@ -156,7 +156,7 @@ for(const guardian of guardians){
   assert.doesNotMatch(nodes.get('armourBuildState').textContent,/STAGED|PENDING/,'The equipped default is not a pending Forge Loader recommendation.');
   const staged={...build,forgeLoaderDecision:{schemaVersion:1}},stagedBefore=JSON.stringify(staged);
   display.renderBuildGear(staged);
-  assert.equal(modGrids.every(grid=>(grid.innerHTML.match(/AI recommendation pending/g)||[]).length===12),true,'Only untouched Forge Loader staging keeps six pending recommendation slots per piece.');
+  assert.equal(modGrids.every(grid=>(grid.innerHTML.match(/Paradox mod pending/g)||[]).length===12),true,'Only untouched Forge Loader staging keeps six pending recommendation slots per piece.');
   assert.equal(JSON.stringify(staged),stagedBefore,'Hiding proposed mod slots must never erase installed socket evidence.');
   assert.equal(JSON.stringify(build),before,'Rendering cannot mutate the original equipped armour, mods or weapons.');
 }

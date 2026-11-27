@@ -148,6 +148,8 @@ export const validators=[
   'test-character-live-data.mjs',
   'test-recommended-build-reveal.mjs',
   'validate-paradox-build-space.mjs',
+  'test-forge-artifact-perks-once.mjs', // The Forge: Character and Build Forge show the same Artifact perks, each once.
+  browser('test-forge-phone-polish.mjs'), // The Forge on phones: section bar, General dividers, Super slots, Build Forge tile sizes and armour cards.
   'test-manual-build-editor.mjs',
   'validate-live-actions-worker.mjs',
   'validate-guardian-semantics.mjs',

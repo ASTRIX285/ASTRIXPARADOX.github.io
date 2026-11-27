@@ -228,7 +228,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-recommender.mjs": "1bf5e794fd",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-state.mjs": "37932d6567",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-artifact-state.mjs": "e16f359910",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-artifact.mjs": "29f54e84ad",
 
@@ -246,7 +246,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-icon-cleaner.mjs": "b47b9d6379",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs": "33ffce3326",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-profile.mjs": "f55418d5d9",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-character-cards.mjs": "4aac6753eb",
 
@@ -258,7 +258,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-fixture-loader.mjs": "97b88eca16",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs": "7b727f65f6",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-gear-layout.mjs": "d6ffa7d62e",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-live-actions.mjs": "652744845b",
 
@@ -304,7 +304,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-super-feature-sync.mjs": "de37abf131",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-super-formation.mjs": "9c4fce94ca",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-super-formation.mjs": "ecec6b988a",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-vault-access.mjs": "43a784690b",
 
@@ -332,7 +332,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-recommendation.mjs": "73016f37ff",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs": "26ea7a0a10",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-space.mjs": "9d02369270",
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-build-state.mjs": "813c0b7d03",
 
@@ -476,7 +476,7 @@
 
   "/astrix-app/services/weapon-service.mjs": "e3b0c44298",
 
-  "/astrix-app/shared/astrix-breach-loader.mjs": "55b014bfa8",
+  "/astrix-app/shared/astrix-breach-loader.mjs": "d2572561e7",
 
   "/astrix-app/shared/astrix-destination-ribbon.js": "a18ecabc3b",
 
@@ -490,7 +490,7 @@
 
   "/astrix-app/shared/astrix-location-visuals.js": "ae6e714bf8",
 
-  "/astrix-app/shared/astrix-portal-loader.js": "d753fdd1a0",
+  "/astrix-app/shared/astrix-portal-loader.js": "93092e2bf4",
 
   "/astrix-app/shared/bungie-icon-queue.mjs": "a6d0901f66",
 

@@ -591,3 +591,48 @@ body.build-forge-page .working-build-actions{flex-wrap:wrap;gap:10px;}
 /* Build Forge reads best at 75% on desktop screens. Positioning code converts
    rects with the element's currentCSSZoom, so tooltips and menus stay aligned. */
 @media (min-width:1280px){html:has(body.build-forge-page){zoom:.75}}
+
+/* Armour & Mods cards (Miguel, 27 Nov 2026), every width: the item tile on the left, its profile details beside it
+   (name, power, rarity, tier, archetype, equipped; only what the data carries), the mods in their own row below.
+   The instruction line reads in sentence case, like the protection note beside it. */
+.design-canvas .armour-design-section .gear-slot.has-arm-details .gear-arm-row{display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:10px!important}
+.design-canvas .armour-design-section .gear-slot.has-arm-details .gear-arm-anchor{flex:none;transform:none!important}
+.design-canvas .armour-design-section .gear-arm-details{flex:1 1 auto;min-width:0;display:grid;gap:5px;align-content:center;text-align:left}
+.design-canvas .armour-design-section .gear-arm-name{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#f6f3f7;font:700 13px/1.25 bahnschrift,"Barlow","Segoe UI",sans-serif;overflow-wrap:anywhere}
+.design-canvas .armour-design-section .gear-arm-facts{display:flex;flex-wrap:wrap;gap:3px 8px;color:#b8b2bd;font:600 11px/1.3 bahnschrift,"Barlow","Segoe UI",sans-serif}
+.design-canvas .armour-design-section .gear-arm-fact.is-power{color:#f6f3f7}
+.design-canvas .armour-design-section .gear-arm-fact.is-equipped{color:var(--ax-ember-hi,#e6391f)}
+.design-canvas .armour-design-section .gear-slot.has-arm-details .gear-arm-row>.armour-set-strip{flex:none}
+.design-canvas .armour-design-section #armourBuildState[hidden]{display:none!important}
+.design-canvas .armour-design-section .gear-subhead #armourBuildInstruction{font-family:bahnschrift,"Barlow","Segoe UI",sans-serif;letter-spacing:.04em;text-transform:none}
+
+/* Phone and tablet (up to 1199px): Build Forge tiles match Character's Weapons and Armour views (about 66px tiles and a
+   74px lead tile at 390). The armour item is the largest tile in its card; weapons stack one per row so their perk
+   sockets can grow. Nothing scrolls sideways. */
+@media (max-width:1199px){
+  body.build-forge-page .design-canvas{--bf-tile:clamp(56px,17vw,96px);--bf-tile-lead:calc(var(--bf-tile) * 1.12);--bf-gap:6px}
+  body.build-forge-page .design-canvas .armour-design-section{
+    --build-armour-mod:var(--bf-tile);--build-armour-gap:var(--bf-gap);
+    --build-armour-art-width:var(--bf-tile-lead);--build-armour-art-height:calc(var(--bf-tile-lead) * 1.22);
+    --apx-icon-gear-art-width:var(--bf-tile-lead)!important;--apx-icon-gear-art-height:calc(var(--bf-tile-lead) * 1.22)!important;
+    --apx-tile-height:calc(var(--bf-tile-lead) * 1.22)!important;--apx-tile-art-height:var(--bf-tile-lead)!important;--apx-tile-footer-top:var(--bf-tile-lead)!important;
+    --apx-tile-label-size:min(calc(var(--bf-tile-lead) / 5),13px)!important;--apx-tile-badge-height:calc(var(--bf-tile-lead) * .22)!important;
+    --paradox-equipment-width:var(--bf-tile-lead)!important;--paradox-equipment-height:calc(var(--bf-tile-lead) * 1.22)!important}
+  body.build-forge-page .design-canvas .armour-design-section .gear-columns{grid-template-columns:minmax(0,1fr)!important}
+  body.build-forge-page .design-canvas .armour-design-section .gear-mods{grid-template-columns:repeat(3,var(--bf-tile))!important;grid-template-rows:repeat(2,var(--bf-tile))!important;gap:var(--bf-gap)!important;justify-content:start!important}
+  body.build-forge-page .design-canvas .armour-design-section .gear-mod{width:var(--bf-tile)!important;height:var(--bf-tile)!important;min-width:0!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons{
+    --apx-icon-gear-art-width:var(--bf-tile-lead)!important;--apx-icon-gear-art-height:calc(var(--bf-tile-lead) * 1.22)!important;
+    --apx-tile-height:calc(var(--bf-tile-lead) * 1.22)!important;--apx-tile-art-height:var(--bf-tile-lead)!important;--apx-tile-footer-top:var(--bf-tile-lead)!important;
+    --apx-tile-label-size:min(calc(var(--bf-tile-lead) / 5),13px)!important;--apx-tile-badge-height:calc(var(--bf-tile-lead) * .22)!important;
+    --paradox-equipment-width:var(--bf-tile-lead)!important;--paradox-equipment-height:calc(var(--bf-tile-lead) * 1.22)!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weap-grid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;width:100%!important;max-width:100%!important;row-gap:10px!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weap{grid-row:auto!important;grid-template-rows:none!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:8px 4px!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weap .cap b{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important}
+  /* Perk sockets: Character's tile size, shrinking only when a weapon has more columns than the card can hold. */
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weapon-perk-strip{width:100%!important;max-width:100%!important;overflow:visible!important;justify-self:stretch!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weapon-perk-matrix.is-compact{--gear-weapon-socket:var(--bf-tile)!important;--gear-weapon-gap:4px!important;width:100%!important;max-width:100%!important;margin-inline:0!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weapon-perk-matrix.is-compact .weapon-perk-row{grid-template-columns:repeat(var(--weapon-perk-columns),minmax(0,var(--bf-tile)))!important;justify-content:center!important;gap:4px!important;width:100%!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons .weapon-perk-matrix.is-compact .weapon-perk-row-label{display:none!important}
+  body.build-forge-page .design-canvas .weapon-design-section .gear-weapons :is(.weapon-perk-cell,.weapon-perk-icon){width:100%!important;height:auto!important;max-width:var(--bf-tile)!important;aspect-ratio:1!important}
+}

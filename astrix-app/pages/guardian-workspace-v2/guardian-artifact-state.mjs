@@ -4,6 +4,10 @@ const itemHash=item=>num(item?.hash??item?.bungieHash??item?.itemHash);
 function normalisePerks(rows=[]){
   return (Array.isArray(rows)?rows:[]).map(item=>({...item,hash:itemHash(item)})).filter(item=>item.hash!==null);
 }
+// Each active perk once, in Bungie's order (a perk offered in several socket buckets is still one perk).
+function uniquePerks(rows=[]){
+  return normalisePerks(rows).filter((item,index,list)=>list.findIndex(other=>other.hash===item.hash)===index);
+}
 
 function cloneObject(value){try{return structuredClone(value);}catch{return JSON.parse(JSON.stringify(value??null));}}
 
@@ -52,8 +56,8 @@ function resolveArtifactViewState(detail={},fallback={}){
     }
     const state=String(liveArtifact.state||'state-unavailable');
     const all=normalisePerks(liveArtifact.perks||[]);
-    const explicit=normalisePerks(liveArtifact.activePerks||[]);
-    const active=state==='state-unavailable'?null:(explicit.length?explicit:all.filter(item=>item?.isActive===true));
+    const explicit=uniquePerks(liveArtifact.activePerks||[]);
+    const active=state==='state-unavailable'?null:(explicit.length?explicit:uniquePerks(all.filter(item=>item?.isActive===true)));
     return {
       mode:'live',
       state,

@@ -629,7 +629,8 @@ function equippedArtifactFromCatalog(profile,equipment,availableArtifacts,season
   const sockets=profile?.itemComponents?.sockets?.data?.[equipped.itemInstanceId]?.sockets||[];
   const selected=new Set(sockets.map(socket=>Number(socket?.plugHash)).filter(Number.isFinite));
   const perks=(source.perks||[]).map(perk=>({...perk,isActive:selected.has(Number(perk.hash))}));
-  const activePerks=perks.filter(perk=>perk.isActive);
+  // A perk can sit in more than one socket bucket of the catalogue; it is one active perk, listed once.
+  const activePerks=perks.filter((perk,index,rows)=>perk.isActive&&rows.findIndex(other=>other.isActive&&Number(other.hash)===Number(perk.hash))===index);
   const artifactConfiguration=createArtifactConfiguration({
     artifactHash:source.hash,
     seasonNumber,

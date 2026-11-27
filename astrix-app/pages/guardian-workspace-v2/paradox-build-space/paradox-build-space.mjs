@@ -172,15 +172,16 @@ function emitLoad(stage,preparedStage,label,status='loading',message=''){
 document.addEventListener('forge:manifest-progress',()=>reportPreparedPageStage('request','build-forge'));
 function tile(item){if(!item)return '<span class="icon-tile empty">◆</span>';const icon=abs(iconOf(item)),name=esc(item.name||'Destiny item');return `<span class="icon-tile" title="${name}">${icon?`<img src="${esc(icon)}" alt="${name}">`:'◆'}</span>`;}
 function weaponCardShell(index){return `<div class="weap"><div class="art ph"><span class="ph-glyph">⌖</span></div><div class="cap"><b>Weapon slot ${index+1}</b><small>Awaiting resolved weapon semantics</small></div></div>`;}
-function gearCard(item,fallback){const index=Math.max(0,(Number(String(fallback).match(/\d+/)?.[0])||1)-1);return String(fallback).startsWith('Weapon')?weaponCardShell(index):armourCard(index,item);}
+function gearCard(item,fallback){const index=Math.max(0,(Number(String(fallback).match(/\d+/)?.[0])||1)-1);return String(fallback).startsWith('Weapon')?weaponCardShell(index):armourCard(index,item,{details:true});}
 function blankArmourModCanvas(){
-  const blankSlots=Array.from({length:6},()=>'<button class="gear-mod is-recommendation-pending" type="button" title="AI recommendation pending" aria-label="AI recommendation pending" disabled><span class="ph-glyph" aria-hidden="true">◇</span></button>').join('');
-  document.querySelectorAll('#armourGrid .gear-mods').forEach(grid=>{grid.classList.add('is-recommendation-pending');grid.dataset.modPresentation='pending';grid.setAttribute('aria-label','Blank AI mod recommendation canvas');grid.innerHTML=blankSlots;});
+  const blankSlots=Array.from({length:6},()=>'<button class="gear-mod is-recommendation-pending" type="button" title="Paradox mod pending" aria-label="Paradox mod pending" disabled><span class="ph-glyph" aria-hidden="true">◇</span></button>').join('');
+  document.querySelectorAll('#armourGrid .gear-mods').forEach(grid=>{grid.classList.add('is-recommendation-pending');grid.dataset.modPresentation='pending';grid.setAttribute('aria-label','Paradox mod plan pending');grid.innerHTML=blankSlots;});
 }
 function renderArmourRecommendationState(build={}){
   const generated=Boolean(build.recommendationGeneratedAt),manual=build.editMode==='manual',staged=Boolean(build.forgeLoaderDecision),state=byId('armourBuildState'),instruction=byId('armourBuildInstruction'),evidence=byId('armourBuildEvidence');
-  if(state)state.textContent=generated?'PARADOX RECOMMENDATION · REVIEW REQUIRED':manual?'MANUAL WORKING BUILD':directEntryMode(build)?'ARMOUR & INSTALLED MODS':staged?'STAGED ARMOUR · MOD PLAN PENDING':'ARMOUR & INSTALLED MODS';
-  if(instruction)instruction.textContent=generated?'AI mod plan generated · review the recommendation before live action':manual?'Undefined armour and reusable mods staged manually.':directEntryMode(build)?'Select an elemental build and generate from this equipment.':staged?'Choose armour manually, or select an elemental build and generate an AI sequence.':'Installed mods from this loaded build are shown below.';
+  // One section title: the plain loaded state repeats the ARMOUR & MODS heading, so its label is left empty and hidden.
+  if(state){state.textContent=generated?'PARADOX RECOMMENDATION · REVIEW REQUIRED':manual?'MANUAL WORKING BUILD':staged&&!directEntryMode(build)?'STAGED ARMOUR · MOD PLAN PENDING':'';state.hidden=!state.textContent;}
+  if(instruction)instruction.textContent=generated?'Paradox mod plan ready, review it before applying.':manual?'Undefined armour and reusable mods staged manually.':directEntryMode(build)?'Select an elemental build and generate from this equipment.':staged?'Choose armour manually, or select an elemental build and generate a Paradox sequence.':'Installed mods from this loaded build are shown below.';
   if(evidence)evidence.textContent=generated?'Original and installed mods remain protected':manual?'Your socket choices are staged in this build.':staged?'Installed mods':'Original build remains protected';
   if(staged&&!generated&&!manual&&!directEntryMode(build))blankArmourModCanvas();
 }
