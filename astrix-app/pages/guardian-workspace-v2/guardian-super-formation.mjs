@@ -188,7 +188,7 @@ function renderSuperFormation({host,nameNode=null,activeSuper=null,superOptions=
     const slot=slotByKey.get(entry.slot)||null;
     const item=entry.item||null;
     if(slot)slot.hidden=false;
-    setDiamondFromItem(slot,item,entry.role.startsWith('equipped-super')?'Equipped Super unavailable':`${entry.element} Super unavailable`);
+    setDiamondFromItem(slot,item,entry.role.startsWith('equipped-super')?'Equipped Super unavailable':'Empty Super slot: this subclass has no other Super for it');
     slot?.classList.toggle('is-empty-super',!item);
     if(slot){slot.dataset.superRole=entry.role;slot.dataset.superElement=entry.element;}
     const selected=entry.selected&&Boolean(item);

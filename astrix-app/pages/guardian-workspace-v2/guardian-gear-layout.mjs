@@ -116,7 +116,26 @@ function armourSetStrip(set) {
   </div>`;
 }
 
-export function armourCard(index, item) {
+// Item details beside the armour tile (Build Forge): only what the profile data carries, never a guess.
+function armourDetailsMarkup(item, armourTier, archetype) {
+  if (!item) return "";
+  const power = Number(item?.power);
+  const rarity = String(item?.tier ?? item?.rarity ?? "").trim();
+  const archetypeName = String(archetype?.name ?? archetype?.displayName ?? "").trim();
+  const equipped = String(item?.source?.kind ?? "") === "equipped";
+  const facts = [
+    Number.isFinite(power) && power > 0 ? `<span class="gear-arm-fact is-power">Power ${esc(power)}</span>` : "",
+    rarity ? `<span class="gear-arm-fact">${esc(rarity)}</span>` : "",
+    Number.isFinite(armourTier) && armourTier > 0 ? `<span class="gear-arm-fact">Tier ${esc(armourTier)}</span>` : "",
+    archetypeName ? `<span class="gear-arm-fact">${esc(archetypeName)}</span>` : "",
+    equipped ? `<span class="gear-arm-fact is-equipped">Equipped</span>` : ""
+  ].filter(Boolean).join("");
+  const name = String(item?.name ?? "").trim();
+  if (!name && !facts) return "";
+  return `<div class="gear-arm-details">${name ? `<b class="gear-arm-name">${esc(name)}</b>` : ""}${facts ? `<span class="gear-arm-facts">${facts}</span>` : ""}</div>`;
+}
+
+export function armourCard(index, item, { details = false } = {}) {
   const name = item?.name ?? armourNames[index];
   const icon = bungieIcon(item?.icon ?? item?.iconUrl ?? item?.displayProperties?.icon);
   const rarity = String(item?.rarity ?? item?.tier ?? "").toLowerCase();
@@ -137,7 +156,7 @@ export function armourCard(index, item) {
   const traitIcon = bungieIcon(trait?.icon ?? trait?.displayProperties?.icon);
   const traitTitle = [trait?.name ?? trait?.displayName, trait?.description].filter(Boolean).join(": ");
 
-  return `<article class="gear-slot ${isExotic ? "exotic" : ""} ${isTierFive ? "is-level-gold" : ""} ${armourSet?.identity ? "has-set-bonus" : ""} ${twoPieceActive ? "is-set-2-active" : ""} ${fourPieceActive ? "is-set-4-active" : ""}" data-armour-index="${index}">
+  return `<article class="gear-slot ${details ? "has-arm-details" : ""} ${isExotic ? "exotic" : ""} ${isTierFive ? "is-level-gold" : ""} ${armourSet?.identity ? "has-set-bonus" : ""} ${twoPieceActive ? "is-set-2-active" : ""} ${fourPieceActive ? "is-set-4-active" : ""}" data-armour-index="${index}">
     <div class="gear-slot-label">${esc(armourNames[index]||`Armour slot ${index+1}`)}</div>
     <div class="gear-arm-row">
       <div class="gear-arm-anchor">
@@ -146,6 +165,7 @@ export function armourCard(index, item) {
           ${setBonusIcon ? `<span class="armour-set-bonus-icon" title="${esc(setBonusTitle)}"><img src="${esc(setBonusIcon)}" alt="${esc(armourSet?.identity?.name ?? "Armour set bonus")}"></span>` : ""}
         </div>
       </div>
+      ${details ? armourDetailsMarkup(item, armourTier, archetype) : ""}
       ${isExotic && traitIcon ? `<div class="armour-set-strip armour-exotic-trait-strip"><span class="armour-set-thresholds"><span class="armour-set-threshold is-active" ${perkTooltipAttributes(trait,'Exotic armour trait')} data-paradox-id="${esc(trait.paradoxId||'')}" data-bungie-hash="${esc(trait.bungieHash??trait.hash??'')}"><img src="${esc(traitIcon)}" alt=""></span></span></div>` : setStrip}
     </div>
     <div class="gear-slot-divider"></div>

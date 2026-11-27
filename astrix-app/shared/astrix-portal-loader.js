@@ -210,7 +210,7 @@
             '<img class="apx-logo" src="'+LOGO+'" alt="">'+
           '</div>'+
         '</div>'+
-        '<div class="apx-brand"><span class="apx-brand-kicker">AI GAMING INTELLIGENCE</span><span class="apx-brand-word"><span class="apx-brand-chrome">ASTRI</span><b>X</b></span><em>PARADOX</em></div>'+
+        '<div class="apx-brand"><span class="apx-brand-kicker">GAMING INTELLIGENCE</span><span class="apx-brand-word"><span class="apx-brand-chrome">ASTRI</span><b>X</b></span><em>PARADOX</em></div>'+
         '<div class="apx-auth-panel apx-recovery-panel" data-recovery="signed-out" hidden>'+
           '<p class="apx-recovery-message">'+RECOVERY_MESSAGES['signed-out']+'</p>'+
           '<div class="apx-recovery-actions"><button class="apx-auth-button apx-recovery-primary" type="button">Sign in with Bungie</button></div>'+

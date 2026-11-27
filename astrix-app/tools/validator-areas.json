@@ -366,6 +366,8 @@
         "test-character-live-data.mjs",
         "test-recommended-build-reveal.mjs",
         "validate-paradox-build-space.mjs",
+        "test-forge-artifact-perks-once.mjs",
+        "test-forge-phone-polish.mjs",
         "test-manual-build-editor.mjs",
         "validate-live-actions-worker.mjs",
         "validate-guardian-semantics.mjs",

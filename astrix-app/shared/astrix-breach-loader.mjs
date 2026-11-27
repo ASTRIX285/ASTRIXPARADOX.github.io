@@ -60,7 +60,7 @@ export async function createBreach({host,signal}={}){
 
   const word=document.createElement('div');
   word.className='apx-xscene-word';
-  word.innerHTML='<span class="apx-xscene-kicker">AI GAMING INTELLIGENCE</span><span class="apx-xscene-top"><span class="apx-xscene-chrome">ASTRI</span><b>X</b></span><span class="apx-xscene-sub">PARADOX</span>';
+  word.innerHTML='<span class="apx-xscene-kicker">GAMING INTELLIGENCE</span><span class="apx-xscene-top"><span class="apx-xscene-chrome">ASTRI</span><b>X</b></span><span class="apx-xscene-sub">PARADOX</span>';
 
   const tab=document.createElement('div');
   tab.className='apx-xscene-tab';

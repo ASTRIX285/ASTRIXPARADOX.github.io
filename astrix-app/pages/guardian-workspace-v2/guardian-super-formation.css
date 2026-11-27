@@ -158,6 +158,8 @@ html body .workspace .left .equipped-subclass-stack>.super-feature{
 }
 .super-feature .super-diamond[hidden]{display:none!important}
 .super-feature .super-diamond.is-empty-super{opacity:.48!important;cursor:default!important}
+/* An empty slot shows an empty socket (a small steel diamond in the transparent frame), never a blank. */
+.super-feature .super-diamond.is-empty-super>span::before{content:"";display:block;width:24%;height:24%;box-sizing:border-box;border:1.5px solid var(--ax-steel,#8a8a89);background:rgba(138,138,137,.12);transform:rotate(45deg)}
 .super-feature .super-diamond::before{
   content:""!important;
   position:absolute!important;

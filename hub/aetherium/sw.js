@@ -54,7 +54,7 @@ const SHELL = [
 
 "/astrix-app/pages/aetherium/daevanion-board.mjs?v=589e8f42ad",
 
-"/astrix-app/shared/astrix-tool-shell.css?v=20260930-stroke-4&shell=20261001-mobile-1&mobile=20261002-1&bf=20261002-1&inv=20261002-1&swr=20261002-1&formation=20261003-1&neutral=20261016-1&capsule=20261016-1",
+"/astrix-app/shared/astrix-tool-shell.css?v=20260930-stroke-4&shell=20261001-mobile-1&mobile=20261002-1&bf=20261002-1&inv=20261002-1&swr=20261002-1&formation=20261003-1&neutral=20261016-1&capsule=20261016-1&phone=20261127-1",
 
 "/astrix-app/tools/fixtures/aion2/eu/servers.json",
 
