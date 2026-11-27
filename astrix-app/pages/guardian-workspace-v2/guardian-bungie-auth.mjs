@@ -203,13 +203,23 @@ let sessionRequest=null;
 const WORKER_UNREACHABLE={authenticated:null,error:"worker_unreachable"};
 const BUNGIE_UNAVAILABLE={authenticated:null,error:"bungie_unavailable"};
 
+// The page head (shared/forge-early-page-data.js) may already have sent this check in a new tab.
+// Its answer is taken once, so the page never sends a second copy.
+function takeEarlySession(){
+  const entry=globalThis.FORGE_EARLY_PAGE_DATA?.session;
+  if(!entry?.response||entry.taken)return null;
+  entry.taken=true;
+  return entry.response;
+}
+
 async function requestSession(){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),12000);
   try{
     let response;
     try{
-      response=await fetch(`${AUTH_ORIGIN}/session`,{
+      const early=takeEarlySession();
+      response=early?await early:await fetch(`${AUTH_ORIGIN}/session`,{
         credentials:"include",
         headers:{Accept:"application/json"},
         signal:controller.signal

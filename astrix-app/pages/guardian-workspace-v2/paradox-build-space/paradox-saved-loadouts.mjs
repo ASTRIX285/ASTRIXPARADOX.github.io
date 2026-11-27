@@ -276,7 +276,7 @@ async function syncParadoxAccount({session,readAll=readAllStored,read=readStored
   return {state:dirty?'pending':'synced',conflicts,account:key};
 }
 
-let syncTimer=null,syncRunning=false,syncAgain=false,syncAbort=null,retryDelay=5000,activeSyncAccount='',observedAccount='';
+let syncTimer=null,syncRunning=false,syncAgain=false,syncAbort=null,retryDelay=5000,activeSyncAccount='',observedAccount='',syncAwaitingSession=false;
 function scheduleParadoxSync(delay=250){
   if(typeof window==='undefined')return;
   // A prerendered page writes nothing until the player actually opens it.
@@ -291,8 +291,10 @@ async function runBackgroundSync(){
   let next=60000;
   try{
     const {getBungieSession}=await import('../guardian-bungie-auth.mjs');
-    const session=await getBungieSession({force:retryDelay>5000||!globalThis.FORGE_BUNGIE_SESSION?.authenticated});
+    syncAwaitingSession=true;
+    const session=await getBungieSession({force:retryDelay>5000||!globalThis.FORGE_BUNGIE_SESSION?.authenticated}).finally(()=>{syncAwaitingSession=false;});
     activeSyncAccount=session?.authenticated?accountKey(session.activeDestinyMembership):'';
+    observedAccount=activeSyncAccount;
     emitSync('forge:paradox-sync',{state:'syncing'});
     const result=await syncParadoxAccount({session,signal:syncAbort.signal});
     emitSync('forge:paradox-sync',result);retryDelay=5000;
@@ -312,7 +314,9 @@ if(typeof window!=='undefined'&&window.addEventListener){
     if(event.detail?.recovering)return;
     const next=event.detail?.authenticated?accountKey(event.detail.activeDestinyMembership):'';
     if(activeSyncAccount&&next!==activeSyncAccount)syncAbort?.abort();
-    if(next!==observedAccount){observedAccount=next;scheduleParadoxSync();}
+    // The session this sync is waiting for is the one being published: it syncs that account
+    // already, so it must not queue a second full sync (Armoury sent /paradox/loadouts twice).
+    if(next!==observedAccount){observedAccount=next;if(!syncAwaitingSession)scheduleParadoxSync();}
   });
   if(typeof BroadcastChannel!=='undefined'){
     syncChannel=new BroadcastChannel('astrix-paradox-loadouts');

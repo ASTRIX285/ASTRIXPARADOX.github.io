@@ -11,6 +11,7 @@ import {cacheBuildForgeState,readBuildForgeState} from '../pages/guardian-worksp
 import {compactBuild,createParadoxLoadoutRecord,validateParadoxLoadoutRecord} from '../pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs';
 import {characterActivityRestriction,confirmBungieLoadoutAction,confirmLiveTransferPlan,confirmPostmasterCollectionIntent,confirmVaultTransferIntent,executeBungieLoadoutAction,executeLiveTransferPlan,inventoryLocations,verifyReadback,sessionBinding,executePostmasterCollectionIntent,executeVaultTransferIntent,stageBungieLoadoutAction,stageLiveTransferPreflight,stagePostmasterCollectionIntent,stageVaultTransferIntent} from '../pages/guardian-workspace-v2/guardian-live-actions.mjs';
 import {INVENTORY_GROUPS,inventoryGroupsMarkup,inventoryItemMarkup,itemState,itemTileMarkup} from '../shared/guardian-inventory-workspace.mjs';
+import {bungieIconAttributes} from '../shared/bungie-icon-queue.mjs';
 import {resolveBreakerTypeDefinition} from '../core/bungie-item-identity.mjs';
 
 const CHARACTER_ID='9100001';
@@ -721,7 +722,7 @@ console.log('BUNGIE_LOADOUT_CONFIRMATION=PASS');
 // Exercise the saved overview independently of auth, DOM boot and the live Guardian.
 const overviewSource=readFileSync(new URL('../pages/loadout/paradox-loadouts.mjs',import.meta.url),'utf8');
 const overviewHelpers=overviewSource.slice(overviewSource.indexOf('const esc='),overviewSource.indexOf('function artifactRequiresInGameStep')).replace('export function savedBuildOverview','function savedBuildOverview');
-const overviewContext={URL,classifyArmourPlug,itemTileMarkup};
+const overviewContext={URL,classifyArmourPlug,itemTileMarkup,bungieIconAttributes};
 runInNewContext(overviewHelpers+';this.renderOverview=savedBuildOverview;',overviewContext);
 const overviewBuild={subclassName:'Saved Titan',subclassIcon:'/subclass.png',subclassBuild:{super:{name:'Saved Super',icon:'/super.png'},abilities:[{name:'Saved ability',icon:'/ability.png'}],aspects:[{name:'Saved aspect',icon:'/aspect.png'}],fragments:[{name:'Saved fragment',icon:'/fragment.png'}]},weapons:[{name:'Saved weapon',icon:'/weapon.png',weaponPerkModel:{columns:[{selectedPlugHash:2,options:[{hash:1,name:'Unselected perk'},{hash:2,name:'Selected perk',icon:'/perk.png'}]}]}}],armour:[{name:'Saved armour',icon:'/armour.png',generalMods:[{name:'Saved mod',icon:'/mod.png'}]}],artifact:{name:'Saved Artifact',perks:[{hash:7,name:'Selected Artifact',icon:'/artifact.png'},{hash:8,name:'Unselected Artifact'}]},artifactConfiguration:{selectedPerkHashes:[7,9]}};
 const unchangedOverview=JSON.stringify(overviewBuild),overviewMarkup=overviewContext.renderOverview(overviewBuild);
@@ -787,7 +788,7 @@ const pageNode=id=>{
   if(!pageNodes.has(id))pageNodes.set(id,{innerHTML:'',textContent:'',hidden:false,open:false,value:'',classList:{toggle(){},add(){},remove(){}},querySelector(){return null;},querySelectorAll(){return [];},showModal(){this.open=true;},close(){this.open=false;}});
   return pageNodes.get(id);
 };
-const pageContext={URL,structuredClone,classifyArmourPlug,itemTileMarkup,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
+const pageContext={URL,structuredClone,classifyArmourPlug,itemTileMarkup,bungieIconAttributes,inventoryLocations,verifyReadback,sessionBinding,confirmLiveTransferPlan,stageBungieLoadoutAction,confirmBungieLoadoutAction,executeLiveTransferPlan,executeBungieLoadoutAction,requestFreshProfile:async()=>{throw new Error('Unexpected live request in unit test');},LOADOUT_DEFINITIONS:{},normaliseArmourSemantics,eligibleEquipment,recordManualEdit,stageEquipmentChoice,stageSocketChoice,stageSubclassSocketChoice,subclassCompatibilityViolations,document:{getElementById:pageNode,querySelector:()=>null},socketGroups};
 runInNewContext(pageSource+`;this.loadoutTest={matchingLoadouts,selectedSocketTargets,restoreSavedSocketIntent,verifySavedSlot,applyThenSaveSlot,render,editableSnapshotItem,closeDialog,draftFor,preparePayload,setCharacter,
   setState(next){records=next.records;session=next.session;characterId=next.characterId;equipped=next.equipped;payload=next.payload||{definitions:{}};loading=false;},
   openDraft(record){dialogState={kind:'edit',record:copy(record)};dialog().showModal();return dialogState.record;},
@@ -898,7 +899,7 @@ function startLoadoutRace(){
     return nodes.get(id);
   };
   const forbidden=()=>{throw new Error('Unexpected persistence or network call in Loadout ordering test');};
-  const context={URL,structuredClone,sessionBinding,classifyArmourPlug,itemTileMarkup,LOADOUT_DEFINITIONS:{},
+  const context={URL,structuredClone,sessionBinding,classifyArmourPlug,itemTileMarkup,bungieIconAttributes,LOADOUT_DEFINITIONS:{},
     document:{getElementById:node,querySelector:()=>null,addEventListener(){}},
     window:{addEventListener(type,handler){listeners.set(type,handler);}},
     mountForgeShell(){},reportPreparedPageStage(){},

@@ -7,6 +7,23 @@ export const bundleKind=page=>page==='journey'?'journey':page==='loadout'?'loado
 // catalogue and hit the 30 s request limit. Blocked or failed opens still
 // resolve immediately through onblocked/onerror.
 export const BUNDLE_CACHE_IO_TIMEOUT_MS=8000;
+const versionKey=kind=>`${kind}@version`;
+function writeVersion(kind,manifestVersion){
+  return new Promise(resolve=>{
+    const request=indexedDB.open('astrix-prepared-public-bundles',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('bundles',{keyPath:'kind'});
+    request.onerror=request.onblocked=()=>resolve(false);
+    request.onsuccess=()=>{
+      const db=request.result;
+      try{
+        const tx=db.transaction('bundles','readwrite');
+        tx.objectStore('bundles').put({kind:versionKey(kind),manifestVersion});
+        tx.oncomplete=()=>{db.close();resolve(true);};
+        tx.onerror=tx.onabort=()=>{db.close();resolve(false);};
+      }catch{db.close();resolve(false);}
+    };
+  }).catch(()=>false);
+}
 async function access(kind,bundle){
   if(typeof indexedDB==='undefined')return null;
   return new Promise(resolve=>{
@@ -19,8 +36,17 @@ async function access(kind,bundle){
     request.onsuccess=()=>{
       db=request.result;if(settled){db.close();return;}
       const tx=db.transaction('bundles',bundle?'readwrite':'readonly'),store=tx.objectStore('bundles');
+      // A small version record beside the bundle, written in the same transaction, lets the page
+      // head (shared/forge-early-page-data.js) name the stored manifest without reading the bundle.
+      if(bundle)store.put({kind:versionKey(kind),manifestVersion:bundle.manifestVersion});
       const operation=bundle?store.put({kind,bundle}):store.get(kind);
-      tx.oncomplete=()=>finish(bundle||operation.result?.bundle||null);
+      const version=bundle?null:store.get(versionKey(kind));
+      tx.oncomplete=()=>{
+        const stored=operation.result?.bundle;
+        // Bundles saved before the version record existed get one on their next read.
+        if(!bundle&&stored?.manifestVersion&&version?.result?.manifestVersion!==stored.manifestVersion)void writeVersion(kind,stored.manifestVersion);
+        finish(bundle||stored||null);
+      };
       tx.onerror=tx.onabort=()=>finish(null);
     };
   }).catch(()=>null);

@@ -14,6 +14,7 @@ import {getBungieSession} from '../guardian-workspace-v2/guardian-bungie-auth.mj
 import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs';
 import {mountForgeShell} from '../guardian-workspace-v2/platform-forge-shell.mjs';
 import {createArmouryEditor} from './armoury-editor.mjs';
+import {bungieIconAttributes} from '../../shared/bungie-icon-queue.mjs';
 
 mountForgeShell({rootSelector:'.apx-page-shell',gameId:'destiny-2',gameName:'Destiny 2',developerName:'Bungie',layout:'destination'});
 
@@ -43,7 +44,7 @@ function savedTile(item,{compact=false,equipment=false,kind='',tooltip=''}={}){
   const empty='<span class="saved-build-empty-socket" aria-hidden="true">◇</span>';
   const shared=equipment&&['weapon','armour'].includes(kind)?itemTileMarkup({...item,icon,source:{...item.source,kind:'saved'}},{kind}):'';
   const count=Number(item.count??item.quantity);
-  return `<figure class="saved-build-tile${compact?' is-compact':''}${equipment?' is-equipment':''}${item.isExotic?' is-exotic':''}" title="${esc(label)}" aria-label="${esc(label)}" role="img" tabindex="0">${shared||`<div class="saved-build-art">${icon?`<img src="${esc(icon)}" alt="" loading="lazy" decoding="async">`:empty}</div>`}${!equipment&&Number.isInteger(count)&&count>1?`<span class="saved-build-count" aria-label="Count ${count}">${count}</span>`:''}</figure>`;
+  return `<figure class="saved-build-tile${compact?' is-compact':''}${equipment?' is-equipment':''}${item.isExotic?' is-exotic':''}" title="${esc(label)}" aria-label="${esc(label)}" role="img" tabindex="0">${shared||`<div class="saved-build-art">${icon?`<img ${bungieIconAttributes(icon)} alt="">`:empty}</div>`}${!equipment&&Number.isInteger(count)&&count>1?`<span class="saved-build-count" aria-label="Count ${count}">${count}</span>`:''}</figure>`;
 }
 function savedMods(item){
   const mods=[...(item.generalMods||item.armourSemantics?.generalMods||[]),...(item.slotMods||item.armourSemantics?.slotMods||[])].filter(mod=>!isEmptyPlug(mod));
@@ -65,7 +66,7 @@ function savedStats(stats=[]){
   const total=rows.length===6&&rows.every(row=>Number.isFinite(valueOf(row)))?rows.reduce((sum,row)=>sum+valueOf(row),0):null;
   return `<div class="saved-build-stats" role="group" aria-label="Saved build stats">${total!==null?`<b class="saved-build-stat-total">Total: ${esc(total)}</b>`:''}${rows.map(row=>{
     const value=valueOf(row),label=`${row.name||'Stat'}: ${Number.isFinite(value)?value:'unavailable'}`,icon=savedIcon(row);
-    return `<span class="saved-build-stat" title="${esc(label)}" aria-label="${esc(label)}">${icon?`<img src="${esc(icon)}" alt="">`:'<span class="saved-build-empty-socket" aria-hidden="true">◇</span>'}<b>${Number.isFinite(value)?esc(value):'None'}</b></span>`;
+    return `<span class="saved-build-stat" title="${esc(label)}" aria-label="${esc(label)}">${icon?`<img ${bungieIconAttributes(icon,{width:13,height:13})} alt="">`:'<span class="saved-build-empty-socket" aria-hidden="true">◇</span>'}<b>${Number.isFinite(value)?esc(value):'None'}</b></span>`;
   }).join('')||'<span class="saved-build-missing">Stats not saved</span>'}</div>`;
 }
 export function savedBuildOverview(build={}){

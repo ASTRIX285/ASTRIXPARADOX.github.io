@@ -1,6 +1,6 @@
 import {readBoundedJson,readBoundedText,MAX_PREPARED_PAGE_BYTES} from './bounded-json.mjs?v=3fb7642429';
-import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs?v=2da7748b41';
-import {runProfileTask} from './engine-profile-client.mjs?v=07c0d11e6f';
+import {readPreparedBundle,savePreparedBundle,joinPreparedBundle} from './prepared-bundle-cache.mjs?v=843d26d6cd';
+import {runProfileTask} from './engine-profile-client.mjs?v=1b554a5d4b';
 import {beginEngineTiming,afterEnginePaint} from './engine-timing.mjs?v=bed8960779';
 import {assertRenderablePagePayload} from './page-ready-contract.mjs?v=a5fcd4c480';
 import {cacheBungieProfile,markPreparedPageCheckSuccess,readCachedBungieProfile} from '../pages/guardian-workspace-v2/guardian-session-cache.mjs?v=e8325e7602';
@@ -150,6 +150,19 @@ function preparedPageUrl(page,{authOrigin=globalThis.FORGE_AUTH_ORIGIN||'https:/
   return url;
 }
 
+// The page head (shared/forge-early-page-data.js) may already have sent this exact request.
+// It is taken once, only by the account signed in on this page and only when it names the
+// manifest this browser still holds; otherwise the page sends its own request as before.
+// Never a second copy. The payload's own membership is still checked after it arrives.
+function takeEarlyPageRequest(page,freshness,manifestVersion){
+  const entry=globalThis.FORGE_EARLY_PAGE_DATA?.pages?.[`${page}:${freshness}`];
+  const session=globalThis.FORGE_BUNGIE_SESSION;
+  if(!entry||entry.taken||session?.authenticated!==true||entry.identity!==membershipIdentity(session))return null;
+  if(entry.manifestVersion&&entry.manifestVersion!==(manifestVersion||''))return null;
+  entry.taken=true;
+  return entry.response;
+}
+
 async function requestPreparedPagePayload(page,options={}){
   try{return await requestPreparedPageAttempt(page,options);}
   catch(error){
@@ -165,8 +178,9 @@ async function requestPreparedPagePayload(page,options={}){
   }
 }
 
-async function requestPreparedPageAttempt(page,{fetchImpl=globalThis.fetch?.bind(globalThis),signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display',quiet=false}={}){
-  if(!fetchImpl)throw new Error('Prepared page network access is unavailable.');
+async function requestPreparedPageAttempt(page,{fetchImpl,signal,timeoutMs=REQUEST_TIMEOUT_MS,freshness='display',quiet=false}={}){
+  const fetcher=fetchImpl||globalThis.fetch?.bind(globalThis);
+  if(!fetcher)throw new Error('Prepared page network access is unavailable.');
   const timing=beginEngineTiming('profile.fetch-join');
   const controller=signal?null:new AbortController();
   const activeSignal=signal||controller.signal;
@@ -175,7 +189,8 @@ async function requestPreparedPageAttempt(page,{fetchImpl=globalThis.fetch?.bind
   try{
     const cachedPrepared=await readPreparedBundle(page);
     if(!quiet)reportPreparedPageStage('request',page);
-    const response=await fetchImpl(preparedPageUrl(page,{freshness,manifestVersion:cachedPrepared?.manifestVersion}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
+    const early=fetchImpl?null:takeEarlyPageRequest(page,freshness,cachedPrepared?.manifestVersion);
+    const response=early?await early:await fetcher(preparedPageUrl(page,{freshness,manifestVersion:cachedPrepared?.manifestVersion}),{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:activeSignal});
     timing.mark('fetch');
     if(!response.ok){
       let details;
