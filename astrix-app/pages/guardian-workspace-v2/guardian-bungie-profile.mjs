@@ -1,7 +1,7 @@
 import {boundedStringify} from '../../core/bounded-json.mjs?v=3fb7642429';
 import {beginEngineTiming} from '../../core/engine-timing.mjs?v=bed8960779';
-import {runProfileTask} from '../../core/engine-profile-client.mjs?v=07c0d11e6f';
-import {getBungieSession} from "./guardian-bungie-auth.mjs?v=e99f26d5d0";
+import {runProfileTask} from '../../core/engine-profile-client.mjs?v=1b554a5d4b';
+import {getBungieSession} from "./guardian-bungie-auth.mjs?v=65fa4bd080";
 import {createArtifactConfiguration,resolveArtifactByProvenance} from "./guardian-artifact-provenance.mjs?v=c08ed347fe";
 import {subclassPlugComponent} from "./guardian-subclass-plug-classifier.mjs?v=3cc08a9e69";
 import {normaliseWeaponSemantics} from "./guardian-semantic-resolver.mjs?v=ee8df72e36";
@@ -13,7 +13,7 @@ import {paradoxDefinitionId,resolveWeaponBreakerTypeDefinition,resolveItemWaterm
 import {characterPlugSetsForItem} from '../../core/bungie-profile-plugs.mjs?v=11043b9a74';
 import {inferEquippedLoadoutIndex} from './guardian-equipped-loadout.mjs?v=29457982b9';
 import {assertRenderablePagePayload} from '../../core/page-ready-contract.mjs?v=a5fcd4c480';
-import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=2a9dfbd7b2';
+import {loadPreparedPagePayload,reportPreparedPageStage} from '../../core/prepared-page-client.mjs?v=847f187dca';
 import {
   cacheBungieProfile,
   createPreparedPageRefreshController,

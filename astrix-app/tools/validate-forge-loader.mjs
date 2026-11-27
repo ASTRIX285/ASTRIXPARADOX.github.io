@@ -340,7 +340,9 @@ assert.match(runtime,/group\.owned&&group\.key===String\(key\|\|''\)/,'The runti
 assert.match(runtime,/data-exotic-key="\$\{esc\(group\.key\)\}"/,'Only one identity key may activate every owned copy behind an Exotic tile.');
 assert.doesNotMatch(runtime,/data-inspect-exotic-key|inspectExoticKey/,'An Exotic selector tile must never open a fixed instance inspection card.');
 const exoticSelectorRuntime=runtime.slice(runtime.indexOf('function renderExotics()'),runtime.indexOf('function bonusReason'));
-assert.match(exoticSelectorRuntime,/<img src="\$\{esc\(group\.icon\)\}"/,'The Exotic selector must render only the Bungie definition image.');
+// 26 Nov 2026: the icon now loads through shared/bungie-icon-queue.mjs (on screen first, six at a
+// time), so the same Bungie definition image is named in data-bungie-icon instead of src.
+assert.match(exoticSelectorRuntime,/<img \$\{bungieIconAttributes\(group\.icon\)\} alt="">/,'The Exotic selector must render only the Bungie definition image.');
 assert.doesNotMatch(exoticSelectorRuntime,/itemTileMarkup|tileItem|power/,'The Exotic selector must not render power, lock, socket, watermark or item-card overlays.');
 assert.match(runtime,/aria-label="\$\{group\.owned\?'Select':'Unavailable'\}/,'Selector labels must describe selection availability without promising an instance inspection.');
 assert.match(html,/id="forgeExoticStatus" hidden/,'The Exotic definition count must remain available without cluttering the visible selector.');

@@ -54,7 +54,7 @@
 
   "/astrix-app/core/engine-precompute.mjs": "d92f1302b8",
 
-  "/astrix-app/core/engine-profile-client.mjs": "07c0d11e6f",
+  "/astrix-app/core/engine-profile-client.mjs": "1b554a5d4b",
 
   "/astrix-app/core/engine-profile-worker.mjs": "4bc3c00b4b",
 
@@ -66,9 +66,9 @@
 
   "/astrix-app/core/paradox-forge.mjs": "502f6fa649",
 
-  "/astrix-app/core/prepared-bundle-cache.mjs": "2da7748b41",
+  "/astrix-app/core/prepared-bundle-cache.mjs": "843d26d6cd",
 
-  "/astrix-app/core/prepared-page-client.mjs": "2a9dfbd7b2",
+  "/astrix-app/core/prepared-page-client.mjs": "847f187dca",
 
   "/astrix-app/core/weapon-roll-advisor.mjs": "7ffb785242",
 
@@ -212,7 +212,7 @@
 
   "/astrix-app/pages/forge-loader/forge-loader-set-list.mjs": "cd3db7b072",
 
-  "/astrix-app/pages/forge-loader/forge-loader.mjs": "751ba1c5f0",
+  "/astrix-app/pages/forge-loader/forge-loader.mjs": "157568e202",
 
   "/astrix-app/pages/forge-loader/results/forge-loader-results.mjs": "9a98fe26e6",
 
@@ -242,7 +242,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-bottom-equal-height.mjs": "e891f5c8fa",
 
-  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs": "e99f26d5d0",
+  "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-auth.mjs": "65fa4bd080",
 
   "/astrix-app/pages/guardian-workspace-v2/guardian-bungie-icon-cleaner.mjs": "b47b9d6379",
 
@@ -348,7 +348,7 @@
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-manual-editor.mjs": "3ec56d26ce",
 
-  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs": "de855cc2c4",
+  "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/paradox-saved-loadouts.mjs": "02701e3900",
 
   "/astrix-app/pages/guardian-workspace-v2/paradox-build-space/recommended-build-copy.mjs": "dc4671b6f4",
 
@@ -408,7 +408,7 @@
 
   "/astrix-app/pages/loadout/armoury-editor.mjs": "bada689998",
 
-  "/astrix-app/pages/loadout/paradox-loadouts.mjs": "70ced5c28c",
+  "/astrix-app/pages/loadout/paradox-loadouts.mjs": "1284f67c5d",
 
   "/astrix-app/pages/mission-reports/mission-reports-data.mjs": "1ccdc76bca",
 
@@ -491,6 +491,10 @@
   "/astrix-app/shared/astrix-location-visuals.js": "ae6e714bf8",
 
   "/astrix-app/shared/astrix-portal-loader.js": "d753fdd1a0",
+
+  "/astrix-app/shared/bungie-icon-queue.mjs": "a6d0901f66",
+
+  "/astrix-app/shared/forge-early-page-data.js": "103ceabab7",
 
   "/astrix-app/shared/guardian-inventory-workspace.mjs": "dc2cf7aa57",
 
