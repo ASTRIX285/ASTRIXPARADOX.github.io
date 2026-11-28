@@ -36,7 +36,7 @@ const SHELL = [
 
 "/astrix-app/games/aion2/index.mjs?v=bc4e8c21cb",
 
-"/astrix-app/pages/aetherium/aetherium-app.mjs?v=e5f7a44a48",
+"/astrix-app/pages/aetherium/aetherium-app.mjs?v=8b2c42608f",
 
 "/astrix-app/pages/aetherium/aetherium-config.mjs?v=b3f9c96bd7",
 
@@ -48,7 +48,7 @@ const SHELL = [
 
 "/astrix-app/pages/aetherium/aetherium-ui.mjs?v=7d775319a1",
 
-"/astrix-app/pages/aetherium/aetherium.css?v=20261126-pwa-1",
+"/astrix-app/pages/aetherium/aetherium.css?v=20261128-install-1",
 
 "/astrix-app/pages/aetherium/daeva-card.mjs?v=b7d6a16e27",
 

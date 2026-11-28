@@ -11,7 +11,12 @@
 //     the plain offline sentence;
 //   - a new deploy waits, shows Update ready, never reloads on its own, and only the tap reloads into the new version
 //     with the old caches gone;
-//   - Install app in the menu only when the browser offers it; the one-line hint on iPhone Safari only;
+//   - Install app in the menu only when the browser offers it; on iPhone and iPad the steps for that browser (Safari,
+//     Chrome, Edge, Firefox), and "Open this page in Safari" for any other (feature/aetherium-install-card, 28 Nov 2026);
+//   - the install card: never on a first visit, shown on the second, Show me gives the steps or the browser's prompt,
+//     closed for good with the X, never in the installed app, never when storage fails, never without an install offer;
+//   - Update ready sits fully inside the header at 320, 390 and 1600 with no horizontal scroll; layout shift under 0.1
+//     with the card and Update ready showing, at 390 and 1600;
 //   - safe area: iPhone 15 (393 x 852, 3x) with the notch and home bar insets, and in landscape: the header, the menu,
 //     the sticky guide bar and the page bottom all sit outside the insets; with no insets nothing moves;
 //   - every page (all 66) starts the app module, and no image on any page's first view is over 400 KB, at 1600 and 390.
@@ -233,23 +238,6 @@ const setOffline=async(context,on)=>{server.offline=on;await context.setOffline(
   await context.close();
 }
 
-// ---------- iPhone hint ----------
-{
-  const SAFARI='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-  const CHROME_IOS='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0.6478.54 Mobile/15E148 Safari/604.1';
-  for(const [ua,shown] of [[SAFARI,true],[CHROME_IOS,false]]){
-    const {context,page}=await open({viewport:{width:393,height:852},deviceScaleFactor:3,isMobile:true,userAgent:ua});
-    await page.goto(`${base}${SCOPE}`);
-    await ready(page);
-    await page.waitForFunction(()=>window.__aeAppStarted===true,null,{timeout:15000});
-    const hint=await page.locator('#aeInstall:not([hidden]) .ae-app-hint').count();
-    assert.equal(hint,shown?1:0,`iPhone hint ${shown?'in Safari':'never in Chrome on iPhone'}`);
-    if(shown)assert.equal(await page.textContent('.ae-app-hint'),'On iPhone: tap Share, then Add to Home Screen.');
-    await context.close();
-  }
-  pass('The iPhone hint shows in Safari only');
-}
-
 // ---------- Safe area ----------
 async function insetsPage(path,{width,height,insets}){
   const {context,page}=await open({viewport:{width,height},deviceScaleFactor:3,isMobile:true});
@@ -308,6 +296,183 @@ const boxOf=(page,selector)=>page.$eval(selector,node=>{const r=node.getBounding
   assert.equal(deskPad,'0px 40px','No insets: the desktop header as before');
   await desk.context.close();
   pass('Safe area: iPhone 15 portrait and landscape clear of the notch and home bar; no change without insets');
+}
+
+// ---------- iPhone and iPad hints ----------
+const IOS='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)';
+const UA={
+  safari:`${IOS} Version/18.6 Mobile/15E148 Safari/604.1`,
+  chrome:`${IOS} CriOS/131.0.6778.73 Mobile/15E148 Safari/604.1`,
+  edge:`${IOS} Version/18.0 EdgiOS/131.2903.68 Mobile/15E148 Safari/605.1.15`,
+  firefox:`${IOS} FxiOS/133.0 Mobile/15E148 Safari/605.1.15`,
+  opera:`${IOS} Version/18.0 Mobile/15E148 Safari/604.1 OPT/5.1.0`,
+  ipad:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15'
+};
+const HINT={
+  safari:'Tap Share, then Add to Home Screen.',
+  chrome:'Tap the share icon in the address bar, then Add to Home Screen.',
+  edge:'Tap the menu button at the bottom, then Share, then Add to Home Screen.',
+  firefox:'Tap the share icon in the address bar, then Add to Home Screen.',
+  opera:'Open this page in Safari to add it to your Home Screen.',
+  ipad:'Tap Share, then Add to Home Screen.'
+};
+const started=page=>page.waitForFunction(()=>window.__aeAppStarted===true,null,{timeout:15000});
+const IPHONE={viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true};
+{
+  for(const browserName of Object.keys(UA)){
+    const {context,page}=await open({...IPHONE,userAgent:UA[browserName]});
+    // iPadOS Safari says it is a Mac; its five touch points give it away.
+    if(browserName==='ipad')await context.addInitScript(()=>{Object.defineProperty(Navigator.prototype,'maxTouchPoints',{get:()=>5,configurable:true});});
+    await page.goto(`${base}${SCOPE}`);
+    await ready(page);
+    await started(page);
+    assert.equal(await page.locator('#aeInstall:not([hidden]) .ae-app-hint').count(),1,`${browserName}: the hint in the menu`);
+    assert.equal(await page.textContent('#aeInstall .ae-app-hint'),HINT[browserName],`${browserName}: the right steps`);
+    assert.equal(await page.locator('#aeInstallBtn').count(),0,`${browserName}: no Install app button on iPhone`);
+    await context.close();
+  }
+  const {context,page}=await open();
+  await page.goto(`${base}${SCOPE}`);
+  await ready(page);
+  await started(page);
+  assert.equal(await page.locator('#aeInstall .ae-app-hint').count(),0,'Desktop: no iPhone hint');
+  await context.close();
+  pass('Menu hint per browser on iPhone and iPad: Safari, Chrome, Edge, Firefox; Open in Safari for any other');
+}
+
+// ---------- Install card ----------
+// A visit is one browser session: a new tab in the same context is a new visit with the same device storage.
+async function visit(context,path=SCOPE){
+  const page=await context.newPage();
+  await page.goto(`${base}${path}`);
+  await ready(page);
+  await started(page);
+  await page.waitForTimeout(200);
+  return page;
+}
+const cardCount=page=>page.locator('#aeInstallCard').count();
+const offerInstall=(page,flag=false)=>page.evaluate(flag=>{const event=new Event('beforeinstallprompt',{cancelable:true});event.prompt=async()=>{if(flag)window.__prompted=true;};event.userChoice=Promise.resolve({outcome:'dismissed'});window.dispatchEvent(event);},flag);
+{
+  const {context,page:first}=await open({...IPHONE,userAgent:UA.chrome});
+  await first.goto(`${base}${SCOPE}`);
+  await ready(first);
+  await started(first);
+  await first.waitForTimeout(200);
+  assert.equal(await cardCount(first),0,'No card on the first visit');
+  await first.reload();
+  await ready(first);
+  await started(first);
+  await first.waitForTimeout(200);
+  assert.equal(await cardCount(first),0,'A reload in the same visit is still the first visit');
+  await first.close();
+  const second=await visit(context);
+  assert.equal(await cardCount(second),1,'The card on the second visit');
+  assert.equal(await second.textContent('.ae-install-title'),'Use The Aetherium like an app.');
+  assert.equal(await second.textContent('.ae-install-lead'),'Add it to your Home Screen.');
+  assert.equal(await second.locator('#aeInstallSteps:not([hidden])').count(),0,'Steps folded until asked');
+  await second.locator('#aeInstallCard').scrollIntoViewIfNeeded();
+  await second.click('#aeInstallCard [data-install-show]');
+  assert.equal(await second.textContent('#aeInstallSteps:not([hidden])'),HINT.chrome,'Show me gives the Chrome steps');
+  // The card sits in the page flow: it covers nothing, and the search, the step tabs and every button stay clear of it.
+  const cardBox=await boxOf(second,'#aeInstallCard');
+  for(const selector of ['#aeSearch','#aeSteps','#aeFind']){
+    const box=await boxOf(second,selector);
+    assert.ok(box.bottom<=cardBox.top||box.top>=cardBox.bottom,`The card is clear of ${selector}`);
+  }
+  assert.equal(await second.$eval('#aeInstallCard',node=>getComputedStyle(node).position),'relative','In the page flow, never fixed over it');
+  await second.click('#aeInstallCard [data-install-close]');
+  assert.equal(await cardCount(second),0,'The X closes it');
+  assert.equal(await second.evaluate(()=>JSON.parse(localStorage.getItem('aetherium.install.v1')).closed),true,'Closed is remembered on this device');
+  await second.close();
+  for(let n=0;n<2;n++){const later=await visit(context);assert.equal(await cardCount(later),0,'Never back once closed');await later.close();}
+  await context.close();
+}
+{
+  // The installed app: navigator.standalone on iPhone, display-mode standalone everywhere else.
+  for(const [label,options,init] of [
+    ['iPhone Home Screen app',{...IPHONE,userAgent:UA.safari},()=>{Object.defineProperty(Navigator.prototype,'standalone',{get:()=>true,configurable:true});}],
+    ['installed app',{},()=>{const real=window.matchMedia.bind(window);window.matchMedia=query=>query.includes('display-mode: standalone')?{matches:true,media:query,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}:real(query);}]
+  ]){
+    const {context}=await open(options);
+    await context.addInitScript(init);
+    for(let n=0;n<3;n++){
+      const page=await visit(context);
+      if(!options.userAgent){await offerInstall(page);await page.waitForTimeout(100);}
+      assert.equal(await cardCount(page),0,`${label}: never the card`);
+      assert.equal(await page.locator('#aeInstall').count(),0,`${label}: no install row in the menu`);
+      await page.close();
+    }
+    await context.close();
+  }
+  // Storage that cannot be read: the card counts as closed, never shown on every visit.
+  const {context}=await open({...IPHONE,userAgent:UA.safari});
+  await context.addInitScript(()=>{Storage.prototype.getItem=()=>{throw new Error('blocked');};});
+  for(let n=0;n<3;n++){const page=await visit(context);assert.equal(await cardCount(page),0,'Storage blocked: no card');await page.close();}
+  await context.close();
+}
+{
+  // Android and desktop: the card waits for the browser's own install offer, and Show me opens it.
+  const {context,page:first}=await open();
+  await first.goto(`${base}${SCOPE}`);
+  await ready(first);
+  await started(first);
+  await first.close();
+  const second=await visit(context);
+  assert.equal(await cardCount(second),0,'No install offer from the browser: no card');
+  await offerInstall(second,true);
+  await second.waitForSelector('#aeInstallCard');
+  assert.equal(await second.locator('#aeInstallSteps').count(),0,'No iPhone steps on desktop');
+  await second.locator('#aeInstallCard').scrollIntoViewIfNeeded();
+  await second.click('#aeInstallCard [data-install-show]');
+  assert.equal(await second.evaluate(()=>window.__prompted),true,'Show me opens the browser install prompt');
+  assert.equal(await cardCount(second),0,'The card steps aside once the prompt is open');
+  await context.close();
+  pass('Install card: not on the first visit, on the second, Show me works, closed for good, never installed or with blocked storage');
+}
+
+// ---------- Update ready in the header, layout shift ----------
+const showUpdate=page=>page.evaluate(async()=>(await import('/astrix-app/pages/aetherium/aetherium-app.mjs')).showUpdate({postMessage(){}}));
+{
+  for(const [width,options] of [[320,{viewport:{width:320,height:700},deviceScaleFactor:2,isMobile:true,userAgent:UA.chrome}],[390,{...IPHONE,userAgent:UA.safari}],[1600,{}]]){
+    const {context,page}=await open(options);
+    await page.goto(`${base}${SCOPE}`);
+    await ready(page);
+    await started(page);
+    await showUpdate(page);
+    const header=await boxOf(page,'header.apx-destination-header');
+    // The menu button shows below 1200 px only; on desktop the ribbon takes its place.
+    for(const selector of ['#aeUpdate',...(width<1200?['#aeMenu']:[]),'header.apx-destination-header .apx-destination-brand']){
+      const box=await boxOf(page,selector);
+      assert.ok(box.left>=header.left&&box.right<=header.right&&box.top>=header.top&&box.bottom<=header.bottom,`${width}: ${selector} fully inside the header (${JSON.stringify(box)})`);
+      assert.ok(box.right<=width,`${width}: ${selector} on screen`);
+    }
+    const update=await boxOf(page,'#aeUpdate'),menu=await boxOf(page,'#aeMenu');
+    assert.ok(update.right-update.left>=40&&update.bottom-update.top>=40,`${width}: Update is a full size tap target`);
+    if(width<1200)assert.ok(update.right<=menu.left,`${width}: Update sits before the menu button`);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),width,`${width}: no horizontal scroll`);
+    assert.equal(await page.textContent('#aeUpdate'),'Update ready','The label stays for screen readers');
+    assert.equal(await page.evaluate(()=>document.querySelector('#aeUpdate .ae-update-label').getBoundingClientRect().width>1),width>=600,`${width}: ${width>=600?'the words show':'the icon only'}`);
+    await context.close();
+  }
+  pass('Update ready sits fully inside the header at 320, 390 and 1600, no horizontal scroll');
+}
+{
+  const shifts=[];
+  for(const [width,options] of [[390,{...IPHONE,userAgent:UA.chrome}],[1600,{}]]){
+    const {context}=await open(options);
+    await context.addInitScript(()=>{window.__cls=0;new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput)window.__cls+=entry.value;}).observe({type:'layout-shift',buffered:true});});
+    await (await visit(context)).close();
+    const page=await visit(context);
+    if(width===1600)await offerInstall(page);
+    await page.waitForSelector('#aeInstallCard',{state:'attached'});
+    await showUpdate(page);
+    await page.waitForTimeout(800);
+    const cls=await page.evaluate(()=>window.__cls);
+    assert.ok(cls<0.1,`${width}: layout shift ${cls.toFixed(4)} with the card and Update ready`);
+    shifts.push(`${width} ${cls.toFixed(4)}`);
+    await context.close();
+  }
+  pass(`Layout shift with the card and Update ready under 0.1 (${shifts.join(', ')})`);
 }
 
 // ---------- Every page: app module, first-view images ----------
