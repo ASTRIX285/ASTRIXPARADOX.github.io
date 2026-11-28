@@ -4,6 +4,8 @@
 // worker knows only that address. Nothing is ever sent to the real Worker or to NCSOFT.
 //   - files: the manifest, the icons, the shell list (build-aetherium-sw.mjs --check), a WebP copy of every image, every
 //     page pointing at the Aetherium manifest with viewport-fit=cover, and no page outside /hub/aetherium/ doing either;
+//     every page carries the manifest theme_color as its theme-color, so Chrome on Android colours its address bar before
+//     install, and no page says "nothing to install" (fix/aetherium-android-touches, 28 Nov 2026);
 //   - installable in Chromium (no manifest errors, no installability errors), no install popup on a first visit;
 //   - the service worker registers with scope /hub/aetherium/ only, and controls nothing outside it;
 //   - a second visit works with the network off; a page never opened shows the offline page with Retry;
@@ -39,6 +41,7 @@ const pass=label=>{results++;console.log(`ok ${results} ${label}`);};
 // ---------- Files ----------
 const pages=[];
 (function walk(dir){for(const name of readdirSync(dir)){const path=join(dir,name);if(statSync(path).isDirectory())walk(path);else if(name==='index.html')pages.push('/'+relative(root,dir).replace(/\\/g,'/')+'/');}})(join(root,'hub/aetherium'));
+const themeColour=JSON.parse(readFileSync(join(root,'hub/aetherium/aetherium.webmanifest'),'utf8')).theme_color;
 const toolPages=pages.filter(path=>path!=='/hub/aetherium/offline/');
 assert.equal(toolPages.length,66,'66 Aetherium pages');
 for(const path of pages){
@@ -47,9 +50,11 @@ for(const path of pages){
   assert.match(html,/<link rel="manifest" href="\/hub\/aetherium\/aetherium\.webmanifest">/,`${path}: the Aetherium manifest`);
   assert.ok(!html.includes('/site.webmanifest'),`${path}: not the site manifest`);
   assert.match(html,/rel="apple-touch-icon" sizes="180x180" href="\/hub\/aetherium\/icons\/apple-touch-icon\.png"/,`${path}: the Aetherium touch icon`);
-  assert.ok(!/<meta name="theme-color"/.test(html)||path==='/hub/aetherium/offline/',`${path}: no theme-color, so a normal browser tab keeps its own toolbar colour`);
+  const themes=[...html.matchAll(/<meta name="theme-color" content="([^"]*)">/g)].map(match=>match[1]);
+  assert.deepEqual(themes,[themeColour],`${path}: one theme-color, the manifest theme_color, so Chrome on Android colours its address bar`);
+  assert.ok(!/nothing to install/i.test(html),`${path}: never "nothing to install", the app can be installed`);
 }
-pass('66 pages and the offline page: the Aetherium manifest, touch icon and viewport-fit=cover');
+pass('66 pages and the offline page: the Aetherium manifest, touch icon, viewport-fit=cover, theme-color and no "nothing to install"');
 const outside=['index.html','hub/index.html','astrix-app/pages/home/index.html','astrix-app/pages/journey/index.html'];
 for(const file of outside){
   const html=readFileSync(join(root,file),'utf8');

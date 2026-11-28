@@ -606,7 +606,7 @@ await check('no visible "armory" or "EU" text on the Daeva Card and Gear page',a
     }
   }
   const {page,context}=await open('/hub/aetherium/');
-  assert.equal(await page.textContent('.ae-search-note'),'Reads public character info from the official AION 2 site. No login, nothing to install. Results are kept for 10 minutes.');
+  assert.equal(await page.textContent('.ae-search-note'),'Reads public character info from the official AION 2 site. No login needed. Results are kept for 10 minutes.');
   await context.close();
 });
 
